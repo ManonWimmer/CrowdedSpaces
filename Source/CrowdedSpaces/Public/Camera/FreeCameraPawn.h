@@ -37,18 +37,27 @@ protected:
 	// Movement
 	UPROPERTY(EditAnywhere, Category="Movement")
 	float MoveSpeed = 1500.f;
-	
+
 	UPROPERTY(EditAnywhere, Category="Movement")
+	float MoveSmooth = 50.f;
+	
+	UPROPERTY(EditAnywhere, Category="Rotation")
 	float RotationSpeed = 60.f;
 
-	UPROPERTY(EditAnywhere, Category="Movement")
+	UPROPERTY(EditAnywhere, Category="Rotation")
+	float RotationSmooth = 50.f;
+
+	UPROPERTY(EditAnywhere, Category="Zoom")
 	float ZoomSpeed = 500.f;
 
-	UPROPERTY(EditAnywhere, Category="Movement")
+	UPROPERTY(EditAnywhere, Category="Zoom")
 	float MinZoom = 800.f;
 
-	UPROPERTY(EditAnywhere, Category="Movement")
+	UPROPERTY(EditAnywhere, Category="Zoom")
 	float MaxZoom = 3000.f;
+
+	UPROPERTY(EditAnywhere, Category="Zoom")
+	float ZoomSmooth = 50.f;
 
 	UPROPERTY(EditAnywhere, Category="Movement")
 	FVector2D MapLimitsX = FVector2D(-5000.f, 5000.f);
@@ -58,7 +67,7 @@ protected:
 
 private:
 	FVector CurrentVelocity = FVector::ZeroVector;
-	
+	float TargetZoom = 0.f;
 	float CurrentYawInput = 0.f;
 
 	// Bind controller delegates

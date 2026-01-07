@@ -27,6 +27,9 @@ AFreeCameraPawn::AFreeCameraPawn()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
 
+	// Default zoom
+	TargetZoom = SpringArm->TargetArmLength;
+
 	AutoPossessPlayer = EAutoReceiveInput::Player0; 
 }
 
@@ -44,6 +47,14 @@ void AFreeCameraPawn::Tick(float DeltaTime)
 
 	ApplyMovement(DeltaTime);
 	ApplyRotation(DeltaTime);
+
+	// Smooth zoom
+	SpringArm->TargetArmLength = FMath::FInterpTo(
+	SpringArm->TargetArmLength,
+	TargetZoom,
+	DeltaTime,
+	ZoomSmooth
+	);
 }
 
 void AFreeCameraPawn::BindControllerEvents()
@@ -77,34 +88,49 @@ void AFreeCameraPawn::OnRotate(float Value)
 
 void AFreeCameraPawn::OnZoom(float Value)
 {
-	SpringArm->TargetArmLength = FMath::Clamp(SpringArm->TargetArmLength - Value * ZoomSpeed, MinZoom, MaxZoom);
+	TargetZoom = FMath::Clamp(
+		TargetZoom - Value * ZoomSpeed,
+		MinZoom,
+		MaxZoom
+	);
 }
 
 void AFreeCameraPawn::ApplyMovement(float DeltaTime)
 {
 	if (!CurrentVelocity.IsNearlyZero())
 	{
-		FVector Forward = GetActorForwardVector();
-		FVector Right = GetActorRightVector();
-		FVector Move = Forward * CurrentVelocity.X + Right * CurrentVelocity.Y;
+		FVector TargetLocation = GetActorLocation();
 
-		FVector NewLocation = GetActorLocation() + Move * DeltaTime;
+		if (!CurrentVelocity.IsNearlyZero())
+		{
+			FVector Forward = GetActorForwardVector();
+			FVector Right = GetActorRightVector();
 
-		// Clamp to map limits
-		NewLocation.X = FMath::Clamp(NewLocation.X, MapLimitsX.X, MapLimitsX.Y);
-		NewLocation.Y = FMath::Clamp(NewLocation.Y, MapLimitsY.X, MapLimitsY.Y);
+			TargetLocation += (Forward * CurrentVelocity.X + Right * CurrentVelocity.Y) * DeltaTime;
+		}
 
-		SetActorLocation(NewLocation);
+		// Clamp
+		TargetLocation.X = FMath::Clamp(TargetLocation.X, MapLimitsX.X, MapLimitsX.Y);
+		TargetLocation.Y = FMath::Clamp(TargetLocation.Y, MapLimitsY.X, MapLimitsY.Y);
+		
+		// Smooth
+		FVector Smoothed = FMath::VInterpTo(GetActorLocation(), TargetLocation, DeltaTime, MoveSmooth);
+		
+		SetActorLocation(Smoothed);
 	}
 }
 
 void AFreeCameraPawn::ApplyRotation(float DeltaTime)
 {
-	if (!FMath::IsNearlyZero(CurrentYawInput))
-	{
-		FRotator Rot = GetActorRotation();
-		Rot.Yaw += CurrentYawInput * DeltaTime;
-		SetActorRotation(Rot);
-	}
+	float TargetYaw = GetActorRotation().Yaw + CurrentYawInput * DeltaTime;
+	
+	float SmoothedYaw = FMath::FInterpTo(
+		GetActorRotation().Yaw,
+		TargetYaw,
+		DeltaTime,
+		RotationSmooth
+	);
+
+	SetActorRotation(FRotator(GetActorRotation().Pitch, SmoothedYaw, 0.f));
 }
 

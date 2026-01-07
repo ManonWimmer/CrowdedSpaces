@@ -12,7 +12,6 @@ void ACameraController::SetupInputComponent()
 	{
 		if (!PlayerInputsData) return;
 
-		// Bind movement
 		// Move Forward
 		EIC->BindAction(PlayerInputsData->MoveForwardAction, ETriggerEvent::Started, this, &ACameraController::MoveForwardInput);
 		EIC->BindAction(PlayerInputsData->MoveForwardAction, ETriggerEvent::Triggered, this, &ACameraController::MoveForwardInput);
