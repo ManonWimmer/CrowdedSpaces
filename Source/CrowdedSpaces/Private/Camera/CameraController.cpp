@@ -1,8 +1,6 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "Camera/CameraController.h"
+﻿#include "Camera/CameraController.h"
 #include "EnhancedInputSubsystems.h"
+#include "EnhancedInputComponent.h"
 
 void ACameraController::SetupInputComponent()
 {
@@ -26,8 +24,12 @@ void ACameraController::SetupInputComponent()
 		EIC->BindAction(PlayerInputsData->RotateAction, ETriggerEvent::Started, this, &ACameraController::RotateInput);
 		EIC->BindAction(PlayerInputsData->RotateAction, ETriggerEvent::Triggered, this, &ACameraController::RotateInput);
 		EIC->BindAction(PlayerInputsData->RotateAction, ETriggerEvent::Completed, this, &ACameraController::StopRotateInput);
-		
-		EIC->BindAction(PlayerInputsData->ZoomAction, ETriggerEvent::Triggered, this, &ACameraController::ZoomInput);
+
+		// Zoom
+		EIC->BindAction(PlayerInputsData->ZoomAction, ETriggerEvent::Started, this, &ACameraController::ZoomInput);
+
+		// Left click
+		EIC->BindAction(PlayerInputsData->LeftClickAction, ETriggerEvent::Started, this, &ACameraController::LeftClickInput);
 	}
 
 	// Add IMC

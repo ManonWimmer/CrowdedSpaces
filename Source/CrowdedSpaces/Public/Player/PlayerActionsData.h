@@ -1,15 +1,10 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "InputAction.h"
 #include "PlayerActionsData.generated.h"
 
-/**
- * 
- */
 UCLASS(BlueprintType)
 class CROWDEDSPACES_API UPlayerActionsData : public UDataAsset
 {
@@ -27,4 +22,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UInputAction* ZoomAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UInputAction* LeftClickAction;
 };

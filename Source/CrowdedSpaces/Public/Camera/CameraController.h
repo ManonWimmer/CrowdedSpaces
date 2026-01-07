@@ -1,22 +1,16 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "InputMappingContext.h"
 #include "Player/PlayerActionsData.h"
-#include "EnhancedInputComponent.h"
 #include "CameraController.generated.h"
-
-/**
- * 
- */
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraMoveForward, float, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraMoveRight, float, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraRotate, float, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraZoom, float, Value);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftClick);
 
 UCLASS()
 class CROWDEDSPACES_API ACameraController : public APlayerController
@@ -42,6 +36,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnCameraZoom OnCameraZoom;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnLeftClick OnLeftClick;
 	
 protected:
 	virtual void SetupInputComponent() override;
@@ -58,4 +55,6 @@ private:
 	void StopRotateInput(const FInputActionValue& Value) { OnCameraRotate.Broadcast(0.f); }
 	
 	void ZoomInput(const FInputActionValue& Value) { OnCameraZoom.Broadcast(Value.Get<float>()); }
+
+	void LeftClickInput(const FInputActionValue& Value) { OnLeftClick.Broadcast(); }
 };
