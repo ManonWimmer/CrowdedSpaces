@@ -1,3 +1,6 @@
+# Rider files
+.idea/
+
 # Visual Studio 2015 user specific files
 .vs/
 
@@ -52,6 +55,13 @@ Plugins/**/Binaries/*
 
 # Builds
 Build/*
+
+!Binaries/
+!Binaries/Win64
+Binaries/Win64/*
+!Binaries/Win64/CrowdedSpacesEditor.target
+!Binaries/Win64/UnrealEditor.modules
+!Binaries/Win64/UnrealEditor-CrowdedSpaces.dll
 
 # Whitelist PakBlacklist-<BuildConfiguration>.txt files
 !Build/*/
