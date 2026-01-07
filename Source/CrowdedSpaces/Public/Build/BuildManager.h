@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Build/GhostObject.h"
+#include "Build/BuildData.h"
 #include "BuildManager.generated.h"
 
 UCLASS()
@@ -29,7 +30,7 @@ private:
 	UStaticMesh* CurrentGhostMesh;
 
 	UPROPERTY(EditAnywhere, Category="Test")
-	UStaticMesh* DefaultMesh; // test direct sans sélection
+	UBuildData* DefaultBuildData; // test direct sans sélection
 
 	float SnapSize;
 

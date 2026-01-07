@@ -24,11 +24,6 @@ void AGameManager::BeginPlay()
 
 void AGameManager::OnPlayerClick()
 {
-	if(GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Game Manager on player click"));
-	}
-	
 	if(CurrentMode != EGameModeState::Building || !BuildManager) return;
 
 	FVector HitLocation;

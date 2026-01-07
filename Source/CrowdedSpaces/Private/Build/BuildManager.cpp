@@ -1,7 +1,7 @@
 ﻿#include "Build/BuildManager.h"
 #include "Build/BuildableObject.h"
 
-ABuildManager::ABuildManager(): CurrentGhost(nullptr), CurrentGhostMesh(nullptr), DefaultMesh(nullptr)
+ABuildManager::ABuildManager(): CurrentGhost(nullptr), CurrentGhostMesh(nullptr), DefaultBuildData(nullptr)
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -11,9 +11,9 @@ ABuildManager::ABuildManager(): CurrentGhost(nullptr), CurrentGhostMesh(nullptr)
 void ABuildManager::BeginPlay()
 {
 	Super::BeginPlay();
-	if(DefaultMesh)
+	if(DefaultBuildData)
 	{
-		StartBuilding(DefaultMesh);
+		StartBuilding(DefaultBuildData->Mesh);
 	}
 }
 
