@@ -17,6 +17,9 @@ public:
 	FString Description;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UTexture2D* Texture;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UStaticMesh* Mesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)

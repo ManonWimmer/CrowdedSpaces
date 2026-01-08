@@ -22,6 +22,9 @@ public:
 	void StartBuilding(UStaticMesh* Mesh);
 	void PlaceObject() const;
 
+	UFUNCTION(BlueprintCallable)
+	TArray<UBuildData*> GetBuildDataObjects() { return BuildDataObjects;}
+
 private:
 	UPROPERTY()
 	AGhostObject* CurrentGhost;
@@ -29,8 +32,11 @@ private:
 	UPROPERTY()
 	UStaticMesh* CurrentGhostMesh;
 
-	UPROPERTY(EditAnywhere, Category="Test")
-	UBuildData* DefaultBuildData; // test direct sans sélection
+	UPROPERTY()
+	UBuildData* DefaultBuildData = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = "Build")
+	TArray<UBuildData*> BuildDataObjects;
 
 	float SnapSize;
 

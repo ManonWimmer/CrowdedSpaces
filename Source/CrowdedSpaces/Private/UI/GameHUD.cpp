@@ -6,9 +6,6 @@
 void AGameHUD::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if(GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("GameHUD begin"));	
 	
 	PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 
@@ -17,14 +14,10 @@ void AGameHUD::BeginPlay()
 
 void AGameHUD::CreateAndInitBuildWidget()
 {
-	if(GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("CreateAndInitBuildWidget"));
-	
 	if (!BuildWidgetBP || !PlayerController) return;
 
 	BuildWidget= CreateWidget(PlayerController, BuildWidgetBP);
+	
+	// plus tard : ui manager qui add to viewport en le gardant en ref pour potentiellement le hide / show
 	BuildWidget->AddToViewport(0);
-
-	if(GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Created build widget"));	
 }

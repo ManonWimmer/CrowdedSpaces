@@ -11,10 +11,6 @@ ABuildManager::ABuildManager(): CurrentGhost(nullptr), CurrentGhostMesh(nullptr)
 void ABuildManager::BeginPlay()
 {
 	Super::BeginPlay();
-	if(DefaultBuildData)
-	{
-		StartBuilding(DefaultBuildData->Mesh);
-	}
 }
 
 void ABuildManager::Tick(float DeltaTime)
