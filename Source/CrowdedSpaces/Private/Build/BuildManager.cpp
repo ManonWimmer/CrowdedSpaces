@@ -1,7 +1,7 @@
 ﻿#include "Build/BuildManager.h"
 #include "Build/BuildableObject.h"
 
-ABuildManager::ABuildManager(): CurrentGhost(nullptr), CurrentGhostMesh(nullptr), DefaultBuildData(nullptr)
+ABuildManager::ABuildManager(): CurrentGhost(nullptr), CurrentGhostMesh(nullptr), CurrentBuildData(nullptr)
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -19,17 +19,34 @@ void ABuildManager::Tick(float DeltaTime)
 	UpdateGhost();
 }
 
-void ABuildManager::StartBuilding(UStaticMesh* Mesh)
+void ABuildManager::StartBuilding(UBuildData* BuildData)
 {
-	if(!Mesh) return;
+	if(!BuildData) return;
 
-	if(!CurrentGhost)
+	CurrentBuildData = BuildData;
+
+	if(CurrentGhost)
+	{
+		CurrentGhost->SetActorHiddenInGame(false);
+	}
+	else
 	{
 		CurrentGhost = GetWorld()->SpawnActor<AGhostObject>(AGhostObject::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
 	}
 
-	CurrentGhost->SetMesh(Mesh);
-	CurrentGhostMesh = Mesh;
+	CurrentGhost->SetMesh(CurrentBuildData->Mesh);
+	CurrentGhostMesh = CurrentBuildData->Mesh;
+}
+
+void ABuildManager::StopBuilding()
+{
+	CurrentBuildData = nullptr;
+	CurrentGhostMesh = nullptr;
+
+	if (CurrentGhost)
+	{
+		CurrentGhost->SetActorHiddenInGame(true);
+	}
 }
 
 void ABuildManager::PlaceObject() const

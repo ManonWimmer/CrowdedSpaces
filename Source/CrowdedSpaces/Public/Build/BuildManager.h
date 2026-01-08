@@ -19,7 +19,13 @@ protected:
 
 public:
 	virtual void Tick(float DeltaTime) override;
-	void StartBuilding(UStaticMesh* Mesh);
+
+	UFUNCTION(BlueprintCallable)
+	void StartBuilding(UBuildData* BuildData);
+
+	UFUNCTION(BlueprintCallable)
+	void StopBuilding();
+	
 	void PlaceObject() const;
 
 	UFUNCTION(BlueprintCallable)
@@ -33,7 +39,7 @@ private:
 	UStaticMesh* CurrentGhostMesh;
 
 	UPROPERTY()
-	UBuildData* DefaultBuildData = nullptr;
+	UBuildData* CurrentBuildData = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Build")
 	TArray<UBuildData*> BuildDataObjects;
