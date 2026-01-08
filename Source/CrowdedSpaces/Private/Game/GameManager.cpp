@@ -12,7 +12,7 @@ void AGameManager::BeginPlay()
 	
 	if (UGameModeSubsystem* Mode = GetWorld()->GetSubsystem<UGameModeSubsystem>())
 	{
-		Mode->SetGameMode(EGameModeState::Building); // temp test après game
+		Mode->SetGameMode(EGameModeState::Game);
 	}
 }
 

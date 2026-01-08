@@ -15,4 +15,7 @@ protected:
 public:
 	UFUNCTION(BlueprintNativeEvent, Category = "UI")
 	void Init();
+
+	UFUNCTION(BlueprintNativeEvent, Category = "UI")
+	void Reset();
 };

@@ -4,6 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "Build/GhostObject.h"
 #include "Build/BuildData.h"
+#include "UI/GameHUD.h"
 #include "BuildManager.generated.h"
 
 UCLASS()
@@ -59,4 +60,7 @@ private:
 
 	UFUNCTION()
 	bool GetCursorHit(FVector& OutHit) const;
+
+	UPROPERTY()
+	AGameHUD* GameHUD;
 };

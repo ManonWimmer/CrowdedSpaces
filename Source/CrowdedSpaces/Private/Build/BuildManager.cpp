@@ -16,7 +16,6 @@ void ABuildManager::BeginPlay()
 	if (UGameModeSubsystem* Mode = GetWorld()->GetSubsystem<UGameModeSubsystem>())
 	{
 		Mode->OnGameModeChanged.AddDynamic(this, &ABuildManager::OnGameModeChanged);
-		OnGameModeChanged(Mode->GetGameMode());
 	}
 
 	if (APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0))
@@ -26,6 +25,8 @@ void ABuildManager::BeginPlay()
 			CamPC->OnLeftClickBuild.AddDynamic(this, &ABuildManager::PlaceObject);
 		}
 	}
+	
+	GameHUD = Cast<AGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
 }
 
 void ABuildManager::OnGameModeChanged(EGameModeState NewMode)
@@ -34,6 +35,16 @@ void ABuildManager::OnGameModeChanged(EGameModeState NewMode)
 	SetActorTickEnabled(NewMode == EGameModeState::Building);
 
 	StopBuilding();
+
+	// UI
+	if (NewMode == EGameModeState::Building)
+	{
+		if (GameHUD) GameHUD->ShowBuildWidget(true);
+	}
+	else
+	{
+		if (GameHUD) GameHUD->ShowBuildWidget(false);
+	}
 }
 
 void ABuildManager::Tick(float DeltaTime)

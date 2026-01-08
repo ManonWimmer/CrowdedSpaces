@@ -21,5 +21,5 @@ public:
 	FOnGameModeChanged OnGameModeChanged;
 
 private:
-	EGameModeState CurrentGameMode = EGameModeState::Building;
+	EGameModeState CurrentGameMode = EGameModeState::Game;
 };
