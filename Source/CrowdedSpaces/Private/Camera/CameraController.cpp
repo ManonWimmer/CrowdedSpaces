@@ -1,6 +1,7 @@
 ﻿#include "Camera/CameraController.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "Game/GameModeSubsystem.h"
 
 void ACameraController::SetupInputComponent()
 {
@@ -46,7 +47,23 @@ void ACameraController::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Cursor
 	SetShowMouseCursor(true);
 	bEnableClickEvents = true;
 	bEnableMouseOverEvents = true;
+}
+
+void ACameraController::LeftClickInput(const FInputActionValue& Value)
+{
+	if (UGameModeSubsystem* Mode = GetWorld()->GetSubsystem<UGameModeSubsystem>())
+	{
+		if (Mode->GetGameMode() == EGameModeState::Building)
+		{
+			OnLeftClickBuild.Broadcast();
+		}
+		else if (Mode->GetGameMode() == EGameModeState::Game)
+		{
+			OnLeftClickGame.Broadcast();	
+		}
+	}
 }

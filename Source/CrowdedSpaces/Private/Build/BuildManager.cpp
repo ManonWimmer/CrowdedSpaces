@@ -1,16 +1,39 @@
 ﻿#include "Build/BuildManager.h"
 #include "Build/BuildableObject.h"
+#include "Camera/CameraController.h"
+#include "Game/GameModeSubsystem.h"
+#include "Kismet/GameplayStatics.h"
 
 ABuildManager::ABuildManager(): CurrentGhost(nullptr), CurrentGhostMesh(nullptr), CurrentBuildData(nullptr)
 {
 	PrimaryActorTick.bCanEverTick = true;
-
-	SnapSize = 100.f;
 }
 
 void ABuildManager::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (UGameModeSubsystem* Mode = GetWorld()->GetSubsystem<UGameModeSubsystem>())
+	{
+		Mode->OnGameModeChanged.AddDynamic(this, &ABuildManager::OnGameModeChanged);
+		OnGameModeChanged(Mode->GetGameMode());
+	}
+
+	if (APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0))
+	{
+		if (ACameraController* CamPC = Cast<ACameraController>(PC))
+		{
+			CamPC->OnLeftClickBuild.AddDynamic(this, &ABuildManager::PlaceObject);
+		}
+	}
+}
+
+void ABuildManager::OnGameModeChanged(EGameModeState NewMode)
+{
+	// Activer ou désactiver le tick selon le mode
+	SetActorTickEnabled(NewMode == EGameModeState::Building);
+
+	StopBuilding();
 }
 
 void ABuildManager::Tick(float DeltaTime)
@@ -49,7 +72,7 @@ void ABuildManager::StopBuilding()
 	}
 }
 
-void ABuildManager::PlaceObject() const
+void ABuildManager::PlaceObject()
 {
 	if(!CurrentGhost || !CurrentGhostMesh) return;
 

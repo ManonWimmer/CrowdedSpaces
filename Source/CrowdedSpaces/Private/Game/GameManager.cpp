@@ -1,49 +1,18 @@
 ﻿#include "Game/GameManager.h"
-#include "EngineUtils.h"
-#include "Blueprint/WidgetLayoutLibrary.h"
-#include "Kismet/GameplayStatics.h"
-#include "Camera/CameraController.h"
 
-AGameManager::AGameManager(): BuildManager(nullptr)
+#include "Game/GameModeSubsystem.h"
+
+AGameManager::AGameManager()
 {
-	CurrentMode = EGameModeState::Building; // temp test, plus tard game
 }
 
 void AGameManager::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	for (TActorIterator<ACameraController> It(GetWorld()); It; ++It)
+	if (UGameModeSubsystem* Mode = GetWorld()->GetSubsystem<UGameModeSubsystem>())
 	{
-		ACameraController* CamPC = *It;
-		if (!CamPC) continue;
-
-		CamPC->OnLeftClick.AddDynamic(this, &AGameManager::OnPlayerClick);
+		Mode->SetGameMode(EGameModeState::Building); // temp test après game
 	}
 }
 
-void AGameManager::OnPlayerClick()
-{
-	if(CurrentMode != EGameModeState::Building || !BuildManager) return;
-
-	FVector HitLocation;
-	if(GetPlayerClickLocation())
-	{
-		BuildManager->PlaceObject();
-	}
-}
-
-bool AGameManager::GetPlayerClickLocation() const
-{
-	if(APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0))
-	{
-		// Ignore si souris sur UI
-		if(UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld()).IsZero())
-		{
-			return false;
-		}
-
-		return true;
-	}
-	return false;
-}

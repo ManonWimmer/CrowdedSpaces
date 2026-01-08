@@ -10,7 +10,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraMoveForward, float, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraMoveRight, float, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraRotate, float, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraZoom, float, Value);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftClick);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftClickBuild);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftClickGame);
 
 UCLASS()
 class CROWDEDSPACES_API ACameraController : public APlayerController
@@ -38,7 +39,10 @@ public:
 	FOnCameraZoom OnCameraZoom;
 
 	UPROPERTY(BlueprintAssignable)
-	FOnLeftClick OnLeftClick;
+	FOnLeftClickBuild OnLeftClickBuild;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnLeftClickGame OnLeftClickGame;
 	
 protected:
 	virtual void SetupInputComponent() override;
@@ -57,5 +61,5 @@ private:
 	
 	void ZoomInput(const FInputActionValue& Value) { OnCameraZoom.Broadcast(Value.Get<float>()); }
 
-	void LeftClickInput(const FInputActionValue& Value) { OnLeftClick.Broadcast(); }
+	void LeftClickInput(const FInputActionValue& Value);
 };

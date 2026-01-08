@@ -10,7 +10,7 @@ class CROWDEDSPACES_API UBuildWidget : public UUserWidget
 	GENERATED_BODY()
 
 protected:
-	void NativeConstruct() override;
+	virtual void NativeConstruct() override;
 	
 public:
 	UFUNCTION(BlueprintNativeEvent, Category = "UI")
