@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "BehaviorTree/BehaviorTree.h"
 #include "GameFramework/Character.h"
 #include "NPC.generated.h"
 
@@ -12,6 +13,11 @@ class CROWDEDSPACES_API ANPC : public ACharacter
 public:
 	ANPC();
 
+	UBehaviorTree* GetBehaviorTree() const { return BehaviorTree; }
+
 protected:
 	virtual void BeginPlay() override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AI")
+	UBehaviorTree* BehaviorTree;
 };
