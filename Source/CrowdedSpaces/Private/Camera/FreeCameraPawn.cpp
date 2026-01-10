@@ -1,7 +1,6 @@
 ﻿#include "CrowdedSpaces/Public/Camera/FreeCameraPawn.h"
-
 #include "Camera/CameraComponent.h"
-#include "Camera/CameraController.h"
+#include "Player/CrowdedPlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
 
 
@@ -54,7 +53,7 @@ void AFreeCameraPawn::BindControllerEvents()
 {
 	if (APlayerController* PC = Cast<APlayerController>(GetController()))
 	{
-		if (ACameraController* CamPC = Cast<ACameraController>(PC))
+		if (ACrowdedPlayerController* CamPC = Cast<ACrowdedPlayerController>(PC))
 		{
 			CamPC->OnCameraMoveForward.AddDynamic(this, &AFreeCameraPawn::OnMoveForward);
 			CamPC->OnCameraMoveRight.AddDynamic(this, &AFreeCameraPawn::OnMoveRight);

@@ -4,7 +4,7 @@
 #include "GameFramework/PlayerController.h"
 #include "InputMappingContext.h"
 #include "Player/PlayerActionsData.h"
-#include "CameraController.generated.h"
+#include "CrowdedPlayerController.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraMoveForward, float, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraMoveRight, float, Value);
@@ -14,7 +14,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftClickBuild);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftClickGame);
 
 UCLASS()
-class CROWDEDSPACES_API ACameraController : public APlayerController
+class CROWDEDSPACES_API ACrowdedPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 

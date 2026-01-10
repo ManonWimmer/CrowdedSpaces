@@ -1,6 +1,6 @@
 ﻿#include "Build/BuildManager.h"
 #include "Build/BuildableObject.h"
-#include "Camera/CameraController.h"
+#include "Player/CrowdedPlayerController.h"
 #include "Game/GameModeSubsystem.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -20,7 +20,7 @@ void ABuildManager::BeginPlay()
 
 	if (APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0))
 	{
-		if (ACameraController* CamPC = Cast<ACameraController>(PC))
+		if (ACrowdedPlayerController* CamPC = Cast<ACrowdedPlayerController>(PC))
 		{
 			CamPC->OnLeftClickBuild.AddDynamic(this, &ABuildManager::PlaceObject);
 		}
