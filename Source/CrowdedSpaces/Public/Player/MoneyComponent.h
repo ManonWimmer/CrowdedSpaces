@@ -13,8 +13,7 @@ class CROWDEDSPACES_API UMoneyComponent : public UActorComponent
 
 public:
 	UMoneyComponent();
-
-public:
+	
 	UFUNCTION(BlueprintCallable)
 	void AddMoney(int Amount);
 

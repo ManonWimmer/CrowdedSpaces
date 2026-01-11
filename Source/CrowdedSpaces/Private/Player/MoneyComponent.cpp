@@ -1,10 +1,5 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+﻿#include "Player/MoneyComponent.h"
 
-
-#include "Player/MoneyComponent.h"
-
-
-// Sets default values for this component's properties
 UMoneyComponent::UMoneyComponent()
 {
 }

@@ -8,7 +8,7 @@ void UPlayerResourcesWidget::NativeConstruct()
 
 void UPlayerResourcesWidget::Init_Implementation()
 {
-	// En BP, setup money etc
+	// En BP, setup money, electricity & oxygen
 }
 
 void UPlayerResourcesWidget::Reset_Implementation()

@@ -2,6 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "Player/MoneyComponent.h"
+#include "Player/ElectricityComponent.h"
+#include "Player/OxygenComponent.h"
 #include "GameFramework/PlayerState.h"
 #include "CrowdedPlayerState.generated.h"
 
@@ -15,8 +17,20 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	UMoneyComponent* GetMoneyComponent() const { return MoneyComponent; }
+	
+	UFUNCTION(BlueprintCallable)
+	UElectricityComponent* GetElectricityComponent() const { return ElectricityComponent; }
+
+	UFUNCTION(BlueprintCallable)
+	UOxygenComponent* GetOxygenComponent() const { return OxygenComponent; }
 
 private:
 	UPROPERTY(VisibleAnywhere)
 	UMoneyComponent* MoneyComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	UElectricityComponent* ElectricityComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	UOxygenComponent* OxygenComponent;
 };
