@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
+#include "Build/BuildableObject.h"
 #include "BuildData.generated.h"
 
 UCLASS(BlueprintType)
@@ -20,7 +21,7 @@ public:
 	UTexture2D* Texture;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UStaticMesh* Mesh;
+	TSubclassOf<ABuildableObject> BuildClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int MoneyCost;

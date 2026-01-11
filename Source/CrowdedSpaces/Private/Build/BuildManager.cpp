@@ -1,11 +1,12 @@
 ﻿#include "Build/BuildManager.h"
 #include "Build/BuildableObject.h"
+#include "Components/WidgetComponent.h"
 #include "Player/CrowdedPlayerController.h"
 #include "Game/GameModeSubsystem.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/CrowdedPlayerState.h"
 
-ABuildManager::ABuildManager(): CurrentGhost(nullptr), CurrentGhostMesh(nullptr), CurrentBuildData(nullptr)
+ABuildManager::ABuildManager(): CurrentGhost(nullptr), CurrentBuildData(nullptr)
 {
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -65,27 +66,37 @@ void ABuildManager::Tick(float DeltaTime)
 
 void ABuildManager::StartBuilding(UBuildData* BuildData)
 {
-	if(!BuildData) return;
+	if (!BuildData || !BuildData->BuildClass) return;
 
 	CurrentBuildData = BuildData;
 
-	if(CurrentGhost)
+	if (!CurrentGhost)
 	{
-		CurrentGhost->SetActorHiddenInGame(false);
-	}
-	else
-	{
-		CurrentGhost = GetWorld()->SpawnActor<AGhostObject>(AGhostObject::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
+		CurrentGhost = GetWorld()->SpawnActor<AGhostObject>(
+			AGhostObject::StaticClass(),
+			FVector::ZeroVector,
+			FRotator::ZeroRotator
+		);
 	}
 
-	CurrentGhost->SetMesh(CurrentBuildData->Mesh);
-	CurrentGhostMesh = CurrentBuildData->Mesh;
+	CurrentGhost->SetActorHiddenInGame(false);
+
+	// Get mesh from buildable
+	const ABuildableObject* DefaultBuildable =
+		BuildData->BuildClass->GetDefaultObject<ABuildableObject>();
+
+	if (!DefaultBuildable) return;
+	
+	UStaticMesh* GhostMesh = DefaultBuildable->GetMeshComponent()->GetStaticMesh();
+	CurrentGhost->SetMesh(GhostMesh);
+
+	// Scale
+	CurrentGhost->SetActorScale3D(DefaultBuildable->GetActorScale3D());
 }
 
 void ABuildManager::StopBuilding()
 {
 	CurrentBuildData = nullptr;
-	CurrentGhostMesh = nullptr;
 
 	if (CurrentGhost)
 	{
@@ -95,20 +106,34 @@ void ABuildManager::StopBuilding()
 
 void ABuildManager::PlaceObject()
 {
-	if(!CurrentGhost || !CurrentGhostMesh) return;
-
-	FVector Location = CurrentGhost->GetActorLocation();
-	FVector Extent = CurrentGhost->GetMeshExtent();
-    
-	if(!CanPlace(Location, Extent))
+	if (!CurrentGhost || !CurrentBuildData || !CurrentBuildData->BuildClass)
 		return;
-	
-	ABuildableObject* Placed = GetWorld()->SpawnActor<ABuildableObject>(ABuildableObject::StaticClass(), Location, FRotator::ZeroRotator);
-	Placed->SetMesh(CurrentGhostMesh);
+
+	const FVector Location = CurrentGhost->GetActorLocation();
+	const FVector Extent = CurrentGhost->GetMeshExtent();
+
+	if (!CanPlace(Location, Extent))
+		return;
+
+	ABuildableObject* Placed = GetWorld()->SpawnActor<ABuildableObject>(
+		CurrentBuildData->BuildClass,
+		Location,
+		FRotator::ZeroRotator
+	);
+
+	if (!Placed) return;
+
+	//  Scale from BP
+	const ABuildableObject* DefaultBuildable =
+		CurrentBuildData->BuildClass->GetDefaultObject<ABuildableObject>();
+
+	Placed->SetActorScale3D(DefaultBuildable->GetActorScale3D());
 
 	// Money
 	if (MoneyComponent)
+	{
 		MoneyComponent->RemoveMoney(CurrentBuildData->MoneyCost);
+	}
 }
 
 
@@ -157,6 +182,8 @@ bool ABuildManager::GetCursorHit(FVector& OutHit) const
 {
 	if(APlayerController* PC = GetWorld()->GetFirstPlayerController())
 	{
+		// todo : check if clcik on ui
+		
 		float MouseX, MouseY;
 		if(PC->GetMousePosition(MouseX, MouseY))
 		{

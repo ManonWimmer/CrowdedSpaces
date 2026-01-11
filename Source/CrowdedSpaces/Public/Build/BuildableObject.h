@@ -17,8 +17,11 @@ public:
 
 	UFUNCTION()
 	FVector GetExtent() const;
+
+	UFUNCTION()
+	UStaticMeshComponent* GetMeshComponent() const { return MeshComp; }
 	
-private:
-	UPROPERTY()
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* MeshComp;
 };

@@ -18,7 +18,7 @@ FVector ABuildableObject::GetExtent() const
 {
 	if(MeshComp && MeshComp->GetStaticMesh())
     {
-        return MeshComp->GetStaticMesh()->GetBoundingBox().GetExtent();
+        return MeshComp->Bounds.BoxExtent;
     }
     return FVector::ZeroVector;
 }

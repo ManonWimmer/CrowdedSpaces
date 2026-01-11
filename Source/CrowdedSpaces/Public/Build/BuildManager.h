@@ -42,9 +42,6 @@ private:
 	AGhostObject* CurrentGhost;
 
 	UPROPERTY()
-	UStaticMesh* CurrentGhostMesh;
-
-	UPROPERTY()
 	UBuildData* CurrentBuildData = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Build")
