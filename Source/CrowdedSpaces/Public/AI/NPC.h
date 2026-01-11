@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "GameFramework/Character.h"
+#include "Resources/FoodComponent.h"
+#include "Components/WidgetComponent.h"
 #include "NPC.generated.h"
 
 UCLASS()
@@ -20,4 +22,30 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AI")
 	UBehaviorTree* BehaviorTree;
+
+	UFUNCTION(BlueprintCallable, Category="AI")
+	UFoodComponent* GetFoodComponent() const { return FoodComponent; }
+
+private:
+	// Food
+	UPROPERTY(EditAnywhere)
+	UFoodComponent* FoodComponent;
+	
+	UPROPERTY(EditAnywhere, Category="Food")
+	float RemoveFoodInterval = 1.0f;
+
+	UPROPERTY(EditAnywhere, Category="Food")
+	int32 RemoveFoodPerInterval = 10;
+
+	UFUNCTION()
+	void RemoveFood() const;
+
+	UFUNCTION()
+	void StartRemoveFood();
+
+	UPROPERTY()
+	FTimerHandle RemoveFoodTimerHandle;
+
+	UPROPERTY(EditAnywhere)
+	UWidgetComponent* FoodBarWidget;
 };
