@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "BuildWidget.h"
+#include "PlayerResourcesWidget.h"
 #include "GameFramework/HUD.h"
 #include "GameHUD.generated.h"
 
@@ -13,11 +14,19 @@ class CROWDEDSPACES_API AGameHUD : public AHUD
 public:
 	virtual void BeginPlay() override;
 
-	void CreateAndInitBuildWidget();
-
 	// Build
+	UFUNCTION()
+	void CreateAndInitBuildWidget();
+	
 	UFUNCTION(BlueprintCallable, Category="Widgets")
 	void ShowBuildWidget(bool bShow);
+
+	// Player Resources (money etc)
+	UFUNCTION()
+	void CreateAndInitPlayerResourcesWidget();
+	
+	UFUNCTION(BlueprintCallable, Category="Widgets")
+	void ShowPlayerResourcesWidget(bool bShow);
 	
 private:
 	UPROPERTY()
@@ -29,4 +38,11 @@ private:
 
 	UPROPERTY()
 	UBuildWidget* BuildWidget;
+
+	// Player Resources (money etc)
+	UPROPERTY(EditAnywhere, Category="Widgets")
+	TSubclassOf<UUserWidget> PlayerResourcesWidgetBP;
+
+	UPROPERTY()
+	UPlayerResourcesWidget* PlayerResourcesWidget;
 };
