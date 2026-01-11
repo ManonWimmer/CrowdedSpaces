@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "BuildableObject.h"
 #include "Build/ProductionType.h"
-#include "Player/MoneyComponent.h"
+#include "Resources/MoneyComponent.h"
 #include "BuildableGenerator.generated.h"
 
 UCLASS()

@@ -1,4 +1,4 @@
-﻿#include "Player/ElectricityComponent.h"
+﻿#include "Resources/ElectricityComponent.h"
 
 UElectricityComponent::UElectricityComponent()
 {

@@ -1,9 +1,10 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Player/MoneyComponent.h"
-#include "Player/ElectricityComponent.h"
-#include "Player/OxygenComponent.h"
+#include "Resources/MoneyComponent.h"
+#include "Resources/ElectricityComponent.h"
+#include "Resources/OxygenComponent.h"
+#include "Resources/FoodComponent.h"
 #include "GameFramework/PlayerState.h"
 #include "CrowdedPlayerState.generated.h"
 
@@ -24,6 +25,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	UOxygenComponent* GetOxygenComponent() const { return OxygenComponent; }
 
+	UFUNCTION(BlueprintCallable)
+	UFoodComponent* GetFoodComponent() const { return FoodComponent; }
+
 private:
 	UPROPERTY(VisibleAnywhere)
 	UMoneyComponent* MoneyComponent;
@@ -33,4 +37,7 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	UOxygenComponent* OxygenComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	UFoodComponent* FoodComponent;
 };

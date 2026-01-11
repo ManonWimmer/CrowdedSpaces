@@ -5,7 +5,7 @@
 #include "Build/GhostObject.h"
 #include "Build/BuildData.h"
 #include "UI/GameHUD.h"
-#include "Player/MoneyComponent.h"
+#include "Resources/MoneyComponent.h"
 #include "BuildManager.generated.h"
 
 UCLASS()

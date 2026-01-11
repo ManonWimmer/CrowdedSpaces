@@ -1,4 +1,4 @@
-﻿#include "Player/OxygenComponent.h"
+﻿#include "Resources/OxygenComponent.h"
 
 UOxygenComponent::UOxygenComponent()
 {

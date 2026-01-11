@@ -1,4 +1,4 @@
-﻿#include "Player/MoneyComponent.h"
+﻿#include "Resources/MoneyComponent.h"
 
 UMoneyComponent::UMoneyComponent()
 {
