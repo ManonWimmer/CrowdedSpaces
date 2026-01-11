@@ -8,8 +8,8 @@ void AGameHUD::BeginPlay()
 	
 	PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 
-	CreateAndInitBuildWidget();
 	CreateAndInitPlayerResourcesWidget();
+	CreateAndInitBuildWidget();
 }
 
 #pragma region Build
@@ -29,7 +29,7 @@ void AGameHUD::ShowBuildWidget(bool bShow)
 	
 	if (bShow)
 	{
-		BuildWidget->SetVisibility(ESlateVisibility::Visible);
+		BuildWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 		BuildWidget->Reset();
 	}
 	else
@@ -47,7 +47,7 @@ void AGameHUD::CreateAndInitPlayerResourcesWidget()
 	PlayerResourcesWidget = Cast<UPlayerResourcesWidget>(CreateWidget(PlayerController, PlayerResourcesWidgetBP));
 	
 	PlayerResourcesWidget->AddToViewport(0);
-	ShowPlayerResourcesWidget(true); // shown at start but no clicks
+	ShowPlayerResourcesWidget(true); // shown at start 
 }
 
 void AGameHUD::ShowPlayerResourcesWidget(bool bShow)
@@ -56,7 +56,7 @@ void AGameHUD::ShowPlayerResourcesWidget(bool bShow)
 	
 	if (bShow)
 	{
-		PlayerResourcesWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
+		PlayerResourcesWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 		PlayerResourcesWidget->Reset();
 	}
 	else

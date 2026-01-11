@@ -1,4 +1,6 @@
 ﻿#include "Build/BuildManager.h"
+
+#include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Build/BuildableObject.h"
 #include "Components/WidgetComponent.h"
 #include "Player/CrowdedPlayerController.h"
@@ -104,11 +106,30 @@ void ABuildManager::StopBuilding()
 	}
 }
 
+
+bool IsCursorOverUI(UWorld* World)
+{
+	TArray<UUserWidget*> Widgets;
+	UWidgetBlueprintLibrary::GetAllWidgetsOfClass(World, Widgets, UUserWidget::StaticClass(), true);
+
+	for (UUserWidget* Widget : Widgets)
+	{
+		if (Widget && Widget->IsInViewport() && Widget->IsHovered())
+		{
+			return true; // le curseur est sur un widget UI
+		}
+	}
+
+	return false;
+}
+
 void ABuildManager::PlaceObject()
 {
 	if (!CurrentGhost || !CurrentBuildData || !CurrentBuildData->BuildClass)
 		return;
 
+	// todo : check if click on ui & return if true
+	
 	const FVector Location = CurrentGhost->GetActorLocation();
 	const FVector Extent = CurrentGhost->GetMeshExtent();
 
@@ -182,8 +203,6 @@ bool ABuildManager::GetCursorHit(FVector& OutHit) const
 {
 	if(APlayerController* PC = GetWorld()->GetFirstPlayerController())
 	{
-		// todo : check if clcik on ui
-		
 		float MouseX, MouseY;
 		if(PC->GetMousePosition(MouseX, MouseY))
 		{
