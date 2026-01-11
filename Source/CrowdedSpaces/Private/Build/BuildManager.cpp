@@ -3,6 +3,7 @@
 #include "Player/CrowdedPlayerController.h"
 #include "Game/GameModeSubsystem.h"
 #include "Kismet/GameplayStatics.h"
+#include "Player/CrowdedPlayerState.h"
 
 ABuildManager::ABuildManager(): CurrentGhost(nullptr), CurrentGhostMesh(nullptr), CurrentBuildData(nullptr)
 {
@@ -13,19 +14,28 @@ void ABuildManager::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Game Mode
 	if (UGameModeSubsystem* Mode = GetWorld()->GetSubsystem<UGameModeSubsystem>())
 	{
 		Mode->OnGameModeChanged.AddDynamic(this, &ABuildManager::OnGameModeChanged);
 	}
 
+	// Player controller
 	if (APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0))
 	{
 		if (ACrowdedPlayerController* CamPC = Cast<ACrowdedPlayerController>(PC))
 		{
 			CamPC->OnLeftClickBuild.AddDynamic(this, &ABuildManager::PlaceObject);
+
+			// Money component
+			if (ACrowdedPlayerState* PS = PC->GetPlayerState<ACrowdedPlayerState>())
+			{
+				MoneyComponent = PS->GetMoneyComponent();
+			}
 		}
 	}
-	
+
+	// HUD
 	GameHUD = Cast<AGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
 }
 
@@ -95,6 +105,10 @@ void ABuildManager::PlaceObject()
 	
 	ABuildableObject* Placed = GetWorld()->SpawnActor<ABuildableObject>(ABuildableObject::StaticClass(), Location, FRotator::ZeroRotator);
 	Placed->SetMesh(CurrentGhostMesh);
+
+	// Money
+	if (MoneyComponent)
+		MoneyComponent->RemoveMoney(CurrentBuildData->MoneyCost);
 }
 
 
