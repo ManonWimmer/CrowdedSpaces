@@ -2,12 +2,11 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Selection/SelectableStatProvider.h"
 #include "FoodComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFoodChanged, int32, NewAmount);
-
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class CROWDEDSPACES_API UFoodComponent : public UActorComponent
+class CROWDEDSPACES_API UFoodComponent : public UActorComponent, public ISelectableStatProvider
 {
 	GENERATED_BODY()
 
@@ -27,7 +26,13 @@ public:
 	int GetFood() {return Food; }
 
 	UPROPERTY(BlueprintAssignable)
-	FOnFoodChanged OnFoodChanged;
+	FOnStatChanged OnStatChanged;
+
+	// Selectable
+public:
+	virtual FString GetStatDisplayName() const override{ return "Food";}
+	virtual float GetCurrentValue() const override { return Food; }
+	virtual FOnStatChanged& GetOnStatChanged() override { return OnStatChanged; }
 	
 private:
 	UPROPERTY(EditAnywhere)

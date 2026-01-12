@@ -67,16 +67,9 @@ FString ANPC::GetDisplayName() const
 	return "NPC";
 }
 
-TMap<FString, FString> ANPC::GetStats() const
+AActor* ANPC::GetSelectableActor()
 {
-	TMap<FString, FString> Stats;
-
-	Stats.Add(
-		"Food",
-		FString::Printf(TEXT("%i"), FoodComponent->GetFood())
-	);
-
-	return Stats;
+	return this;
 }
 #pragma endregion Selectable
 

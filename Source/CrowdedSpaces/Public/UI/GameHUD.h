@@ -38,6 +38,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Widgets")
 	void UpdateSelectionWidget(const FString DisplayName, const TMap<FString, FString> Stats);
+
+	UPROPERTY()
+	USelectionWidget* SelectionWidget;
 	
 private:
 	UPROPERTY()
@@ -60,7 +63,4 @@ private:
 	// Selection
 	UPROPERTY(EditAnywhere, Category="Widgets")
 	TSubclassOf<UUserWidget> SelectionWidgetBP;
-
-	UPROPERTY()
-	USelectionWidget* SelectionWidget;
 };

@@ -19,8 +19,7 @@ public:
 	// Sélection / désélection
 	virtual void OnSelected() = 0;
 	virtual void OnDeselected() = 0;
-
-	// Infos à afficher
+	
 	virtual FString GetDisplayName() const = 0;
-	virtual TMap<FString, FString> GetStats() const = 0;
+	virtual AActor* GetSelectableActor() = 0;
 };

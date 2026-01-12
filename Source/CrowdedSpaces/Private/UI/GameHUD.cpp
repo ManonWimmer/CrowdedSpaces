@@ -75,7 +75,7 @@ void AGameHUD::CreateAndInitSelectionWidget()
 	SelectionWidget = Cast<USelectionWidget>(CreateWidget(PlayerController, SelectionWidgetBP));
 	
 	SelectionWidget->AddToViewport(0);
-	ShowPlayerResourcesWidget(false); 
+	ShowSelectionWidget(false); 
 }
 
 void AGameHUD::ShowSelectionWidget(bool bShow)

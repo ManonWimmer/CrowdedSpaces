@@ -4,6 +4,8 @@
 #include "Blueprint/UserWidget.h"
 #include "SelectionWidget.generated.h"
 
+class ISelectableStatProvider;
+
 UCLASS()
 class CROWDEDSPACES_API USelectionWidget : public UUserWidget
 {
@@ -11,6 +13,12 @@ class CROWDEDSPACES_API USelectionWidget : public UUserWidget
 
 protected:
 	virtual void NativeConstruct() override;
+
+	UPROPERTY()
+	TArray<TScriptInterface<ISelectableStatProvider>> BoundStats;
+
+	UPROPERTY()
+	AActor* SelectedActor;
 
 public:
 	UFUNCTION(BlueprintNativeEvent, Category = "UI")
@@ -21,4 +29,13 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
 	void UpdateSelection(const FString& DisplayName, const TMap<FString, FString>& Stats);
+
+	void BindToSelectable(AActor* SelectableActor);
+
+	// Unbind proprement
+	void Unbind();
+	
+	// Callback générique
+	UFUNCTION()
+	void OnAnyStatUpdated(FName StatId, float NewValue);
 };
