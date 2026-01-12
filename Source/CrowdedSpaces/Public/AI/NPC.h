@@ -17,14 +17,14 @@ public:
 
 	UBehaviorTree* GetBehaviorTree() const { return BehaviorTree; }
 
+	UFUNCTION(BlueprintCallable, Category="AI")
+	UFoodComponent* GetFoodComponent() const { return FoodComponent; }
+
 protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AI")
 	UBehaviorTree* BehaviorTree;
-
-	UFUNCTION(BlueprintCallable, Category="AI")
-	UFoodComponent* GetFoodComponent() const { return FoodComponent; }
 
 private:
 	// Food
