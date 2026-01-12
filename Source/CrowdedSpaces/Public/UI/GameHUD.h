@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "BuildWidget.h"
 #include "PlayerResourcesWidget.h"
+#include "SelectionWidget.h"
 #include "GameFramework/HUD.h"
 #include "GameHUD.generated.h"
 
@@ -27,6 +28,13 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category="Widgets")
 	void ShowPlayerResourcesWidget(bool bShow);
+
+	// Selection
+	UFUNCTION()
+	void CreateAndInitSelectionWidget();
+	
+	UFUNCTION(BlueprintCallable, Category="Widgets")
+	void ShowSelectionWidget(bool bShow);
 	
 private:
 	UPROPERTY()
@@ -45,4 +53,11 @@ private:
 
 	UPROPERTY()
 	UPlayerResourcesWidget* PlayerResourcesWidget;
+
+	// Selection
+	UPROPERTY(EditAnywhere, Category="Widgets")
+	TSubclassOf<UUserWidget> SelectionWidgetBP;
+
+	UPROPERTY()
+	USelectionWidget* SelectionWidget;
 };

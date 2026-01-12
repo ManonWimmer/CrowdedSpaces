@@ -10,6 +10,7 @@ void AGameHUD::BeginPlay()
 
 	CreateAndInitPlayerResourcesWidget();
 	CreateAndInitBuildWidget();
+	CreateAndInitSelectionWidget();
 }
 
 #pragma region Build
@@ -65,3 +66,30 @@ void AGameHUD::ShowPlayerResourcesWidget(bool bShow)
 	}
 }
 #pragma endregion Player Resources
+
+#pragma region Selection
+void AGameHUD::CreateAndInitSelectionWidget()
+{
+	if (!SelectionWidgetBP || !PlayerController) return;
+
+	SelectionWidget = Cast<USelectionWidget>(CreateWidget(PlayerController, SelectionWidgetBP));
+	
+	SelectionWidget->AddToViewport(0);
+	ShowPlayerResourcesWidget(false); 
+}
+
+void AGameHUD::ShowSelectionWidget(bool bShow)
+{
+	if (!SelectionWidget) return;
+	
+	if (bShow)
+	{
+		SelectionWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		SelectionWidget->Reset();
+	}
+	else
+	{
+		SelectionWidget->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+#pragma endregion Selection
