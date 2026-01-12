@@ -7,7 +7,7 @@ UElectricityComponent::UElectricityComponent()
 void UElectricityComponent::AddElectricity(int Amount)
 {
 	Electricity += Amount;
-	OnElectricityChanged.Broadcast(Electricity);
+	OnStatChanged.Broadcast("Electricity", Electricity);
 }
 
 void UElectricityComponent::RemoveElectricity(int Amount)
@@ -15,7 +15,7 @@ void UElectricityComponent::RemoveElectricity(int Amount)
 	if (!HasEnoughElectricity(Amount)) return;
 	
 	Electricity -= Amount;
-	OnElectricityChanged.Broadcast(Electricity);
+	OnStatChanged.Broadcast("Electricity", Electricity);
 }
 
 bool UElectricityComponent::HasEnoughElectricity(int Amount)

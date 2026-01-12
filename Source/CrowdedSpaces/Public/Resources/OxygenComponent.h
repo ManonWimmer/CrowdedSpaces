@@ -2,12 +2,11 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Selection/SelectableStatProvider.h"
 #include "OxygenComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnOxygenChanged, int32, NewAmount);
-
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class CROWDEDSPACES_API UOxygenComponent : public UActorComponent
+class CROWDEDSPACES_API UOxygenComponent : public UActorComponent, public ISelectableStatProvider
 {
 	GENERATED_BODY()
 
@@ -26,8 +25,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 	int GetOxygen() {return Oxygen; }
 
+	// Selectable
 	UPROPERTY(BlueprintAssignable)
-	FOnOxygenChanged OnOxygenChanged;
+	FOnStatChanged OnStatChanged;
+	
+	virtual FString GetStatDisplayName() const override{ return "Oxygen";}
+	virtual float GetCurrentValue() const override { return Oxygen; }
+	virtual FOnStatChanged& GetOnStatChanged() override { return OnStatChanged; }
 	
 private:
 	UPROPERTY(EditAnywhere)

@@ -25,11 +25,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	int GetFood() {return Food; }
 
-	UPROPERTY(BlueprintAssignable)
-	FOnStatChanged OnStatChanged;
 
 	// Selectable
-public:
+	UPROPERTY(BlueprintAssignable)
+	FOnStatChanged OnStatChanged;
+	
 	virtual FString GetStatDisplayName() const override{ return "Food";}
 	virtual float GetCurrentValue() const override { return Food; }
 	virtual FOnStatChanged& GetOnStatChanged() override { return OnStatChanged; }
