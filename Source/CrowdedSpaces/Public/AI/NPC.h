@@ -5,10 +5,11 @@
 #include "GameFramework/Character.h"
 #include "Resources/FoodComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Selection/Selectable.h"
 #include "NPC.generated.h"
 
 UCLASS()
-class CROWDEDSPACES_API ANPC : public ACharacter
+class CROWDEDSPACES_API ANPC : public ACharacter, public ISelectable
 {
 	GENERATED_BODY()
 
@@ -48,4 +49,12 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	UWidgetComponent* FoodBarWidget;
+	
+	// Selectable
+public:
+	virtual void OnSelected() override;
+	virtual void OnDeselected() override;
+
+	virtual FString GetDisplayName() const override;
+	virtual TMap<FString, FString> GetStats() const override;
 };

@@ -2,6 +2,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "Game/GameModeSubsystem.h"
+#include "Kismet/GameplayStatics.h"
 
 void ACrowdedPlayerController::SetupInputComponent()
 {
@@ -51,6 +52,9 @@ void ACrowdedPlayerController::BeginPlay()
 	SetShowMouseCursor(true);
 	bEnableClickEvents = true;
 	bEnableMouseOverEvents = true;
+
+	// Get HUD
+	GameHUD = Cast<AGameHUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
 }
 
 void ACrowdedPlayerController::LeftClickInput(const FInputActionValue& Value)
@@ -67,5 +71,43 @@ void ACrowdedPlayerController::LeftClickInput(const FInputActionValue& Value)
 		}
 
 		// Handle click selection
+		FHitResult Hit;
+		bool bHit = GetHitResultUnderCursor(ECC_Visibility, false, Hit);
+
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1, 2.f, FColor::Yellow,
+				FString::Printf(TEXT("Hit: %s"),
+					bHit && Hit.GetActor() ? *Hit.GetActor()->GetName() : TEXT("NONE"))
+			);
+		}
+		
+		if (!GameHUD) return;
+		
+		if (SelectedObject)
+		{
+			SelectedObject->OnDeselected();
+			SelectedObject = nullptr;
+			GameHUD->ShowSelectionWidget(false);
+		}
+
+		if (Hit.GetActor() && Hit.GetActor()->Implements<USelectable>())
+		{
+			if (GEngine)
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Click on selectable");
+			
+			SelectedObject = Cast<ISelectable>(Hit.GetActor());
+			SelectedObject->OnSelected();
+			GameHUD->ShowSelectionWidget(true);
+
+			// Envoie des infos à l’UI
+			GameHUD->UpdateSelectionWidget(SelectedObject->GetDisplayName(), SelectedObject->GetStats());
+		}
+		else
+		{
+			if (GEngine)
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Failed click");
+		}
 	}
 }

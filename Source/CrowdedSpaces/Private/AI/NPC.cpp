@@ -45,4 +45,38 @@ void ANPC::StartRemoveFood()
 	);
 }
 
+#pragma region Selectable
+void ANPC::OnSelected()
+{
+	if (FoodBarWidget)
+	{
+		FoodBarWidget->SetVisibility(true);
+	}
+}
+
+void ANPC::OnDeselected()
+{
+	if (FoodBarWidget)
+	{
+		FoodBarWidget->SetVisibility(false);
+	}
+}
+
+FString ANPC::GetDisplayName() const
+{
+	return "NPC";
+}
+
+TMap<FString, FString> ANPC::GetStats() const
+{
+	TMap<FString, FString> Stats;
+
+	Stats.Add(
+		"Food",
+		FString::Printf(TEXT("%i"), FoodComponent->GetFood())
+	);
+
+	return Stats;
+}
+#pragma endregion Selectable
 

@@ -35,6 +35,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category="Widgets")
 	void ShowSelectionWidget(bool bShow);
+
+	UFUNCTION(BlueprintCallable, Category="Widgets")
+	void UpdateSelectionWidget(const FString DisplayName, const TMap<FString, FString> Stats);
 	
 private:
 	UPROPERTY()

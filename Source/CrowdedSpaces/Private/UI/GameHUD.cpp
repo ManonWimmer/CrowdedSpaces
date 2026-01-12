@@ -92,4 +92,11 @@ void AGameHUD::ShowSelectionWidget(bool bShow)
 		SelectionWidget->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
+
+void AGameHUD::UpdateSelectionWidget(const FString DisplayName, const TMap<FString, FString> Stats)
+{
+	if (!SelectionWidget) return;
+
+	SelectionWidget->UpdateSelection(DisplayName, Stats);
+}
 #pragma endregion Selection

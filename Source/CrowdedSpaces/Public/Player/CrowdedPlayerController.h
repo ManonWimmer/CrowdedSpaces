@@ -4,6 +4,8 @@
 #include "GameFramework/PlayerController.h"
 #include "InputMappingContext.h"
 #include "Player/PlayerActionsData.h"
+#include "Selection/Selectable.h"
+#include "UI/GameHUD.h"
 #include "CrowdedPlayerController.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraMoveForward, float, Value);
@@ -62,4 +64,10 @@ private:
 	void ZoomInput(const FInputActionValue& Value) { OnCameraZoom.Broadcast(Value.Get<float>()); }
 
 	void LeftClickInput(const FInputActionValue& Value);
+
+	// Selectable
+	ISelectable* SelectedObject = nullptr;
+
+	UPROPERTY()
+	AGameHUD* GameHUD = nullptr;
 };
