@@ -70,20 +70,11 @@ void ACrowdedPlayerController::LeftClickInput(const FInputActionValue& Value)
 			OnLeftClickGame.Broadcast();	
 		}
 
+		if (!GameHUD) return;
+		
 		// Handle click selection
 		FHitResult Hit;
 		bool bHit = GetHitResultUnderCursor(ECC_Visibility, false, Hit);
-
-		if (GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(
-				-1, 2.f, FColor::Yellow,
-				FString::Printf(TEXT("Hit: %s"),
-					bHit && Hit.GetActor() ? *Hit.GetActor()->GetName() : TEXT("NONE"))
-			);
-		}
-		
-		if (!GameHUD) return;
 		
 		if (SelectedObject)
 		{
@@ -106,7 +97,7 @@ void ACrowdedPlayerController::LeftClickInput(const FInputActionValue& Value)
 			if (GameHUD->SelectionWidget)
 			{
 				// Bind automatique à toutes les stats du composant
-				GameHUD->SelectionWidget->BindToSelectable(Hit.GetActor());
+				GameHUD->SelectionWidget->BindToSelectable(Hit.GetActor(), SelectedObject->GetDisplayName());
 			}
 		}
 		else

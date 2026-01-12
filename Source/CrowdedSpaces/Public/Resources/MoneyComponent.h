@@ -2,12 +2,13 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Selection/SelectableStatProvider.h"
 #include "MoneyComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMoneyChanged, int32, NewAmount);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class CROWDEDSPACES_API UMoneyComponent : public UActorComponent
+class CROWDEDSPACES_API UMoneyComponent : public UActorComponent, public ISelectableStatProvider
 {
 	GENERATED_BODY()
 
@@ -26,8 +27,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 	int GetMoney() {return Money; }
 
+	// Selectable
 	UPROPERTY(BlueprintAssignable)
-	FOnMoneyChanged OnMoneyChanged;
+	FOnStatChanged OnStatChanged;
+	
+	virtual FString GetStatDisplayName() const override{ return "Money";}
+	virtual float GetCurrentValue() const override { return Money; }
+	virtual FOnStatChanged& GetOnStatChanged() override { return OnStatChanged; }
 	
 private:
 	UPROPERTY(EditAnywhere)

@@ -7,7 +7,7 @@ UMoneyComponent::UMoneyComponent()
 void UMoneyComponent::AddMoney(int Amount)
 {
 	Money += Amount;
-	OnMoneyChanged.Broadcast(Money);
+	OnStatChanged.Broadcast("Money", Money);
 }
 
 void UMoneyComponent::RemoveMoney(int Amount)
@@ -15,7 +15,7 @@ void UMoneyComponent::RemoveMoney(int Amount)
 	if (!HasEnoughMoney(Amount)) return;
 	
 	Money -= Amount;
-	OnMoneyChanged.Broadcast(Money);
+	OnStatChanged.Broadcast("Money", Money);
 }
 
 bool UMoneyComponent::HasEnoughMoney(int Amount)

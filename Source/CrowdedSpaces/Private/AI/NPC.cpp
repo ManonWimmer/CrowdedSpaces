@@ -4,9 +4,13 @@
 
 ANPC::ANPC()
 {
+	// Food
 	FoodComponent = CreateDefaultSubobject<UFoodComponent>(TEXT("FoodComponent"));
 	FoodBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("FoodBarWidget"));
 	FoodBarWidget->SetupAttachment(GetMesh());
+
+	// Oxygen
+	OxygenComponent = CreateDefaultSubobject<UOxygenComponent>(TEXT("OxygenComponent"));
 }
 
 void ANPC::BeginPlay()
@@ -48,18 +52,14 @@ void ANPC::StartRemoveFood()
 #pragma region Selectable
 void ANPC::OnSelected()
 {
-	if (FoodBarWidget)
-	{
-		FoodBarWidget->SetVisibility(true);
-	}
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "on selected ");
 }
 
 void ANPC::OnDeselected()
 {
-	if (FoodBarWidget)
-	{
-		FoodBarWidget->SetVisibility(false);
-	}
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "on deselected ");
 }
 
 FString ANPC::GetDisplayName() const

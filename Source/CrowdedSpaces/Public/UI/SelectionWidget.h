@@ -18,7 +18,10 @@ protected:
 	TArray<TScriptInterface<ISelectableStatProvider>> BoundStats;
 
 	UPROPERTY()
-	AActor* SelectedActor;
+	AActor* SelectedActor = nullptr;
+
+	UPROPERTY()
+	FString ActorDisplayName = "";
 
 public:
 	UFUNCTION(BlueprintNativeEvent, Category = "UI")
@@ -30,7 +33,7 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
 	void UpdateSelection(const FString& DisplayName, const TMap<FString, FString>& Stats);
 
-	void BindToSelectable(AActor* SelectableActor);
+	void BindToSelectable(AActor* SelectableActor, FString DisplayName);
 
 	// Unbind proprement
 	void Unbind();

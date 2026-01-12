@@ -7,13 +7,14 @@ void USelectionWidget::NativeConstruct()
 	Super::NativeConstruct();
 }
 
-void USelectionWidget::BindToSelectable(AActor* SelectableActor)
+void USelectionWidget::BindToSelectable(AActor* SelectableActor, FString DisplayName)
 {
 	if (!SelectableActor) return;
 	
 	Unbind();
 
 	SelectedActor = SelectableActor;
+	ActorDisplayName = DisplayName;
 	BoundStats.Empty();
 	
 	TArray<UActorComponent*> Components;
@@ -37,7 +38,7 @@ void USelectionWidget::BindToSelectable(AActor* SelectableActor)
 		}
 	}
 	
-	UpdateSelection(SelectableActor->GetName(), StatsToDisplay);
+	UpdateSelection(DisplayName, StatsToDisplay);
 }
 
 void USelectionWidget::Unbind()
@@ -49,6 +50,7 @@ void USelectionWidget::Unbind()
 	
 	BoundStats.Empty();
 	SelectedActor = nullptr;
+	ActorDisplayName = "";
 }
 
 void USelectionWidget::OnAnyStatUpdated(FName StatId, float NewValue)
@@ -66,7 +68,7 @@ void USelectionWidget::OnAnyStatUpdated(FName StatId, float NewValue)
 		);
 	}
 	
-	UpdateSelection(SelectedActor->GetName(), StatsToDisplay);
+	UpdateSelection(ActorDisplayName, StatsToDisplay);
 }
 
 void USelectionWidget::Init_Implementation()

@@ -5,6 +5,7 @@
 #include "GameFramework/Character.h"
 #include "Resources/FoodComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Resources/OxygenComponent.h"
 #include "Selection/Selectable.h"
 #include "NPC.generated.h"
 
@@ -37,6 +38,10 @@ private:
 
 	UPROPERTY(EditAnywhere, Category="Food")
 	int32 RemoveFoodPerInterval = 10;
+
+	// Oxygen
+	UPROPERTY(EditAnywhere)
+	UOxygenComponent* OxygenComponent;
 
 	UFUNCTION()
 	void RemoveFood() const;
