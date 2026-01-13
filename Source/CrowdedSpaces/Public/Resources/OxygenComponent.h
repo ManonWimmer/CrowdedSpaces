@@ -29,8 +29,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnStatChanged OnStatChanged;
 	
-	virtual FString GetStatDisplayName() const override{ return "Oxygen";}
-	virtual float GetCurrentValue() const override { return Oxygen; }
+	virtual TArray<TPair<FString, float>> GetCurrentValues() const override;
 	virtual FOnStatChanged& GetOnStatChanged() override { return OnStatChanged; }
 	
 private:

@@ -29,10 +29,10 @@ void USelectionWidget::BindToSelectable(AActor* SelectableActor, FString Display
 			TScriptInterface<ISelectableStatProvider> StatProvider(Comp);
 			BoundStats.Add(StatProvider);
 			
-			StatsToDisplay.Add(
-				StatProvider->GetStatDisplayName(),
-				FString::SanitizeFloat(StatProvider->GetCurrentValue())
-			);
+			for (auto stat : StatProvider->GetCurrentValues())
+			{
+				StatsToDisplay.Add(stat.Key, FString::SanitizeFloat(stat.Value));
+			}
 			
 			StatProvider->GetOnStatChanged().AddDynamic(this, &USelectionWidget::OnAnyStatUpdated);
 		}
@@ -62,10 +62,10 @@ void USelectionWidget::OnAnyStatUpdated(FName StatId, float NewValue)
 	// Recrée toutes les stats
 	for (auto& Stat : BoundStats)
 	{
-		StatsToDisplay.Add(
-			Stat->GetStatDisplayName(),
-			FString::SanitizeFloat(Stat->GetCurrentValue())
-		);
+		for (auto stat : Stat->GetCurrentValues())
+		{
+			StatsToDisplay.Add(stat.Key, FString::SanitizeFloat(stat.Value));
+		}
 	}
 	
 	UpdateSelection(ActorDisplayName, StatsToDisplay);

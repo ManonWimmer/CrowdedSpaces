@@ -23,3 +23,12 @@ bool UElectricityComponent::HasEnoughElectricity(int Amount)
 	return Electricity >= Amount;
 }
 
+#pragma region Selectable
+TArray<TPair<FString, float>> UElectricityComponent::GetCurrentValues() const
+{
+	TArray<TPair<FString, float>> values;
+	values.Add(TPair<FString, float>(FString("Electricity"), Electricity));
+	return values;
+}
+#pragma endregion Selectable
+

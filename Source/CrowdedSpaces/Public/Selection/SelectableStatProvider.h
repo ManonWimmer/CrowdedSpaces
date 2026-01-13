@@ -24,7 +24,6 @@ class CROWDEDSPACES_API ISelectableStatProvider
 	GENERATED_BODY()
 
 public:
-	virtual FString GetStatDisplayName() const = 0;
-	virtual float GetCurrentValue() const = 0;
+	virtual TArray<TPair<FString, float>> GetCurrentValues() const = 0; // DisplayName - Value
 	virtual FOnStatChanged& GetOnStatChanged() = 0;
 };

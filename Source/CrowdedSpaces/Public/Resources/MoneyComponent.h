@@ -5,8 +5,6 @@
 #include "Selection/SelectableStatProvider.h"
 #include "MoneyComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMoneyChanged, int32, NewAmount);
-
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class CROWDEDSPACES_API UMoneyComponent : public UActorComponent, public ISelectableStatProvider
 {
@@ -31,8 +29,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnStatChanged OnStatChanged;
 	
-	virtual FString GetStatDisplayName() const override{ return "Money";}
-	virtual float GetCurrentValue() const override { return Money; }
+	virtual TArray<TPair<FString, float>> GetCurrentValues() const override;
 	virtual FOnStatChanged& GetOnStatChanged() override { return OnStatChanged; }
 	
 private:
