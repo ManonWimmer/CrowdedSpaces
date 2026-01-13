@@ -31,7 +31,7 @@ void USelectionWidget::BindToSelectable(AActor* SelectableActor, FString Display
 			
 			for (auto stat : StatProvider->GetCurrentValues())
 			{
-				StatsToDisplay.Add(stat.Key, FString::SanitizeFloat(stat.Value));
+				StatsToDisplay.Add(stat.Key, stat.Value);
 			}
 			
 			StatProvider->GetOnStatChanged().AddDynamic(this, &USelectionWidget::OnAnyStatUpdated);
@@ -64,7 +64,7 @@ void USelectionWidget::OnAnyStatUpdated(FName StatId, float NewValue)
 	{
 		for (auto stat : Stat->GetCurrentValues())
 		{
-			StatsToDisplay.Add(stat.Key, FString::SanitizeFloat(stat.Value));
+			StatsToDisplay.Add(stat.Key, stat.Value);
 		}
 	}
 	

@@ -9,12 +9,14 @@ UProductionComponent::UProductionComponent(): PlayerMoneyComponent(nullptr)
 }
 
 #pragma region Selectable
-TArray<TPair<FString, float>> UProductionComponent::GetCurrentValues() const
+TArray<TPair<FString, FString>> UProductionComponent::GetCurrentValues() const
 {
-	TArray<TPair<FString, float>> values;
-	//values.Add(TPair<FString, float>(FString("Production Type"), ProductionType)); todo after switch to string
-	values.Add(TPair<FString, float>(FString("Production Interval"), ProductionInterval));
-	values.Add(TPair<FString, float>(FString("Resource Per Interval"), ResourcePerInterval));
+	TArray<TPair<FString, FString>> values;
+	FString ProductionTypeName = UEnum::GetValueAsString(ProductionType);
+	ProductionTypeName.RemoveFromStart(TEXT("EProductionType::"));
+	values.Add(TPair<FString, FString>(FString("Production Type"), ProductionTypeName)); 
+	values.Add(TPair<FString, FString>(FString("Production Interval"), FString::SanitizeFloat(ProductionInterval)));
+	values.Add(TPair<FString, FString>(FString("Resource Per Interval"), FString::SanitizeFloat(ResourcePerInterval)));
 	return values;
 }
 #pragma endregion Selectable

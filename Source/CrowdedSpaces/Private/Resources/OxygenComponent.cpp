@@ -24,10 +24,10 @@ bool UOxygenComponent::HasEnoughOxygen(int Amount)
 }
 
 #pragma region Selectable
-TArray<TPair<FString, float>> UOxygenComponent::GetCurrentValues() const
+TArray<TPair<FString, FString>> UOxygenComponent::GetCurrentValues() const
 {
-	TArray<TPair<FString, float>> values;
-	values.Add(TPair<FString, float>(FString("Oxygen"), Oxygen));
+	TArray<TPair<FString, FString>> values;
+	values.Add(TPair<FString, FString>(FString("Oxygen"), FString::SanitizeFloat(Oxygen)));
 	return values;
 }
 #pragma endregion Selectable

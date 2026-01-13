@@ -24,11 +24,11 @@ bool UFoodComponent::HasEnoughFood(int Amount)
 }
 
 #pragma region Selectable
-TArray<TPair<FString, float>> UFoodComponent::GetCurrentValues() const
+TArray<TPair<FString, FString>> UFoodComponent::GetCurrentValues() const
 {
-	TArray<TPair<FString, float>> values;
-	values.Add(TPair<FString, float>(FString("Food"), Food));
-	values.Add(TPair<FString, float>(FString("Test"), 1000));
+	TArray<TPair<FString, FString>> values;
+	values.Add(TPair<FString, FString>(FString("Food"), FString::SanitizeFloat(Food)));
+	values.Add(TPair<FString, FString>(FString("Test"), FString::SanitizeFloat(1000)));
 	return values;
 }
 #pragma endregion Selectable

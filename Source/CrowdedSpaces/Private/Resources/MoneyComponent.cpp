@@ -24,10 +24,10 @@ bool UMoneyComponent::HasEnoughMoney(int Amount)
 }
 
 #pragma region Selectable
-TArray<TPair<FString, float>> UMoneyComponent::GetCurrentValues() const
+TArray<TPair<FString, FString>> UMoneyComponent::GetCurrentValues() const
 {
-	TArray<TPair<FString, float>> values;
-	values.Add(TPair<FString, float>(FString("Money"), Money));
+	TArray<TPair<FString, FString>> values;
+	values.Add(TPair<FString, FString>(FString("Money"), FString::SanitizeFloat(Money)));
 	return values;
 }
 #pragma endregion Selectable
