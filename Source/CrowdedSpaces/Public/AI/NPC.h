@@ -61,6 +61,5 @@ public:
 	virtual void OnDeselected() override;
 
 	virtual FString GetDisplayName() const override;
-
 	virtual AActor* GetSelectableActor() override;
 };

@@ -2,49 +2,29 @@
 
 #include "CoreMinimal.h"
 #include "BuildableObject.h"
-#include "Build/ProductionType.h"
-#include "Resources/MoneyComponent.h"
+#include "Production/ProductionComponent.h"
+#include "Selection/Selectable.h"
 #include "BuildableGenerator.generated.h"
 
 UCLASS()
-class CROWDEDSPACES_API ABuildableGenerator : public ABuildableObject
+class CROWDEDSPACES_API ABuildableGenerator : public ABuildableObject, public ISelectable
 {
 	GENERATED_BODY()
 
 public:
 	ABuildableGenerator();
 
-	UPROPERTY(EditAnywhere, Category="Generator")
-	EProductionType ProductionType = EProductionType::Money;
+	// Selectable
+	virtual void OnSelected() override;
+	virtual void OnDeselected() override;
 	
-	UPROPERTY(EditAnywhere, Category="Generator")
-	float ProductionInterval = 1.0f;
-
-	UPROPERTY(EditAnywhere, Category="Generator")
-	int32 ResourcePerInterval = 10;
+	virtual FString GetDisplayName() const override;
+	virtual AActor* GetSelectableActor() override;
 
 protected:
 	virtual void BeginPlay() override;
-
-	UPROPERTY()
-	FTimerHandle ProductionTimerHandle;
-
+	
 private:
-	UFUNCTION()
-	void GenerateProduction() const;
-
-	UFUNCTION()
-	void StartProduction();
-
-	UFUNCTION()
-	void PauseProduction() const;
-
-	UFUNCTION()
-	void ResumeProduction() const;
-
-	UFUNCTION()
-	void RestartProduction();
-
 	UPROPERTY()
-	UMoneyComponent* MoneyComponent;
+	UProductionComponent* ProductionComponent;
 };
