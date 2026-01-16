@@ -4,7 +4,8 @@
 #include "Player/CrowdedPlayerController.h"
 #include "Player/CrowdedPlayerState.h"
 
-UProductionComponent::UProductionComponent(): PlayerMoneyComponent(nullptr)
+UProductionComponent::UProductionComponent(): PlayerMoneyComponent(nullptr), PlayerElectricityComponent(nullptr),
+											  PlayerOxygenComponent(nullptr), PlayerFoodComponent(nullptr)
 {
 }
 
@@ -19,7 +20,7 @@ TArray<TPair<FString, FString>> UProductionComponent::GetCurrentValues() const
 	values.Add(TPair<FString, FString>(FString("Resource Per Interval"), FString::SanitizeFloat(ResourcePerInterval)));
 	return values;
 }
-#pragma endregion Selectable
+#pragma endregion Selectables
 
 void UProductionComponent::BeginPlay()
 {
@@ -29,10 +30,13 @@ void UProductionComponent::BeginPlay()
 	{
 		if (ACrowdedPlayerController* CamPC = Cast<ACrowdedPlayerController>(PC))
 		{
-			// Money component
+			// Get player components
 			if (ACrowdedPlayerState* PS = PC->GetPlayerState<ACrowdedPlayerState>())
 			{
 				PlayerMoneyComponent = PS->GetMoneyComponent();
+				PlayerElectricityComponent = PS->GetElectricityComponent();
+				PlayerOxygenComponent = PS->GetOxygenComponent();
+				PlayerFoodComponent = PS->GetFoodComponent();
 			}
 		}
 	}
@@ -43,11 +47,35 @@ void UProductionComponent::GenerateProduction() const
 {
 	switch (ProductionType)
 	{
-		// Money
+	// Money
 	case EProductionType::Money:
 		if (PlayerMoneyComponent)
 		{
 			PlayerMoneyComponent->AddMoney(ResourcePerInterval);
+		}
+		break;
+
+	// Electricity
+	case EProductionType::Electricity:
+		if (PlayerElectricityComponent)
+		{
+			PlayerElectricityComponent->AddElectricity(ResourcePerInterval);
+		}
+		break;
+
+	// Oxygen
+	case EProductionType::Oxygen:
+		if (PlayerOxygenComponent)
+		{
+			PlayerOxygenComponent->AddOxygen(ResourcePerInterval);
+		}
+		break;
+
+	// Food
+	case EProductionType::Food:
+		if (PlayerFoodComponent)
+		{
+			PlayerFoodComponent->AddFood(ResourcePerInterval);
 		}
 		break;
 		

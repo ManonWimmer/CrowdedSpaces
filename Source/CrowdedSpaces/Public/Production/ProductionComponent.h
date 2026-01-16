@@ -4,6 +4,9 @@
 #include "Components/ActorComponent.h"
 #include "ProductionType.h"
 #include "Resources/MoneyComponent.h"
+#include "Resources/ElectricityComponent.h"
+#include "Resources/OxygenComponent.h"
+#include "Resources/FoodComponent.h"
 #include "ProductionComponent.generated.h"
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -23,7 +26,8 @@ public:
 	
 	virtual TArray<TPair<FString, FString>> GetCurrentValues() const override;
 	virtual FOnStatChanged& GetOnStatChanged() override { return OnStatChanged; }
-	
+
+	// Production
 	UPROPERTY(EditAnywhere, Category="Production")
 	EProductionType ProductionType = EProductionType::Money;
 	
@@ -54,4 +58,13 @@ private:
 
 	UPROPERTY()
 	UMoneyComponent* PlayerMoneyComponent;
+
+	UPROPERTY()
+	UElectricityComponent* PlayerElectricityComponent;
+
+	UPROPERTY()
+	UOxygenComponent* PlayerOxygenComponent;
+
+	UPROPERTY()
+	UFoodComponent* PlayerFoodComponent;
 };
