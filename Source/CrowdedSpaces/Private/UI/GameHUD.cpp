@@ -11,6 +11,7 @@ void AGameHUD::BeginPlay()
 	CreateAndInitPlayerResourcesWidget();
 	CreateAndInitBuildWidget();
 	CreateAndInitSelectionWidget();
+	CreateAndInitMoralEventWidget();
 }
 
 #pragma region Build
@@ -100,3 +101,30 @@ void AGameHUD::UpdateSelectionWidget(const FString DisplayName, const TMap<FStri
 	SelectionWidget->UpdateSelection(DisplayName, Stats);
 }
 #pragma endregion Selection
+
+#pragma region Moral Event
+void AGameHUD::CreateAndInitMoralEventWidget()
+{
+	if (!MoralEventWidgetBP || !PlayerController) return;
+
+	MoralEventWidget = Cast<UMoralEventWidget>(CreateWidget(PlayerController, MoralEventWidgetBP));
+	
+	MoralEventWidget->AddToViewport(0);
+	ShowMoralEventWidget(false); 
+}
+
+void AGameHUD::ShowMoralEventWidget(bool bShow)
+{
+	if (!MoralEventWidget) return;
+	
+	if (bShow)
+	{
+		MoralEventWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		MoralEventWidget->Reset();
+	}
+	else
+	{
+		MoralEventWidget->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+#pragma endregion Moral Event

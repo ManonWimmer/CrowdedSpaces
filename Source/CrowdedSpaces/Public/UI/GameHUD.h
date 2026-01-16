@@ -4,6 +4,7 @@
 #include "BuildWidget.h"
 #include "PlayerResourcesWidget.h"
 #include "SelectionWidget.h"
+#include "MoralEventWidget.h"
 #include "GameFramework/HUD.h"
 #include "GameHUD.generated.h"
 
@@ -41,6 +42,13 @@ public:
 
 	UPROPERTY()
 	USelectionWidget* SelectionWidget;
+
+	// Moral Event
+	UFUNCTION()
+	void CreateAndInitMoralEventWidget();
+	
+	UFUNCTION(BlueprintCallable, Category="Widgets")
+	void ShowMoralEventWidget(bool bShow);
 	
 private:
 	UPROPERTY()
@@ -63,4 +71,11 @@ private:
 	// Selection
 	UPROPERTY(EditAnywhere, Category="Widgets")
 	TSubclassOf<UUserWidget> SelectionWidgetBP;
+
+	// Moral Event
+	UPROPERTY(EditAnywhere, Category="Widgets")
+	TSubclassOf<UUserWidget> MoralEventWidgetBP;
+
+	UPROPERTY()
+	UMoralEventWidget* MoralEventWidget;
 };
