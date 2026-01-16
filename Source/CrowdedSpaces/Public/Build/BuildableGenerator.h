@@ -21,6 +21,8 @@ public:
 	virtual FString GetDisplayName() const override;
 	virtual AActor* GetSelectableActor() override;
 
+	UProductionComponent* GetProductionComponent() const { return ProductionComponent; } 
+
 protected:
 	virtual void BeginPlay() override;
 	
