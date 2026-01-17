@@ -127,4 +127,11 @@ void AGameHUD::ShowMoralEventWidget(bool bShow)
 		MoralEventWidget->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
+
+void AGameHUD::UpdateMoralEventWidget(const UMoralEventData* EventData)
+{
+	if (!MoralEventWidget) return;
+
+	MoralEventWidget->Update(EventData);
+}
 #pragma endregion Moral Event

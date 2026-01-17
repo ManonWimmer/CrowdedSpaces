@@ -6,6 +6,7 @@
 #include "SelectionWidget.h"
 #include "MoralEventWidget.h"
 #include "GameFramework/HUD.h"
+#include "MoralEvent/MoralEventData.h"
 #include "GameHUD.generated.h"
 
 UCLASS()
@@ -49,6 +50,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category="Widgets")
 	void ShowMoralEventWidget(bool bShow);
+
+	UFUNCTION(BlueprintCallable, Category="Widgets")
+	void UpdateMoralEventWidget(const UMoralEventData* EventData);
 	
 private:
 	UPROPERTY()

@@ -6,9 +6,9 @@ void UMoralEventWidget::NativeConstruct()
 	Init();
 }
 
-void UMoralEventWidget::Update_Implementation()
+void UMoralEventWidget::Update_Implementation(const UMoralEventData* EventData)
 {
-	// En BP, update texts, à voir quoi mettre en paramètres (data ?)
+	// En BP, update texts 
 }
 
 void UMoralEventWidget::Reset_Implementation()

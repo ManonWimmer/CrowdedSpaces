@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "MoralEvent/MoralEventData.h"
 #include "Debug.generated.h"
 
 UCLASS()
@@ -17,8 +18,15 @@ protected:
 
 public:
 	UFUNCTION(CallInEditor, Category = "Debug")
-	void Debug_SetGameMode_Game() const;
+	void SetGameMode_Game() const;
 
 	UFUNCTION(CallInEditor, Category = "Debug")
-	void Debug_SetGameMode_Building() const;
+	void SetGameMode_Building() const;
+
+	UFUNCTION(CallInEditor, Category = "Debug")
+	void StartDebugEventData() const;
+
+private:
+	UPROPERTY(EditAnywhere, Category = "Debug")
+	UMoralEventData* DebugEventData;
 };
