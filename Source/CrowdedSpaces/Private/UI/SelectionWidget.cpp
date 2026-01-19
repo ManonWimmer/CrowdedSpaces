@@ -73,9 +73,10 @@ void USelectionWidget::OnAnyStatUpdated(FName StatId, float NewValue)
 
 void USelectionWidget::Init_Implementation()
 {
+	Super::Init_Implementation();
 }
 
 void USelectionWidget::Reset_Implementation()
 {
+	Super::Reset_Implementation();
 }
-

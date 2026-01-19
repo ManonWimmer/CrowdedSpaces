@@ -1,18 +1,21 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
+#include "CustomWidget.h"
 #include "SelectionWidget.generated.h"
 
 class ISelectableStatProvider;
 
 UCLASS()
-class CROWDEDSPACES_API USelectionWidget : public UUserWidget
+class CROWDEDSPACES_API USelectionWidget : public UCustomWidget
 {
 	GENERATED_BODY()
 
 protected:
 	virtual void NativeConstruct() override;
+	
+	virtual void Init_Implementation() override;
+	virtual void Reset_Implementation() override;
 
 	UPROPERTY()
 	TArray<TScriptInterface<ISelectableStatProvider>> BoundStats;
@@ -24,12 +27,6 @@ protected:
 	FString ActorDisplayName = "";
 
 public:
-	UFUNCTION(BlueprintNativeEvent, Category = "UI")
-	void Init();
-
-	UFUNCTION(BlueprintNativeEvent, Category = "UI")
-	void Reset();
-
 	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
 	void UpdateSelection(const FString& DisplayName, const TMap<FString, FString>& Stats);
 
