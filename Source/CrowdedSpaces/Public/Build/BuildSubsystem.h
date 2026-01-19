@@ -1,30 +1,28 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "Subsystems/WorldSubsystem.h"
 #include "Build/GhostObject.h"
 #include "Build/BuildData.h"
 #include "UI/GameHUD.h"
 #include "Resources/MoneyComponent.h"
-#include "BuildManager.generated.h"
+#include "BuildSubsystem.generated.h"
 
 UCLASS()
-class CROWDEDSPACES_API ABuildManager : public AActor
+class CROWDEDSPACES_API UBuildSubsystem : public UTickableWorldSubsystem
 {
 	GENERATED_BODY()
 
 public:
-	ABuildManager();
+	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
+	virtual TStatId GetStatId() const override;
 
-protected:
-	virtual void BeginPlay() override;
-
-public:
 	UFUNCTION()
 	void OnGameModeChanged(EGameModeState NewMode);
 	
 	virtual void Tick(float DeltaTime) override;
-
+	virtual bool IsTickable() const override;
+	
 	UFUNCTION(BlueprintCallable)
 	void StartBuilding(UBuildData* BuildData);
 
@@ -33,6 +31,12 @@ public:
 
 	UFUNCTION()
 	void PlaceObject();
+
+	UFUNCTION()
+	void SetBuildData(const TArray<UBuildData*>& NewBuildData) { BuildDataObjects = NewBuildData; }
+
+	UFUNCTION()
+	void SetSnapSize(const float NewSnapSize) { SnapSize = NewSnapSize; }
 
 	UFUNCTION(BlueprintCallable)
 	TArray<UBuildData*> GetBuildDataObjects() { return BuildDataObjects;}
@@ -44,11 +48,11 @@ private:
 	UPROPERTY()
 	UBuildData* CurrentBuildData = nullptr;
 
-	UPROPERTY(EditAnywhere, Category = "Build")
-	TArray<UBuildData*> BuildDataObjects;
+	UPROPERTY()
+	TArray<UBuildData*> BuildDataObjects; // Send by game state
 
-	UPROPERTY(EditAnywhere, Category = "Build")
-	float SnapSize = 100.f;
+	UPROPERTY()
+	float SnapSize = 100.f; // Send by game state
 
 	UFUNCTION()
 	void UpdateGhost() const;
@@ -64,4 +68,7 @@ private:
 
 	UPROPERTY()
 	UMoneyComponent* MoneyComponent;
+
+	UPROPERTY()
+	bool bTickEnabled = false;
 };

@@ -1,26 +1,20 @@
-﻿#include "Build/BuildManager.h"
+﻿#include "Build/BuildSubsystem.h"
 
 #include "Blueprint/WidgetBlueprintLibrary.h"
-#include "Build/BuildableObject.h"
-#include "Components/WidgetComponent.h"
-#include "Player/CrowdedPlayerController.h"
 #include "Game/GameModeSubsystem.h"
 #include "Kismet/GameplayStatics.h"
+#include "Player/CrowdedPlayerController.h"
+#include "Resources/MoneyComponent.h"
 #include "Player/CrowdedPlayerState.h"
 
-ABuildManager::ABuildManager(): CurrentGhost(nullptr), CurrentBuildData(nullptr)
+void UBuildSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
-	PrimaryActorTick.bCanEverTick = true;
-}
-
-void ABuildManager::BeginPlay()
-{
-	Super::BeginPlay();
+	Super::OnWorldBeginPlay(InWorld);
 
 	// Game Mode
 	if (UGameModeSubsystem* Mode = GetWorld()->GetSubsystem<UGameModeSubsystem>())
 	{
-		Mode->OnGameModeChanged.AddDynamic(this, &ABuildManager::OnGameModeChanged);
+		Mode->OnGameModeChanged.AddDynamic(this, &UBuildSubsystem::OnGameModeChanged);
 	}
 
 	// Player controller
@@ -28,7 +22,7 @@ void ABuildManager::BeginPlay()
 	{
 		if (ACrowdedPlayerController* CamPC = Cast<ACrowdedPlayerController>(PC))
 		{
-			CamPC->OnLeftClickBuild.AddDynamic(this, &ABuildManager::PlaceObject);
+			CamPC->OnLeftClickBuild.AddDynamic(this, &UBuildSubsystem::PlaceObject);
 
 			// Money component
 			if (ACrowdedPlayerState* PS = PC->GetPlayerState<ACrowdedPlayerState>())
@@ -42,10 +36,15 @@ void ABuildManager::BeginPlay()
 	GameHUD = Cast<AGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
 }
 
-void ABuildManager::OnGameModeChanged(EGameModeState NewMode)
+TStatId UBuildSubsystem::GetStatId() const
+{
+	RETURN_QUICK_DECLARE_CYCLE_STAT(UBuildSubsystem, STATGROUP_Tickables); // Sinon crash quand Tickable true
+}
+
+void UBuildSubsystem::OnGameModeChanged(EGameModeState NewMode)
 {
 	// Activer ou désactiver le tick selon le mode
-	SetActorTickEnabled(NewMode == EGameModeState::Building);
+	bTickEnabled = (NewMode == EGameModeState::Building);
 
 	StopBuilding();
 
@@ -60,13 +59,18 @@ void ABuildManager::OnGameModeChanged(EGameModeState NewMode)
 	}
 }
 
-void ABuildManager::Tick(float DeltaTime)
+void UBuildSubsystem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	UpdateGhost();
 }
 
-void ABuildManager::StartBuilding(UBuildData* BuildData)
+bool UBuildSubsystem::IsTickable() const
+{
+	return bTickEnabled;
+}
+
+void UBuildSubsystem::StartBuilding(UBuildData* BuildData)
 {
 	if (!BuildData || !BuildData->BuildClass) return;
 
@@ -96,7 +100,7 @@ void ABuildManager::StartBuilding(UBuildData* BuildData)
 	CurrentGhost->SetActorScale3D(DefaultBuildable->GetActorScale3D());
 }
 
-void ABuildManager::StopBuilding()
+void UBuildSubsystem::StopBuilding()
 {
 	CurrentBuildData = nullptr;
 
@@ -123,7 +127,7 @@ bool IsCursorOverUI(UWorld* World)
 	return false;
 }
 
-void ABuildManager::PlaceObject()
+void UBuildSubsystem::PlaceObject()
 {
 	if (!CurrentGhost || !CurrentBuildData || !CurrentBuildData->BuildClass)
 		return;
@@ -158,7 +162,7 @@ void ABuildManager::PlaceObject()
 }
 
 
-void ABuildManager::UpdateGhost() const
+void UBuildSubsystem::UpdateGhost() const
 {
 	if(!CurrentGhost) return;
 
@@ -178,7 +182,7 @@ void ABuildManager::UpdateGhost() const
 	CurrentGhost->SetValid(bValid);
 }
 
-bool ABuildManager::CanPlace(const FVector& Location, const FVector& Extent) const
+bool UBuildSubsystem::CanPlace(const FVector& Location, const FVector& Extent) const
 {
 	FCollisionShape BoxShape = FCollisionShape::MakeBox(Extent);
 	FCollisionQueryParams Params;
@@ -198,7 +202,7 @@ bool ABuildManager::CanPlace(const FVector& Location, const FVector& Extent) con
 	return !bBlocked;
 }
 
-bool ABuildManager::GetCursorHit(FVector& OutHit) const
+bool UBuildSubsystem::GetCursorHit(FVector& OutHit) const
 {
 	if(APlayerController* PC = GetWorld()->GetFirstPlayerController())
 	{
@@ -219,4 +223,3 @@ bool ABuildManager::GetCursorHit(FVector& OutHit) const
 	}
 	return false;
 }
-
