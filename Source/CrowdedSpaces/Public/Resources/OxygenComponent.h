@@ -29,7 +29,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnStatChanged OnStatChanged;
 	
-	virtual TArray<TPair<FString, FString>> GetCurrentValues() const override;
+	virtual TArray<FStat> GetCurrentValues() const override;
 	virtual FOnStatChanged& GetOnStatChanged() override { return OnStatChanged; }
 	
 private:

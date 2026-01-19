@@ -53,6 +53,9 @@ void ACrowdedPlayerController::BeginPlay()
 	bEnableClickEvents = true;
 	bEnableMouseOverEvents = true;
 
+	// Input mode à tester pour click ui
+	SetInputMode(FInputModeGameAndUI());
+
 	// Get HUD
 	GameHUD = Cast<AGameHUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
 }

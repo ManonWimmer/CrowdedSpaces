@@ -22,28 +22,26 @@ EBTNodeResult::Type UBTTask_FindNearestGeneratorLocation::ExecuteTask(UBehaviorT
 			for (TObjectIterator<AActor> Itr; Itr; ++Itr)
 			{
 				ABuildableGenerator* Generator = Cast<ABuildableGenerator>(*Itr);
-				if (Generator)
+				if (!Generator) continue;
+				
+				// Get nearest generator of production type in radius
+				if (Generator->GetProductionComponent()->ProductionType != ProductionType) continue;
+				
+				float Distance = FVector::Distance(Origin, NPC->GetActorLocation());
+				if (Distance < SearchRadius / 2)
 				{
-					// Get nearest generator of production type in radius
-					if (Generator->GetProductionComponent()->ProductionType == ProductionType)
+					if (NearestGenerator)
 					{
-						float Distance = FVector::Distance(Origin, NPC->GetActorLocation());
-						if (Distance < SearchRadius / 2)
+						if (Distance < NearestDistance)
 						{
-							if (NearestGenerator)
-							{
-								if (Distance < NearestDistance)
-								{
-									NearestGenerator = Generator;
-									NearestDistance = Distance;
-								}
-							}
-							else
-							{
-								NearestGenerator = Generator;
-								NearestDistance = Distance;
-							}
+							NearestGenerator = Generator;
+							NearestDistance = Distance;
 						}
+					}
+					else
+					{
+						NearestGenerator = Generator;
+						NearestDistance = Distance;
 					}
 				}
 			}

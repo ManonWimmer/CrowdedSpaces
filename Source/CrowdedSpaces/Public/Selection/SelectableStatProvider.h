@@ -1,11 +1,9 @@
 ﻿#pragma once
+using FStat = TPair<FString, FString> ;
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
 #include "SelectableStatProvider.generated.h"
-
-
-
 
 UINTERFACE(BlueprintType)
 class USelectableStatProvider : public UInterface
@@ -24,6 +22,6 @@ class CROWDEDSPACES_API ISelectableStatProvider
 	GENERATED_BODY()
 
 public:
-	virtual TArray<TPair<FString, FString>> GetCurrentValues() const = 0; // DisplayName - Value
+	virtual TArray<FStat> GetCurrentValues() const = 0; // DisplayName - Value
 	virtual FOnStatChanged& GetOnStatChanged() = 0;
 };

@@ -194,7 +194,6 @@ bool ABuildManager::CanPlace(const FVector& Location, const FVector& Extent) con
 		BoxShape,
 		Params
 	);
-
 	
 	return !bBlocked;
 }
