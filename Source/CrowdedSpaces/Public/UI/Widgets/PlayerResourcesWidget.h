@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "CustomWidget.h"
+#include "UI/CustomWidget.h"
 #include "PlayerResourcesWidget.generated.h"
 
 UCLASS()

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "CustomWidget.h"
+#include "UI/CustomWidget.h"
 #include "SelectionWidget.generated.h"
 
 class ISelectableStatProvider;

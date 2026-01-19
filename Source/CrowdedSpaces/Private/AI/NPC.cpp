@@ -1,6 +1,6 @@
 ﻿#include "AI/NPC.h"
 
-#include "UI/FoodBarWidget.h"
+#include "UI/Widgets/FoodBarWidget.h"
 
 ANPC::ANPC()
 {

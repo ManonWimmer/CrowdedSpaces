@@ -1,10 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "BuildWidget.h"
-#include "PlayerResourcesWidget.h"
-#include "SelectionWidget.h"
-#include "MoralEventWidget.h"
+#include "Widgets/SelectionWidget.h"
 #include "GameFramework/HUD.h"
 #include "CustomWidget.h"
 #include "MoralEvent/MoralEventData.h"
@@ -47,9 +44,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Widgets")
 	void UpdateSelectionWidget(const FString DisplayName, const TMap<FString, FString> Stats);
 
-	UPROPERTY()
-	USelectionWidget* SelectionWidget;
-
+	UFUNCTION()
+	USelectionWidget* GetSelectionWidget() { return GetOrCreateWidget<USelectionWidget>(SelectionWidgetBP); }
+	
 	// Moral Event
 	UFUNCTION(BlueprintCallable, Category="Widgets")
 	void ShowMoralEventWidget(bool bShow);

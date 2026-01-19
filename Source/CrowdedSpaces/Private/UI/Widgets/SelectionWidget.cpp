@@ -1,4 +1,4 @@
-﻿#include "UI/SelectionWidget.h"
+﻿#include "UI/Widgets/SelectionWidget.h"
 
 #include "Selection/SelectableStatProvider.h"
 

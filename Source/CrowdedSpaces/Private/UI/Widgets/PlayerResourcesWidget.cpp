@@ -1,4 +1,4 @@
-﻿#include "UI/PlayerResourcesWidget.h"
+﻿#include "UI/Widgets/PlayerResourcesWidget.h"
 
 void UPlayerResourcesWidget::NativeConstruct()
 {
