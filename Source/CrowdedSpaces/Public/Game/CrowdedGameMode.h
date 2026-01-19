@@ -1,18 +1,22 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Subsystems/WorldSubsystem.h"
 #include "Game/GameModeState.h"
-#include "GameModeSubsystem.generated.h"
+#include "GameFramework/GameMode.h"
+#include "CrowdedGameMode.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameModeChanged, EGameModeState, NewGameMode);
 
 UCLASS()
-class CROWDEDSPACES_API UGameModeSubsystem : public UWorldSubsystem
+class CROWDEDSPACES_API ACrowdedGameMode : public AGameMode
 {
 	GENERATED_BODY()
 
 public:
+	ACrowdedGameMode();
+
+	virtual void BeginPlay() override;
+	
 	EGameModeState GetGameMode() const { return CurrentGameMode; }
 	
 	void SetGameMode(EGameModeState NewGameMode);

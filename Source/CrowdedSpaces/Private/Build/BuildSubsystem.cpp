@@ -1,7 +1,7 @@
 ﻿#include "Build/BuildSubsystem.h"
 
 #include "Blueprint/WidgetBlueprintLibrary.h"
-#include "Game/GameModeSubsystem.h"
+#include "Game/CrowdedGameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/CrowdedPlayerController.h"
 #include "Resources/MoneyComponent.h"
@@ -12,9 +12,9 @@ void UBuildSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	Super::OnWorldBeginPlay(InWorld);
 
 	// Game Mode
-	if (UGameModeSubsystem* Mode = GetWorld()->GetSubsystem<UGameModeSubsystem>())
+	if (ACrowdedGameMode* GameMode = Cast<ACrowdedGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
 	{
-		Mode->OnGameModeChanged.AddDynamic(this, &UBuildSubsystem::OnGameModeChanged);
+		GameMode->OnGameModeChanged.AddDynamic(this, &UBuildSubsystem::OnGameModeChanged);
 	}
 
 	// Player controller

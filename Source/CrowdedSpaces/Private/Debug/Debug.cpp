@@ -1,6 +1,7 @@
 ﻿#include "Debug/Debug.h"
 
-#include "Game/GameModeSubsystem.h"
+#include "Game/CrowdedGameMode.h"
+#include "Kismet/GameplayStatics.h"
 #include "MoralEvent/MoralEventManager.h"
 
 ADebug::ADebug()
@@ -14,17 +15,17 @@ void ADebug::BeginPlay()
 
 void ADebug::SetGameMode_Game() const
 {
-	if (UGameModeSubsystem* Mode = GetWorld()->GetSubsystem<UGameModeSubsystem>())
+	if (ACrowdedGameMode* GameMode = Cast<ACrowdedGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
 	{
-		Mode->SetGameMode(EGameModeState::Game);
+		GameMode->SetGameMode(EGameModeState::Game);
 	}
 }
 
 void ADebug::SetGameMode_Building() const
 {
-	if (UGameModeSubsystem* Mode = GetWorld()->GetSubsystem<UGameModeSubsystem>())
+	if (ACrowdedGameMode* GameMode = Cast<ACrowdedGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
 	{
-		Mode->SetGameMode(EGameModeState::Building);
+		GameMode->SetGameMode(EGameModeState::Building);
 	}
 }
 

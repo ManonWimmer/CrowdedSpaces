@@ -1,7 +1,7 @@
 ﻿#include "Player/CrowdedPlayerController.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
-#include "Game/GameModeSubsystem.h"
+#include "Game/CrowdedGameMode.h"
 #include "Kismet/GameplayStatics.h"
 
 void ACrowdedPlayerController::SetupInputComponent()
@@ -62,13 +62,13 @@ void ACrowdedPlayerController::BeginPlay()
 
 void ACrowdedPlayerController::LeftClickInput(const FInputActionValue& Value)
 {
-	if (UGameModeSubsystem* Mode = GetWorld()->GetSubsystem<UGameModeSubsystem>())
+	if (ACrowdedGameMode* GameMode = Cast<ACrowdedGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
 	{
-		if (Mode->GetGameMode() == EGameModeState::Building)
+		if (GameMode->GetGameMode() == EGameModeState::Building)
 		{
 			OnLeftClickBuild.Broadcast();
 		}
-		else if (Mode->GetGameMode() == EGameModeState::Game)
+		else if (GameMode->GetGameMode() == EGameModeState::Game)
 		{
 			OnLeftClickGame.Broadcast();	
 		}
