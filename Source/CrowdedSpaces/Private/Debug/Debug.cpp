@@ -2,7 +2,7 @@
 
 #include "Game/CrowdedGameMode.h"
 #include "Kismet/GameplayStatics.h"
-#include "MoralEvent/MoralEventManager.h"
+#include "MoralEvent/MoralEventSubsystem.h"
 
 ADebug::ADebug()
 {
@@ -31,7 +31,7 @@ void ADebug::SetGameMode_Building() const
 
 void ADebug::StartDebugEventData() const
 {
-	UMoralEventManager* MoralEventManager = GetWorld()->GetSubsystem<UMoralEventManager>();
+	UMoralEventSubsystem* MoralEventManager = GetWorld()->GetSubsystem<UMoralEventSubsystem>();
 	
 	if (!MoralEventManager || !DebugEventData) return;
 
