@@ -1,18 +1,21 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AI/NPC.h"
 #include "MoralEvent/MoralEvent.h"
 #include "MoralEvent_SpawnNPC.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable)
 class CROWDEDSPACES_API UMoralEvent_SpawnNPC : public UMoralEvent
 {
 	GENERATED_BODY()
 
 public:
-	virtual void StartMoralEvent() override;
-
-	virtual void ClickOnChoice(int choiceIndex) override;
+	virtual void ClickOnChoice(int ChoiceIndex) override;
 
 	virtual void SetupChoices() override;
+
+private:
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<ANPC> NPCClass;
 };

@@ -1,41 +1,30 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "MoralEventData.h"
+#include "MoralEvent.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "UI/GameHUD.h"
 #include "MoralEventSubsystem.generated.h"
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNoSelected);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnYesSelected);
 
 UCLASS()
 class CROWDEDSPACES_API UMoralEventSubsystem : public UWorldSubsystem
 {
 	GENERATED_BODY()
 
-//to do: get datas of moral event data type to select random ? 
-	
 public:
 	UFUNCTION(BlueprintCallable, Category="MoralEventManager")
-	void StartNewEvent(UMoralEventData* EventData);
+	void StartNewEvent(TSubclassOf<UMoralEvent> NewEvent);
 
 	UFUNCTION(BlueprintCallable, Category="MoralEventManager")
-	void EndCurrentEvent(bool bSelected);
-
-	UPROPERTY(BlueprintAssignable)
-	FOnNoSelected OnNoSelected;
-
-	UPROPERTY(BlueprintAssignable)
-	FOnYesSelected OnYesSelected;
+	void OnChoiceSelected(int ChoiceIndex);
 	
 private:
 	void GetGameHUD();
 	
 	UPROPERTY()
-	UMoralEventData* CurrentEventData = nullptr;
+	UMoralEvent* CurrentEvent = nullptr;
 
-// todo : use moral events get in game state comme build ? 
+// todo : get moral events bp in game state (comme build) ? for random event
 	
 	UPROPERTY()
 	AGameHUD* GameHUD = nullptr;

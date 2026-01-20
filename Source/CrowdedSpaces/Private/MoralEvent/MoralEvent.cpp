@@ -1,13 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "MoralEvent/MoralEvent.h"
 
-
-UMoralEvent::UMoralEvent()
+void UMoralEvent::ClickOnChoice(int ChoiceIndex)
 {
+	
 }
 
-UMoralEvent::~UMoralEvent()
+void UMoralEvent::SetupChoices()
 {
 }

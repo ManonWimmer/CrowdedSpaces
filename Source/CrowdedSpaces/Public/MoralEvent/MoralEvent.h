@@ -1,26 +1,29 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "MoralEvent.generated.h"
 
-UCLASS(BlueprintType)
+UCLASS(Blueprintable, BlueprintType)
 class CROWDEDSPACES_API UMoralEvent : public UObject
 {
-	GENERATED_BODY();
+	GENERATED_BODY()
 
 public:
 	UFUNCTION(BlueprintCallable)
-	virtual void StartMoralEvent();
-
-	UFUNCTION(BlueprintCallable)
-	virtual void ClickOnChoice(int choiceIndex);
+	virtual void ClickOnChoice(int ChoiceIndex);
 
 	UFUNCTION()
 	virtual void SetupChoices();
+
+	UFUNCTION(BlueprintCallable)
+	TArray<FString> GetChoices() { return Choices; }
 	
-	// titre
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="MoralEvent")
+	FString EventTitle;
 
-	// description
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="MoralEvent")
+	FString EventDescription;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY()
 	TArray<FString> Choices;
 };

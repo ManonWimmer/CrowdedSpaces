@@ -1,45 +1,25 @@
 ﻿#include "MoralEvent/MoralEventSubsystem.h"
 
-#include "AI/NPC.h"
-
-void UMoralEventSubsystem::StartNewEvent(UMoralEventData* EventData)
+void UMoralEventSubsystem::StartNewEvent(TSubclassOf<UMoralEvent> NewEvent)
 {
 	if (!GameHUD) GetGameHUD();
 	
-	CurrentEventData = EventData;
+	CurrentEvent = NewObject<UMoralEvent>(this, NewEvent);
+	CurrentEvent->SetupChoices();
 
 	GameHUD->ShowMoralEventWidget(true);
-	GameHUD->UpdateMoralEventWidget(CurrentEventData);
+	GameHUD->UpdateMoralEventWidget(CurrentEvent);
 }
 
-void UMoralEventSubsystem::EndCurrentEvent(bool bSelected)
+void UMoralEventSubsystem::OnChoiceSelected(int ChoiceIndex)
 {
 	if (!GameHUD) GetGameHUD();
 
+	CurrentEvent->ClickOnChoice(ChoiceIndex);
 	GameHUD->ShowMoralEventWidget(false);
-
-	if (bSelected)
-	{
-		switch(CurrentEventData->Type)
-		{
-		case EMoralEventType::NewNPC:
-				if(GEngine)
-					GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Blue, "Spawn New NPC");
-				
-				FVector Location(0.0f, 0.0f, 140.0f);
-				FRotator Rotation(0.0f, 0.0f, 0.0f);
-				FActorSpawnParameters SpawnInfo;
-				
-				GetWorld()->SpawnActor<AActor>(CurrentEventData->NPCClass, Location, Rotation, SpawnInfo);
-				break;
-		}
-	}
 	
-	
-	CurrentEventData = nullptr;
+	CurrentEvent = nullptr;
 }
-
-// Plus tard : end current event(choice index) -> current moral event on choice selected
 
 void UMoralEventSubsystem::GetGameHUD()
 {

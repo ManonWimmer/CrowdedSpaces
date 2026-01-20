@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "UI/CustomWidget.h"
-#include "MoralEvent/MoralEventData.h"
+#include "MoralEvent/MoralEvent.h"
 #include "MoralEventWidget.generated.h"
 
 UCLASS()
@@ -18,5 +18,5 @@ protected:
 
 public:
 	UFUNCTION(BlueprintNativeEvent, Category = "UI")
-	void Update(const UMoralEventData* EventData);
+	void Update(const UMoralEvent* MoralEvent);
 };

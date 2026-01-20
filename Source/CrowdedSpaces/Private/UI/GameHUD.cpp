@@ -66,12 +66,12 @@ void AGameHUD::ShowMoralEventWidget(bool bShow)
 	ShowWidget(MoralEventWidgetBP, bShow, ESlateVisibility::SelfHitTestInvisible);
 }
 
-void AGameHUD::UpdateMoralEventWidget(const UMoralEventData* EventData)
+void AGameHUD::UpdateMoralEventWidget(const UMoralEvent* MoralEvent)
 {
 	auto MoralEventWidget = GetOrCreateWidget<UMoralEventWidget>(MoralEventWidgetBP);
 	if (!MoralEventWidget) return;
 
-	MoralEventWidget->Update(EventData);
+	MoralEventWidget->Update(MoralEvent);
 }
 #pragma endregion Moral Event
 

@@ -29,12 +29,12 @@ void ADebug::SetGameMode_Building() const
 	}
 }
 
-void ADebug::StartDebugEventData() const
+void ADebug::StartDebugMoralEvent() const
 {
-	UMoralEventSubsystem* MoralEventManager = GetWorld()->GetSubsystem<UMoralEventSubsystem>();
+	UMoralEventSubsystem* MoralEventSubsystem = GetWorld()->GetSubsystem<UMoralEventSubsystem>();
 	
-	if (!MoralEventManager || !DebugEventData) return;
+	if (!MoralEventSubsystem || !DebugEventData) return;
 
-	MoralEventManager->StartNewEvent(DebugEventData);
+	MoralEventSubsystem->StartNewEvent(DebugEventData);
 }
 

@@ -4,7 +4,7 @@
 #include "Widgets/SelectionWidget.h"
 #include "GameFramework/HUD.h"
 #include "CustomWidget.h"
-#include "MoralEvent/MoralEventData.h"
+#include "MoralEvent/MoralEvent.h"
 #include "WidgetStartupConfig.h"
 #include "GameHUD.generated.h"
 
@@ -52,7 +52,7 @@ public:
 	void ShowMoralEventWidget(bool bShow);
 
 	UFUNCTION(BlueprintCallable, Category="Widgets")
-	void UpdateMoralEventWidget(const UMoralEventData* EventData);
+	void UpdateMoralEventWidget(const UMoralEvent* MoralEvent);
 	
 private:
 	UPROPERTY()

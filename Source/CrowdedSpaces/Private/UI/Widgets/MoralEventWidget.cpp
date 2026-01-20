@@ -5,9 +5,10 @@ void UMoralEventWidget::NativeConstruct()
 	Super::NativeConstruct();
 }
 
-void UMoralEventWidget::Update_Implementation(const UMoralEventData* EventData)
+void UMoralEventWidget::Init_Implementation()
 {
-	// En BP, update texts 
+	Super::Init_Implementation();
+	// En BP, setup binds avec Events Manager ? 
 }
 
 void UMoralEventWidget::Reset_Implementation()
@@ -16,8 +17,7 @@ void UMoralEventWidget::Reset_Implementation()
 	// En BP, reset texts ? 
 }
 
-void UMoralEventWidget::Init_Implementation()
+void UMoralEventWidget::Update_Implementation(const UMoralEvent* MoralEvent)
 {
-	Super::Init_Implementation();
-	// En BP, setup binds avec Events Manager ? 
+	// En BP, update texts 
 }

@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "MoralEvent/MoralEventData.h"
+#include "MoralEvent/MoralEvent.h"
 #include "Debug.generated.h"
 
 UCLASS()
@@ -24,9 +24,9 @@ public:
 	void SetGameMode_Building() const;
 
 	UFUNCTION(CallInEditor, Category = "Debug")
-	void StartDebugEventData() const;
+	void StartDebugMoralEvent() const;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Debug")
-	UMoralEventData* DebugEventData;
+	TSubclassOf<UMoralEvent> DebugEventData;
 };
