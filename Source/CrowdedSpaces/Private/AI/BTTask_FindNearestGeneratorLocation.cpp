@@ -11,53 +11,55 @@ UBTTask_FindNearestGeneratorLocation::UBTTask_FindNearestGeneratorLocation(FObje
 
 EBTNodeResult::Type UBTTask_FindNearestGeneratorLocation::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	if (ANPCController* const Controller = Cast<ANPCController>(OwnerComp.GetAIOwner()))
-	{
-		if (APawn* const NPC = Controller->GetPawn())
-		{
-			FVector const Origin = NPC->GetActorLocation();
-			ABuildableGenerator* NearestGenerator = nullptr;
-			float NearestDistance = 0.0f;
-			
-			for (TObjectIterator<AActor> Itr; Itr; ++Itr)
-			{
-				ABuildableGenerator* Generator = Cast<ABuildableGenerator>(*Itr);
-				if (!Generator) continue;
-				
-				// Get nearest generator of production type in radius
-				if (Generator->GetProductionComponent()->ProductionType != ProductionType) continue;
-				
-				float Distance = FVector::Distance(Origin, NPC->GetActorLocation());
-				if (Distance < SearchRadius / 2)
-				{
-					if (NearestGenerator)
-					{
-						if (Distance < NearestDistance)
-						{
-							NearestGenerator = Generator;
-							NearestDistance = Distance;
-						}
-					}
-					else
-					{
-						NearestGenerator = Generator;
-						NearestDistance = Distance;
-					}
-				}
-			}
+	ANPCController* const Controller = Cast<ANPCController>(OwnerComp.GetAIOwner());
+	if (!Controller)
+		return EBTNodeResult::Failed;
 
-			// Success or Failed
+	APawn* const NPC = Controller->GetPawn();
+	if (!NPC)
+		return EBTNodeResult::Failed;
+
+	FVector const Origin = NPC->GetActorLocation();
+	ABuildableGenerator* NearestGenerator = nullptr;
+	float NearestDistance = 0.0f;
+	
+	for (TObjectIterator<ABuildableGenerator> Itr; Itr; ++Itr)
+	{
+		ABuildableGenerator* Generator = *Itr;
+		if (!Generator) continue;
+		
+		// Get nearest generator of production type in radius
+		if (Generator->GetProductionComponent()->ProductionType != ProductionType) continue;
+		
+		float Distance = FVector::Distance(Origin, NPC->GetActorLocation());
+		if (Distance < SearchRadius / 2)
+		{
 			if (NearestGenerator)
 			{
-				OwnerComp.GetBlackboardComponent()->SetValueAsVector(GetSelectedBlackboardKey(), NearestGenerator->GetActorLocation());
-				FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
-				return EBTNodeResult::Succeeded;
+				if (Distance < NearestDistance)
+				{
+					NearestGenerator = Generator;
+					NearestDistance = Distance;
+				}
 			}
 			else
 			{
-				return EBTNodeResult::Failed;
+				NearestGenerator = Generator;
+				NearestDistance = Distance;
 			}
 		}
+	}
+
+	// Success or Failed
+	if (NearestGenerator)
+	{
+		OwnerComp.GetBlackboardComponent()->SetValueAsVector(GetSelectedBlackboardKey(), NearestGenerator->GetActorLocation());
+		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+		return EBTNodeResult::Succeeded;
+	}
+	else
+	{
+		return EBTNodeResult::Failed;
 	}
 
 	return EBTNodeResult::Failed;
