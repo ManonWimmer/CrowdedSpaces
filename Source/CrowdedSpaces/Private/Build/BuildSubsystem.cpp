@@ -204,20 +204,21 @@ bool UBuildSubsystem::CanPlace(const FVector& Location, const FVector& Extent) c
 
 bool UBuildSubsystem::GetCursorHit(FVector& OutHit) const
 {
-	if(APlayerController* PC = GetWorld()->GetFirstPlayerController())
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	if (!PC)
+		return false;
+	
+	float MouseX, MouseY;
+	if(PC->GetMousePosition(MouseX, MouseY))
 	{
-		float MouseX, MouseY;
-		if(PC->GetMousePosition(MouseX, MouseY))
+		FVector WorldOrigin, WorldDir;
+		if(PC->DeprojectScreenPositionToWorld(MouseX, MouseY, WorldOrigin, WorldDir))
 		{
-			FVector WorldOrigin, WorldDir;
-			if(PC->DeprojectScreenPositionToWorld(MouseX, MouseY, WorldOrigin, WorldDir))
+			FHitResult Hit;
+			if(GetWorld()->LineTraceSingleByChannel(Hit, WorldOrigin, WorldOrigin + WorldDir * CursorLineTraceDistance, ECC_Visibility))
 			{
-				FHitResult Hit;
-				if(GetWorld()->LineTraceSingleByChannel(Hit, WorldOrigin, WorldOrigin + WorldDir * 10000.f, ECC_Visibility))
-				{
-					OutHit = Hit.Location;
-					return true;
-				}
+				OutHit = Hit.Location;
+				return true;
 			}
 		}
 	}

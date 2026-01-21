@@ -20,6 +20,7 @@ FVector ABuildableObject::GetExtent() const
     {
         return MeshComp->Bounds.BoxExtent;
     }
+	
     return FVector::ZeroVector;
 }
 

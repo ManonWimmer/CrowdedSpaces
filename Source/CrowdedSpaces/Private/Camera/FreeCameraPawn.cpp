@@ -51,16 +51,24 @@ void AFreeCameraPawn::Tick(float DeltaTime)
 
 void AFreeCameraPawn::BindControllerEvents()
 {
-	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (!PC)
 	{
-		if (ACrowdedPlayerController* CamPC = Cast<ACrowdedPlayerController>(PC))
-		{
-			CamPC->OnCameraMoveForward.AddDynamic(this, &AFreeCameraPawn::OnMoveForward);
-			CamPC->OnCameraMoveRight.AddDynamic(this, &AFreeCameraPawn::OnMoveRight);
-			CamPC->OnCameraRotate.AddDynamic(this, &AFreeCameraPawn::OnRotate);
-			CamPC->OnCameraZoom.AddDynamic(this, &AFreeCameraPawn::OnZoom);
-		}
+		UE_LOG(LogTemp, Warning, TEXT("Free Camera Pawn : Player Controller Null"));
+		return;
 	}
+
+	ACrowdedPlayerController* CrowdedPC = Cast<ACrowdedPlayerController>(PC);
+	if (!CrowdedPC)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Free Camera Pawn : Crowded Player Controller Null"));
+		return;
+	}
+	
+	CrowdedPC->OnCameraMoveForward.AddDynamic(this, &AFreeCameraPawn::OnMoveForward);
+	CrowdedPC->OnCameraMoveRight.AddDynamic(this, &AFreeCameraPawn::OnMoveRight);
+	CrowdedPC->OnCameraRotate.AddDynamic(this, &AFreeCameraPawn::OnRotate);
+	CrowdedPC->OnCameraZoom.AddDynamic(this, &AFreeCameraPawn::OnZoom);
 }
 
 void AFreeCameraPawn::OnMoveForward(float Value)
@@ -89,27 +97,28 @@ void AFreeCameraPawn::OnZoom(float Value)
 
 void AFreeCameraPawn::ApplyMovement(float DeltaTime)
 {
+	if (CurrentVelocity.IsNearlyZero())
+		return;
+	
+	FVector TargetLocation = GetActorLocation();
+
 	if (!CurrentVelocity.IsNearlyZero())
 	{
-		FVector TargetLocation = GetActorLocation();
+		FVector Forward = GetActorForwardVector();
+		FVector Right = GetActorRightVector();
 
-		if (!CurrentVelocity.IsNearlyZero())
-		{
-			FVector Forward = GetActorForwardVector();
-			FVector Right = GetActorRightVector();
-
-			TargetLocation += (Forward * CurrentVelocity.X + Right * CurrentVelocity.Y) * DeltaTime;
-		}
-
-		// Clamp
-		TargetLocation.X = FMath::Clamp(TargetLocation.X, MapLimitsX.X, MapLimitsX.Y);
-		TargetLocation.Y = FMath::Clamp(TargetLocation.Y, MapLimitsY.X, MapLimitsY.Y);
-		
-		// Smooth
-		FVector Smoothed = FMath::VInterpTo(GetActorLocation(), TargetLocation, DeltaTime, MoveSmooth);
-		
-		SetActorLocation(Smoothed);
+		TargetLocation += (Forward * CurrentVelocity.X + Right * CurrentVelocity.Y) * DeltaTime;
 	}
+
+	// Clamp
+	TargetLocation.X = FMath::Clamp(TargetLocation.X, MapLimitsX.X, MapLimitsX.Y);
+	TargetLocation.Y = FMath::Clamp(TargetLocation.Y, MapLimitsY.X, MapLimitsY.Y);
+	
+	// Smooth
+	FVector Smoothed = FMath::VInterpTo(GetActorLocation(), TargetLocation, DeltaTime, MoveSmooth);
+	
+	SetActorLocation(Smoothed);
+	
 }
 
 void AFreeCameraPawn::ApplyRotation(float DeltaTime)
