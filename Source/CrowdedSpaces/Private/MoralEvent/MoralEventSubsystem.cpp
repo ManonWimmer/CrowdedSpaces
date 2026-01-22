@@ -11,11 +11,11 @@ void UMoralEventSubsystem::StartNewEvent(TSubclassOf<UMoralEvent> NewEvent)
 	GameHUD->UpdateMoralEventWidget(CurrentEvent);
 }
 
-void UMoralEventSubsystem::OnChoiceSelected(int ChoiceIndex)
+void UMoralEventSubsystem::OnChoiceSelected(EMoralEventChoice Choice)
 {
 	if (!GameHUD) GetGameHUD();
 
-	CurrentEvent->ClickOnChoice(ChoiceIndex);
+	CurrentEvent->ClickOnChoice(Choice);
 	GameHUD->ShowMoralEventWidget(false);
 	
 	CurrentEvent = nullptr;

@@ -72,5 +72,5 @@ private:
 	UPROPERTY()
 	bool bTickEnabled = false;
 	
-	constexpr float CursorLineTraceDistance = 10000.f;
+	static constexpr float CursorLineTraceDistance = 10000.f;
 };

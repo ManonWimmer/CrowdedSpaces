@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "MoralEventChoice.h"
 #include "MoralEvent.generated.h"
 
 UCLASS(Blueprintable, BlueprintType)
@@ -10,13 +11,13 @@ class CROWDEDSPACES_API UMoralEvent : public UObject
 
 public:
 	UFUNCTION(BlueprintCallable)
-	virtual void ClickOnChoice(int ChoiceIndex);
+	virtual void ClickOnChoice(EMoralEventChoice Choice);
 
 	UFUNCTION()
 	virtual void SetupChoices();
 
 	UFUNCTION(BlueprintCallable)
-	TArray<FString> GetChoices() { return Choices; }
+	TArray<EMoralEventChoice> GetChoices() { return Choices; }
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="MoralEvent")
 	FString EventTitle;
@@ -25,5 +26,5 @@ public:
 	FString EventDescription;
 
 	UPROPERTY()
-	TArray<FString> Choices;
+	TArray<EMoralEventChoice> Choices;
 };

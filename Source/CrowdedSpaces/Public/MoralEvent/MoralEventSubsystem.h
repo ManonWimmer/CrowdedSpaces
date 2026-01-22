@@ -16,7 +16,7 @@ public:
 	void StartNewEvent(TSubclassOf<UMoralEvent> NewEvent);
 
 	UFUNCTION(BlueprintCallable, Category="MoralEventManager")
-	void OnChoiceSelected(int ChoiceIndex);
+	void OnChoiceSelected(EMoralEventChoice Choice);
 	
 private:
 	void GetGameHUD();
