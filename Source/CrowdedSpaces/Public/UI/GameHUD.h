@@ -1,0 +1,80 @@
+﻿#pragma once
+
+#include "CoreMinimal.h"
+#include "Widgets/SelectionWidget.h"
+#include "GameFramework/HUD.h"
+#include "CustomWidget.h"
+#include "MoralEvent/MoralEvent.h"
+#include "WidgetStartupConfig.h"
+#include "GameHUD.generated.h"
+
+UCLASS()
+class CROWDEDSPACES_API AGameHUD : public AHUD
+{
+	GENERATED_BODY()
+
+public:
+	virtual void BeginPlay() override;
+
+	// Generic functions
+	template<typename T>
+	T* GetOrCreateWidget(TSubclassOf<UCustomWidget> WidgetClass);
+
+	UFUNCTION()
+	void ShowWidget(TSubclassOf<UCustomWidget> WidgetClass, bool bShow, ESlateVisibility VisibilityOnShow);
+
+	UPROPERTY(EditAnywhere, Category="Widgets")
+	TArray<FWidgetStartupConfig> StartupWidgetsConfig;
+
+	UFUNCTION()
+	void CreateStartupWidgets();
+	
+	// Build
+	UFUNCTION(BlueprintCallable, Category="Widgets")
+	void ShowBuildWidget(bool bShow);
+
+	// Player Resources (money etc)
+	UFUNCTION(BlueprintCallable, Category="Widgets")
+	void ShowPlayerResourcesWidget(bool bShow);
+
+	// Selection
+	UFUNCTION(BlueprintCallable, Category="Widgets")
+	void ShowSelectionWidget(bool bShow);
+
+	UFUNCTION(BlueprintCallable, Category="Widgets")
+	void UpdateSelectionWidget(const FString DisplayName, const TMap<FString, FString> Stats);
+
+	UFUNCTION()
+	USelectionWidget* GetSelectionWidget() { return GetOrCreateWidget<USelectionWidget>(SelectionWidgetBP); }
+	
+	// Moral Event
+	UFUNCTION(BlueprintCallable, Category="Widgets")
+	void ShowMoralEventWidget(bool bShow);
+
+	UFUNCTION(BlueprintCallable, Category="Widgets")
+	void UpdateMoralEventWidget(const UMoralEvent* MoralEvent);
+	
+private:
+	UPROPERTY()
+	TObjectPtr<APlayerController> PlayerController;
+
+	// Build
+	UPROPERTY(EditAnywhere, Category="Widgets")
+	TSubclassOf<UCustomWidget> BuildWidgetBP;
+
+	// Player Resources (money etc)
+	UPROPERTY(EditAnywhere, Category="Widgets")
+	TSubclassOf<UCustomWidget> PlayerResourcesWidgetBP;
+
+	// Selection
+	UPROPERTY(EditAnywhere, Category="Widgets")
+	TSubclassOf<UCustomWidget> SelectionWidgetBP;
+
+	// Moral Event
+	UPROPERTY(EditAnywhere, Category="Widgets")
+	TSubclassOf<UCustomWidget> MoralEventWidgetBP;
+
+	UPROPERTY()
+	TMap<TSubclassOf<UCustomWidget>, UCustomWidget*> WidgetInstances;
+};
+
