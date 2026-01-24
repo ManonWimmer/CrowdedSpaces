@@ -33,7 +33,8 @@ void ADebug::StartDebugMoralEvent() const
 {
 	UMoralEventSubsystem* MoralEventSubsystem = GetWorld()->GetSubsystem<UMoralEventSubsystem>();
 	
-	if (!MoralEventSubsystem || !DebugEventData) return;
+	if (!MoralEventSubsystem || !DebugEventData)
+		return;
 
 	MoralEventSubsystem->StartNewEvent(DebugEventData);
 }

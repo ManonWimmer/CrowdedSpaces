@@ -7,12 +7,13 @@ void ACrowdedGameState::BeginPlay()
 	Super::BeginPlay();
 
 	// Get build subsystem & send data
-	if (UBuildSubsystem* BuildSubsystem = GetWorld()->GetSubsystem<UBuildSubsystem>())
-	{
-		if (GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Blue, "Set data of build subsystem");
+	UBuildSubsystem* BuildSubsystem = GetWorld()->GetSubsystem<UBuildSubsystem>();
+	if (!BuildSubsystem)
+		return;
+	
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Blue, "Set data of build subsystem");
 		
-		BuildSubsystem->SetBuildData(BuildDataObjects);
-		BuildSubsystem->SetSnapSize(SnapSize);
-	}
+	BuildSubsystem->SetBuildData(BuildDataObjects);
+	BuildSubsystem->SetSnapSize(SnapSize);
 }

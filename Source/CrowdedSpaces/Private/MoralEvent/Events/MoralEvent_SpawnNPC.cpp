@@ -8,16 +8,18 @@ void UMoralEvent_SpawnNPC::ClickOnChoice(EMoralEventChoice Choice)
 	FRotator Rotation(0.0f, 0.0f, 0.0f);
 	FActorSpawnParameters SpawnInfo;
 	
-	switch(Choice)
+	switch (Choice)
 	{
 		case EMoralEventChoice::SpawnNPC: 
-			if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Yellow, "Decided to do spawn npc.");
+			if (GEngine)
+				GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Yellow, "Decided to do spawn npc.");
 
 			GetWorld()->SpawnActor<AActor>(NPCClass, Location, Rotation, SpawnInfo);
 			break;
 			
 		case EMoralEventChoice::DoNothing: 
-			if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Yellow, "Decided to do nothing.");
+			if (GEngine)
+				GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Yellow, "Decided to do nothing.");
 			break;
 		
 		default:

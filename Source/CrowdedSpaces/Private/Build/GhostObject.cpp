@@ -32,9 +32,10 @@ void AGhostObject::SetMesh(UStaticMesh* InMesh)
 
 void AGhostObject::SetValid(bool bIsValid)
 {
-	if(!Mesh || !GhostBaseMaterial) return;
+	if (!Mesh || !GhostBaseMaterial)
+		return;
 
-	if(DynamicMat == nullptr)
+	if (!DynamicMat)
 	{
 		DynamicMat = UMaterialInstanceDynamic::Create(GhostBaseMaterial, this);
 		Mesh->SetMaterial(0, DynamicMat);

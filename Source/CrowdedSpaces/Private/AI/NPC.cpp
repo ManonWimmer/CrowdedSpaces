@@ -18,17 +18,19 @@ void ANPC::BeginPlay()
 	Super::BeginPlay();
 
 	// Cast food bar widget class to food bar widget -> set owning actor
-	if (FoodBarWidget)
-	{
-		if (UUserWidget* UserWidget = FoodBarWidget->GetUserWidgetObject())
-		{
-			if (UFoodBarWidget* FoodWidget = Cast<UFoodBarWidget>(UserWidget))
-			{
-				FoodWidget->OwningActor = this;
-				FoodWidget->Init();
-			}
-		}
-	}
+	if (!FoodBarWidget)
+		return;
+
+	UUserWidget* UserWidget = FoodBarWidget->GetUserWidgetObject();
+	if (!UserWidget)
+		return;
+
+	UFoodBarWidget* FoodWidget = Cast<UFoodBarWidget>(UserWidget);
+	if (!FoodWidget)
+		return;
+	
+	FoodWidget->OwningActor = this;
+	FoodWidget->Init();
 	
 	StartRemoveFood();
 }

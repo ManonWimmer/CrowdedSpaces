@@ -15,28 +15,29 @@ EBTNodeResult::Type UBTTask_TryToEat::ExecuteTask(UBehaviorTreeComponent& OwnerC
 {
 	UFoodComponent* NPCFoodComponent = nullptr;
 	UFoodComponent* PlayerFoodComponent = nullptr;
+	
+	// Get NPC Food component
+	ANPCController* const Controller = Cast<ANPCController>(OwnerComp.GetAIOwner());
+	if (!Controller)
+		return EBTNodeResult::Failed;
 
-	// Get NPC Food Component
-	if (ANPCController* const Controller = Cast<ANPCController>(OwnerComp.GetAIOwner()))
-	{
-		if (ANPC* const NPC = Cast<ANPC>(Controller->GetPawn()))
-		{
-			NPCFoodComponent = NPC->GetFoodComponent();
-		}
-	}
+	
+	ANPC* const NPC = Cast<ANPC>(Controller->GetPawn());
+	if (!NPC)
+		return EBTNodeResult::Failed;
 
-	// todo: mettre en begin play
+	NPCFoodComponent = NPC->GetFoodComponent();
+	
 	// Get Player Food Component
-	if (APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0))
-	{
-		if (ACrowdedPlayerController* PlayerController = Cast<ACrowdedPlayerController>(PC))
-		{
-			if (ACrowdedPlayerState* PS = PlayerController->GetPlayerState<ACrowdedPlayerState>())
-			{
-				PlayerFoodComponent = PS->GetFoodComponent();
-			}
-		}
-	}
+	ACrowdedPlayerController* PlayerController = Cast<ACrowdedPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0))
+	if (!PlayerController)
+		return EBTNodeResult::Failed;
+
+	ACrowdedPlayerState* PlayerState = PlayerController->GetPlayerState<ACrowdedPlayerState>();
+	if (!PlayerState)
+		return EBTNodeResult::Failed;
+
+	PlayerFoodComponent = PlayerState->GetFoodComponent();
 	
 	if (!NPCFoodComponent || !PlayerFoodComponent)
 		return EBTNodeResult::Failed;
@@ -48,7 +49,8 @@ EBTNodeResult::Type UBTTask_TryToEat::ExecuteTask(UBehaviorTreeComponent& OwnerC
 		PlayerFoodComponent->RemoveFood(NeededFood);
 		return EBTNodeResult::Succeeded;
 	}
-	// todo: check si pas assed de food dans player pour pas ajouter dans npc
+	
+	// todo: check si pas assez de food dans player pour pas ajouter dans npc
 
 	return EBTNodeResult::Failed;
 }

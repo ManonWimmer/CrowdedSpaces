@@ -26,20 +26,23 @@ void UProductionComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0))
-	{
-		if (ACrowdedPlayerController* CamPC = Cast<ACrowdedPlayerController>(PC))
-		{
-			// Get player components
-			if (ACrowdedPlayerState* PS = PC->GetPlayerState<ACrowdedPlayerState>())
-			{
-				PlayerMoneyComponent = PS->GetMoneyComponent();
-				PlayerElectricityComponent = PS->GetElectricityComponent();
-				PlayerOxygenComponent = PS->GetOxygenComponent();
-				PlayerFoodComponent = PS->GetFoodComponent();
-			}
-		}
-	}
+	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (!PC)
+		return;
+
+	ACrowdedPlayerController* CamPC = Cast<ACrowdedPlayerController>(PC);
+	if (!CamPC)
+		return;
+
+	ACrowdedPlayerState* PS = PC->GetPlayerState<ACrowdedPlayerState>();
+	if (!PS)
+		return;
+	
+	// Get player components
+	PlayerMoneyComponent = PS->GetMoneyComponent();
+	PlayerElectricityComponent = PS->GetElectricityComponent();
+	PlayerOxygenComponent = PS->GetOxygenComponent();
+	PlayerFoodComponent = PS->GetFoodComponent();
 }
 
 
@@ -47,40 +50,40 @@ void UProductionComponent::GenerateProduction() const
 {
 	switch (ProductionType)
 	{
-	// Money
-	case EProductionType::Money:
-		if (PlayerMoneyComponent)
-		{
-			PlayerMoneyComponent->AddMoney(ResourcePerInterval);
-		}
-		break;
+		// Money
+		case EProductionType::Money:
+			if (PlayerMoneyComponent)
+			{
+				PlayerMoneyComponent->AddMoney(ResourcePerInterval);
+			}
+			break;
 
-	// Electricity
-	case EProductionType::Electricity:
-		if (PlayerElectricityComponent)
-		{
-			PlayerElectricityComponent->AddElectricity(ResourcePerInterval);
-		}
-		break;
+		// Electricity
+		case EProductionType::Electricity:
+			if (PlayerElectricityComponent)
+			{
+				PlayerElectricityComponent->AddElectricity(ResourcePerInterval);
+			}
+			break;
 
-	// Oxygen
-	case EProductionType::Oxygen:
-		if (PlayerOxygenComponent)
-		{
-			PlayerOxygenComponent->AddOxygen(ResourcePerInterval);
-		}
-		break;
+		// Oxygen
+		case EProductionType::Oxygen:
+			if (PlayerOxygenComponent)
+			{
+				PlayerOxygenComponent->AddOxygen(ResourcePerInterval);
+			}
+			break;
 
-	// Food
-	case EProductionType::Food:
-		if (PlayerFoodComponent)
-		{
-			PlayerFoodComponent->AddFood(ResourcePerInterval);
-		}
-		break;
+		// Food
+		case EProductionType::Food:
+			if (PlayerFoodComponent)
+			{
+				PlayerFoodComponent->AddFood(ResourcePerInterval);
+			}
+			break;
 		
-	default:
-		break;
+		default:
+			break;
 	}
 }
 

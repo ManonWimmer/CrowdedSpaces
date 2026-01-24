@@ -7,7 +7,8 @@ void AGameHUD::BeginPlay()
 	Super::BeginPlay();
 	
 	PlayerController = GetOwningPlayerController();
-	if (!PlayerController) return;
+	if (!PlayerController)
+		return;
 	
 	// Create widgets
 	CreateStartupWidgets();
@@ -15,19 +16,19 @@ void AGameHUD::BeginPlay()
 
 void AGameHUD::CreateStartupWidgets()
 {
-	for (const FWidgetStartupConfig& Config : StartupWidgetsConfig)
+	for (const auto& [WidgetClass, InitialVisibility] : StartupWidgetsConfig)
 	{
-		if (!Config.WidgetClass) continue;
+		if (!WidgetClass) continue;
 
-		UCustomWidget* Widget = CreateWidget<UCustomWidget>(PlayerController, Config.WidgetClass);
+		UCustomWidget* Widget = CreateWidget<UCustomWidget>(PlayerController, WidgetClass);
 
 		if (!Widget) continue;
 
 		Widget->AddToViewport();
-		Widget->SetVisibility(Config.InitialVisibility);
+		Widget->SetVisibility(InitialVisibility);
 		Widget->Init();
 
-		WidgetInstances.Add(Config.WidgetClass, Widget);
+		WidgetInstances.Add(WidgetClass, Widget);
 	}
 }
 
@@ -54,7 +55,8 @@ void AGameHUD::ShowSelectionWidget(bool bShow)
 void AGameHUD::UpdateSelectionWidget(const FString DisplayName, const TMap<FString, FString> Stats)
 {
 	auto SelectionWidget = GetOrCreateWidget<USelectionWidget>(SelectionWidgetBP);
-	if (!SelectionWidget) return;
+	if (!SelectionWidget)
+		return;
 
 	SelectionWidget->UpdateSelection(DisplayName, Stats);
 }
@@ -69,7 +71,8 @@ void AGameHUD::ShowMoralEventWidget(bool bShow)
 void AGameHUD::UpdateMoralEventWidget(const UMoralEvent* MoralEvent)
 {
 	auto MoralEventWidget = GetOrCreateWidget<UMoralEventWidget>(MoralEventWidgetBP);
-	if (!MoralEventWidget) return;
+	if (!MoralEventWidget)
+		return;
 
 	MoralEventWidget->Update(MoralEvent);
 }
@@ -78,10 +81,12 @@ void AGameHUD::UpdateMoralEventWidget(const UMoralEvent* MoralEvent)
 #pragma region Generic Functions
 void AGameHUD::ShowWidget(TSubclassOf<UCustomWidget> WidgetClass, bool bShow, ESlateVisibility VisibilityOnShow)
 {
-	if (!WidgetClass) return;
+	if (!WidgetClass)
+		return;
 
 	UCustomWidget* Widget = GetOrCreateWidget<UCustomWidget>(WidgetClass);
-	if (!Widget) return;
+	if (!Widget)
+		return;
 
 	if (bShow)
 	{
@@ -98,7 +103,8 @@ void AGameHUD::ShowWidget(TSubclassOf<UCustomWidget> WidgetClass, bool bShow, ES
 template <typename T>
 T* AGameHUD::GetOrCreateWidget(TSubclassOf<UCustomWidget> WidgetClass)
 {
-	if (!WidgetClass || !PlayerController) return nullptr;
+	if (!WidgetClass || !PlayerController)
+		return nullptr;
 
 	if (UCustomWidget** Found = WidgetInstances.Find(WidgetClass))
 	{
@@ -107,7 +113,8 @@ T* AGameHUD::GetOrCreateWidget(TSubclassOf<UCustomWidget> WidgetClass)
 
 	UCustomWidget* NewWidget = CreateWidget<UCustomWidget>(PlayerController, WidgetClass);
 
-	if (!NewWidget) return nullptr;
+	if (!NewWidget)
+		return nullptr;
 
 	NewWidget->AddToViewport();
 	NewWidget->SetVisibility(ESlateVisibility::Hidden);

@@ -2,7 +2,8 @@
 
 void UMoralEventSubsystem::StartNewEvent(TSubclassOf<UMoralEvent> NewEvent)
 {
-	if (!GameHUD) GetGameHUD();
+	if (!GameHUD)
+		GetGameHUD();
 	
 	CurrentEvent = NewObject<UMoralEvent>(this, NewEvent);
 	CurrentEvent->SetupChoices();
@@ -13,7 +14,8 @@ void UMoralEventSubsystem::StartNewEvent(TSubclassOf<UMoralEvent> NewEvent)
 
 void UMoralEventSubsystem::OnChoiceSelected(EMoralEventChoice Choice)
 {
-	if (!GameHUD) GetGameHUD();
+	if (!GameHUD)
+		GetGameHUD();
 
 	CurrentEvent->ClickOnChoice(Choice);
 	GameHUD->ShowMoralEventWidget(false);

@@ -9,7 +9,8 @@ void USelectionWidget::NativeConstruct()
 
 void USelectionWidget::BindToSelectable(AActor* SelectableActor, FString DisplayName)
 {
-	if (!SelectableActor) return;
+	if (!SelectableActor)
+		return;
 	
 	Unbind();
 
@@ -29,7 +30,7 @@ void USelectionWidget::BindToSelectable(AActor* SelectableActor, FString Display
 			TScriptInterface<ISelectableStatProvider> StatProvider(Comp);
 			BoundStats.Add(StatProvider);
 			
-			for (const auto StatValue : StatProvider->GetCurrentValues())
+			for (const FStat& StatValue : StatProvider->GetCurrentValues())
 			{
 				StatsToDisplay.Add(StatValue.Key, StatValue.Value);
 			}
@@ -43,7 +44,7 @@ void USelectionWidget::BindToSelectable(AActor* SelectableActor, FString Display
 
 void USelectionWidget::Unbind()
 {
-	for (const auto& Stat : BoundStats)
+	for (const TScriptInterface<ISelectableStatProvider>& Stat : BoundStats)
 	{
 		Stat->GetOnStatChanged().RemoveAll(this);
 	}
@@ -55,12 +56,13 @@ void USelectionWidget::Unbind()
 
 void USelectionWidget::OnAnyStatUpdated(FName StatId, float NewValue)
 {
-	if (!SelectedActor) return;
+	if (!SelectedActor)
+		return;
 
 	TMap<FString, FString> StatsToDisplay;
 
 	// Recrée toutes les stats
-	for (const auto& Stat : BoundStats)
+	for (const TScriptInterface<ISelectableStatProvider>& Stat : BoundStats)
 	{
 		for (const auto StatValue : Stat->GetCurrentValues())
 		{
