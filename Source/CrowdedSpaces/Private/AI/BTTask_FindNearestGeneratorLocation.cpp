@@ -2,7 +2,6 @@
 #include "AI/NPCController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Build/BuildableGenerator.h"
-#include "Customizations/MathStructProxyCustomizations.h"
 
 UBTTask_FindNearestGeneratorLocation::UBTTask_FindNearestGeneratorLocation(FObjectInitializer const& ObjectInitializer)
 {
