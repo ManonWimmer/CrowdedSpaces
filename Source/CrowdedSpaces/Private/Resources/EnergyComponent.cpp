@@ -19,7 +19,7 @@ void UEnergyComponent::AddEnergy(int Amount)
 
 	if (Energy != OldEnergy)
 	{
-		OnStatChanged.Broadcast("Energy", Energy);
+		OnStatChanged.Broadcast("Energy", FString::SanitizeFloat(Energy));
 	}
 
 	if (Energy >= MaxEnergy)
@@ -31,7 +31,7 @@ void UEnergyComponent::AddEnergy(int Amount)
 void UEnergyComponent::RemoveEnergy(int Amount)
 {
 	Energy = FMath::Clamp(Energy - Amount, 0, MaxEnergy);
-	OnStatChanged.Broadcast("Energy", Energy);
+	OnStatChanged.Broadcast("Energy", FString::SanitizeFloat(Energy));
 }
 
 bool UEnergyComponent::HasEnoughEnergy(int Amount)

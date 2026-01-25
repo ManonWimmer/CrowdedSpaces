@@ -9,6 +9,14 @@ void ABuildableBed::BeginPlay()
 	Super::BeginPlay();
 }
 
+
+void ABuildableBed::SetAvailable(bool NewAvailable)
+{
+	bIsAvailable = NewAvailable;
+	FString Result = bIsAvailable ? TEXT("True") : TEXT("False");
+	OnStatChanged.Broadcast("Is Available", Result);
+}
+
 #pragma region Selectable
 void ABuildableBed::OnSelected()
 {

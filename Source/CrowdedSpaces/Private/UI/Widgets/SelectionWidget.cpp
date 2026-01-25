@@ -72,14 +72,15 @@ void USelectionWidget::Unbind()
 	ActorDisplayName = "";
 }
 
-void USelectionWidget::OnAnyStatUpdated(FName StatId, float NewValue)
+void USelectionWidget::OnAnyStatUpdated(FName StatId, FString NewValue)
 {
 	if (!SelectedActor)
 		return;
 
 	TMap<FString, FString> StatsToDisplay;
 
-	// Recrée toutes les stats
+	// Recréer toutes les stats
+	// todo: pas recréer mais check si statid == , change value seulement pour 1
 	for (const TScriptInterface<ISelectableStatProvider>& Stat : BoundStats)
 	{
 		for (const auto StatValue : Stat->GetCurrentValues())

@@ -37,5 +37,5 @@ public:
 	
 	// Callback générique
 	UFUNCTION()
-	void OnAnyStatUpdated(FName StatId, float NewValue);
+	void OnAnyStatUpdated(FName StatId, FString NewValue);
 };

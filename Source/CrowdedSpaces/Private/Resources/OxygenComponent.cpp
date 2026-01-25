@@ -8,7 +8,7 @@ UOxygenComponent::UOxygenComponent()
 void UOxygenComponent::AddOxygen(int Amount)
 {
 	Oxygen += Amount;
-	OnStatChanged.Broadcast("Oxygen", Oxygen);
+	OnStatChanged.Broadcast("Oxygen", FString::SanitizeFloat(Oxygen));
 }
 
 void UOxygenComponent::RemoveOxygen(int Amount)
@@ -16,7 +16,7 @@ void UOxygenComponent::RemoveOxygen(int Amount)
 	if (!HasEnoughOxygen(Amount)) return;
 	
 	Oxygen -= Amount;
-	OnStatChanged.Broadcast("Oxygen", Oxygen);
+	OnStatChanged.Broadcast("Oxygen", FString::SanitizeFloat(Oxygen));
 }
 
 bool UOxygenComponent::HasEnoughOxygen(int Amount)

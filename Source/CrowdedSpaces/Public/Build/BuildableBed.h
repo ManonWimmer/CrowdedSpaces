@@ -14,6 +14,10 @@ class CROWDEDSPACES_API ABuildableBed : public ABuildableObject, public ISelecta
 public:
 	ABuildableBed();
 
+	bool IsAvailable() const { return bIsAvailable; }
+	
+	void SetAvailable(bool NewAvailable);
+
 	// Selectable
 	virtual void OnSelected() override;
 	virtual void OnDeselected() override;
