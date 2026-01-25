@@ -26,12 +26,14 @@ EBTNodeResult::Type UBTTask_FindNearestGeneratorLocation::ExecuteTask(UBehaviorT
 	for (TObjectIterator<ABuildableGenerator> Itr; Itr; ++Itr)
 	{
 		ABuildableGenerator* Generator = *Itr;
-		if (!Generator) continue;
+		if (!Generator)
+			continue;
 		
 		// Get nearest generator of production type in radius
-		if (Generator->GetProductionComponent()->ProductionType != ProductionType) continue;
+		if (Generator->GetProductionComponent()->ProductionType != ProductionType)
+			continue;
 		
-		float Distance = FVector::Distance(Origin, NPC->GetActorLocation());
+		float Distance = FVector::Distance(Origin, Generator->GetActorLocation());
 		if (Distance < SearchRadius / 2)
 		{
 			if (NearestGenerator)
@@ -53,7 +55,13 @@ EBTNodeResult::Type UBTTask_FindNearestGeneratorLocation::ExecuteTask(UBehaviorT
 	// Success or Failed
 	if (NearestGenerator)
 	{
-		OwnerComp.GetBlackboardComponent()->SetValueAsVector(GetSelectedBlackboardKey(), NearestGenerator->GetActorLocation());
+		UBlackboardComponent* Blackboard = OwnerComp.GetBlackboardComponent();
+		if (!Blackboard)
+			return EBTNodeResult::Failed;
+
+		// Target location key
+		Blackboard->SetValueAsVector(GetSelectedBlackboardKey(), NearestGenerator->GetActorLocation());
+		
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		return EBTNodeResult::Succeeded;
 	}
@@ -61,6 +69,4 @@ EBTNodeResult::Type UBTTask_FindNearestGeneratorLocation::ExecuteTask(UBehaviorT
 	{
 		return EBTNodeResult::Failed;
 	}
-
-	return EBTNodeResult::Failed;
 }
