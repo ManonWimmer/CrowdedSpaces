@@ -18,11 +18,29 @@ void USelectionWidget::BindToSelectable(AActor* SelectableActor, FString Display
 	ActorDisplayName = DisplayName;
 	BoundStats.Empty();
 	
+	TMap<FString, FString> StatsToDisplay;
+	
+	// Check interface in actor
+	if (ISelectableStatProvider* ActorProvider =
+		Cast<ISelectableStatProvider>(SelectableActor))
+	{
+		BoundStats.Add(SelectableActor);
+
+		for (const FStat& StatValue : ActorProvider->GetCurrentValues())
+		{
+			StatsToDisplay.Add(StatValue.Key, StatValue.Value);
+		}
+
+		ActorProvider->GetOnStatChanged().AddDynamic(
+			this,
+			&USelectionWidget::OnAnyStatUpdated
+		);
+	}
+
+	// Check interface in components
 	TArray<UActorComponent*> Components;
 	SelectableActor->GetComponents(Components);
-
-	TMap<FString, FString> StatsToDisplay;
-
+	
 	for (UActorComponent* Comp : Components)
 	{
 		if (Comp->Implements<USelectableStatProvider>())

@@ -5,6 +5,13 @@ ABuildableGenerator::ABuildableGenerator()
 	ProductionComponent = CreateDefaultSubobject<UProductionComponent>("ProductionComponent");
 }
 
+void ABuildableGenerator::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	ProductionComponent->StartProduction();
+}
+
 #pragma region Selectable
 void ABuildableGenerator::OnSelected()
 {
@@ -24,11 +31,4 @@ AActor* ABuildableGenerator::GetSelectableActor()
 	return this;
 }
 #pragma endregion Selectable
-
-void ABuildableGenerator::BeginPlay()
-{
-	Super::BeginPlay();
-	
-	ProductionComponent->StartProduction();
-}
 

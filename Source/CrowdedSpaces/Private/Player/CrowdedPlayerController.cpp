@@ -78,7 +78,8 @@ void ACrowdedPlayerController::LeftClickInput(const FInputActionValue& Value)
 		OnLeftClickGame.Broadcast();	
 	}
 
-	if (!GameHUD) return;
+	if (!GameHUD)
+		return;
 	
 	// Handle click selection
 	FHitResult Hit;
