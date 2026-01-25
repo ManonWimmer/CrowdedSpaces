@@ -29,7 +29,7 @@ EBTNodeResult::Type UBTTask_TryToEat::ExecuteTask(UBehaviorTreeComponent& OwnerC
 	NPCFoodComponent = NPC->GetFoodComponent();
 	
 	// Get Player Food Component
-	ACrowdedPlayerController* PlayerController = Cast<ACrowdedPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0))
+	ACrowdedPlayerController* PlayerController = Cast<ACrowdedPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 	if (!PlayerController)
 		return EBTNodeResult::Failed;
 

@@ -2,6 +2,7 @@
 
 UFoodComponent::UFoodComponent()
 {
+	PrimaryComponentTick.bCanEverTick = false;
 }
 
 void UFoodComponent::AddFood(int Amount)
@@ -26,9 +27,9 @@ bool UFoodComponent::HasEnoughFood(int Amount)
 #pragma region Selectable
 TArray<TPair<FString, FString>> UFoodComponent::GetCurrentValues() const
 {
-	TArray<TPair<FString, FString>> values;
-	values.Add(TPair<FString, FString>(FString("Food"), FString::SanitizeFloat(Food)));
-	values.Add(TPair<FString, FString>(FString("Test"), FString::SanitizeFloat(1000)));
-	return values;
+	TArray<TPair<FString, FString>> Values;
+	Values.Add(TPair<FString, FString>(FString("Food"), FString::SanitizeFloat(Food)));
+	Values.Add(TPair<FString, FString>(FString("Test"), FString::SanitizeFloat(1000)));
+	return Values;
 }
 #pragma endregion Selectable

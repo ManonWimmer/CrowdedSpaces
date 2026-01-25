@@ -11,6 +11,9 @@ ANPC::ANPC()
 
 	// Oxygen
 	OxygenComponent = CreateDefaultSubobject<UOxygenComponent>(TEXT("OxygenComponent"));
+
+	// Energy
+	EnergyComponent = CreateDefaultSubobject<UEnergyComponent>(TEXT("EnergyComponent"));
 }
 
 void ANPC::BeginPlay()

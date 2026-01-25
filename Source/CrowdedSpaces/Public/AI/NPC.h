@@ -6,6 +6,7 @@
 #include "Resources/FoodComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Resources/OxygenComponent.h"
+#include "Resources/EnergyComponent.h"
 #include "Selection/Selectable.h"
 #include "NPC.generated.h"
 
@@ -21,6 +22,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="AI")
 	UFoodComponent* GetFoodComponent() const { return FoodComponent; }
+
+	UFUNCTION(BlueprintCallable, Category="AI")
+	UEnergyComponent* GetEnergyComponent() const { return EnergyComponent; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -54,6 +58,10 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	UWidgetComponent* FoodBarWidget;
+
+	// Energy
+	UPROPERTY(EditAnywhere)
+	UEnergyComponent* EnergyComponent;
 	
 	// Selectable
 public:

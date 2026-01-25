@@ -2,6 +2,7 @@
 
 UElectricityComponent::UElectricityComponent()
 {
+	PrimaryComponentTick.bCanEverTick = false;
 }
 
 void UElectricityComponent::AddElectricity(int Amount)
@@ -26,9 +27,9 @@ bool UElectricityComponent::HasEnoughElectricity(int Amount)
 #pragma region Selectable
 TArray<TPair<FString, FString>> UElectricityComponent::GetCurrentValues() const
 {
-	TArray<TPair<FString, FString>> values;
-	values.Add(TPair<FString, FString>(FString("Electricity"), FString::SanitizeFloat(Electricity)));
-	return values;
+	TArray<TPair<FString, FString>> Values;
+	Values.Add(TPair<FString, FString>(FString("Electricity"), FString::SanitizeFloat(Electricity)));
+	return Values;
 }
 #pragma endregion Selectable
 

@@ -2,6 +2,7 @@
 
 UOxygenComponent::UOxygenComponent()
 {
+	PrimaryComponentTick.bCanEverTick = false;
 }
 
 void UOxygenComponent::AddOxygen(int Amount)
@@ -26,9 +27,9 @@ bool UOxygenComponent::HasEnoughOxygen(int Amount)
 #pragma region Selectable
 TArray<TPair<FString, FString>> UOxygenComponent::GetCurrentValues() const
 {
-	TArray<TPair<FString, FString>> values;
-	values.Add(TPair<FString, FString>(FString("Oxygen"), FString::SanitizeFloat(Oxygen)));
-	return values;
+	TArray<TPair<FString, FString>> Values;
+	Values.Add(TPair<FString, FString>(FString("Oxygen"), FString::SanitizeFloat(Oxygen)));
+	return Values;
 }
 #pragma endregion Selectable
 

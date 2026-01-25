@@ -8,7 +8,7 @@ void ACrowdedPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 	
-	UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(InputComponent)
+	UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(InputComponent);
 	if (!EIC)
 		return;
 	
