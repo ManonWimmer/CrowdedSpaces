@@ -21,6 +21,12 @@ private:
 	UPROPERTY(EditAnywhere, Category = "AI")
 	float SearchRadius = 500.f;
 
+	UPROPERTY(EditAnywhere, Category="Blackboard")
+	FBlackboardKeySelector TargetLocationKey;
+	
+	UPROPERTY(EditAnywhere, Category="Blackboard")
+	FBlackboardKeySelector TargetGeneratorKey;
+
 	UPROPERTY(EditAnywhere, Category = "AI")
 	EProductionType ProductionType = EProductionType::Money;
 };

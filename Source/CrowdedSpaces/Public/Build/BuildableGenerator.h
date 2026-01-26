@@ -14,6 +14,8 @@ class CROWDEDSPACES_API ABuildableGenerator : public ABuildableObject, public IS
 public:
 	ABuildableGenerator();
 
+	void SetNPCWorking(bool bWorking);
+	
 	// Selectable
 	virtual void OnSelected() override;
 	virtual void OnDeselected() override;
@@ -29,4 +31,7 @@ protected:
 private:
 	UPROPERTY(EditAnywhere)
 	UProductionComponent* ProductionComponent;
+	
+	UPROPERTY()
+	bool bHasNPCWorking = false;
 };

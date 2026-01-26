@@ -9,7 +9,6 @@ void ABuildableBed::BeginPlay()
 	Super::BeginPlay();
 }
 
-
 void ABuildableBed::SetAvailable(bool NewAvailable)
 {
 	bIsAvailable = NewAvailable;

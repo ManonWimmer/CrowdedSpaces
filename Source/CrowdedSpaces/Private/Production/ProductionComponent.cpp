@@ -12,13 +12,17 @@ UProductionComponent::UProductionComponent(): PlayerMoneyComponent(nullptr), Pla
 #pragma region Selectable
 TArray<TPair<FString, FString>> UProductionComponent::GetCurrentValues() const
 {
-	TArray<TPair<FString, FString>> values;
+	TArray<TPair<FString, FString>> Values;
 	FString ProductionTypeName = UEnum::GetValueAsString(ProductionType);
 	ProductionTypeName.RemoveFromStart(TEXT("EProductionType::"));
-	values.Add(TPair<FString, FString>(FString("Production Type"), ProductionTypeName)); 
-	values.Add(TPair<FString, FString>(FString("Production Interval"), FString::SanitizeFloat(ProductionInterval)));
-	values.Add(TPair<FString, FString>(FString("Resource Per Interval"), FString::SanitizeFloat(ResourcePerInterval)));
-	return values;
+	Values.Add(TPair<FString, FString>(FString("Production Type"), ProductionTypeName));
+
+	FString Active = GetOwner()->GetWorldTimerManager().IsTimerActive(ProductionTimerHandle) ? TEXT("True") : TEXT("False");
+	Values.Add(TPair<FString, FString>(FString("Is Active"), Active));
+	
+	Values.Add(TPair<FString, FString>(FString("Production Interval"), FString::SanitizeFloat(ProductionInterval)));
+	Values.Add(TPair<FString, FString>(FString("Resource Per Interval"), FString::SanitizeFloat(ResourcePerInterval)));
+	return Values;
 }
 #pragma endregion Selectables
 
@@ -44,7 +48,6 @@ void UProductionComponent::BeginPlay()
 	PlayerOxygenComponent = PS->GetOxygenComponent();
 	PlayerFoodComponent = PS->GetFoodComponent();
 }
-
 
 void UProductionComponent::GenerateProduction() const
 {
@@ -97,22 +100,48 @@ void UProductionComponent::StartProduction()
 		ProductionInterval,
 		true // looping
 	);
+
+	bHasStartedProduction = true;
+
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Yellow, "Production Started");
+
+	OnStatChanged.Broadcast("Is Active", "True");
 }
 
-void UProductionComponent::PauseProduction() const
+void UProductionComponent::PauseProduction()
 {
+	if (!bHasStartedProduction)
+		return;
+
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Yellow, "Production Paused");
+	
 	if (GetOwner()->GetWorldTimerManager().IsTimerActive(ProductionTimerHandle))
 	{
 		GetOwner()->GetWorldTimerManager().PauseTimer(ProductionTimerHandle);
 	}
+
+	OnStatChanged.Broadcast("Is Active", "False");
 }
 
-void UProductionComponent::ResumeProduction() const
+void UProductionComponent::ResumeOrStartProduction()
 {
+	if (!bHasStartedProduction)
+	{
+		StartProduction();
+		return;
+	}
+
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Yellow, "Production UnPaused");
+	
 	if (GetOwner()->GetWorldTimerManager().IsTimerPaused(ProductionTimerHandle))
 	{
 		GetOwner()->GetWorldTimerManager().UnPauseTimer(ProductionTimerHandle);
 	}
+
+	OnStatChanged.Broadcast("Is Active", "False");
 }
 
 void UProductionComponent::RestartProduction()

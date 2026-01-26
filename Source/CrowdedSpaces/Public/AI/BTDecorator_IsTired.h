@@ -13,8 +13,12 @@ public:
 	explicit UBTDecorator_IsTired(FObjectInitializer const& ObjectInitializer);
 
 	virtual bool CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const override;
+	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 
 	UPROPERTY(EditAnywhere, Category="Condition")
 	int32 TiredUnderEnergy = 30;
+
+private:
+	bool CachedValue = false;
 };
 

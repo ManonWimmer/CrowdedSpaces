@@ -69,17 +69,6 @@ void UBTTask_UseBed::OnEnergyFull()
 	NPC = Cast<ANPC>(Controller->GetPawn());
 	if (!NPC)
 		return;
-	
-	// Set bed as available
-	UBlackboardComponent* Blackboard = OwnerCompPtr->GetBlackboardComponent();
-	ABuildableBed* TargetBed = Cast<ABuildableBed>(Blackboard->GetValueAsObject(TargetBedKey.SelectedKeyName));
-	if (TargetBed)
-	{
-		TargetBed->SetAvailable(true); 
-	}
-
-	// Set NPC not sleeping
-	EnergyComp->SetSleeping(false);
 
 	// Unbind
 	EnergyComp->OnEnergyFull.RemoveDynamic(this, &UBTTask_UseBed::OnEnergyFull);
@@ -94,7 +83,21 @@ void UBTTask_UseBed::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* No
 	EBTNodeResult::Type TaskResult)
 {
 	Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);
+	
+	// Set bed as available
+	UBlackboardComponent* Blackboard = OwnerCompPtr->GetBlackboardComponent();
+	if (!Blackboard)
+		return;
+	
+	ABuildableBed* TargetBed = Cast<ABuildableBed>(Blackboard->GetValueAsObject(TargetBedKey.SelectedKeyName));
+	if (!TargetBed)
+		return;
+	
+	TargetBed->SetAvailable(true); 
 
+	// Set NPC not sleeping
+	EnergyComp->SetSleeping(false);
+	
 	if(GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Use Target Bed stop action");
 	

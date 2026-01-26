@@ -5,11 +5,19 @@ ABuildableGenerator::ABuildableGenerator()
 	ProductionComponent = CreateDefaultSubobject<UProductionComponent>("ProductionComponent");
 }
 
+void ABuildableGenerator::SetNPCWorking(bool bWorking)
+{
+	bHasNPCWorking = bWorking;
+
+	if (bHasNPCWorking)
+		ProductionComponent->ResumeOrStartProduction();
+	else
+		ProductionComponent->PauseProduction();
+}
+
 void ABuildableGenerator::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	ProductionComponent->StartProduction();
 }
 
 #pragma region Selectable

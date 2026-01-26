@@ -44,10 +44,10 @@ public:
 	void StartProduction();
 
 	UFUNCTION()
-	void PauseProduction() const;
+	void PauseProduction();
 
 	UFUNCTION()
-	void ResumeProduction() const;
+	void ResumeOrStartProduction();
 
 	UFUNCTION()
 	void RestartProduction();
@@ -67,4 +67,6 @@ private:
 
 	UPROPERTY()
 	UFoodComponent* PlayerFoodComponent;
+
+	bool bHasStartedProduction = false;
 };

@@ -6,6 +6,9 @@
 UBTDecorator_IsTired::UBTDecorator_IsTired(FObjectInitializer const& ObjectInitializer)
 {
 	NodeName = "Is Tired";
+
+	bCreateNodeInstance = true; // Chaque NPC a sa propre instance
+	bNotifyTick = true;
 }
 
 bool UBTDecorator_IsTired::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const
@@ -23,4 +26,17 @@ bool UBTDecorator_IsTired::CalculateRawConditionValue(UBehaviorTreeComponent& Ow
 		return false;
 	
 	return EnergyComp->GetEnergy() <= TiredUnderEnergy;
+}
+
+void UBTDecorator_IsTired::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+{
+	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
+
+	const bool bCurrentValue = CalculateRawConditionValue(OwnerComp, NodeMemory);
+	
+	if (bCurrentValue != CachedValue)
+	{
+		CachedValue = bCurrentValue;
+		OwnerComp.RequestExecution(this); 
+	}
 }

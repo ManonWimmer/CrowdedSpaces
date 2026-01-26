@@ -1,4 +1,6 @@
 ﻿#include "AI/BTTasks/BTTask_FindNearestGeneratorLocation.h"
+
+#include "EngineUtils.h"
 #include "AI/NPCController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Build/BuildableGenerator.h"
@@ -20,14 +22,18 @@ EBTNodeResult::Type UBTTask_FindNearestGeneratorLocation::ExecuteTask(UBehaviorT
 	NPC = Cast<ANPC>(Controller->GetPawn());
 	if (!NPC)
 		return EBTNodeResult::Failed;
+	
+	UWorld* World = NPC->GetWorld();
+	if (!World)
+		return EBTNodeResult::Failed;
 
 	FVector const Origin = NPC->GetActorLocation();
 	ABuildableGenerator* NearestGenerator = nullptr;
 	float NearestDistance = 0.0f;
 	
-	for (TObjectIterator<ABuildableGenerator> Itr; Itr; ++Itr)
+	for (TActorIterator<ABuildableGenerator> It(World); It; ++It)
 	{
-		ABuildableGenerator* Generator = *Itr;
+		ABuildableGenerator* Generator = *It;
 		if (!Generator)
 			continue;
 		
@@ -62,7 +68,10 @@ EBTNodeResult::Type UBTTask_FindNearestGeneratorLocation::ExecuteTask(UBehaviorT
 			return EBTNodeResult::Failed;
 
 		// Target location key
-		Blackboard->SetValueAsVector(GetSelectedBlackboardKey(), NearestGenerator->GetActorLocation());
+		Blackboard->SetValueAsVector(TargetLocationKey.SelectedKeyName, NearestGenerator->GetActorLocation());
+
+		// Target bed key
+		Blackboard->SetValueAsObject(TargetGeneratorKey.SelectedKeyName, NearestGenerator);
 		
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		return EBTNodeResult::Succeeded;
