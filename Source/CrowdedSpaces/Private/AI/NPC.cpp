@@ -16,6 +16,13 @@ ANPC::ANPC()
 	EnergyComponent = CreateDefaultSubobject<UEnergyComponent>(TEXT("EnergyComponent"));
 }
 
+void ANPC::SetCurrentAction(ENPCAction NewAction)
+{
+	CurrentAction = NewAction;
+	FString ActionString = StaticEnum<ENPCAction>()->GetDisplayNameTextByValue(static_cast<int64>(CurrentAction)).ToString();
+	OnStatChanged.Broadcast("Current Action", ActionString);
+}
+
 void ANPC::BeginPlay()
 {
 	Super::BeginPlay();
@@ -75,6 +82,14 @@ FString ANPC::GetDisplayName() const
 AActor* ANPC::GetSelectableActor()
 {
 	return this;
+}
+
+TArray<FStat> ANPC::GetCurrentValues() const
+{
+	TArray<TPair<FString, FString>> Values;
+	FString ActionString = StaticEnum<ENPCAction>()->GetDisplayNameTextByValue(static_cast<int64>(CurrentAction)).ToString();
+	Values.Add(TPair<FString, FString>(FString("Current Action"), ActionString));
+	return Values;
 }
 #pragma endregion Selectable
 

@@ -1,4 +1,4 @@
-﻿#include "AI/BTTask_FindRandomLocation.h"
+﻿#include "AI/BTTasks/BTTask_FindRandomLocation.h"
 
 #include "NavigationSystem.h"
 #include "AI/NPCController.h"
@@ -7,6 +7,9 @@
 UBTTask_FindRandomLocation::UBTTask_FindRandomLocation(FObjectInitializer const& ObjectInitializer)
 {
 	NodeName = "Find Random Location In NavMesh";
+
+	bCreateNodeInstance = true; // Chaque NPC a sa propre instance    
+	bNotifyTaskFinished = true;
 }
 
 EBTNodeResult::Type UBTTask_FindRandomLocation::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -15,7 +18,7 @@ EBTNodeResult::Type UBTTask_FindRandomLocation::ExecuteTask(UBehaviorTreeCompone
 	if (!Controller)
 		return EBTNodeResult::Failed;
 
-	APawn* const NPC = Controller->GetPawn();
+	NPC = Cast<ANPC>(Controller->GetPawn());
 	if (!NPC)
 		return EBTNodeResult::Failed;
 	
@@ -35,4 +38,10 @@ EBTNodeResult::Type UBTTask_FindRandomLocation::ExecuteTask(UBehaviorTreeCompone
 	}
 
 	return EBTNodeResult::Failed;
+}
+
+void UBTTask_FindRandomLocation::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory,
+	EBTNodeResult::Type TaskResult)
+{
+	Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);
 }

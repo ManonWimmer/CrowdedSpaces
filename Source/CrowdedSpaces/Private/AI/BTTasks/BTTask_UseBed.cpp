@@ -1,4 +1,4 @@
-﻿#include "AI/BTTask_UseBed.h"
+﻿#include "AI/BTTasks/BTTask_UseBed.h"
 
 #include "AI/NPCController.h"
 #include "Build/BuildableBed.h"
@@ -8,6 +8,12 @@
 UBTTask_UseBed::UBTTask_UseBed(FObjectInitializer const& ObjectInitializer)
 {
 	NodeName = "Use Target Bed";
+
+	bCreateNodeInstance = true; // Chaque NPC a sa propre instance    
+	bNotifyTaskFinished = true;
+
+	// Action
+	NPCAction = ENPCAction::Sleep;
 }
 
 EBTNodeResult::Type UBTTask_UseBed::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -16,10 +22,13 @@ EBTNodeResult::Type UBTTask_UseBed::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 	if (!Controller)
 		return EBTNodeResult::Failed;
 
-	APawn* NPC = Controller->GetPawn();
+	NPC = Cast<ANPC>(Controller->GetPawn());
 	if (!NPC)
 		return EBTNodeResult::Failed;
 
+	// Action
+	StartAction();
+	
 	// Get the target bed from blackboard
 	UBlackboardComponent* Blackboard = OwnerComp.GetBlackboardComponent();
 	if (!Blackboard)
@@ -57,7 +66,7 @@ void UBTTask_UseBed::OnEnergyFull()
 	if (!Controller)
 		return;
 
-	APawn* NPC = Controller->GetPawn();
+	NPC = Cast<ANPC>(Controller->GetPawn());
 	if (!NPC)
 		return;
 	
@@ -75,5 +84,19 @@ void UBTTask_UseBed::OnEnergyFull()
 	// Unbind
 	EnergyComp->OnEnergyFull.RemoveDynamic(this, &UBTTask_UseBed::OnEnergyFull);
 
+	if(GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "On energy full");
+
 	FinishLatentTask(*OwnerCompPtr, EBTNodeResult::Succeeded);
+}
+
+void UBTTask_UseBed::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory,
+	EBTNodeResult::Type TaskResult)
+{
+	Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);
+
+	if(GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Use Target Bed stop action");
+	
+	StopAction();
 }

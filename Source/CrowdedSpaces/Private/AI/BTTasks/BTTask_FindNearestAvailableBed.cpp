@@ -1,4 +1,4 @@
-﻿#include "AI/BTTask_FindNearestAvailableBed.h"
+﻿#include "AI/BTTasks/BTTask_FindNearestAvailableBed.h"
 
 #include "EngineUtils.h"
 #include "AI/NPCController.h"
@@ -8,6 +8,9 @@
 UBTTask_FindNearestAvailableBed::UBTTask_FindNearestAvailableBed(FObjectInitializer const& ObjectInitializer)
 {
 	NodeName = "Find Nearest Available Bed Location In NavMesh";
+	
+	bCreateNodeInstance = true; // Chaque NPC a sa propre instance    
+	bNotifyTaskFinished = true;
 }
 
 EBTNodeResult::Type UBTTask_FindNearestAvailableBed::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -16,7 +19,7 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBed::ExecuteTask(UBehaviorTreeCo
 	if (!Controller)
 		return EBTNodeResult::Failed;
 
-	APawn* const NPC = Controller->GetPawn();
+	NPC = Cast<ANPC>(Controller->GetPawn());
 	if (!NPC)
 		return EBTNodeResult::Failed;
 
@@ -77,4 +80,10 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBed::ExecuteTask(UBehaviorTreeCo
 	{
 		return EBTNodeResult::Failed;
 	}
+}
+
+void UBTTask_FindNearestAvailableBed::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory,
+	EBTNodeResult::Type TaskResult)
+{
+	Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);
 }

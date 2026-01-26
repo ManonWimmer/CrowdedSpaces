@@ -8,10 +8,11 @@
 #include "Resources/OxygenComponent.h"
 #include "Resources/EnergyComponent.h"
 #include "Selection/Selectable.h"
+#include "NPCAction.h"
 #include "NPC.generated.h"
 
 UCLASS()
-class CROWDEDSPACES_API ANPC : public ACharacter, public ISelectable
+class CROWDEDSPACES_API ANPC : public ACharacter, public ISelectable, public ISelectableStatProvider
 {
 	GENERATED_BODY()
 
@@ -25,6 +26,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="AI")
 	UEnergyComponent* GetEnergyComponent() const { return EnergyComponent; }
+
+	UFUNCTION(BlueprintCallable, Category="AI")
+	void SetCurrentAction(ENPCAction NewAction);
 
 protected:
 	virtual void BeginPlay() override;
@@ -62,6 +66,10 @@ private:
 	// Energy
 	UPROPERTY(EditAnywhere)
 	UEnergyComponent* EnergyComponent;
+
+	// Action
+	UPROPERTY()
+	ENPCAction CurrentAction = ENPCAction::Idle;
 	
 	// Selectable
 public:
@@ -70,4 +78,10 @@ public:
 
 	virtual FString GetDisplayName() const override;
 	virtual AActor* GetSelectableActor() override;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnStatChanged OnStatChanged; // Current action changed
+	
+	virtual TArray<FStat> GetCurrentValues() const override;
+	virtual FOnStatChanged& GetOnStatChanged() override { return OnStatChanged; }
 };
