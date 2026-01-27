@@ -40,6 +40,9 @@ public:
 	void SetSleeping(bool bSleeping);
 	
 	UFUNCTION(BlueprintCallable)
+	bool GetIsSleeping() { return bIsSleeping; }
+	
+	UFUNCTION(BlueprintCallable)
 	int GetEnergy() {return Energy; }
 
 	UPROPERTY(BlueprintAssignable)

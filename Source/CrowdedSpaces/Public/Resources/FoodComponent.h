@@ -39,6 +39,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	int GetFood() {return Food; }
 
+	UFUNCTION(BlueprintCallable)
+	bool GetIsEating() { return bIsEating; }
+
 	UPROPERTY(BlueprintAssignable)
 	FOnFoodFull OnFoodFull;
 
