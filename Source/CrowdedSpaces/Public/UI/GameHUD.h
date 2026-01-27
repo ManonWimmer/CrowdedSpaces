@@ -53,6 +53,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Widgets")
 	void UpdateMoralEventWidget(const UMoralEvent* MoralEvent);
+
+	UFUNCTION(BlueprintCallable, Category="Widgets")
+	bool IsCursorHoveringUI();
 	
 private:
 	UPROPERTY()

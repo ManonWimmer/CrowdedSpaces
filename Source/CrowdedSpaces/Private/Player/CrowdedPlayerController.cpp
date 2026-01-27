@@ -68,6 +68,13 @@ void ACrowdedPlayerController::LeftClickInput(const FInputActionValue& Value)
 	ACrowdedGameMode* GameMode = Cast<ACrowdedGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 	if (!GameMode)
 		return;
+
+	// Check click on UI
+	if (!GameHUD)
+		return;
+
+	if (GameHUD->IsCursorHoveringUI())
+		return;
 	
 	if (GameMode->GetGameMode() == EGameModeState::Building)
 	{

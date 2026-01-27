@@ -76,6 +76,25 @@ void AGameHUD::UpdateMoralEventWidget(const UMoralEvent* MoralEvent)
 
 	MoralEventWidget->Update(MoralEvent);
 }
+
+bool AGameHUD::IsCursorHoveringUI()
+{
+	for (auto& Pair : WidgetInstances)
+	{
+		UCustomWidget* Widget = Pair.Value;
+		if (!Widget) continue;
+
+		if (Widget->IsHovered())
+		{
+			if (GEngine)
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Cursor Hovering Widget");
+			
+			return true;
+		}
+	}
+
+	return false;
+}
 #pragma endregion Moral Event
 
 #pragma region Generic Functions
