@@ -74,6 +74,10 @@ private:
 	UPROPERTY(EditAnywhere, Category="Widgets")
 	TSubclassOf<UCustomWidget> MoralEventWidgetBP;
 
+	// Debug
+	UPROPERTY(EditAnywhere, Category="Widgets")
+	TSubclassOf<UCustomWidget> DebugWidgetBP;
+
 	UPROPERTY()
 	TMap<TSubclassOf<UCustomWidget>, UCustomWidget*> WidgetInstances;
 };
