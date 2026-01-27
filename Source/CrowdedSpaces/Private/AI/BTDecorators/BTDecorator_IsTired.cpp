@@ -1,4 +1,4 @@
-﻿#include "AI/BTDecorator_IsTired.h"
+﻿#include "AI/BTDecorators/BTDecorator_IsTired.h"
 
 #include "AIController.h"
 #include "Resources/EnergyComponent.h"

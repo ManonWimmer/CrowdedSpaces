@@ -1,7 +1,7 @@
 ﻿#include "AI/BTTasks/BTTask_UseBed.h"
 
 #include "AI/NPCController.h"
-#include "Build/BuildableBed.h"
+#include "Build/Buildable/BuildableBed.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Resources/EnergyComponent.h"
 

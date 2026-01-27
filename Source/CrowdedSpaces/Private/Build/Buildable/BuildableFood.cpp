@@ -1,15 +1,15 @@
-﻿#include "Build/BuildableBed.h"
+﻿#include "Build/Buildable/BuildableFood.h"
 
-ABuildableBed::ABuildableBed()
+ABuildableFood::ABuildableFood()
 {
 }
 
-void ABuildableBed::BeginPlay()
+void ABuildableFood::BeginPlay()
 {
 	Super::BeginPlay();
 }
 
-void ABuildableBed::SetAvailable(bool NewAvailable)
+void ABuildableFood::SetAvailable(bool NewAvailable)
 {
 	bIsAvailable = NewAvailable;
 	FString Result = bIsAvailable ? TEXT("True") : TEXT("False");
@@ -17,25 +17,25 @@ void ABuildableBed::SetAvailable(bool NewAvailable)
 }
 
 #pragma region Selectable
-void ABuildableBed::OnSelected()
+void ABuildableFood::OnSelected()
 {
 }
 
-void ABuildableBed::OnDeselected()
+void ABuildableFood::OnDeselected()
 {
 }
 
-FString ABuildableBed::GetDisplayName() const
+FString ABuildableFood::GetDisplayName() const
 {
-	return "Bed";
+	return "Food";
 }
 
-AActor* ABuildableBed::GetSelectableActor()
+AActor* ABuildableFood::GetSelectableActor()
 {
 	return this;
 }
 
-TArray<FStat> ABuildableBed::GetCurrentValues() const
+TArray<FStat> ABuildableFood::GetCurrentValues() const
 {
 	TArray<TPair<FString, FString>> Values;
 	FString Result = bIsAvailable ? TEXT("True") : TEXT("False");

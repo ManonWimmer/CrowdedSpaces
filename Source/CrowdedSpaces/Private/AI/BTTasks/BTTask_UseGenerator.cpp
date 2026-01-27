@@ -1,7 +1,7 @@
 ﻿#include "AI/BTTasks/BTTask_UseGenerator.h"
 
 #include "AI/NPCController.h"
-#include "Build/BuildableGenerator.h"
+#include "Build/Buildable/BuildableGenerator.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Resources/EnergyComponent.h"
 

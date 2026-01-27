@@ -1,19 +1,19 @@
-﻿#include "AI/BTTasks/BTTask_FindNearestAvailableBed.h"
+﻿#include "AI/BTTasks/BTTask_FindNearestAvailableFood.h"
 
 #include "EngineUtils.h"
 #include "AI/NPCController.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "Build/Buildable/BuildableBed.h"
+#include "Build/Buildable/BuildableFood.h"
 
-UBTTask_FindNearestAvailableBed::UBTTask_FindNearestAvailableBed(FObjectInitializer const& ObjectInitializer)
+UBTTask_FindNearestAvailableFood::UBTTask_FindNearestAvailableFood(FObjectInitializer const& ObjectInitializer)
 {
-	NodeName = "Find Nearest Available Bed Location In NavMesh";
+	NodeName = "Find Nearest Available Food Location In NavMesh";
 	
 	bCreateNodeInstance = true; // Chaque NPC a sa propre instance    
 	bNotifyTaskFinished = true;
 }
 
-EBTNodeResult::Type UBTTask_FindNearestAvailableBed::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+EBTNodeResult::Type UBTTask_FindNearestAvailableFood::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	ANPCController* const Controller = Cast<ANPCController>(OwnerComp.GetAIOwner());
 	if (!Controller)
@@ -28,50 +28,50 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBed::ExecuteTask(UBehaviorTreeCo
 		return EBTNodeResult::Failed;
 
 	FVector const Origin = NPC->GetActorLocation();
-	ABuildableBed* NearestAvailableBed = nullptr;
+	ABuildableFood* NearestAvailableFood = nullptr;
 	float NearestDistance = 0.0f;
 	
-	for (TActorIterator<ABuildableBed> It(World); It; ++It) // TObjectIterator marchait pas en renvoyait tjrs en actor location 0,0,-78
+	for (TActorIterator<ABuildableFood> It(World); It; ++It) // TObjectIterator marchait pas en renvoyait tjrs en actor location 0,0,-78
 	{
-		ABuildableBed* Bed = *It;
-		if (!Bed || !IsValid(Bed))
+		ABuildableFood* Food = *It;
+		if (!Food || !IsValid(Food))
 			continue; 
 		
-		// Get nearest bed AVAILABLE
-		if (!Bed->IsAvailable())
+		// Get nearest food AVAILABLE
+		if (!Food->IsAvailable())
 			continue;
 		
-		float Distance = FVector::Distance(Origin, Bed->GetActorLocation());
+		float Distance = FVector::Distance(Origin, Food->GetActorLocation());
 		if (Distance < SearchRadius / 2)
 		{
-			if (NearestAvailableBed)
+			if (NearestAvailableFood)
 			{
 				if (Distance < NearestDistance)
 				{
-					NearestAvailableBed = Bed;
+					NearestAvailableFood = Food;
 					NearestDistance = Distance;
 				}
 			}
 			else
 			{
-				NearestAvailableBed = Bed;
+				NearestAvailableFood = Food;
 				NearestDistance = Distance;
 			}
 		}
 	}
 
 	// Success or Failed + set keys
-	if (NearestAvailableBed)
+	if (NearestAvailableFood)
 	{
 		UBlackboardComponent* Blackboard = OwnerComp.GetBlackboardComponent();
 		if (!Blackboard)
 			return EBTNodeResult::Failed;
 		
 		// Target location key
-		Blackboard->SetValueAsVector(TargetLocationKey.SelectedKeyName, NearestAvailableBed->GetActorLocation());
+		Blackboard->SetValueAsVector(TargetLocationKey.SelectedKeyName, NearestAvailableFood->GetActorLocation());
 
-		// Target bed key
-		Blackboard->SetValueAsObject(TargetBedKey.SelectedKeyName, NearestAvailableBed);
+		// Target food key
+		Blackboard->SetValueAsObject(TargetFoodKey.SelectedKeyName, NearestAvailableFood);
 		
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		return EBTNodeResult::Succeeded;
@@ -82,7 +82,7 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBed::ExecuteTask(UBehaviorTreeCo
 	}
 }
 
-void UBTTask_FindNearestAvailableBed::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory,
+void UBTTask_FindNearestAvailableFood::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory,
 	EBTNodeResult::Type TaskResult)
 {
 	Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);

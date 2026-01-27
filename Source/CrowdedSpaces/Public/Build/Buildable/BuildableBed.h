@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "BuildableObject.h"
+#include "Build/BuildableObject.h"
 #include "Selection/Selectable.h"
 #include "Selection/SelectableStatProvider.h"
 #include "BuildableBed.generated.h"

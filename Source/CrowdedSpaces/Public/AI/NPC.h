@@ -54,9 +54,6 @@ private:
 	UFUNCTION()
 	void RemoveFood() const;
 
-	UFUNCTION()
-	void StartRemoveFood();
-
 	UPROPERTY()
 	FTimerHandle RemoveFoodTimerHandle;
 

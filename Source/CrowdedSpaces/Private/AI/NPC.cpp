@@ -6,6 +6,7 @@ ANPC::ANPC()
 {
 	// Food
 	FoodComponent = CreateDefaultSubobject<UFoodComponent>(TEXT("FoodComponent"));
+	FoodComponent->SetSufferHunger(true);
 	FoodBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("FoodBarWidget"));
 	FoodBarWidget->SetupAttachment(GetMesh());
 
@@ -42,23 +43,12 @@ void ANPC::BeginPlay()
 	FoodWidget->OwningActor = this;
 	FoodWidget->Init();
 	
-	StartRemoveFood();
+	//StartRemoveFood(); now managed in food component directly if suffer hunger
 }
 
 void ANPC::RemoveFood() const
 {
 	FoodComponent->RemoveFood(RemoveFoodPerInterval);
-}
-
-void ANPC::StartRemoveFood()
-{
-	GetWorldTimerManager().SetTimer(
-		RemoveFoodTimerHandle,
-		this,
-		&ANPC::RemoveFood,
-		RemoveFoodInterval,
-		true // looping
-	);
 }
 
 #pragma region Selectable
