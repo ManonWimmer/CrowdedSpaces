@@ -3,6 +3,7 @@
 #include "EnhancedInputComponent.h"
 #include "Game/CrowdedGameMode.h"
 #include "Kismet/GameplayStatics.h"
+#include "UI/Widgets/SelectionWidget.h"
 
 void ACrowdedPlayerController::SetupInputComponent()
 {
@@ -65,15 +66,11 @@ void ACrowdedPlayerController::BeginPlay()
 
 void ACrowdedPlayerController::LeftClickInput(const FInputActionValue& Value)
 {
+	//if (GEngine)
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, "Left click event");
+	
 	ACrowdedGameMode* GameMode = Cast<ACrowdedGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 	if (!GameMode)
-		return;
-
-	// Check click on UI
-	if (!GameHUD)
-		return;
-
-	if (GameHUD->IsCursorHoveringUI())
 		return;
 	
 	if (GameMode->GetGameMode() == EGameModeState::Building)

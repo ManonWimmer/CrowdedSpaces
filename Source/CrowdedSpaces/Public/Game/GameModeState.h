@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 
-UENUM(BlueprintType)
+UENUM(BlueprintType, Blueprintable)
 enum class EGameModeState : uint8
 {
 	Game      UMETA(DisplayName="Game"),

@@ -1,12 +1,13 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Widgets/SelectionWidget.h"
 #include "GameFramework/HUD.h"
-#include "CustomWidget.h"
 #include "MoralEvent/MoralEvent.h"
 #include "WidgetStartupConfig.h"
 #include "GameHUD.generated.h"
+
+class UCustomWidget;
+class USelectionWidget;
 
 UCLASS()
 class CROWDEDSPACES_API AGameHUD : public AHUD
@@ -53,9 +54,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Widgets")
 	void UpdateMoralEventWidget(const UMoralEvent* MoralEvent);
-
-	UFUNCTION(BlueprintCallable, Category="Widgets")
-	bool IsCursorHoveringUI();
 	
 private:
 	UPROPERTY()
@@ -83,5 +81,9 @@ private:
 
 	UPROPERTY()
 	TMap<TSubclassOf<UCustomWidget>, UCustomWidget*> WidgetInstances;
+
+	int CursorOverUI = 0;
+
+	bool bUIClickThisFrame = false;
 };
 
