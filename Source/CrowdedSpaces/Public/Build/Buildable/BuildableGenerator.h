@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Build/BuildableObject.h"
 #include "Production/ProductionComponent.h"
+#include "Production/ProductionUpgradeData.h"
 #include "Selection/Selectable.h"
 #include "BuildableGenerator.generated.h"
 
@@ -31,7 +32,10 @@ protected:
 	
 private:
 	UPROPERTY(EditAnywhere)
-	UProductionComponent* ProductionComponent;
+	UProductionComponent* ProductionComponent = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	UProductionUpgradeData* ProductionUpgradeData = nullptr;
 	
 	UPROPERTY()
 	bool bHasNPCWorking = false;
