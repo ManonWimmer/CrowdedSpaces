@@ -2,6 +2,7 @@
 #include "Blueprint/UserWidget.h"
 #include "UI/Widgets/MoralEventWidget.h"
 #include "UI/CustomWidget.h"
+#include "UI/Widgets/GeneratorSelectionWidget.h"
 #include "UI/Widgets/SelectionWidget.h"
 
 void AGameHUD::BeginPlay()
@@ -51,12 +52,14 @@ void AGameHUD::ShowPlayerResourcesWidget(bool bShow)
 #pragma region Selection
 void AGameHUD::ShowSelectionWidget(bool bShow)
 {
-	ShowWidget(SelectionWidgetBP, bShow, ESlateVisibility::SelfHitTestInvisible);
+	//ShowWidget(SelectionWidgetBP, bShow, ESlateVisibility::SelfHitTestInvisible);
+	ShowWidget(GeneratorSelectionWidgetBP, bShow, ESlateVisibility::SelfHitTestInvisible); // test voir si ça marche avec lui
 }
 
 void AGameHUD::UpdateSelectionWidget(const FString DisplayName, const TMap<FString, FString> Stats)
 {
-	auto SelectionWidget = GetOrCreateWidget<USelectionWidget>(SelectionWidgetBP);
+	//auto SelectionWidget = GetOrCreateWidget<USelectionWidget>(SelectionWidgetBP);
+	auto SelectionWidget = GetOrCreateWidget<UGeneratorSelectionWidget>(GeneratorSelectionWidgetBP); // test ici aussi
 	if (!SelectionWidget)
 		return;
 

@@ -11,6 +11,7 @@ void ABuildableGenerator::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Register generator
 	UBuildableRegistrySubsystem* BRS = GetWorld()->GetSubsystem<UBuildableRegistrySubsystem>();
 	if (!BRS)
 		return;
@@ -19,6 +20,17 @@ void ABuildableGenerator::BeginPlay()
 		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Register generator");
 
 	BRS->RegisterGenerator(this);
+
+	// Assign start production values
+	if (!ProductionComponent)
+		return;
+
+	if (!ProductionUpgradeData)
+		return;
+
+	ProductionComponent->ProductionType = ProductionUpgradeData->ProductionType;
+	ProductionComponent->ProductionInterval = ProductionUpgradeData->StartProductionInterval;
+	ProductionComponent->ResourcePerInterval = ProductionUpgradeData->StartResourcePerInterval;
 }
 
 void ABuildableGenerator::EndPlay(const EEndPlayReason::Type EndPlayReason)

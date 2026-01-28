@@ -8,6 +8,7 @@
 
 class UCustomWidget;
 class USelectionWidget;
+class UGeneratorSelectionWidget;
 
 UCLASS()
 class CROWDEDSPACES_API AGameHUD : public AHUD
@@ -46,7 +47,7 @@ public:
 	void UpdateSelectionWidget(const FString DisplayName, const TMap<FString, FString> Stats);
 
 	UFUNCTION()
-	USelectionWidget* GetSelectionWidget() { return GetOrCreateWidget<USelectionWidget>(SelectionWidgetBP); }
+	UGeneratorSelectionWidget* GetSelectionWidget() { return GetOrCreateWidget<UGeneratorSelectionWidget>(GeneratorSelectionWidgetBP); } // test ici
 	
 	// Moral Event
 	UFUNCTION(BlueprintCallable, Category="Widgets")
@@ -70,6 +71,10 @@ private:
 	// Selection
 	UPROPERTY(EditAnywhere, Category="Widgets")
 	TSubclassOf<UCustomWidget> SelectionWidgetBP;
+
+	// Selection
+	UPROPERTY(EditAnywhere, Category="Widgets")
+	TSubclassOf<UCustomWidget> GeneratorSelectionWidgetBP;
 
 	// Moral Event
 	UPROPERTY(EditAnywhere, Category="Widgets")
