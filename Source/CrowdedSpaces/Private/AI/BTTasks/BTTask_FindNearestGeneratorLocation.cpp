@@ -3,6 +3,7 @@
 #include "EngineUtils.h"
 #include "AI/NPCController.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Build/BuildableRegistrySubsystem.h"
 #include "Build/Buildable/BuildableGenerator.h"
 
 UBTTask_FindNearestGeneratorLocation::UBTTask_FindNearestGeneratorLocation(FObjectInitializer const& ObjectInitializer)
@@ -31,16 +32,16 @@ EBTNodeResult::Type UBTTask_FindNearestGeneratorLocation::ExecuteTask(UBehaviorT
 	ABuildableGenerator* NearestGenerator = nullptr;
 	float NearestDistance = 0.0f;
 	
-	for (TActorIterator<ABuildableGenerator> It(World); It; ++It)
+	UBuildableRegistrySubsystem* BRS = World->GetSubsystem<UBuildableRegistrySubsystem>();
+	if (!BRS)
+		return EBTNodeResult::Failed;
+	
+	for (TWeakObjectPtr<ABuildableGenerator> Generator : BRS->Generators) 
 	{
-		ABuildableGenerator* Generator = *It;
-		if (!Generator)
+		if (!Generator.IsValid())
 			continue;
 		
 		// Get nearest generator of production type in radius
-		if (Generator->GetProductionComponent()->ProductionType != ProductionType)
-			continue;
-		
 		float Distance = FVector::Distance(Origin, Generator->GetActorLocation());
 		if (Distance < SearchRadius / 2)
 		{
@@ -48,13 +49,13 @@ EBTNodeResult::Type UBTTask_FindNearestGeneratorLocation::ExecuteTask(UBehaviorT
 			{
 				if (Distance < NearestDistance)
 				{
-					NearestGenerator = Generator;
+					NearestGenerator = Generator.Get();
 					NearestDistance = Distance;
 				}
 			}
 			else
 			{
-				NearestGenerator = Generator;
+				NearestGenerator = Generator.Get();
 				NearestDistance = Distance;
 			}
 		}
@@ -69,8 +70,8 @@ EBTNodeResult::Type UBTTask_FindNearestGeneratorLocation::ExecuteTask(UBehaviorT
 
 		// Target location key
 		Blackboard->SetValueAsVector(TargetLocationKey.SelectedKeyName, NearestGenerator->GetActorLocation());
-
-		// Target bed key
+		
+		// Target generator key
 		Blackboard->SetValueAsObject(TargetGeneratorKey.SelectedKeyName, NearestGenerator);
 		
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);

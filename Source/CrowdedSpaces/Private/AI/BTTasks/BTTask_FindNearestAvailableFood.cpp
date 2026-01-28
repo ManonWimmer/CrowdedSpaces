@@ -3,6 +3,7 @@
 #include "EngineUtils.h"
 #include "AI/NPCController.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Build/BuildableRegistrySubsystem.h"
 #include "Build/Buildable/BuildableFood.h"
 
 UBTTask_FindNearestAvailableFood::UBTTask_FindNearestAvailableFood(FObjectInitializer const& ObjectInitializer)
@@ -30,11 +31,14 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableFood::ExecuteTask(UBehaviorTreeC
 	FVector const Origin = NPC->GetActorLocation();
 	ABuildableFood* NearestAvailableFood = nullptr;
 	float NearestDistance = 0.0f;
+
+	UBuildableRegistrySubsystem* BRS = World->GetSubsystem<UBuildableRegistrySubsystem>();
+	if (!BRS)
+		return EBTNodeResult::Failed;
 	
-	for (TActorIterator<ABuildableFood> It(World); It; ++It) // TObjectIterator marchait pas en renvoyait tjrs en actor location 0,0,-78
+	for (TWeakObjectPtr<ABuildableFood> Food : BRS->Foods) 
 	{
-		ABuildableFood* Food = *It;
-		if (!Food || !IsValid(Food))
+		if (!Food.IsValid())
 			continue; 
 		
 		// Get nearest food AVAILABLE
@@ -48,13 +52,13 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableFood::ExecuteTask(UBehaviorTreeC
 			{
 				if (Distance < NearestDistance)
 				{
-					NearestAvailableFood = Food;
+					NearestAvailableFood = Food.Get();
 					NearestDistance = Distance;
 				}
 			}
 			else
 			{
-				NearestAvailableFood = Food;
+				NearestAvailableFood = Food.Get();
 				NearestDistance = Distance;
 			}
 		}

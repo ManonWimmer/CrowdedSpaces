@@ -1,8 +1,35 @@
 ﻿#include "Build/Buildable/BuildableGenerator.h"
 
+#include "Build/BuildableRegistrySubsystem.h"
+
 ABuildableGenerator::ABuildableGenerator()
 {
 	ProductionComponent = CreateDefaultSubobject<UProductionComponent>("ProductionComponent");
+}
+
+void ABuildableGenerator::BeginPlay()
+{
+	Super::BeginPlay();
+
+	UBuildableRegistrySubsystem* BRS = GetWorld()->GetSubsystem<UBuildableRegistrySubsystem>();
+	if (!BRS)
+		return;
+		
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Register generator");
+
+	BRS->RegisterGenerator(this);
+}
+
+void ABuildableGenerator::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	UBuildableRegistrySubsystem* BRS = GetWorld()->GetSubsystem<UBuildableRegistrySubsystem>();
+	if (!BRS)
+		return;
+
+	BRS->UnregisterGenerator(this);
 }
 
 void ABuildableGenerator::SetNPCWorking(bool bWorking)
@@ -13,11 +40,6 @@ void ABuildableGenerator::SetNPCWorking(bool bWorking)
 		ProductionComponent->ResumeOrStartProduction();
 	else
 		ProductionComponent->PauseProduction();
-}
-
-void ABuildableGenerator::BeginPlay()
-{
-	Super::BeginPlay();
 }
 
 #pragma region Selectable

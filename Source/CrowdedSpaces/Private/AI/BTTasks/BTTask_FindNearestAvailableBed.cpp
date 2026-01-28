@@ -4,6 +4,7 @@
 #include "AI/NPCController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Build/Buildable/BuildableBed.h"
+#include "Build/BuildableRegistrySubsystem.h"
 
 UBTTask_FindNearestAvailableBed::UBTTask_FindNearestAvailableBed(FObjectInitializer const& ObjectInitializer)
 {
@@ -26,15 +27,18 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBed::ExecuteTask(UBehaviorTreeCo
 	UWorld* World = NPC->GetWorld();
 	if (!World)
 		return EBTNodeResult::Failed;
-
+	
 	FVector const Origin = NPC->GetActorLocation();
 	ABuildableBed* NearestAvailableBed = nullptr;
 	float NearestDistance = 0.0f;
+
+	UBuildableRegistrySubsystem* BRS = World->GetSubsystem<UBuildableRegistrySubsystem>();
+	if (!BRS)
+		return EBTNodeResult::Failed;
 	
-	for (TActorIterator<ABuildableBed> It(World); It; ++It) // TObjectIterator marchait pas en renvoyait tjrs en actor location 0,0,-78
+	for (TWeakObjectPtr<ABuildableBed> Bed : BRS->Beds) 
 	{
-		ABuildableBed* Bed = *It;
-		if (!Bed || !IsValid(Bed))
+		if (!Bed.IsValid())
 			continue; 
 		
 		// Get nearest bed AVAILABLE
@@ -48,13 +52,13 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBed::ExecuteTask(UBehaviorTreeCo
 			{
 				if (Distance < NearestDistance)
 				{
-					NearestAvailableBed = Bed;
+					NearestAvailableBed = Bed.Get();
 					NearestDistance = Distance;
 				}
 			}
 			else
 			{
-				NearestAvailableBed = Bed;
+				NearestAvailableBed = Bed.Get();
 				NearestDistance = Distance;
 			}
 		}
