@@ -3,7 +3,6 @@
 #include "EnhancedInputComponent.h"
 #include "Game/CrowdedGameMode.h"
 #include "Kismet/GameplayStatics.h"
-#include "UI/Widgets/GeneratorSelectionWidget.h"
 #include "UI/Widgets/SelectionWidget.h"
 
 void ACrowdedPlayerController::SetupInputComponent()

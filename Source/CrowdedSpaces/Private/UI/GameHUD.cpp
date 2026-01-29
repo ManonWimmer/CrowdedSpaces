@@ -2,7 +2,6 @@
 #include "Blueprint/UserWidget.h"
 #include "UI/Widgets/MoralEventWidget.h"
 #include "UI/CustomWidget.h"
-#include "UI/Widgets/GeneratorSelectionWidget.h"
 #include "UI/Widgets/SelectionWidget.h"
 
 void AGameHUD::BeginPlay()
@@ -54,17 +53,6 @@ void AGameHUD::ShowSelectionWidget(bool bShow)
 {
 	ShowWidget(SelectionWidgetBP, bShow, ESlateVisibility::SelfHitTestInvisible);
 }
-
-/*
-void AGameHUD::UpdateSelectionWidget(const FString DisplayName, const TMap<FString, FString> Stats)
-{
-	auto SelectionWidget = GetOrCreateWidget<USelectionWidget>(SelectionWidgetBP);
-	if (!SelectionWidget)
-		return;
-
-	SelectionWidget->UpdateSelection(DisplayName, Stats);
-}
-*/
 #pragma endregion Selection
 
 #pragma region Moral Event

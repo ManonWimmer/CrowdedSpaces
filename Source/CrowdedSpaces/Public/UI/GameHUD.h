@@ -6,6 +6,7 @@
 #include "WidgetStartupConfig.h"
 #include "GameHUD.generated.h"
 
+enum class ESelectionType : uint8;
 class UCustomWidget;
 class USelectionWidget;
 class UGeneratorSelectionWidget;
@@ -42,11 +43,6 @@ public:
 	// Selection
 	UFUNCTION(BlueprintCallable, Category="Widgets")
 	void ShowSelectionWidget(bool bShow);
-
-	/*
-	UFUNCTION(BlueprintCallable, Category="Widgets")
-	void UpdateSelectionWidget(const FString DisplayName, const TMap<FString, FString> Stats);
-	*/
 	
 	UFUNCTION()
 	USelectionWidget* GetSelectionWidget() { return GetOrCreateWidget<USelectionWidget>(SelectionWidgetBP); }

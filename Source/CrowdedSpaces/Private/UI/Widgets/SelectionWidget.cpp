@@ -11,6 +11,8 @@ void USelectionWidget::BindToSelectable(AActor* SelectableActor, FString Display
 {
 	if (!SelectableActor)
 		return;
+
+	Setup(SelectableActor, SelectionType);
 	
 	Unbind();
 

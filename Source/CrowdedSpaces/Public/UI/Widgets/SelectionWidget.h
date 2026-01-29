@@ -31,6 +31,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
 	void UpdateSelection(const FString& DisplayName, const TMap<FString, FString>& Stats, ESelectionType SelectionType);
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
+    void Setup(AActor* SelectableActor, ESelectionType SelectionType);
+	
 	void BindToSelectable(AActor* SelectableActor, FString DisplayName, ESelectionType SelectionType);
 
 	// Unbind proprement
