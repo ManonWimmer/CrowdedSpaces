@@ -33,6 +33,9 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
     void Setup(AActor* SelectableActor, ESelectionType SelectionType);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
+	void Unsetup();
 	
 	void BindToSelectable(AActor* SelectableActor, FString DisplayName, ESelectionType SelectionType);
 

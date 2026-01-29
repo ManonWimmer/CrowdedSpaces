@@ -1,5 +1,5 @@
 ﻿#pragma once
-using FStat = TPair<FString, FString> ;
+using FStat = TPair<FString, FString>;
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"

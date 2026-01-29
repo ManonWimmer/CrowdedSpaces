@@ -99,9 +99,6 @@ void ACrowdedPlayerController::LeftClickInput(const FInputActionValue& Value)
 
 	if (Hit.GetActor() && Hit.GetActor()->Implements<USelectable>())
 	{
-		if (GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Click on selectable");
-
 		SelectedObject = Cast<ISelectable>(Hit.GetActor());
 		SelectedObject->OnSelected();
 
@@ -112,10 +109,5 @@ void ACrowdedPlayerController::LeftClickInput(const FInputActionValue& Value)
 			// Bind automatique à toutes les stats du composant
 			GameHUD->GetSelectionWidget()->BindToSelectable(Hit.GetActor(), SelectedObject->GetDisplayName(), SelectedObject->SelectionType);
 		}
-	}
-	else
-	{
-		if (GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Failed click");
 	}
 }

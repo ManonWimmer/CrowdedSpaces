@@ -11,10 +11,8 @@ void USelectionWidget::BindToSelectable(AActor* SelectableActor, FString Display
 {
 	if (!SelectableActor)
 		return;
-
-	Setup(SelectableActor, SelectionType);
 	
-	Unbind();
+	Setup(SelectableActor, SelectionType);
 
 	SelectedActor = SelectableActor;
 	ActorDisplayName = DisplayName;
@@ -73,6 +71,8 @@ void USelectionWidget::Unbind()
 	BoundStats.Empty();
 	SelectedActor = nullptr;
 	ActorDisplayName = "";
+
+	Unsetup();
 }
 
 void USelectionWidget::OnAnyStatUpdated(FName StatId, FString NewValue)
