@@ -7,6 +7,8 @@
 #include "Selection/Selectable.h"
 #include "BuildableGenerator.generated.h"
 
+class UMoneyComponent;
+
 UCLASS()
 class CROWDEDSPACES_API ABuildableGenerator : public ABuildableObject, public ISelectable
 {
@@ -24,19 +26,46 @@ public:
 	virtual FString GetDisplayName() const override;
 	virtual AActor* GetSelectableActor() override;
 
-	UProductionComponent* GetProductionComponent() const { return ProductionComponent; } 
+	UProductionComponent* GetProductionComponent() const { return ProductionComponent; }
+
+	UFUNCTION(BlueprintCallable, Category = "Upgrade")
+	void OnNextUpgrade();
+
+	UFUNCTION(BlueprintCallable, Category = "Upgrade")
+	bool GetHasNextUpgrade();
+	
+	UFUNCTION(BlueprintCallable, Category = "Upgrade")
+	FUpgradeStruct GetNextUpgrade();
+
+	UFUNCTION(BlueprintCallable, Category = "Upgrade")
+	UMoneyComponent* GetPlayerMoneyComponent() { return PlayerMoneyComponent; }
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
 private:
+	// Production
 	UPROPERTY(EditAnywhere)
 	UProductionComponent* ProductionComponent = nullptr;
 
+	// Upgrade
 	UPROPERTY(EditAnywhere)
 	UProductionUpgradeData* ProductionUpgradeData = nullptr;
+
+	UPROPERTY();
+	int CurrentUpgrade = 0;
+
+	UPROPERTY()
+	bool bHasNextUpgrade;
 	
+	UPROPERTY()
+	FUpgradeStruct NextUpgrade;
+
+	UPROPERTY()
+	UMoneyComponent* PlayerMoneyComponent;
+
+	// Work
 	UPROPERTY()
 	bool bHasNPCWorking = false;
 };
