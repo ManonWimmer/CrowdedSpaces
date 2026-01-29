@@ -52,34 +52,19 @@ void AGameHUD::ShowPlayerResourcesWidget(bool bShow)
 #pragma region Selection
 void AGameHUD::ShowSelectionWidget(bool bShow)
 {
-	LastSelectionWidget = ShowWidget(SelectionWidgetBP, bShow, ESlateVisibility::SelfHitTestInvisible);
-	LastSelectionWidget = GetOrCreateWidget<USelectionWidget>(SelectionWidgetBP);
+	ShowWidget(SelectionWidgetBP, bShow, ESlateVisibility::SelfHitTestInvisible);
 }
 
-void AGameHUD::HideLastSelectionWidget()
-{
-	if (!LastSelectionWidget)
-		return;
-	
-	LastSelectionWidget->SetVisibility(ESlateVisibility::Hidden);
-}
-
-void AGameHUD::ShowGeneratorSelectionWidget(bool bShow)
-{
-	ShowWidget(GeneratorSelectionWidgetBP, bShow, ESlateVisibility::SelfHitTestInvisible);
-	LastSelectionWidget = GetOrCreateWidget<UGeneratorSelectionWidget>(GeneratorSelectionWidgetBP);
-}
-
+/*
 void AGameHUD::UpdateSelectionWidget(const FString DisplayName, const TMap<FString, FString> Stats)
 {
-	//auto SelectionWidget = GetOrCreateWidget<USelectionWidget>(SelectionWidgetBP);
-	//auto SelectionWidget = GetOrCreateWidget<UGeneratorSelectionWidget>(GeneratorSelectionWidgetBP); // test ici aussi
-	
-	if (!LastSelectionWidget)
+	auto SelectionWidget = GetOrCreateWidget<USelectionWidget>(SelectionWidgetBP);
+	if (!SelectionWidget)
 		return;
 
-	LastSelectionWidget->UpdateSelection(DisplayName, Stats);
+	SelectionWidget->UpdateSelection(DisplayName, Stats);
 }
+*/
 #pragma endregion Selection
 
 #pragma region Moral Event
@@ -99,14 +84,14 @@ void AGameHUD::UpdateMoralEventWidget(const UMoralEvent* MoralEvent)
 #pragma endregion Moral Event
 
 #pragma region Generic Functions
-UCustomWidget* AGameHUD::ShowWidget(TSubclassOf<UCustomWidget> WidgetClass, bool bShow, ESlateVisibility VisibilityOnShow)
+void AGameHUD::ShowWidget(TSubclassOf<UCustomWidget> WidgetClass, bool bShow, ESlateVisibility VisibilityOnShow)
 {
 	if (!WidgetClass)
-		return nullptr;
+		return;
 
 	UCustomWidget* Widget = GetOrCreateWidget<UCustomWidget>(WidgetClass);
 	if (!Widget)
-		return nullptr;
+		return;
 
 	if (bShow)
 	{
@@ -117,8 +102,6 @@ UCustomWidget* AGameHUD::ShowWidget(TSubclassOf<UCustomWidget> WidgetClass, bool
 	{
 		Widget->SetVisibility(ESlateVisibility::Hidden);
 	}
-
-	return Widget;
 }
 
 

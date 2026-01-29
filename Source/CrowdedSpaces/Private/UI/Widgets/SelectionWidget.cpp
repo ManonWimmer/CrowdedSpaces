@@ -7,7 +7,7 @@ void USelectionWidget::NativeConstruct()
 	Super::NativeConstruct();
 }
 
-void USelectionWidget::BindToSelectable(AActor* SelectableActor, FString DisplayName)
+void USelectionWidget::BindToSelectable(AActor* SelectableActor, FString DisplayName, ESelectionType SelectionType)
 {
 	if (!SelectableActor)
 		return;
@@ -56,8 +56,9 @@ void USelectionWidget::BindToSelectable(AActor* SelectableActor, FString Display
 			StatProvider->GetOnStatChanged().AddDynamic(this, &USelectionWidget::OnAnyStatUpdated);
 		}
 	}
-	
-	UpdateSelection(DisplayName, StatsToDisplay);
+
+	CurrentSelectionType = SelectionType;
+	UpdateSelection(DisplayName, StatsToDisplay, CurrentSelectionType);
 }
 
 void USelectionWidget::Unbind()
@@ -89,7 +90,7 @@ void USelectionWidget::OnAnyStatUpdated(FName StatId, FString NewValue)
 		}
 	}
 	
-	UpdateSelection(ActorDisplayName, StatsToDisplay);
+	UpdateSelection(ActorDisplayName, StatsToDisplay, CurrentSelectionType);
 }
 
 void USelectionWidget::Init_Implementation()

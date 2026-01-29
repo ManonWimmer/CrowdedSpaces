@@ -5,7 +5,7 @@
 ABuildableGenerator::ABuildableGenerator()
 {
 	ProductionComponent = CreateDefaultSubobject<UProductionComponent>("ProductionComponent");
-	Tags = { FName("Generator") };
+	SelectionType = ESelectionType::Generator;
 }
 
 void ABuildableGenerator::BeginPlay()

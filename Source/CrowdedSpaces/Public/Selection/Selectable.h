@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "SelectionType.h"
 #include "UObject/Interface.h"
 #include "Selectable.generated.h"
 
@@ -22,4 +23,6 @@ public:
 	
 	virtual FString GetDisplayName() const = 0;
 	virtual AActor* GetSelectableActor() = 0;
+
+	ESelectionType SelectionType = ESelectionType::Default;
 };

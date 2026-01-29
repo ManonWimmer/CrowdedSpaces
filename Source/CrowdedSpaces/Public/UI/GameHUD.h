@@ -23,7 +23,7 @@ public:
 	T* GetOrCreateWidget(TSubclassOf<UCustomWidget> WidgetClass);
 
 	UFUNCTION()
-	UCustomWidget* ShowWidget(TSubclassOf<UCustomWidget> WidgetClass, bool bShow, ESlateVisibility VisibilityOnShow);
+	void ShowWidget(TSubclassOf<UCustomWidget> WidgetClass, bool bShow, ESlateVisibility VisibilityOnShow);
 
 	UPROPERTY(EditAnywhere, Category="Widgets")
 	TArray<FWidgetStartupConfig> StartupWidgetsConfig;
@@ -43,20 +43,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Widgets")
 	void ShowSelectionWidget(bool bShow);
 
-	UFUNCTION(BlueprintCallable, Category="Widgets")
-	void HideLastSelectionWidget();
-
-	UFUNCTION(BlueprintCallable, Category="Widgets")
-	void ShowGeneratorSelectionWidget(bool bShow);
-
+	/*
 	UFUNCTION(BlueprintCallable, Category="Widgets")
 	void UpdateSelectionWidget(const FString DisplayName, const TMap<FString, FString> Stats);
-
+	*/
+	
 	UFUNCTION()
 	USelectionWidget* GetSelectionWidget() { return GetOrCreateWidget<USelectionWidget>(SelectionWidgetBP); }
-
-	UFUNCTION()
-	USelectionWidget* GetLastSelectionWidget() const { return LastSelectionWidget; }
 	
 	// Moral Event
 	UFUNCTION(BlueprintCallable, Category="Widgets")
@@ -80,13 +73,6 @@ private:
 	// Selection
 	UPROPERTY(EditAnywhere, Category="Widgets")
 	TSubclassOf<UCustomWidget> SelectionWidgetBP;
-
-	// Selection - Generator
-	UPROPERTY(EditAnywhere, Category="Widgets")
-	TSubclassOf<UCustomWidget> GeneratorSelectionWidgetBP;
-
-	UPROPERTY()
-	USelectionWidget* LastSelectionWidget = nullptr; // Generator or normal for the moment
 	
 	// Moral Event
 	UPROPERTY(EditAnywhere, Category="Widgets")

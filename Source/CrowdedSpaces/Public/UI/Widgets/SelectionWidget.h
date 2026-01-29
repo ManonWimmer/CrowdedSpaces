@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "UI/CustomWidget.h"
+#include "Selection/SelectionType.h"
 #include "SelectionWidget.generated.h"
 
 class ISelectableStatProvider;
@@ -28,9 +29,9 @@ protected:
 
 public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
-	void UpdateSelection(const FString& DisplayName, const TMap<FString, FString>& Stats);
+	void UpdateSelection(const FString& DisplayName, const TMap<FString, FString>& Stats, ESelectionType SelectionType);
 
-	void BindToSelectable(AActor* SelectableActor, FString DisplayName);
+	void BindToSelectable(AActor* SelectableActor, FString DisplayName, ESelectionType SelectionType);
 
 	// Unbind proprement
 	void Unbind();
@@ -38,4 +39,7 @@ public:
 	// Callback générique
 	UFUNCTION()
 	void OnAnyStatUpdated(FName StatId, FString NewValue);
+
+	UPROPERTY()
+	ESelectionType CurrentSelectionType = ESelectionType::Default;
 };
