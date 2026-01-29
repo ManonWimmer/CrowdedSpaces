@@ -5,6 +5,7 @@
 ABuildableGenerator::ABuildableGenerator()
 {
 	ProductionComponent = CreateDefaultSubobject<UProductionComponent>("ProductionComponent");
+	Tags = { FName("Generator") };
 }
 
 void ABuildableGenerator::BeginPlay()

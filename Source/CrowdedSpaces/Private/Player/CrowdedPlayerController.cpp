@@ -94,8 +94,10 @@ void ACrowdedPlayerController::LeftClickInput(const FInputActionValue& Value)
 	{
 		SelectedObject->OnDeselected();
 		SelectedObject = nullptr;
-		GameHUD->ShowSelectionWidget(false);
-		GameHUD->GetSelectionWidget()->Unbind();
+		//GameHUD->ShowSelectionWidget(false);
+		GameHUD->HideLastSelectionWidget();
+		//GameHUD->GetSelectionWidget()->Unbind();
+		GameHUD->GetLastSelectionWidget()->Unbind();
 	}
 
 	if (Hit.GetActor() && Hit.GetActor()->Implements<USelectable>())
@@ -106,12 +108,19 @@ void ACrowdedPlayerController::LeftClickInput(const FInputActionValue& Value)
 		SelectedObject = Cast<ISelectable>(Hit.GetActor());
 		SelectedObject->OnSelected();
 
-		GameHUD->ShowSelectionWidget(true);
+		if (Hit.GetActor()->ActorHasTag(FName("Generator")))
+		{
+			GameHUD->ShowGeneratorSelectionWidget(true);
+		}
+		else
+		{
+			GameHUD->ShowSelectionWidget(true);
+		}
 
-		if (GameHUD->GetSelectionWidget())
+		if (GameHUD->GetLastSelectionWidget())
 		{
 			// Bind automatique à toutes les stats du composant
-			GameHUD->GetSelectionWidget()->BindToSelectable(Hit.GetActor(), SelectedObject->GetDisplayName());
+			GameHUD->GetLastSelectionWidget()->BindToSelectable(Hit.GetActor(), SelectedObject->GetDisplayName());
 		}
 	}
 	else
