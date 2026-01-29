@@ -27,7 +27,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	int GetMoney() {return Money; }
 
-	UPROPERTY(BlueprintAssignable, Category = "EventDispatchers")
+	UPROPERTY(BlueprintAssignable, Category = "Money")
 	FOnMoneyChanged OnMoneyChanged;
 
 	// Selectable

@@ -11,7 +11,7 @@ class CROWDEDSPACES_API UMoralEvent_ExpelNPC : public UMoralEvent
 	GENERATED_BODY()
 
 public:
-	virtual void ClickOnChoice(EMoralEventChoice Choice) override;
+	virtual void ClickOnChoice(EMoralEventType Choice) override;
 
 	virtual void SetupChoices() override;
 

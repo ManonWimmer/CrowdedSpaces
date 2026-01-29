@@ -8,13 +8,13 @@
 
 class ACrowdedPlayerController;
 
-void UMoralEvent_ExpelNPC::ClickOnChoice(EMoralEventChoice Choice)
+void UMoralEvent_ExpelNPC::ClickOnChoice(EMoralEventType Choice)
 {
 	Super::ClickOnChoice(Choice);
 	
 	switch (Choice)
 	{
-		case EMoralEventChoice::ExpelNPC:
+		case EMoralEventType::ExpelNPC:
 		{
 			if (GEngine)
 				GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Yellow, "Decided to do expel npc.");
@@ -73,7 +73,7 @@ void UMoralEvent_ExpelNPC::ClickOnChoice(EMoralEventChoice Choice)
 			break;
 		}
 	
-		case EMoralEventChoice::DoNothing: 
+		case EMoralEventType::DoNothing: 
 			if (GEngine)
 				GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Yellow, "Decided to do nothing.");
 			break;
@@ -87,5 +87,5 @@ void UMoralEvent_ExpelNPC::SetupChoices()
 {
 	Super::SetupChoices();
 
-	Choices = {EMoralEventChoice::ExpelNPC, EMoralEventChoice::DoNothing};
+	Choices = {EMoralEventType::ExpelNPC, EMoralEventType::DoNothing};
 }

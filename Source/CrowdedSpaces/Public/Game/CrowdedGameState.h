@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
 #include "Build/BuildData.h"
+#include "Time/TimeData.h"
 #include "CrowdedGameState.generated.h"
 
 UCLASS()
@@ -13,9 +14,14 @@ class CROWDEDSPACES_API ACrowdedGameState : public AGameStateBase
 public:
 	virtual void BeginPlay() override;
 
+	// Build
 	UPROPERTY(EditAnywhere, Category = "Build")
 	TArray<UBuildData*> BuildDataObjects;
 
 	UPROPERTY(EditAnywhere, Category = "Build")
 	float SnapSize = 100.f;
+
+	// Time
+	UPROPERTY(EditAnywhere, Category = "Time")
+	UTimeData* TimeData;
 };

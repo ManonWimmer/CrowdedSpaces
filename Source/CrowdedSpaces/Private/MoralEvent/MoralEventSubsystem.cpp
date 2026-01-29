@@ -12,7 +12,7 @@ void UMoralEventSubsystem::StartNewEvent(TSubclassOf<UMoralEvent> NewEvent)
 	GameHUD->UpdateMoralEventWidget(CurrentEvent);
 }
 
-void UMoralEventSubsystem::OnChoiceSelected(EMoralEventChoice Choice)
+void UMoralEventSubsystem::OnChoiceSelected(EMoralEventType Choice)
 {
 	if (!GameHUD)
 		GetGameHUD();

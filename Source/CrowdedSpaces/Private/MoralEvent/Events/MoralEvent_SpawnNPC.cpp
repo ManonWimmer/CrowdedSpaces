@@ -1,6 +1,6 @@
 #include "MoralEvent/Events/MoralEvent_SpawnNPC.h"
 
-void UMoralEvent_SpawnNPC::ClickOnChoice(EMoralEventChoice Choice)
+void UMoralEvent_SpawnNPC::ClickOnChoice(EMoralEventType Choice)
 {
 	Super::ClickOnChoice(Choice);
 
@@ -10,14 +10,14 @@ void UMoralEvent_SpawnNPC::ClickOnChoice(EMoralEventChoice Choice)
 	
 	switch (Choice)
 	{
-		case EMoralEventChoice::SpawnNPC: 
+		case EMoralEventType::SpawnNPC: 
 			if (GEngine)
 				GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Yellow, "Decided to do spawn npc.");
 
 			GetWorld()->SpawnActor<AActor>(NPCClass, Location, Rotation, SpawnInfo);
 			break;
 			
-		case EMoralEventChoice::DoNothing: 
+		case EMoralEventType::DoNothing: 
 			if (GEngine)
 				GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Yellow, "Decided to do nothing.");
 			break;
@@ -31,5 +31,5 @@ void UMoralEvent_SpawnNPC::SetupChoices()
 {
 	Super::SetupChoices();
 
-	Choices = {EMoralEventChoice::SpawnNPC, EMoralEventChoice::DoNothing};
+	Choices = {EMoralEventType::SpawnNPC, EMoralEventType::DoNothing};
 }
