@@ -1,10 +1,10 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "GameSpeedType.generated.h"
+#include "TimeSpeedType.generated.h"
 
 UENUM(BlueprintType)
-enum class EGameSpeedType : uint8
+enum class ETimeSpeedType : uint8
 {
 	Paused			UMETA(DisplayName="Paused"),
 	Normal			UMETA(DisplayName="Normal"),

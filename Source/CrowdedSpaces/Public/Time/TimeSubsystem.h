@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "TimeData.h"
+#include "TimeSpeedType.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "TimeSubsystem.generated.h"
 
@@ -30,7 +31,7 @@ public:
 	void SetTimeData(UTimeData* NewTimeData);
 
 	UFUNCTION(BlueprintCallable, Category = "Time")
-	void SetGameSpeed(EGameSpeedType NewGameSpeed);
+	void SetGameSpeed(ETimeSpeedType NewTimeSpeed);
 	
 	UFUNCTION()
 	void GetCurrentSpeedValues();
@@ -40,7 +41,7 @@ private:
 	float CurrentMinutes = 0;
 
 	UPROPERTY()
-	EGameSpeedType CurrentGameSpeed = EGameSpeedType::Normal;
+	ETimeSpeedType CurrentTimeSpeed = ETimeSpeedType::Normal;
 
 	UPROPERTY()
 	float CurrentSpeedMultiplier = 0;

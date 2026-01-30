@@ -2,6 +2,7 @@
 #include "Camera/CameraComponent.h"
 #include "Player/CrowdedPlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 
 AFreeCameraPawn::AFreeCameraPawn()
@@ -37,14 +38,18 @@ void AFreeCameraPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	ApplyMovement(DeltaTime);
-	ApplyRotation(DeltaTime);
+	float RealDeltaTime = DeltaTime;
+	if (UGameplayStatics::GetGlobalTimeDilation(GetWorld()) > 0)
+		RealDeltaTime = GetWorld()->GetDeltaSeconds() / UGameplayStatics::GetGlobalTimeDilation(GetWorld());
+	
+	ApplyMovement(RealDeltaTime);
+	ApplyRotation(RealDeltaTime);
 
 	// Smooth zoom
 	SpringArm->TargetArmLength = FMath::FInterpTo(
 	SpringArm->TargetArmLength,
 	TargetZoom,
-	DeltaTime,
+	RealDeltaTime,
 	ZoomSmooth
 	);
 }

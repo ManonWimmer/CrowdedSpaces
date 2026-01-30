@@ -1,5 +1,8 @@
 ﻿#include "Time/TimeSubsystem.h"
 
+#include "Kismet/GameplayStatics.h"
+#include "Time/TimeSpeedType.h"
+
 TStatId UTimeSubsystem::GetStatId() const
 {
 	RETURN_QUICK_DECLARE_CYCLE_STAT(UTimeSubsystem, STATGROUP_Tickables);
@@ -26,17 +29,18 @@ void UTimeSubsystem::SetTimeData(UTimeData* NewTimeData)
 	GetCurrentSpeedValues();
 }
 
-void UTimeSubsystem::SetGameSpeed(EGameSpeedType NewGameSpeed)
+void UTimeSubsystem::SetGameSpeed(ETimeSpeedType NewTimeSpeed)
 {
-	CurrentGameSpeed = NewGameSpeed;
+	CurrentTimeSpeed = NewTimeSpeed;
 	GetCurrentSpeedValues();
+	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), CurrentSpeedTimeDilation);
 }
 
 void UTimeSubsystem::GetCurrentSpeedValues()
 {
 	for (FTimeDataStruct SpeedData : TimeData->TimeData)
 	{
-		if (SpeedData.GameSpeedType == CurrentGameSpeed)
+		if (SpeedData.TimeSpeedType == CurrentTimeSpeed)
 		{
 			CurrentSpeedMultiplier = SpeedData.GameSpeedMultiplier;
 			CurrentSpeedTimeDilation = SpeedData.GameTimeDilation;
