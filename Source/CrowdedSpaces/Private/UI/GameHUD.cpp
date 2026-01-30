@@ -58,7 +58,7 @@ void AGameHUD::ShowSelectionWidget(bool bShow)
 #pragma region Moral Event
 void AGameHUD::ShowMoralEventWidget(bool bShow)
 {
-	ShowWidget(MoralEventWidgetBP, bShow, ESlateVisibility::SelfHitTestInvisible);
+	ShowWidget(MoralEventWidgetBP, bShow, ESlateVisibility::Visible); // Impossible de cliquer sur boutons pendant (build, time etc)
 }
 
 void AGameHUD::UpdateMoralEventWidget(const UMoralEvent* MoralEvent)

@@ -1,6 +1,7 @@
 ﻿#include "Game/CrowdedGameState.h"
 
 #include "Build/BuildSubsystem.h"
+#include "MoralEvent/MoralEventSubsystem.h"
 #include "Time/TimeSubsystem.h"
 
 void ACrowdedGameState::BeginPlay()
@@ -21,4 +22,11 @@ void ACrowdedGameState::BeginPlay()
 		return;
 
 	TimeSubsystem->SetTimeData(TimeData);
+
+	// Get moral event subsystem & send data
+	UMoralEventSubsystem* MoralEventSubsystem = GetWorld()->GetSubsystem<UMoralEventSubsystem>();
+	if (!MoralEventSubsystem)
+		return;
+
+	MoralEventSubsystem->SetPossibleEvents(PossibleMoralEvents);
 }

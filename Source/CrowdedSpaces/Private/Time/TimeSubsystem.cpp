@@ -26,6 +26,16 @@ void UTimeSubsystem::Tick(float DeltaTime)
 	// Current minutes
 	CurrentMinutes = FMath::Fmod(TotalMinutes, 1440); // Modulo pour 1440 minutes pas jours
 	OnTimeChanged.Broadcast(CurrentMinutes);
+
+	if (CurrentMinutes > TimeData->MoralEventHour * 60 && LastDayMoralEvent != CurrentDay)
+	{
+		LastDayMoralEvent = CurrentDay;
+
+		OnMoralEventTime.Broadcast();
+
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Moral");
+	}
 }
 
 bool UTimeSubsystem::IsTickable() const
@@ -39,11 +49,25 @@ void UTimeSubsystem::SetTimeData(UTimeData* NewTimeData)
 	GetCurrentSpeedValues();
 }
 
-void UTimeSubsystem::SetGameSpeed(ETimeSpeedType NewTimeSpeed)
+void UTimeSubsystem::SetTimeSpeed(ETimeSpeedType NewTimeSpeed)
 {
+	if (CurrentTimeSpeed == NewTimeSpeed)
+		return;
+	
 	CurrentTimeSpeed = NewTimeSpeed;
 	GetCurrentSpeedValues();
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), CurrentSpeedTimeDilation);
+	OnTimeSpeedChanged.Broadcast(CurrentTimeSpeed);
+}
+
+void UTimeSubsystem::SetTimePaused()
+{
+	SetTimeSpeed(ETimeSpeedType::Paused);
+}
+
+void UTimeSubsystem::SetTimeNormal()
+{
+	SetTimeSpeed(ETimeSpeedType::Normal);
 }
 
 void UTimeSubsystem::GetCurrentSpeedValues()

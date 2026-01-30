@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
 #include "Build/BuildData.h"
+#include "MoralEvent/MoralEvent.h"
 #include "Time/TimeData.h"
 #include "CrowdedGameState.generated.h"
 
@@ -24,4 +25,8 @@ public:
 	// Time
 	UPROPERTY(EditAnywhere, Category = "Time")
 	UTimeData* TimeData;
+
+	// Moral Events
+	UPROPERTY(EditAnywhere, Category = "MoralEvent")
+	TArray<TSubclassOf<UMoralEvent>> PossibleMoralEvents;
 };

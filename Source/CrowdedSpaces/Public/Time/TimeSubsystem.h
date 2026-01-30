@@ -8,6 +8,8 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTimeChanged, float, NewMinutes);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDayChanged, int, NewDay);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnMoralEventTime);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTimeSpeedChanged, ETimeSpeedType, NewTimeSpeed);
 
 UCLASS()
 class CROWDEDSPACES_API UTimeSubsystem : public UTickableWorldSubsystem
@@ -25,6 +27,12 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Time")
 	FOnDayChanged OnDayChanged;
 
+	UPROPERTY(BlueprintAssignable, Category = "Time")
+	FOnMoralEventTime OnMoralEventTime;
+
+	UPROPERTY(BlueprintAssignable, Category = "Time")
+	FOnTimeSpeedChanged OnTimeSpeedChanged;
+
 	UFUNCTION(BlueprintCallable, Category = "Time")
 	float GetCurrentMinutes() { return CurrentMinutes; }
 
@@ -37,8 +45,15 @@ public:
 	UFUNCTION()
 	void SetTimeData(UTimeData* NewTimeData);
 
+	// Game speed
 	UFUNCTION(BlueprintCallable, Category = "Time")
-	void SetGameSpeed(ETimeSpeedType NewTimeSpeed);
+	void SetTimeSpeed(ETimeSpeedType NewTimeSpeed);
+
+	UFUNCTION(BlueprintCallable, Category = "Time")
+	void SetTimePaused();
+
+	UFUNCTION(BlueprintCallable, Category = "Time")
+	void SetTimeNormal();
 	
 	UFUNCTION()
 	void GetCurrentSpeedValues();

@@ -12,6 +12,19 @@ void UMoralEventSubsystem::StartNewEvent(TSubclassOf<UMoralEvent> NewEvent)
 	GameHUD->UpdateMoralEventWidget(CurrentEvent);
 }
 
+void UMoralEventSubsystem::HandleRandomMoralEvent()
+{
+	if (PossibleEvents.Num() == 0)
+		return;
+
+	// Get random event in possible events
+	int32 RandomIndex = FMath::RandRange(0, PossibleEvents.Num() - 1);
+	TSubclassOf<UMoralEvent> RandomEvent = PossibleEvents[RandomIndex];
+
+	// Start event
+	StartNewEvent(RandomEvent);
+}
+
 void UMoralEventSubsystem::OnChoiceSelected(EMoralEventType Choice)
 {
 	if (!GameHUD)
@@ -21,6 +34,8 @@ void UMoralEventSubsystem::OnChoiceSelected(EMoralEventType Choice)
 	GameHUD->ShowMoralEventWidget(false);
 	
 	CurrentEvent = nullptr;
+
+	OnMoralEventEnded.Broadcast();
 }
 
 void UMoralEventSubsystem::GetGameHUD()
