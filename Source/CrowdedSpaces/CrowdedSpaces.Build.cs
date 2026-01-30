@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 using UnrealBuildTool;
+using System.IO; // Pour Path.Combine
 
 public class CrowdedSpaces : ModuleRules
 {
@@ -22,6 +23,9 @@ public class CrowdedSpaces : ModuleRules
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
+		
+		string EnginePatchesPath = Path.Combine(ModuleDirectory, "..", "EnginePatches");
+		PublicIncludePaths.Add(EnginePatchesPath);
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
