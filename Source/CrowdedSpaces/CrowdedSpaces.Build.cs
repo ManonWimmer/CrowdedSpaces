@@ -24,9 +24,6 @@ public class CrowdedSpaces : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 		
-		string EnginePatchesPath = Path.Combine(ModuleDirectory, "..", "EnginePatches");
-		PublicIncludePaths.Add(EnginePatchesPath);
-
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
 		
