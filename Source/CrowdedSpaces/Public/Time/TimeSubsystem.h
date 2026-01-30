@@ -7,6 +7,7 @@
 #include "TimeSubsystem.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTimeChanged, float, NewMinutes);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDayChanged, int, NewDay);
 
 UCLASS()
 class CROWDEDSPACES_API UTimeSubsystem : public UTickableWorldSubsystem
@@ -21,8 +22,14 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Time")
 	FOnTimeChanged OnTimeChanged;
 
+	UPROPERTY(BlueprintAssignable, Category = "Time")
+	FOnDayChanged OnDayChanged;
+
 	UFUNCTION(BlueprintCallable, Category = "Time")
 	float GetCurrentMinutes() { return CurrentMinutes; }
+
+	UFUNCTION(BlueprintCallable, Category = "Time")
+	int GetCurrentDay() { return CurrentDay; }
 
 	UFUNCTION(BlueprintCallable, Category = "Time")
 	UTimeData* GetTimeData() const { return TimeData; }
@@ -38,7 +45,16 @@ public:
 	
 private:
 	UPROPERTY()
+	float TotalMinutes = 0;
+	
+	UPROPERTY()
 	float CurrentMinutes = 0;
+
+	UPROPERTY()
+	int CurrentDay = 1;
+
+	UPROPERTY()
+	int LastDayMoralEvent = 0;
 
 	UPROPERTY()
 	ETimeSpeedType CurrentTimeSpeed = ETimeSpeedType::Normal;

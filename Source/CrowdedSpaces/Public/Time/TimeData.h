@@ -28,4 +28,7 @@ class CROWDEDSPACES_API UTimeData : public UDataAsset
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TArray<FTimeDataStruct> TimeData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float MoralEventHour;
 };

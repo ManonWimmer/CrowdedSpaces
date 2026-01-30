@@ -39,7 +39,7 @@ void AFreeCameraPawn::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	float RealDeltaTime = DeltaTime;
-	if (UGameplayStatics::GetGlobalTimeDilation(GetWorld()) > 0)
+	if (UGameplayStatics::GetGlobalTimeDilation(GetWorld()) >= 1)
 		RealDeltaTime = GetWorld()->GetDeltaSeconds() / UGameplayStatics::GetGlobalTimeDilation(GetWorld());
 	
 	ApplyMovement(RealDeltaTime);

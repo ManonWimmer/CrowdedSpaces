@@ -12,9 +12,19 @@ void UTimeSubsystem::Tick(float DeltaTime)
 {
 	if (!TimeData)
 		return;
-	
-	CurrentMinutes = FMath::Fmod((CurrentMinutes + CurrentSpeedMultiplier * DeltaTime),1440); // Modulo pour 1440 minutes pas jours
-	
+
+	TotalMinutes += CurrentSpeedMultiplier * DeltaTime;
+
+	// Current day
+	int NewDay = (TotalMinutes / 1440) + 1;
+	if (NewDay != CurrentDay)
+	{
+		CurrentDay = NewDay;
+		OnDayChanged.Broadcast(CurrentDay);
+	}
+
+	// Current minutes
+	CurrentMinutes = FMath::Fmod(TotalMinutes, 1440); // Modulo pour 1440 minutes pas jours
 	OnTimeChanged.Broadcast(CurrentMinutes);
 }
 
