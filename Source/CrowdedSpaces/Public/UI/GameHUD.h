@@ -53,6 +53,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Widgets")
 	void UpdateMoralEventWidget(const UMoralEvent* MoralEvent);
+
+	// Time
+	UFUNCTION(BlueprintCallable, Category="Widgets")
+	void ShowTimeWidget(bool bShow);
 	
 private:
 	UPROPERTY()
@@ -77,6 +81,10 @@ private:
 	// Debug
 	UPROPERTY(EditAnywhere, Category="Widgets")
 	TSubclassOf<UCustomWidget> DebugWidgetBP;
+
+	// Time
+	UPROPERTY(EditAnywhere, Category="Widgets")
+	TSubclassOf<UCustomWidget> TimeBP;
 
 	UPROPERTY()
 	TMap<TSubclassOf<UCustomWidget>, UCustomWidget*> WidgetInstances;

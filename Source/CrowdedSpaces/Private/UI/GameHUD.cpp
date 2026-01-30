@@ -71,6 +71,13 @@ void AGameHUD::UpdateMoralEventWidget(const UMoralEvent* MoralEvent)
 }
 #pragma endregion Moral Event
 
+#pragma region Time
+void AGameHUD::ShowTimeWidget(bool bShow)
+{
+	ShowWidget(TimeBP, bShow, ESlateVisibility::SelfHitTestInvisible);
+}
+#pragma endregion Time
+
 #pragma region Generic Functions
 void AGameHUD::ShowWidget(TSubclassOf<UCustomWidget> WidgetClass, bool bShow, ESlateVisibility VisibilityOnShow)
 {

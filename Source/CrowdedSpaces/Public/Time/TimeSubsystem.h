@@ -23,8 +23,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Time")
 	float GetCurrentMinutes() { return CurrentMinutes; }
 
+	UFUNCTION(BlueprintCallable, Category = "Time")
+	UTimeData* GetTimeData() const { return TimeData; }
+	
 	UFUNCTION()
-	void SetTimeData(UTimeData* NewTimeData) { TimeData = NewTimeData; }
+	void SetTimeData(UTimeData* NewTimeData);
+
+	UFUNCTION(BlueprintCallable, Category = "Time")
+	void SetGameSpeed(EGameSpeedType NewGameSpeed);
+	
+	UFUNCTION()
+	void GetCurrentSpeedValues();
 	
 private:
 	UPROPERTY()
@@ -32,6 +41,12 @@ private:
 
 	UPROPERTY()
 	EGameSpeedType CurrentGameSpeed = EGameSpeedType::Normal;
+
+	UPROPERTY()
+	float CurrentSpeedMultiplier = 0;
+
+	UPROPERTY()
+	float CurrentSpeedTimeDilation = 0;
 	
 	UPROPERTY()
 	UTimeData* TimeData = nullptr; // Get from game state
