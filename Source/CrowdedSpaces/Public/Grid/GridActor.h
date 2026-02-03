@@ -23,13 +23,17 @@ public:
 private:
 	void DrawLine(FVector Start, FVector End, float Thickness, TArray<FVector>& Vertices, TArray<int>& Triangles);
 	float LineWidth() const; 
-	float LineHeight() const; 
+	float LineHeight() const;
+	TObjectPtr<UMaterialInstanceDynamic> CreateMaterialInstance(FLinearColor Color, float Opacity);
 	
 	UPROPERTY(EditAnywhere, Category = "Grid")
 	TObjectPtr<UProceduralMeshComponent> LinesProceduralMesh;
 
 	UPROPERTY(EditAnywhere, Category = "Grid")
 	TObjectPtr<UProceduralMeshComponent> CellsProceduralMesh;
+
+	UPROPERTY(EditAnywhere, Category="Materials")
+	TObjectPtr<UMaterialInterface> BaseMaterial;
 
 	UPROPERTY(EditAnywhere, Category = "Grid")
 	int Rows = 10;

@@ -5,6 +5,7 @@ AGridActor::AGridActor()
 	LinesProceduralMesh = CreateDefaultSubobject<UProceduralMeshComponent>("LinesProceduralMesh");
 	CellsProceduralMesh = CreateDefaultSubobject<UProceduralMeshComponent>("CellsProceduralMesh");
 
+	RootComponent = CreateDefaultSubobject<USceneComponent>("Root");
 	LinesProceduralMesh->SetupAttachment(RootComponent);
 	CellsProceduralMesh->SetupAttachment(RootComponent);
 	
@@ -14,7 +15,9 @@ AGridActor::AGridActor()
 void AGridActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
-
+	
+	TObjectPtr<UMaterialInstanceDynamic> CellMaterialInstance = CreateMaterialInstance(CellColor, CellOpacity);
+	
 	TArray<FVector> LineVertices;
 	TArray<int> LineTriangles;
 
@@ -38,26 +41,65 @@ void AGridActor::OnConstruction(const FTransform& Transform)
 		DrawLine(FVector(X, 0, 0), FVector(X, Rows * CellSize, 0), LineThickness, LineVertices, LineTriangles);
 	}
 
-	// Create line mesh
-	TArray<FVector> Normals;         
-	TArray<FVector2D> UV0;           
-	TArray<FColor> VertexColors;     
-	TArray<FProcMeshTangent> Tangents;
+	// Create line mesh & material
+	TArray<FVector> LinesNormals;         
+	TArray<FVector2D> LinesUV0;           
+	TArray<FColor> LinesVertexColors;     
+	TArray<FProcMeshTangent> LinesTangents;
+
+	for (int i = 0; i < LineVertices.Num(); i++)
+	{
+		LinesNormals.Add(FVector::UpVector); 
+		LinesUV0.Add(FVector2D(0,0)); 
+	}
 	
 	LinesProceduralMesh->CreateMeshSection(
-		0,           // section index
+		0,           
 		LineVertices,
 		LineTriangles,
-		Normals,
-		UV0,
-		VertexColors,
-		Tangents,
-		false         // enable collision
+		LinesNormals,
+		LinesUV0,
+		LinesVertexColors,
+		LinesTangents,
+		false         
+	);
+
+	TObjectPtr<UMaterialInstanceDynamic> LinesMaterialInstance = CreateMaterialInstance(LineColor, LineOpacity);
+	LinesProceduralMesh->SetMaterial(0, LinesMaterialInstance);
+
+	// Draw cells
+	TArray<FVector> CellsVertices;
+	TArray<int> CellsTriangles;
+	float HalfCell = CellSize / 2;
+	DrawLine(FVector(0, HalfCell, 0), FVector(CellSize, HalfCell, 0), CellSize, CellsVertices, CellsTriangles);
+	
+	CellsProceduralMesh->SetVisibility(false);
+
+	// Create cells mesh & material
+	TArray<FVector> CellsNormals;         
+	TArray<FVector2D> CellsUV0;           
+	TArray<FColor> CellsVertexColors;     
+	TArray<FProcMeshTangent> CellsTangents;
+
+	for (int i = 0; i < CellsVertices.Num(); i++)
+	{
+		CellsNormals.Add(FVector::UpVector); 
+		CellsUV0.Add(FVector2D(0,0)); 
+	}
+	
+	CellsProceduralMesh->CreateMeshSection(
+		0,           
+		CellsVertices,
+		CellsTriangles,
+		CellsNormals,
+		CellsUV0,
+		CellsVertexColors,
+		CellsTangents,
+		false         
 	);
 	
-	
-	TArray<FVector> CellVertices;
-	TArray<int> CellTriangles;
+	TObjectPtr<UMaterialInstanceDynamic> CellsMaterialInstance = CreateMaterialInstance(CellColor, CellOpacity);
+	CellsProceduralMesh->SetMaterial(0, CellsMaterialInstance);
 }
 
 void AGridActor::BeginPlay()
@@ -85,12 +127,12 @@ void AGridActor::DrawLine(FVector Start, FVector End, float Thickness, TArray<FV
 	Vertices.Add(End - (Direction * HalfThickness)); // Bottom right corner
 
 	Triangles.Add(StartIndex + 0);
-	Triangles.Add(StartIndex + 1);
 	Triangles.Add(StartIndex + 2);
+	Triangles.Add(StartIndex + 1);
 
 	Triangles.Add(StartIndex + 2);
-	Triangles.Add(StartIndex + 1);
 	Triangles.Add(StartIndex + 3);
+	Triangles.Add(StartIndex + 1);
 }
 
 float AGridActor::LineWidth() const
@@ -101,5 +143,25 @@ float AGridActor::LineWidth() const
 float AGridActor::LineHeight() const
 {
 	return Columns * CellSize;
+}
+
+TObjectPtr<UMaterialInstanceDynamic> AGridActor::CreateMaterialInstance(FLinearColor Color, float Opacity)
+{
+	if (!BaseMaterial)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("BaseMaterial is null!"));
+		return nullptr;
+	}
+
+	UMaterialInstanceDynamic* DynamicMat =
+	   UMaterialInstanceDynamic::Create(BaseMaterial, this);
+
+	if (DynamicMat)
+	{
+		DynamicMat->SetVectorParameterValue(TEXT("Color"), Color);
+		DynamicMat->SetScalarParameterValue(TEXT("Opacity"), Opacity);
+	}
+
+	return DynamicMat;
 }
 
