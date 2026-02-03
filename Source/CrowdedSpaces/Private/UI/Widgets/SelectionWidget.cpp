@@ -38,10 +38,10 @@ void USelectionWidget::BindToSelectable(AActor* SelectableActor, FString Display
 	}
 
 	// Check interface in components
-	TArray<UActorComponent*> Components;
+	TArray<TObjectPtr<UActorComponent>> Components;
 	SelectableActor->GetComponents(Components);
 	
-	for (UActorComponent* Comp : Components)
+	for (TObjectPtr<UActorComponent> Comp : Components)
 	{
 		if (Comp->Implements<USelectableStatProvider>())
 		{

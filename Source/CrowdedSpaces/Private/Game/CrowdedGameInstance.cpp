@@ -15,11 +15,11 @@ void UCrowdedGameInstance::OnPostWorldInitialization(UWorld* World, const UWorld
 	if (!World)
 		return;
 
-	UTimeSubsystem* TimeSubsystem = World->GetSubsystem<UTimeSubsystem>();
+	TObjectPtr<UTimeSubsystem> TimeSubsystem = World->GetSubsystem<UTimeSubsystem>();
 	if (!TimeSubsystem)
 		return;
 	
-	UMoralEventSubsystem* MoralSubsystem = World->GetSubsystem<UMoralEventSubsystem>();
+	TObjectPtr<UMoralEventSubsystem> MoralSubsystem = World->GetSubsystem<UMoralEventSubsystem>();
 	if (!MoralSubsystem)
 		return;
 

@@ -18,7 +18,7 @@ UBTTask_UseGenerator::UBTTask_UseGenerator(FObjectInitializer const& ObjectIniti
 
 EBTNodeResult::Type UBTTask_UseGenerator::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	ANPCController* Controller = Cast<ANPCController>(OwnerComp.GetAIOwner());
+	TObjectPtr<ANPCController> Controller = Cast<ANPCController>(OwnerComp.GetAIOwner());
 	if (!Controller)
 		return EBTNodeResult::Failed;
 
@@ -30,11 +30,11 @@ EBTNodeResult::Type UBTTask_UseGenerator::ExecuteTask(UBehaviorTreeComponent& Ow
 	StartAction();
 	
 	// Get the target bed from blackboard
-	UBlackboardComponent* Blackboard = OwnerComp.GetBlackboardComponent();
+	TObjectPtr<UBlackboardComponent> Blackboard = OwnerComp.GetBlackboardComponent();
 	if (!Blackboard)
 		return EBTNodeResult::Failed;
 
-	ABuildableGenerator* TargetGenerator = Cast<ABuildableGenerator>(Blackboard->GetValueAsObject(TargetGeneratorKey.SelectedKeyName));
+	TObjectPtr<ABuildableGenerator> TargetGenerator = Cast<ABuildableGenerator>(Blackboard->GetValueAsObject(TargetGeneratorKey.SelectedKeyName));
 	if (!TargetGenerator)
 		return EBTNodeResult::Failed;
 	
@@ -54,11 +54,11 @@ void UBTTask_UseGenerator::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uin
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Use generator stop action");
 	
 	// Set generator as not working
-	UBlackboardComponent* Blackboard = OwnerComp.GetBlackboardComponent();
+	TObjectPtr<UBlackboardComponent> Blackboard = OwnerComp.GetBlackboardComponent();
 	if (!Blackboard)
 		return;
 	
-	ABuildableGenerator* TargetGenerator = Cast<ABuildableGenerator>(Blackboard->GetValueAsObject(TargetGeneratorKey.SelectedKeyName));
+	TObjectPtr<ABuildableGenerator> TargetGenerator = Cast<ABuildableGenerator>(Blackboard->GetValueAsObject(TargetGeneratorKey.SelectedKeyName));
 	if (!TargetGenerator)
 		return ;
 	

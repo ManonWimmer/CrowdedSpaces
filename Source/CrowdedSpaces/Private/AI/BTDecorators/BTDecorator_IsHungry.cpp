@@ -13,15 +13,15 @@ UBTDecorator_IsHungry::UBTDecorator_IsHungry(FObjectInitializer const& ObjectIni
 
 bool UBTDecorator_IsHungry::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const
 {
-	AAIController* AIController = OwnerComp.GetAIOwner();
+	TObjectPtr<AAIController> AIController = OwnerComp.GetAIOwner();
 	if (!AIController)
 		return false;
 
-	APawn* Pawn = AIController->GetPawn();
+	TObjectPtr<APawn> Pawn = AIController->GetPawn();
 	if (!Pawn)
 		return false;
 
-	UFoodComponent* FoodComp = Pawn->FindComponentByClass<UFoodComponent>();
+	TObjectPtr<UFoodComponent> FoodComp = Pawn->FindComponentByClass<UFoodComponent>();
 	if (!FoodComp)
 		return false;
 	

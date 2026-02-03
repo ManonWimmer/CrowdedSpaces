@@ -17,14 +17,14 @@ public:
 
 	// Build
 	UPROPERTY(EditAnywhere, Category = "Build")
-	TArray<UBuildData*> BuildDataObjects;
+	TArray<TObjectPtr<UBuildData>> BuildDataObjects;
 
 	UPROPERTY(EditAnywhere, Category = "Build")
 	float SnapSize = 100.f;
 
 	// Time
 	UPROPERTY(EditAnywhere, Category = "Time")
-	UTimeData* TimeData;
+	TObjectPtr<UTimeData> TimeData;
 
 	// Moral Events
 	UPROPERTY(EditAnywhere, Category = "MoralEvent")

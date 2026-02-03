@@ -13,15 +13,15 @@ UBTDecorator_IsSleeping::UBTDecorator_IsSleeping(FObjectInitializer const& Objec
 
 bool UBTDecorator_IsSleeping::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const
 {
-	AAIController* AIController = OwnerComp.GetAIOwner();
+	TObjectPtr<AAIController> AIController = OwnerComp.GetAIOwner();
 	if (!AIController)
 		return false;
 
-	APawn* Pawn = AIController->GetPawn();
+	TObjectPtr<APawn> Pawn = AIController->GetPawn();
 	if (!Pawn)
 		return false;
 
-	UEnergyComponent* EnergyComp = Pawn->FindComponentByClass<UEnergyComponent>();
+	TObjectPtr<UEnergyComponent> EnergyComp = Pawn->FindComponentByClass<UEnergyComponent>();
 	if (!EnergyComp)
 		return false;
 	

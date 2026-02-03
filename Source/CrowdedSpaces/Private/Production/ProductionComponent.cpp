@@ -30,15 +30,15 @@ void UProductionComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	TObjectPtr<APlayerController> PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	if (!PC)
 		return;
 
-	ACrowdedPlayerController* CamPC = Cast<ACrowdedPlayerController>(PC);
+	TObjectPtr<ACrowdedPlayerController> CamPC = Cast<ACrowdedPlayerController>(PC);
 	if (!CamPC)
 		return;
 
-	ACrowdedPlayerState* PS = PC->GetPlayerState<ACrowdedPlayerState>();
+	TObjectPtr<ACrowdedPlayerState> PS = PC->GetPlayerState<ACrowdedPlayerState>();
 	if (!PS)
 		return;
 	

@@ -81,5 +81,5 @@ private:
 	float CurrentSpeedTimeDilation = 0;
 	
 	UPROPERTY()
-	UTimeData* TimeData = nullptr; // Get from game state
+	TObjectPtr<UTimeData> TimeData = nullptr; // Get from game state
 };

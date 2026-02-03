@@ -57,16 +57,16 @@ private:
 	FTimerHandle ProductionTimerHandle;
 
 	UPROPERTY()
-	UMoneyComponent* PlayerMoneyComponent;
+	TObjectPtr<UMoneyComponent> PlayerMoneyComponent;
 
 	UPROPERTY()
-	UElectricityComponent* PlayerElectricityComponent;
+	TObjectPtr<UElectricityComponent> PlayerElectricityComponent;
 
 	UPROPERTY()
-	UOxygenComponent* PlayerOxygenComponent;
+	TObjectPtr<UOxygenComponent> PlayerOxygenComponent;
 
 	UPROPERTY()
-	UFoodComponent* PlayerFoodComponent;
+	TObjectPtr<UFoodComponent> PlayerFoodComponent;
 
 	bool bHasStartedProduction = false;
 };

@@ -10,7 +10,7 @@ void ABuildableBed::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UBuildableRegistrySubsystem* BRS = GetWorld()->GetSubsystem<UBuildableRegistrySubsystem>();
+	TObjectPtr<UBuildableRegistrySubsystem> BRS = GetWorld()->GetSubsystem<UBuildableRegistrySubsystem>();
 	if (!BRS)
 		return;
 
@@ -24,7 +24,7 @@ void ABuildableBed::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
-	UBuildableRegistrySubsystem* BRS = GetWorld()->GetSubsystem<UBuildableRegistrySubsystem>();
+	TObjectPtr<UBuildableRegistrySubsystem> BRS = GetWorld()->GetSubsystem<UBuildableRegistrySubsystem>();
 	if (!BRS)
 		return;
 
@@ -52,7 +52,7 @@ FString ABuildableBed::GetDisplayName() const
 	return "Bed";
 }
 
-AActor* ABuildableBed::GetSelectableActor()
+TObjectPtr<AActor> ABuildableBed::GetSelectableActor()
 {
 	return this;
 }

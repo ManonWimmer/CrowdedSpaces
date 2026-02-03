@@ -18,17 +18,16 @@ void UMoralEvent_ExpelNPC::ClickOnChoice(EMoralEventType Choice)
 		{
 			if (GEngine)
 				GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Yellow, "Decided to do expel npc.");
-
-			// Get NPCs in world
-			UWorld* World = GetWorld();
+				
+			TObjectPtr<UWorld> World = GetWorld();
 			if (!World)
 				break;
 
-			TArray<ANPC*> FoundNPCs;
+			TArray<TObjectPtr<ANPC>> FoundNPCs;
 		
 			for (TActorIterator<ANPC> It(World); It; ++It) 
 			{
-				ANPC* NPC = *It;
+				TObjectPtr<ANPC> NPC = *It;
 				if (!NPC || !IsValid(NPC))
 					continue;
 
@@ -41,26 +40,23 @@ void UMoralEvent_ExpelNPC::ClickOnChoice(EMoralEventType Choice)
 					GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Found 0 NPC in world.");
 				break;
 			}
-
-			// Get random npc
+				
 			int32 RandomIndex = FMath::RandRange(0, FoundNPCs.Num() - 1);
-			ANPC* RandomNPC = FoundNPCs[RandomIndex];
-
-			// Destroy it
+			TObjectPtr<ANPC> RandomNPC = FoundNPCs[RandomIndex];
+				
 			RandomNPC->Destroy();
-
-			// Add player money
-			APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+				
+			TObjectPtr<APlayerController> PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 			if (!PC)
 				break;
 
-			ACrowdedPlayerController* CamPC = Cast<ACrowdedPlayerController>(PC);
+			TObjectPtr<ACrowdedPlayerController> CamPC = Cast<ACrowdedPlayerController>(PC);
 			if (!CamPC)
 				break;
 
-			UMoneyComponent* MoneyComponent = nullptr;
+			TObjectPtr<UMoneyComponent> MoneyComponent = nullptr;
 		
-			if (ACrowdedPlayerState* PS = PC->GetPlayerState<ACrowdedPlayerState>())
+			if (TObjectPtr<ACrowdedPlayerState> PS = PC->GetPlayerState<ACrowdedPlayerState>())
 			{
 				MoneyComponent = PS->GetMoneyComponent();
 			}

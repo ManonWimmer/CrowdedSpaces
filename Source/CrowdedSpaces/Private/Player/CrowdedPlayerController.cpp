@@ -9,7 +9,7 @@ void ACrowdedPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 	
-	UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(InputComponent);
+	TObjectPtr<UEnhancedInputComponent> EIC = Cast<UEnhancedInputComponent>(InputComponent);
 	if (!EIC)
 		return;
 	
@@ -37,11 +37,11 @@ void ACrowdedPlayerController::SetupInputComponent()
 	EIC->BindAction(PlayerInputsData->LeftClickAction, ETriggerEvent::Started, this, &ACrowdedPlayerController::LeftClickInput);
 
 	// Add IMC
-	ULocalPlayer* LP = GetLocalPlayer();
+	TObjectPtr<ULocalPlayer> LP = GetLocalPlayer();
 	if (!LP)
 		return;
 
-	UEnhancedInputLocalPlayerSubsystem* InputSubsystem = LP->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+	TObjectPtr<UEnhancedInputLocalPlayerSubsystem> InputSubsystem = LP->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
 	if (!InputSubsystem)
 		return;
 	
@@ -69,7 +69,7 @@ void ACrowdedPlayerController::LeftClickInput(const FInputActionValue& Value)
 	//if (GEngine)
 		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, "Left click event");
 	
-	ACrowdedGameMode* GameMode = Cast<ACrowdedGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	TObjectPtr<ACrowdedGameMode> GameMode = Cast<ACrowdedGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 	if (!GameMode)
 		return;
 	

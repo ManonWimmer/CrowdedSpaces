@@ -25,5 +25,5 @@ protected:
 	virtual void Reset_Implementation();
 
 	UPROPERTY()
-	AGameHUD* GameHUD = nullptr;
+	TObjectPtr<AGameHUD> GameHUD = nullptr;
 };

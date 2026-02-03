@@ -18,7 +18,7 @@ public:
 	FString Description;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UTexture2D* Texture;
+	TObjectPtr<UTexture2D> Texture;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSubclassOf<ABuildableObject> BuildClass;

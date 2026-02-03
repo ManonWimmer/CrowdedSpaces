@@ -139,7 +139,7 @@ FString ABuildableGenerator::GetDisplayName() const
 	return "Generator";
 }
 
-AActor* ABuildableGenerator::GetSelectableActor()
+TObjectPtr<AActor> ABuildableGenerator::GetSelectableActor()
 {
 	return this;
 }

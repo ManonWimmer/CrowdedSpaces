@@ -22,7 +22,7 @@ void AGameHUD::CreateStartupWidgets()
 	{
 		if (!WidgetClass) continue;
 
-		UCustomWidget* Widget = CreateWidget<UCustomWidget>(PlayerController, WidgetClass);
+		TObjectPtr<UCustomWidget> Widget = CreateWidget<UCustomWidget>(PlayerController, WidgetClass);
 
 		if (!Widget) continue;
 
@@ -63,7 +63,7 @@ void AGameHUD::ShowMoralEventWidget(bool bShow)
 
 void AGameHUD::UpdateMoralEventWidget(const UMoralEvent* MoralEvent)
 {
-	auto MoralEventWidget = GetOrCreateWidget<UMoralEventWidget>(MoralEventWidgetBP);
+	TObjectPtr<UMoralEventWidget> MoralEventWidget = GetOrCreateWidget<UMoralEventWidget>(MoralEventWidgetBP);
 	if (!MoralEventWidget)
 		return;
 
@@ -84,7 +84,7 @@ void AGameHUD::ShowWidget(TSubclassOf<UCustomWidget> WidgetClass, bool bShow, ES
 	if (!WidgetClass)
 		return;
 
-	UCustomWidget* Widget = GetOrCreateWidget<UCustomWidget>(WidgetClass);
+	TObjectPtr<UCustomWidget> Widget = GetOrCreateWidget<UCustomWidget>(WidgetClass);
 	if (!Widget)
 		return;
 
@@ -101,17 +101,17 @@ void AGameHUD::ShowWidget(TSubclassOf<UCustomWidget> WidgetClass, bool bShow, ES
 
 
 template <typename T>
-T* AGameHUD::GetOrCreateWidget(TSubclassOf<UCustomWidget> WidgetClass)
+TObjectPtr<T> AGameHUD::GetOrCreateWidget(TSubclassOf<UCustomWidget> WidgetClass)
 {
 	if (!WidgetClass || !PlayerController)
 		return nullptr;
 
-	if (UCustomWidget** Found = WidgetInstances.Find(WidgetClass))
+	if (TObjectPtr<UCustomWidget>* Found = WidgetInstances.Find(WidgetClass))
 	{
 		return Cast<T>(*Found); 
 	}
 
-	UCustomWidget* NewWidget = CreateWidget<UCustomWidget>(PlayerController, WidgetClass);
+	TObjectPtr<UCustomWidget> NewWidget = CreateWidget<UCustomWidget>(PlayerController, WidgetClass);
 
 	if (!NewWidget)
 		return nullptr;

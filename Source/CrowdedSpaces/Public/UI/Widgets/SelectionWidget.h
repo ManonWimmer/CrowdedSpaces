@@ -22,7 +22,7 @@ protected:
 	TArray<TScriptInterface<ISelectableStatProvider>> BoundStats;
 
 	UPROPERTY()
-	AActor* SelectedActor = nullptr;
+	TObjectPtr<AActor> SelectedActor = nullptr;
 
 	UPROPERTY()
 	FString ActorDisplayName = "";

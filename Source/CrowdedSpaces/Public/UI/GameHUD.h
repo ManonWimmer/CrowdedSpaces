@@ -21,7 +21,7 @@ public:
 
 	// Generic functions
 	template<typename T>
-	T* GetOrCreateWidget(TSubclassOf<UCustomWidget> WidgetClass);
+	TObjectPtr<T> GetOrCreateWidget(TSubclassOf<UCustomWidget> WidgetClass);
 
 	UFUNCTION()
 	void ShowWidget(TSubclassOf<UCustomWidget> WidgetClass, bool bShow, ESlateVisibility VisibilityOnShow);
@@ -87,7 +87,7 @@ private:
 	TSubclassOf<UCustomWidget> TimeBP;
 
 	UPROPERTY()
-	TMap<TSubclassOf<UCustomWidget>, UCustomWidget*> WidgetInstances;
+	TMap<TSubclassOf<UCustomWidget>, TObjectPtr<UCustomWidget>> WidgetInstances;
 
 	int CursorOverUI = 0;
 

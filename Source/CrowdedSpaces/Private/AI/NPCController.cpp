@@ -10,11 +10,11 @@ void ANPCController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
-	ANPC* const NPC = Cast<ANPC>(InPawn);
+	TObjectPtr<ANPC> const NPC = Cast<ANPC>(InPawn);
 	if (!NPC)
 		return;
 	
-	UBehaviorTree* const Tree = NPC->GetBehaviorTree();
+	TObjectPtr<UBehaviorTree> const Tree = NPC->GetBehaviorTree();
 	if (!Tree)
 		return;
 	

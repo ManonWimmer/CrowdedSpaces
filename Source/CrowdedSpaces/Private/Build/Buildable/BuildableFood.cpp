@@ -52,7 +52,7 @@ FString ABuildableFood::GetDisplayName() const
 	return "Food";
 }
 
-AActor* ABuildableFood::GetSelectableActor()
+TObjectPtr<AActor> ABuildableFood::GetSelectableActor()
 {
 	return this;
 }

@@ -43,13 +43,13 @@ public:
 
 private:
 	UPROPERTY()
-	AGhostObject* CurrentGhost;
+	TObjectPtr<AGhostObject> CurrentGhost;
 
 	UPROPERTY()
-	UBuildData* CurrentBuildData = nullptr;
+	TObjectPtr<UBuildData> CurrentBuildData = nullptr;
 
 	UPROPERTY()
-	TArray<UBuildData*> BuildDataObjects; // Send by game state
+	TArray<TObjectPtr<UBuildData>> BuildDataObjects; // Send by game state
 
 	UPROPERTY()
 	float SnapSize = 100.f; // Send by game state
@@ -64,10 +64,10 @@ private:
 	bool GetCursorHit(FVector& OutHit) const;
 
 	UPROPERTY()
-	AGameHUD* GameHUD;
+	TObjectPtr<AGameHUD> GameHUD;
 
 	UPROPERTY()
-	UMoneyComponent* MoneyComponent;
+	TObjectPtr<UMoneyComponent> MoneyComponent;
 
 	UPROPERTY()
 	bool bTickEnabled = false;

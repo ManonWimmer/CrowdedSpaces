@@ -9,7 +9,7 @@ void ACrowdedGameState::BeginPlay()
 	Super::BeginPlay();
 
 	// Get build subsystem & send data
-	UBuildSubsystem* BuildSubsystem = GetWorld()->GetSubsystem<UBuildSubsystem>();
+	TObjectPtr<UBuildSubsystem> BuildSubsystem = GetWorld()->GetSubsystem<UBuildSubsystem>();
 	if (!BuildSubsystem)
 		return;
 		
@@ -17,14 +17,14 @@ void ACrowdedGameState::BeginPlay()
 	BuildSubsystem->SetSnapSize(SnapSize);
 
 	// Get time subsystem & send data
-	UTimeSubsystem* TimeSubsystem = GetWorld()->GetSubsystem<UTimeSubsystem>();
+	TObjectPtr<UTimeSubsystem> TimeSubsystem = GetWorld()->GetSubsystem<UTimeSubsystem>();
 	if (!TimeSubsystem)
 		return;
 
 	TimeSubsystem->SetTimeData(TimeData);
 
 	// Get moral event subsystem & send data
-	UMoralEventSubsystem* MoralEventSubsystem = GetWorld()->GetSubsystem<UMoralEventSubsystem>();
+	TObjectPtr<UMoralEventSubsystem> MoralEventSubsystem = GetWorld()->GetSubsystem<UMoralEventSubsystem>();
 	if (!MoralEventSubsystem)
 		return;
 

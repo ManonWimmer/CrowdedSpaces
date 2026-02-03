@@ -33,11 +33,11 @@ private:
 	void GetGameHUD();
 	
 	UPROPERTY()
-	UMoralEvent* CurrentEvent = nullptr;
+	TObjectPtr<UMoralEvent> CurrentEvent = nullptr;
 
 	UPROPERTY()
 	TArray<TSubclassOf<UMoralEvent>> PossibleEvents; // Sent by game state
 	
 	UPROPERTY()
-	AGameHUD* GameHUD = nullptr;
+	TObjectPtr<AGameHUD> GameHUD = nullptr;
 };

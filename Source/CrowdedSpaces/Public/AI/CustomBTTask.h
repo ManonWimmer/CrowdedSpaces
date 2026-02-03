@@ -19,5 +19,5 @@ protected:
 	ENPCAction NPCAction;
 
 	UPROPERTY()
-	ANPC* NPC = nullptr;
+	TObjectPtr<ANPC> NPC = nullptr;
 };

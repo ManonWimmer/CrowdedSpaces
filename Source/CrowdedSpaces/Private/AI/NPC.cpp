@@ -32,11 +32,11 @@ void ANPC::BeginPlay()
 	if (!FoodBarWidget)
 		return;
 
-	UUserWidget* UserWidget = FoodBarWidget->GetUserWidgetObject();
+	TObjectPtr<UUserWidget> UserWidget = FoodBarWidget->GetUserWidgetObject();
 	if (!UserWidget)
 		return;
 
-	UFoodBarWidget* FoodWidget = Cast<UFoodBarWidget>(UserWidget);
+	TObjectPtr<UFoodBarWidget> FoodWidget = Cast<UFoodBarWidget>(UserWidget);
 	if (!FoodWidget)
 		return;
 	
@@ -69,7 +69,7 @@ FString ANPC::GetDisplayName() const
 	return "NPC";
 }
 
-AActor* ANPC::GetSelectableActor()
+TObjectPtr<AActor> ANPC::GetSelectableActor()
 {
 	return this;
 }

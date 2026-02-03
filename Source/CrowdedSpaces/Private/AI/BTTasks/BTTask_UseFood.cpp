@@ -18,7 +18,7 @@ UBTTask_UseFood::UBTTask_UseFood(FObjectInitializer const& ObjectInitializer)
 
 EBTNodeResult::Type UBTTask_UseFood::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	ANPCController* Controller = Cast<ANPCController>(OwnerComp.GetAIOwner());
+	TObjectPtr<ANPCController> Controller = Cast<ANPCController>(OwnerComp.GetAIOwner());
 	if (!Controller)
 		return EBTNodeResult::Failed;
 
@@ -30,11 +30,11 @@ EBTNodeResult::Type UBTTask_UseFood::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 	StartAction();
 	
 	// Get the target bed from blackboard
-	UBlackboardComponent* Blackboard = OwnerComp.GetBlackboardComponent();
+	TObjectPtr<UBlackboardComponent> Blackboard = OwnerComp.GetBlackboardComponent();
 	if (!Blackboard)
 		return EBTNodeResult::Failed;
 
-	ABuildableFood* TargetFood = Cast<ABuildableFood>(Blackboard->GetValueAsObject(TargetFoodKey.SelectedKeyName));
+	TObjectPtr<ABuildableFood> TargetFood = Cast<ABuildableFood>(Blackboard->GetValueAsObject(TargetFoodKey.SelectedKeyName));
 	if (!TargetFood)
 		return EBTNodeResult::Failed;
 	
@@ -62,7 +62,7 @@ void UBTTask_UseFood::OnFoodFull()
 	if (!OwnerCompPtr.IsValid() || !FoodComp.IsValid())
 		return;
 
-	ANPCController* Controller = Cast<ANPCController>(OwnerCompPtr->GetAIOwner());
+	TObjectPtr<ANPCController> Controller = Cast<ANPCController>(OwnerCompPtr->GetAIOwner());
 	if (!Controller)
 		return;
 
@@ -85,11 +85,11 @@ void UBTTask_UseFood::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* N
 	Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);
 	
 	// Set food as available
-	UBlackboardComponent* Blackboard = OwnerCompPtr->GetBlackboardComponent();
+	TObjectPtr<UBlackboardComponent> Blackboard = OwnerCompPtr->GetBlackboardComponent();
 	if (!Blackboard)
 		return;
 	
-	ABuildableFood* TargetFood = Cast<ABuildableFood>(Blackboard->GetValueAsObject(TargetFoodKey.SelectedKeyName));
+	TObjectPtr<ABuildableFood> TargetFood = Cast<ABuildableFood>(Blackboard->GetValueAsObject(TargetFoodKey.SelectedKeyName));
 	if (!TargetFood)
 		return;
 	

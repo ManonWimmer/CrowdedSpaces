@@ -40,7 +40,7 @@ void UMoralEventSubsystem::OnChoiceSelected(EMoralEventType Choice)
 
 void UMoralEventSubsystem::GetGameHUD()
 {
-	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	TObjectPtr<APlayerController> PC = GetWorld()->GetFirstPlayerController();
 	if (!PC) return;
 
 	GameHUD = Cast<AGameHUD>(PC->GetHUD());

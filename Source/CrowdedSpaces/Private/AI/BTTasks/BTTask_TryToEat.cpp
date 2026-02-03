@@ -19,11 +19,11 @@ UBTTask_TryToEat::UBTTask_TryToEat(FObjectInitializer const& ObjectInitializer)
 
 EBTNodeResult::Type UBTTask_TryToEat::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	UFoodComponent* NPCFoodComponent = nullptr;
-	UFoodComponent* PlayerFoodComponent = nullptr;
+	TObjectPtr<UFoodComponent> NPCFoodComponent = nullptr;
+	TObjectPtr<UFoodComponent> PlayerFoodComponent = nullptr;
 	
 	// Get NPC Food component
-	ANPCController* const Controller = Cast<ANPCController>(OwnerComp.GetAIOwner());
+	TObjectPtr<ANPCController> const Controller = Cast<ANPCController>(OwnerComp.GetAIOwner());
 	if (!Controller)
 		return EBTNodeResult::Failed;
 	
@@ -37,11 +37,11 @@ EBTNodeResult::Type UBTTask_TryToEat::ExecuteTask(UBehaviorTreeComponent& OwnerC
 	NPCFoodComponent = NPC->GetFoodComponent();
 	
 	// Get Player Food Component
-	ACrowdedPlayerController* PlayerController = Cast<ACrowdedPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	TObjectPtr<ACrowdedPlayerController> PlayerController = Cast<ACrowdedPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 	if (!PlayerController)
 		return EBTNodeResult::Failed;
 
-	ACrowdedPlayerState* PlayerState = PlayerController->GetPlayerState<ACrowdedPlayerState>();
+	TObjectPtr<ACrowdedPlayerState> PlayerState = PlayerController->GetPlayerState<ACrowdedPlayerState>();
 	if (!PlayerState)
 		return EBTNodeResult::Failed;
 

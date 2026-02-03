@@ -16,7 +16,7 @@ UBTTask_FindNearestAvailableFood::UBTTask_FindNearestAvailableFood(FObjectInitia
 
 EBTNodeResult::Type UBTTask_FindNearestAvailableFood::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	ANPCController* const Controller = Cast<ANPCController>(OwnerComp.GetAIOwner());
+	TObjectPtr<ANPCController> const Controller = Cast<ANPCController>(OwnerComp.GetAIOwner());
 	if (!Controller)
 		return EBTNodeResult::Failed;
 
@@ -24,7 +24,7 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableFood::ExecuteTask(UBehaviorTreeC
 	if (!NPC)
 		return EBTNodeResult::Failed;
 
-	UWorld* World = NPC->GetWorld();
+	TObjectPtr<UWorld> World = NPC->GetWorld();
 	if (!World)
 		return EBTNodeResult::Failed;
 
@@ -32,7 +32,7 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableFood::ExecuteTask(UBehaviorTreeC
 	ABuildableFood* NearestAvailableFood = nullptr;
 	float NearestDistance = 0.0f;
 
-	UBuildableRegistrySubsystem* BRS = World->GetSubsystem<UBuildableRegistrySubsystem>();
+	TObjectPtr<UBuildableRegistrySubsystem> BRS = World->GetSubsystem<UBuildableRegistrySubsystem>();
 	if (!BRS)
 		return EBTNodeResult::Failed;
 	
@@ -67,7 +67,7 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableFood::ExecuteTask(UBehaviorTreeC
 	// Success or Failed + set keys
 	if (NearestAvailableFood)
 	{
-		UBlackboardComponent* Blackboard = OwnerComp.GetBlackboardComponent();
+		TObjectPtr<UBlackboardComponent> Blackboard = OwnerComp.GetBlackboardComponent();
 		if (!Blackboard)
 			return EBTNodeResult::Failed;
 		

@@ -56,14 +56,14 @@ void AFreeCameraPawn::Tick(float DeltaTime)
 
 void AFreeCameraPawn::BindControllerEvents()
 {
-	APlayerController* PC = Cast<APlayerController>(GetController());
+	TObjectPtr<APlayerController> PC = Cast<APlayerController>(GetController());
 	if (!PC)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Free Camera Pawn : Player Controller Null"));
 		return;
 	}
 
-	ACrowdedPlayerController* CrowdedPC = Cast<ACrowdedPlayerController>(PC);
+	TObjectPtr<ACrowdedPlayerController> CrowdedPC = Cast<ACrowdedPlayerController>(PC);
 	if (!CrowdedPC)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Free Camera Pawn : Crowded Player Controller Null"));

@@ -14,7 +14,7 @@ UBTTask_FindRandomLocation::UBTTask_FindRandomLocation(FObjectInitializer const&
 
 EBTNodeResult::Type UBTTask_FindRandomLocation::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	ANPCController* const Controller = Cast<ANPCController>(OwnerComp.GetAIOwner());
+	TObjectPtr<ANPCController> const Controller = Cast<ANPCController>(OwnerComp.GetAIOwner());
 	if (!Controller)
 		return EBTNodeResult::Failed;
 
@@ -24,7 +24,7 @@ EBTNodeResult::Type UBTTask_FindRandomLocation::ExecuteTask(UBehaviorTreeCompone
 	
 	// Find random location in navigation system
 	FVector const Origin = NPC->GetActorLocation();
-	if (UNavigationSystemV1* const NavigationSystem = UNavigationSystemV1::GetCurrent(GetWorld()))
+	if (TObjectPtr<UNavigationSystemV1> const NavigationSystem = UNavigationSystemV1::GetCurrent(GetWorld()))
 	{
 		FNavLocation Location;
 		if (NavigationSystem->GetRandomPointInNavigableRadius(Origin, SearchRadius, Location))

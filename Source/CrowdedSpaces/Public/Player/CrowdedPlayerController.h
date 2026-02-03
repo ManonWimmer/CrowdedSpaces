@@ -69,5 +69,5 @@ private:
 	ISelectable* SelectedObject = nullptr;
 
 	UPROPERTY()
-	AGameHUD* GameHUD = nullptr;
+	TObjectPtr<AGameHUD> GameHUD = nullptr;
 };

@@ -24,7 +24,7 @@ public:
 	virtual void OnDeselected() override;
 	
 	virtual FString GetDisplayName() const override;
-	virtual AActor* GetSelectableActor() override;
+	virtual TObjectPtr<AActor> GetSelectableActor() override;
 
 	UProductionComponent* GetProductionComponent() const { return ProductionComponent; }
 

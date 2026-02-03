@@ -18,7 +18,7 @@ UBTTask_UseBed::UBTTask_UseBed(FObjectInitializer const& ObjectInitializer)
 
 EBTNodeResult::Type UBTTask_UseBed::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	ANPCController* Controller = Cast<ANPCController>(OwnerComp.GetAIOwner());
+	TObjectPtr<ANPCController> Controller = Cast<ANPCController>(OwnerComp.GetAIOwner());
 	if (!Controller)
 		return EBTNodeResult::Failed;
 
@@ -30,11 +30,11 @@ EBTNodeResult::Type UBTTask_UseBed::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 	StartAction();
 	
 	// Get the target bed from blackboard
-	UBlackboardComponent* Blackboard = OwnerComp.GetBlackboardComponent();
+	TObjectPtr<UBlackboardComponent> Blackboard = OwnerComp.GetBlackboardComponent();
 	if (!Blackboard)
 		return EBTNodeResult::Failed;
 
-	ABuildableBed* TargetBed = Cast<ABuildableBed>(Blackboard->GetValueAsObject(TargetBedKey.SelectedKeyName));
+	TObjectPtr<ABuildableBed> TargetBed = Cast<ABuildableBed>(Blackboard->GetValueAsObject(TargetBedKey.SelectedKeyName));
 	if (!TargetBed)
 		return EBTNodeResult::Failed;
 	
@@ -62,7 +62,7 @@ void UBTTask_UseBed::OnEnergyFull()
 	if (!OwnerCompPtr.IsValid() || !EnergyComp.IsValid())
 		return;
 
-	ANPCController* Controller = Cast<ANPCController>(OwnerCompPtr->GetAIOwner());
+	TObjectPtr<ANPCController> Controller = Cast<ANPCController>(OwnerCompPtr->GetAIOwner());
 	if (!Controller)
 		return;
 
@@ -85,11 +85,11 @@ void UBTTask_UseBed::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* No
 	Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);
 	
 	// Set bed as available
-	UBlackboardComponent* Blackboard = OwnerCompPtr->GetBlackboardComponent();
+	TObjectPtr<UBlackboardComponent> Blackboard = OwnerCompPtr->GetBlackboardComponent();
 	if (!Blackboard)
 		return;
 	
-	ABuildableBed* TargetBed = Cast<ABuildableBed>(Blackboard->GetValueAsObject(TargetBedKey.SelectedKeyName));
+	TObjectPtr<ABuildableBed> TargetBed = Cast<ABuildableBed>(Blackboard->GetValueAsObject(TargetBedKey.SelectedKeyName));
 	if (!TargetBed)
 		return;
 	

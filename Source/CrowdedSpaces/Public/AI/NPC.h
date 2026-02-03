@@ -34,12 +34,12 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AI")
-	UBehaviorTree* BehaviorTree;
+	TObjectPtr<UBehaviorTree> BehaviorTree;
 
 private:
 	// Food
 	UPROPERTY(EditAnywhere)
-	UFoodComponent* FoodComponent;
+	TObjectPtr<UFoodComponent> FoodComponent;
 	
 	UPROPERTY(EditAnywhere, Category="Food")
 	float RemoveFoodInterval = 1.0f;
@@ -49,7 +49,7 @@ private:
 
 	// Oxygen
 	UPROPERTY(EditAnywhere)
-	UOxygenComponent* OxygenComponent;
+	TObjectPtr<UOxygenComponent> OxygenComponent;
 
 	UFUNCTION()
 	void RemoveFood() const;
@@ -58,11 +58,11 @@ private:
 	FTimerHandle RemoveFoodTimerHandle;
 
 	UPROPERTY(EditAnywhere)
-	UWidgetComponent* FoodBarWidget;
+	TObjectPtr<UWidgetComponent> FoodBarWidget;
 
 	// Energy
 	UPROPERTY(EditAnywhere)
-	UEnergyComponent* EnergyComponent;
+	TObjectPtr<UEnergyComponent> EnergyComponent;
 
 	// Action
 	UPROPERTY()
@@ -74,7 +74,7 @@ public:
 	virtual void OnDeselected() override;
 
 	virtual FString GetDisplayName() const override;
-	virtual AActor* GetSelectableActor() override;
+	virtual TObjectPtr<AActor> GetSelectableActor() override;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnStatChanged OnStatChanged; // Current action changed
