@@ -20,6 +20,21 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION(BlueprintCallable, Category = "Grid")
+	bool CheckIsValidCell(int Row, int Column);
+
+	UFUNCTION(BlueprintCallable, Category = "Grid")
+	bool GetCellAtLocation(FVector Location, int& OutRow, int& OutColumn);
+	
+	UFUNCTION(BlueprintCallable, Category = "Grid")
+	bool GetGridLocation(bool bIsCenter, int Row, int Column, FVector2D& OutGridLocation);
+
+	UFUNCTION(BlueprintCallable, Category = "Grid")
+	void SelectCell(int Row, int Column);
+	
+	UFUNCTION(BlueprintCallable, Category = "Grid")
+	void DeselectCell();
+
 private:
 	void DrawLine(FVector Start, FVector End, float Thickness, TArray<FVector>& Vertices, TArray<int>& Triangles);
 	float LineWidth() const; 

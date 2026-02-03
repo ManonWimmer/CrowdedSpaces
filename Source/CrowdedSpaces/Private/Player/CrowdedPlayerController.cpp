@@ -46,6 +46,10 @@ void ACrowdedPlayerController::SetupInputComponent()
 		return;
 	
 	InputSubsystem->AddMappingContext(CameraIMC, 0);
+
+	// ----- TEMPORAIRE TEST GRID PROTO ----- //
+	GridActor = Cast<AGridActor>(UGameplayStatics::GetActorOfClass(GetWorld(), AGridActor::StaticClass()));
+	// ----- TEMPORAIRE TEST GRID PROTO ----- //
 }
 
 void ACrowdedPlayerController::BeginPlay()
@@ -81,13 +85,31 @@ void ACrowdedPlayerController::LeftClickInput(const FInputActionValue& Value)
 	{
 		OnLeftClickGame.Broadcast();	
 	}
-
+	
 	if (!GameHUD)
 		return;
 	
 	// Handle click selection
 	FHitResult Hit;
 	bool bHit = GetHitResultUnderCursor(ECC_Visibility, false, Hit);
+	
+	// ----- TEMPORAIRE TEST GRID PROTO ----- //
+	if (GridActor)
+	{
+		FVector MouseLocation = Hit.Location;
+
+		int OutRow = 0;
+		int OutColumn = 0;
+		if (GridActor->GetCellAtLocation(MouseLocation ,OutRow, OutColumn))
+		{
+			GridActor->SelectCell(OutRow, OutColumn);
+		}
+		else
+		{
+			GridActor->DeselectCell();
+		}
+	}
+	// ----- TEMPORAIRE TEST GRID PROTO ----- //
 	
 	if (SelectedObject)
 	{

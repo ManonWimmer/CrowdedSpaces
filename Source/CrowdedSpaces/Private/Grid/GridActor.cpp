@@ -112,6 +112,54 @@ void AGridActor::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+bool AGridActor::CheckIsValidCell(int Row, int Column)
+{
+	return (Row >= 0 && Row < Rows && Column >= 0 && Column < Columns);
+}
+
+bool AGridActor::GetCellAtLocation(FVector Location, int& OutRow, int& OutColumn)
+{
+	OutRow = FMathf::Floor(Rows * ((Location.X - GetActorLocation().X) / LineWidth()));
+	OutColumn = FMathf::Floor(Columns * ((Location.Y - GetActorLocation().Y) / LineHeight()));
+
+	return CheckIsValidCell(OutRow, OutColumn);
+}
+
+bool AGridActor::GetGridLocation(bool bIsCenter, int Row, int Column, FVector2D& OutGridLocation)
+{
+	if (!CheckIsValidCell(Row, Column))
+		return false;
+
+	OutGridLocation.X = Row * CellSize + GetActorLocation().X;
+	OutGridLocation.Y = Column * CellSize + GetActorLocation().Y;
+	
+	if (bIsCenter)
+	{
+		OutGridLocation.X += CellSize / 2;
+		OutGridLocation.Y += CellSize / 2;
+	}
+	
+	return true;
+}
+
+void AGridActor::SelectCell(int Row, int Column)
+{
+	FVector2D GridLocation;
+	if (!GetGridLocation(false, Row, Column, GridLocation))
+	{
+		CellsProceduralMesh->SetVisibility(false);
+		return;
+	}
+
+	CellsProceduralMesh->SetVisibility(true);
+	CellsProceduralMesh->SetWorldLocation(FVector(GridLocation.X, GridLocation.Y, GetActorLocation().Z));
+}
+
+void AGridActor::DeselectCell()
+{
+	CellsProceduralMesh->SetVisibility(false);
+}
+
 void AGridActor::DrawLine(FVector Start, FVector End, float Thickness, TArray<FVector>& Vertices, TArray<int>& Triangles)
 {
 	float HalfThickness = Thickness / 2;
