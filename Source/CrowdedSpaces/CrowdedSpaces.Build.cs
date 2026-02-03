@@ -19,7 +19,8 @@ public class CrowdedSpaces : ModuleRules
 			"UMG", 
 			"AIModule",
 			"GameplayTasks",
-			"NavigationSystem"
+			"NavigationSystem",
+			"ProceduralMeshComponent"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
