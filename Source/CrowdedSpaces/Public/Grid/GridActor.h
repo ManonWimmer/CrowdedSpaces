@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "GridCell.h"
 #include "GameFramework/Actor.h"
 #include "ProceduralMeshComponent.h"
-#include "Components/InstancedStaticMeshComponent.h"
 #include "GridActor.generated.h"
 
 UCLASS()
@@ -20,33 +20,33 @@ protected:
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Grid")
-	bool CheckIsValidCell(int Row, int Column);
+	bool CheckIsValidCell(int Row, int Column) const;
 
 	UFUNCTION(BlueprintCallable, Category = "Grid")
-	bool GetCellAtLocation(FVector Location, int& OutRow, int& OutColumn);
+	bool GetCellAtLocation(FVector Location, int& OutRow, int& OutColumn) const;
 	
 	UFUNCTION(BlueprintCallable, Category = "Grid")
-	bool GetGridLocation(bool bIsCenter, int Row, int Column, FVector2D& OutGridLocation);
+	bool GetGridLocation(bool bIsCenter, int Row, int Column, FVector2D& OutGridLocation) const;
 
 	UFUNCTION(BlueprintCallable, Category = "Grid")
 	void SelectCell(int Row, int Column);
 	
 	UFUNCTION(BlueprintCallable, Category = "Grid")
-	void DeselectCell();
+	void DeselectSelectedCells();
+	
+	FGridCell* GetGridCell(int Row, int Column);
 
 private:
-	void DrawLine(FVector Start, FVector End, float Thickness, TArray<FVector>& Vertices, TArray<int>& Triangles);
+	void DrawLine(const FVector& Start, const FVector& End, float Thickness, TArray<FVector>& Vertices, TArray<int>& Triangles);
 	float LineWidth() const; 
 	float LineHeight() const;
+	
 	TObjectPtr<UMaterialInstanceDynamic> CreateMaterialInstance(FLinearColor Color, float Opacity);
 	
 	UPROPERTY(EditAnywhere, Category = "Grid")
 	TObjectPtr<UProceduralMeshComponent> LinesProceduralMesh;
 
-	UPROPERTY(EditAnywhere, Category = "Grid")
-	TObjectPtr<UProceduralMeshComponent> CellsProceduralMesh;
-
-	UPROPERTY(EditAnywhere, Category="Materials")
+	UPROPERTY(EditAnywhere, Category="Grid")
 	TObjectPtr<UMaterialInterface> BaseMaterial;
 
 	UPROPERTY(EditAnywhere, Category = "Grid")
@@ -72,26 +72,7 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Grid")
 	float CellOpacity = 0.25f;
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UStaticMesh> CellMesh; // Plane
-
-	UPROPERTY()
-	TObjectPtr<UInstancedStaticMeshComponent> CellsISM;
-
-	// ----- TEST CREATE IN TICK ----- //
-	TArray<FVector> PendingVertices;
-	TArray<int32> PendingTriangles;
-	TArray<FVector> PendingNormals;
-	TArray<FVector2D> PendingUV0;
-	TArray<FColor> PendingVertexColors;
-	TArray<FProcMeshTangent> PendingTangents;
-
-	int32 PendingVertexIndex = 0;
-	int32 CurrentRow = 0;
-	int32 CurrentCol = 0;
-	int32 CellsPerTick = 5; 
-
-	bool bGeneratingCells = false;
-	// ----- TEST CREATE IN TICK ----- //
+	
+	TMap<FIntPoint, FGridCell> Cells;
+	TArray<FGridCell*> SelectedCells;
 };

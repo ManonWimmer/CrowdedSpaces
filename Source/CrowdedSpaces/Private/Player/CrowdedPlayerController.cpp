@@ -106,7 +106,7 @@ void ACrowdedPlayerController::LeftClickInput(const FInputActionValue& Value)
 		}
 		else
 		{
-			GridActor->DeselectCell();
+			GridActor->DeselectSelectedCells();
 		}
 	}
 	// ----- TEMPORAIRE TEST GRID PROTO ----- //
