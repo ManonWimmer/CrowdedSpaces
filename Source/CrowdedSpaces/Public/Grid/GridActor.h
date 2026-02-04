@@ -35,6 +35,10 @@ public:
 	void DeselectSelectedCells();
 	
 	FGridCell* GetGridCell(int Row, int Column);
+	
+	int GetCellSize() const { return CellSize;}
+	int GetRows() const { return Rows;}
+	int GetColumns() const { return Columns;}
 
 private:
 	void DrawLine(const FVector& Start, const FVector& End, float Thickness, TArray<FVector>& Vertices, TArray<int>& Triangles);

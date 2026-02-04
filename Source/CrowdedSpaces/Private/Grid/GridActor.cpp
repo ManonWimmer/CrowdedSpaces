@@ -142,8 +142,11 @@ bool AGridActor::CheckIsValidCell(const int Row, const int Column) const
 
 bool AGridActor::GetCellAtLocation(const FVector Location, int& OutRow, int& OutColumn) const
 {
-	OutRow = FMath::FloorToInt(Rows * ((Location.X - GetActorLocation().X) / LineWidth()));
-	OutColumn = FMath::FloorToInt(Columns * ((Location.Y - GetActorLocation().Y) / LineHeight()));
+	float LocalX = Location.X - GetActorLocation().X;
+	float LocalY = Location.Y - GetActorLocation().Y;
+	
+	OutColumn = FMath::FloorToInt(LocalY / CellSize); 
+	OutRow = FMath::FloorToInt(LocalX / CellSize);
 	
 	return CheckIsValidCell(OutRow, OutColumn);
 }
@@ -155,8 +158,6 @@ bool AGridActor::GetGridLocation(const bool bIsCenter, const int Row, const int 
 
 	OutGridLocation.X = Row * CellSize + GetActorLocation().X;
 	OutGridLocation.Y = Column * CellSize + GetActorLocation().Y;
-
-	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("Get grid location - Row : %d, Column : %d"), Row, Column));
 	
 	if (bIsCenter)
 	{

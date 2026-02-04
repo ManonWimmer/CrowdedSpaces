@@ -25,4 +25,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int MoneyCost;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int GridRowsX = 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int GridColumnsY = 1;
 };

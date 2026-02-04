@@ -132,30 +132,52 @@ void UBuildSubsystem::PlaceObject()
 	if (!CurrentGhost || !CurrentBuildData || !CurrentBuildData->BuildClass || !GridActor)
 		return;
 
-	FVector GhostLocation = CurrentGhost->GetActorLocation();
-	int Row, Column;
-	if (!GridActor->GetCellAtLocation(GhostLocation, Row, Column))
-		return;
+	int SizeX = CurrentBuildData->GridRowsX;
+	int SizeY = CurrentBuildData->GridColumnsY;
 
-	FGridCell* Cell = GridActor->GetGridCell(Row, Column);
-	if (!Cell || Cell->bOccupied)
-		return;
+	int StartRow = 0, StartCol = 0;
+	GridActor->GetCellAtLocation(CurrentGhost->GetActorLocation(), StartRow, StartCol);
+	
+	StartRow -= SizeX / 2;
+	StartCol -= SizeY / 2;
 
+	StartRow = FMath::Clamp(StartRow, 0, GridActor->GetRows() - SizeX);
+	StartCol = FMath::Clamp(StartCol, 0, GridActor->GetColumns() - SizeY);
+
+	// Check can place
+	for (int Row = StartRow; Row < StartRow + SizeX; ++Row)
+	{
+		for (int Col = StartCol; Col < StartCol + SizeY; ++Col)
+		{
+			FGridCell* Cell = GridActor->GetGridCell(Row, Col);
+			if (!Cell || Cell->bOccupied)
+				return; 
+		}
+	}
 	TObjectPtr<ABuildableObject> Placed = GetWorld()->SpawnActor<ABuildableObject>(
 		CurrentBuildData->BuildClass,
-		GhostLocation,
+		CurrentGhost->GetActorLocation(),
 		FRotator::ZeroRotator
 	);
 
 	if (!Placed)
 		return;
 
-	// Scale from default
+	// Default scale
 	TObjectPtr<ABuildableObject> DefaultBuildable = CurrentBuildData->BuildClass->GetDefaultObject<ABuildableObject>();
 	Placed->SetActorScale3D(DefaultBuildable->GetActorScale3D());
-	
-	Cell->bOccupied = true;
-	
+
+	// Set cells occupied
+	for (int Row = StartRow; Row < StartRow + SizeX; ++Row)
+	{
+		for (int Col = StartCol; Col < StartCol + SizeY; ++Col)
+		{
+			FGridCell* Cell = GridActor->GetGridCell(Row, Col);
+			if (Cell)
+				Cell->bOccupied = true;
+		}
+	}
+
 	if (MoneyComponent)
 		MoneyComponent->RemoveMoney(CurrentBuildData->MoneyCost);
 }
@@ -176,22 +198,48 @@ void UBuildSubsystem::UpdateGhost() const
 		return;
 	}
 
-	int Row, Column;
-	if (GridActor->GetCellAtLocation(HitLocation, Row, Column))
+	int HitRow, HitCol;
+	if (!GridActor->GetCellAtLocation(HitLocation, HitRow, HitCol))
 	{
-		FVector2D CellLocation;
-		GridActor->GetGridLocation(true, Row, Column, CellLocation);
-
 		GridActor->DeselectSelectedCells();
-		GridActor->SelectCell(Row, Column);
-
-		FVector SnappedLocation(CellLocation.X, CellLocation.Y, GridActor->GetActorLocation().Z); 
-		CurrentGhost->SetActorLocation(SnappedLocation);
-		
-		FGridCell* Cell = GridActor->GetGridCell(Row, Column);
-		bool bValid = Cell && !Cell->bOccupied;
+		return;
 	}
+
+	if (!CurrentBuildData)
+		return;
+
+	int SizeX = CurrentBuildData->GridRowsX;
+	int SizeY = CurrentBuildData->GridColumnsY;
+
+	int StartRow = HitRow - (SizeX - 1) / 2;
+	int StartCol = HitCol - (SizeY - 1) / 2;
+
+	StartRow = FMath::Clamp(StartRow, 0, GridActor->GetRows() - SizeX);
+	StartCol = FMath::Clamp(StartCol, 0, GridActor->GetColumns() - SizeY);
+	
+	GridActor->DeselectSelectedCells();
+	for (int Row = StartRow; Row < StartRow + SizeX; ++Row)
+	{
+		for (int Col = StartCol; Col < StartCol + SizeY; ++Col)
+		{
+			FGridCell* Cell = GridActor->GetGridCell(Row, Col);
+			if (Cell)
+				GridActor->SelectCell(Row, Col);
+		}
+	}
+	
+	FVector2D TopLeft;
+	GridActor->GetGridLocation(false, StartRow, StartCol, TopLeft);
+	
+	FVector SnappedLocation(
+		TopLeft.X + (SizeX * GridActor->GetCellSize()) / 2.0f,
+		TopLeft.Y + (SizeY * GridActor->GetCellSize()) / 2.0f,
+		GridActor->GetActorLocation().Z
+	);
+
+	CurrentGhost->SetActorLocation(SnappedLocation);
 }
+
 
 bool UBuildSubsystem::GetCursorHit(FVector& OutHit) const
 {
