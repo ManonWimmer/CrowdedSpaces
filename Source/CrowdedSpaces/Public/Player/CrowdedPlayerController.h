@@ -3,11 +3,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "InputMappingContext.h"
-
-// ----- TEMPORAIRE TEST GRID PROTO ----- //
-#include "Grid/GridActor.h"
-// ----- TEMPORAIRE TEST GRID PROTO ----- //
-
 #include "Player/PlayerActionsData.h"
 #include "Selection/Selectable.h"
 #include "UI/GameHUD.h"
@@ -75,9 +70,4 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<AGameHUD> GameHUD = nullptr;
-
-	// ----- TEMPORAIRE TEST GRID PROTO ----- //
-	UPROPERTY()
-	TObjectPtr<AGridActor> GridActor = nullptr;
-	// ----- TEMPORAIRE TEST GRID PROTO ----- //
 };

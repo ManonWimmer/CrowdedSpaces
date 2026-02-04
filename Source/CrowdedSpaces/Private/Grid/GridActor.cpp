@@ -174,6 +174,12 @@ void AGridActor::SelectCell(const int Row, const int Column)
 		return;
 	
 	NewSelectedCell->CellProceduralMesh->SetVisibility(true);
+
+	if (NewSelectedCell->bOccupied)
+		NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Red);
+	else
+		NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Green);
+	
 	SelectedCells.Add(NewSelectedCell);
 }
 

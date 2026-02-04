@@ -122,11 +122,14 @@ void UBuildSubsystem::StopBuilding()
 
 	if (CurrentGhost)
 		CurrentGhost->SetActorHiddenInGame(true);
+
+	if (GridActor)
+		GridActor->DeselectSelectedCells();
 }
 
 void UBuildSubsystem::PlaceObject()
 {
-	if (!CurrentGhost || !CurrentBuildData || !CurrentBuildData->BuildClass)
+	if (!CurrentGhost || !CurrentBuildData || !CurrentBuildData->BuildClass || !GridActor)
 		return;
 
 	FVector GhostLocation = CurrentGhost->GetActorLocation();
@@ -155,44 +158,23 @@ void UBuildSubsystem::PlaceObject()
 	
 	if (MoneyComponent)
 		MoneyComponent->RemoveMoney(CurrentBuildData->MoneyCost);
-
-	/* OLD 
-	const FVector Location = CurrentGhost->GetActorLocation();
-	const FVector Extent = CurrentGhost->GetMeshExtent();
-
-	if (!CanPlace(Location, Extent))
-		return;
-
-	TObjectPtr<ABuildableObject> Placed = GetWorld()->SpawnActor<ABuildableObject>(
-		CurrentBuildData->BuildClass,
-		Location,
-		FRotator::ZeroRotator
-	);
-
-	if (!Placed)
-		return;
-
-	//  Scale from BP
-	TObjectPtr<ABuildableObject> const DefaultBuildable =
-		CurrentBuildData->BuildClass->GetDefaultObject<ABuildableObject>();
-
-	Placed->SetActorScale3D(DefaultBuildable->GetActorScale3D());
-
-	// Money
-	if (MoneyComponent)
-		MoneyComponent->RemoveMoney(CurrentBuildData->MoneyCost);
-	*/
 }
 
 
 void UBuildSubsystem::UpdateGhost() const
 {
-	if(!CurrentGhost)
+	if(!CurrentGhost || !GridActor)
+		return;
+
+	if (CurrentGhost->IsHidden())
 		return;
 
 	FVector HitLocation;
 	if(!GetCursorHit(HitLocation))
+	{
+		GridActor->DeselectSelectedCells();
 		return;
+	}
 
 	int Row, Column;
 	if (GridActor->GetCellAtLocation(HitLocation, Row, Column))
@@ -200,47 +182,15 @@ void UBuildSubsystem::UpdateGhost() const
 		FVector2D CellLocation;
 		GridActor->GetGridLocation(true, Row, Column, CellLocation);
 
-		FVector SnappedLocation(CellLocation.X, CellLocation.Y, HitLocation.Z); 
+		GridActor->DeselectSelectedCells();
+		GridActor->SelectCell(Row, Column);
+
+		FVector SnappedLocation(CellLocation.X, CellLocation.Y, GridActor->GetActorLocation().Z); 
 		CurrentGhost->SetActorLocation(SnappedLocation);
 		
 		FGridCell* Cell = GridActor->GetGridCell(Row, Column);
 		bool bValid = Cell && !Cell->bOccupied;
-		CurrentGhost->SetValid(bValid);
 	}
-
-	/* OLD
-	FVector MeshExtent = CurrentGhost->GetMeshExtent(); 
-	FVector GhostLocation = HitLocation + FVector(0.f, 0.f, MeshExtent.Z); // pivot not in the center anymore 
-	
-	FVector Snapped = GhostLocation;
-	Snapped.X = FMath::RoundToFloat(Snapped.X / SnapSize) * SnapSize;
-	Snapped.Y = FMath::RoundToFloat(Snapped.Y / SnapSize) * SnapSize;
-
-	CurrentGhost->SetActorLocation(Snapped);
-	
-	bool bValid = CanPlace(Snapped, CurrentGhost->GetMeshExtent());
-	CurrentGhost->SetValid(bValid);
-	*/
-}
-
-bool UBuildSubsystem::CanPlace(const FVector& Location, const FVector& Extent) const
-{
-	FCollisionShape BoxShape = FCollisionShape::MakeBox(Extent);
-	FCollisionQueryParams Params;
-	Params.bTraceComplex = true;
-	
-	FCollisionObjectQueryParams ObjectQuery;
-	ObjectQuery.AddObjectTypesToQuery(ECC_GameTraceChannel1); // Build
-
-	bool bBlocked = GetWorld()->OverlapAnyTestByObjectType(
-		Location,
-		FQuat::Identity,
-		ObjectQuery,
-		BoxShape,
-		Params
-	);
-	
-	return !bBlocked;
 }
 
 bool UBuildSubsystem::GetCursorHit(FVector& OutHit) const

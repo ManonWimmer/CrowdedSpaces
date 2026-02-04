@@ -59,9 +59,6 @@ private:
 	void UpdateGhost() const;
 
 	UFUNCTION()
-	bool CanPlace(const FVector& Location, const FVector& Extent) const;
-
-	UFUNCTION()
 	bool GetCursorHit(FVector& OutHit) const;
 
 	UPROPERTY()
