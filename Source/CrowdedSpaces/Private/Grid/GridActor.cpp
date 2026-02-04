@@ -1,5 +1,6 @@
 ﻿#include "Grid/GridActor.h"
 
+
 AGridActor::AGridActor()
 {
 	LinesProceduralMesh = CreateDefaultSubobject<UProceduralMeshComponent>("LinesProceduralMesh");
@@ -8,13 +9,22 @@ AGridActor::AGridActor()
 	RootComponent = CreateDefaultSubobject<USceneComponent>("Root");
 	LinesProceduralMesh->SetupAttachment(RootComponent);
 	CellsProceduralMesh->SetupAttachment(RootComponent);
+
+	// ----- TEST INSTANCED MESH ----- //
+	CellsISM = CreateDefaultSubobject<UInstancedStaticMeshComponent>("CellsISM");
+	CellsISM->SetupAttachment(RootComponent);
+	CellsISM->SetMobility(EComponentMobility::Movable);
+	// ----- TEST INSTANCED MESH ----- //
 	
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 }
 
 void AGridActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
+
+	LinesProceduralMesh->ClearAllMeshSections();
+	CellsProceduralMesh->ClearAllMeshSections();
 	
 	TObjectPtr<UMaterialInstanceDynamic> CellMaterialInstance = CreateMaterialInstance(CellColor, CellOpacity);
 	
@@ -105,11 +115,177 @@ void AGridActor::OnConstruction(const FTransform& Transform)
 void AGridActor::BeginPlay()
 {
 	Super::BeginPlay();
-}
 
-void AGridActor::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
+	// ----- TEST POOL COMPONENTS ----- //
+	/*
+	for (int i = 0; i < Rows; i++)
+	{
+		for (int j = 0; j < Columns; j++)
+		{
+			UProceduralMeshComponent* OtherCellProceduralMesh = NewObject<UProceduralMeshComponent>(this);
+			OtherCellProceduralMesh->RegisterComponent();
+			OtherCellProceduralMesh->AttachToComponent(
+				RootComponent,
+				FAttachmentTransformRules::KeepRelativeTransform
+			);
+
+			FVector CellLocation(
+                        i * CellSize,
+                        j * CellSize,
+                        0
+                    );
+            
+                    OtherCellProceduralMesh->SetRelativeLocation(CellLocation);
+
+			OtherCellProceduralMesh->SetVisibility(true);
+			
+			TArray<FVector> OtherCellVertices;
+			TArray<int> OtherCellTriangles;
+			float HalfCell = CellSize / 2;
+			DrawLine(FVector(0, HalfCell, 0), FVector(CellSize, HalfCell, 0), CellSize, OtherCellVertices, OtherCellTriangles);
+			TArray<FVector> OtherCellNormals;         
+			TArray<FVector2D> OtherCellUV0;           
+			TArray<FColor> OtherCellVertexColors;     
+			TArray<FProcMeshTangent> OtherCellTangents;
+
+			for (int x = 0; x < OtherCellVertices.Num(); x++)
+			{
+				OtherCellNormals.Add(FVector::UpVector); 
+				OtherCellUV0.Add(FVector2D(0,0)); 
+			}
+	
+			OtherCellProceduralMesh->CreateMeshSection(
+				0,           
+				OtherCellVertices,
+				OtherCellTriangles,
+				OtherCellNormals,
+				OtherCellUV0,
+				OtherCellVertexColors,
+				OtherCellTangents,
+				false         
+			);
+
+			FLinearColor RandomColor = FLinearColor::MakeRandomColor();
+
+			TObjectPtr<UMaterialInstanceDynamic> CellsMaterialInstance =
+				CreateMaterialInstance(RandomColor, CellOpacity);
+			OtherCellProceduralMesh->SetMaterial(0, CellsMaterialInstance);
+		}
+	}
+	*/
+	// ----- TEST POOL COMPONENTS ----- //
+
+	// ----- TEST INSTANCED MESH ----- //
+	/*
+	if (!CellMesh) return; 
+
+	CellsISM->SetStaticMesh(CellMesh);
+
+	// 3 floats pour RGB
+	CellsISM->NumCustomDataFloats = 3;
+	CellsISM->ClearInstances();
+
+	const float MeshSize = 100.f; // plane UE par défaut = 100 cm
+	const float Scale = CellSize / MeshSize;
+
+	for (int Row = 0; Row < Rows; Row++)
+	{
+		for (int Column = 0; Column < Columns; Column++)
+		{
+			FVector Location(Column * CellSize + CellSize / 2, Row * CellSize + CellSize / 2, 0.f);
+
+			FTransform InstanceTransform;
+			InstanceTransform.SetLocation(Location);
+			InstanceTransform.SetScale3D(FVector(Scale));
+
+			int32 InstanceIndex = CellsISM->AddInstance(InstanceTransform);
+
+			FLinearColor Color = FLinearColor::MakeRandomColor();
+
+			CellsISM->SetCustomDataValue(InstanceIndex, 0, Color.R);
+			CellsISM->SetCustomDataValue(InstanceIndex, 1, Color.G);
+			CellsISM->SetCustomDataValue(InstanceIndex, 2, Color.B);
+		}
+	}
+	*/
+	// ----- TEST INSTANCED MESH ----- //
+
+	// ----- TEST 1 PROCEDURAL FOR ALL CELLS ----- //
+	 CellsProceduralMesh->ClearAllMeshSections();
+
+    TArray<FVector> Vertices;
+    TArray<int32> Triangles;
+    TArray<FVector> Normals;
+    TArray<FVector2D> UV0;
+    TArray<FColor> VertexColors;
+    TArray<FProcMeshTangent> Tangents;
+
+    int32 VertexIndex = 0;
+
+    for (int Row = 0; Row < Rows; Row++)
+    {
+        for (int Col = 0; Col < Columns; Col++)
+        {
+            FVector BaseLocation(Col * CellSize, Row * CellSize, 0.f);
+
+            // 4 vertices du quad
+            Vertices.Add(BaseLocation); // Bottom Left
+            Vertices.Add(BaseLocation + FVector(CellSize, 0, 0)); // Bottom Right
+            Vertices.Add(BaseLocation + FVector(0, CellSize, 0)); // Top Left
+            Vertices.Add(BaseLocation + FVector(CellSize, CellSize, 0)); // Top Right
+
+            // 2 triangles
+            Triangles.Add(VertexIndex + 0);
+            Triangles.Add(VertexIndex + 2);
+            Triangles.Add(VertexIndex + 1);
+
+            Triangles.Add(VertexIndex + 2);
+            Triangles.Add(VertexIndex + 3);
+            Triangles.Add(VertexIndex + 1);
+
+            // Normals
+            Normals.Add(FVector::UpVector);
+            Normals.Add(FVector::UpVector);
+            Normals.Add(FVector::UpVector);
+            Normals.Add(FVector::UpVector);
+
+            // UV
+            UV0.Add(FVector2D(0, 0));
+            UV0.Add(FVector2D(1, 0));
+            UV0.Add(FVector2D(0, 1));
+            UV0.Add(FVector2D(1, 1));
+
+            // Vertex colors (random)
+            FLinearColor RandomColor = FLinearColor::MakeRandomColor();
+        	FColor VertexColor = RandomColor.ToFColor(true);
+        	VertexColors.Add(VertexColor);
+        	VertexColors.Add(VertexColor);
+        	VertexColors.Add(VertexColor);
+        	VertexColors.Add(VertexColor);
+
+            // Tangents
+            Tangents.Add(FProcMeshTangent(1, 0, 0));
+            Tangents.Add(FProcMeshTangent(1, 0, 0));
+            Tangents.Add(FProcMeshTangent(1, 0, 0));
+            Tangents.Add(FProcMeshTangent(1, 0, 0));
+
+            VertexIndex += 4;
+        }
+    }
+
+    CellsProceduralMesh->CreateMeshSection(
+        0,
+        Vertices,
+        Triangles,
+        Normals,
+        UV0,
+        VertexColors,
+        Tangents,
+        false
+    );
+	
+    CellsProceduralMesh->SetVisibility(true);
+	// ----- TEST 1 PROCEDURAL FOR ALL CELLS ----- //
 }
 
 bool AGridActor::CheckIsValidCell(int Row, int Column)
@@ -119,8 +295,8 @@ bool AGridActor::CheckIsValidCell(int Row, int Column)
 
 bool AGridActor::GetCellAtLocation(FVector Location, int& OutRow, int& OutColumn)
 {
-	OutRow = FMathf::Floor(Rows * ((Location.X - GetActorLocation().X) / LineWidth()));
-	OutColumn = FMathf::Floor(Columns * ((Location.Y - GetActorLocation().Y) / LineHeight()));
+	OutRow = FMath::FloorToInt(Rows * ((Location.X - GetActorLocation().X) / LineWidth()));
+	OutColumn = FMath::FloorToInt(Columns * ((Location.Y - GetActorLocation().Y) / LineHeight()));
 
 	return CheckIsValidCell(OutRow, OutColumn);
 }
@@ -212,4 +388,6 @@ TObjectPtr<UMaterialInstanceDynamic> AGridActor::CreateMaterialInstance(FLinearC
 
 	return DynamicMat;
 }
+
+
 

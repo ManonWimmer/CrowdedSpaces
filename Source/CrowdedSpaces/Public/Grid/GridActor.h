@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "ProceduralMeshComponent.h"
+#include "Components/InstancedStaticMeshComponent.h"
 #include "GridActor.generated.h"
 
 UCLASS()
@@ -18,8 +19,6 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	virtual void Tick(float DeltaTime) override;
-
 	UFUNCTION(BlueprintCallable, Category = "Grid")
 	bool CheckIsValidCell(int Row, int Column);
 
@@ -73,4 +72,26 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Grid")
 	float CellOpacity = 0.25f;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UStaticMesh> CellMesh; // Plane
+
+	UPROPERTY()
+	TObjectPtr<UInstancedStaticMeshComponent> CellsISM;
+
+	// ----- TEST CREATE IN TICK ----- //
+	TArray<FVector> PendingVertices;
+	TArray<int32> PendingTriangles;
+	TArray<FVector> PendingNormals;
+	TArray<FVector2D> PendingUV0;
+	TArray<FColor> PendingVertexColors;
+	TArray<FProcMeshTangent> PendingTangents;
+
+	int32 PendingVertexIndex = 0;
+	int32 CurrentRow = 0;
+	int32 CurrentCol = 0;
+	int32 CellsPerTick = 5; 
+
+	bool bGeneratingCells = false;
+	// ----- TEST CREATE IN TICK ----- //
 };
