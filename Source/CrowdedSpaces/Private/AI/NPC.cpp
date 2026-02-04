@@ -42,8 +42,6 @@ void ANPC::BeginPlay()
 	
 	FoodWidget->OwningActor = this;
 	FoodWidget->Init();
-	
-	//StartRemoveFood(); now managed in food component directly if suffer hunger
 }
 
 void ANPC::RemoveFood() const
@@ -78,7 +76,7 @@ TArray<FStat> ANPC::GetCurrentValues() const
 {
 	TArray<TPair<FString, FString>> Values;
 	FString ActionString = StaticEnum<ENPCAction>()->GetDisplayNameTextByValue(static_cast<int64>(CurrentAction)).ToString();
-	Values.Add(TPair<FString, FString>(FString("Current Action"), ActionString));
+	Values.Emplace(FString("Current Action"), ActionString);
 	return Values;
 }
 #pragma endregion Selectable

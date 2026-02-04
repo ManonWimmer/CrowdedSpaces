@@ -28,7 +28,7 @@ bool UElectricityComponent::HasEnoughElectricity(int Amount)
 TArray<TPair<FString, FString>> UElectricityComponent::GetCurrentValues() const
 {
 	TArray<TPair<FString, FString>> Values;
-	Values.Add(TPair<FString, FString>(FString("Electricity"), FString::SanitizeFloat(Electricity)));
+	Values.Emplace(FString("Electricity"), FString::SanitizeFloat(Electricity));
 	return Values;
 }
 #pragma endregion Selectable

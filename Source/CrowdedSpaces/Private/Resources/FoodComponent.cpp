@@ -93,9 +93,9 @@ void UFoodComponent::FoodTick()
 TArray<TPair<FString, FString>> UFoodComponent::GetCurrentValues() const
 {
 	TArray<TPair<FString, FString>> Values;
-	Values.Add(TPair<FString, FString>(FString("Food"), FString::SanitizeFloat(Food)));
+	Values.Emplace(FString("Food"), FString::SanitizeFloat(Food));
 	FString Result = bIsEating ? TEXT("True") : TEXT("False");
-	Values.Add(TPair<FString, FString>(FString("Is Eating"), Result));
+	Values.Emplace(FString("Is Eating"), Result);
 	return Values;
 }
 #pragma endregion Selectable

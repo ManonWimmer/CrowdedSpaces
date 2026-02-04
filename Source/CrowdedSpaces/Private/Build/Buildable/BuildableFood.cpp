@@ -61,7 +61,7 @@ TArray<FStat> ABuildableFood::GetCurrentValues() const
 {
 	TArray<TPair<FString, FString>> Values;
 	FString Result = bIsAvailable ? TEXT("True") : TEXT("False");
-	Values.Add(TPair<FString, FString>(FString("Is Available"), Result));
+	Values.Emplace(FString("Is Available"), Result);
 	return Values;
 }
 #pragma endregion Selectable

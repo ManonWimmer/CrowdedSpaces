@@ -86,9 +86,9 @@ void UEnergyComponent::EnergyTick()
 TArray<TPair<FString, FString>> UEnergyComponent::GetCurrentValues() const
 {
 	TArray<TPair<FString, FString>> Values;
-	Values.Add(TPair<FString, FString>(FString("Energy"), FString::SanitizeFloat(Energy)));
+	Values.Emplace(FString("Energy"), FString::SanitizeFloat(Energy));
 	FString Result = bIsSleeping ? TEXT("True") : TEXT("False");
-	Values.Add(TPair<FString, FString>(FString("Is Sleeping"), Result));
+	Values.Emplace(FString("Is Sleeping"), Result);
 	return Values;
 }
 #pragma endregion Selectable

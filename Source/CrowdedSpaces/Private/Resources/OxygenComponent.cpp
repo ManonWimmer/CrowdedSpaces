@@ -28,7 +28,7 @@ bool UOxygenComponent::HasEnoughOxygen(int Amount)
 TArray<TPair<FString, FString>> UOxygenComponent::GetCurrentValues() const
 {
 	TArray<TPair<FString, FString>> Values;
-	Values.Add(TPair<FString, FString>(FString("Oxygen"), FString::SanitizeFloat(Oxygen)));
+	Values.Emplace(FString("Oxygen"), FString::SanitizeFloat(Oxygen));
 	return Values;
 }
 #pragma endregion Selectable

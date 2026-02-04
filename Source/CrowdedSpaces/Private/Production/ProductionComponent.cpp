@@ -15,13 +15,13 @@ TArray<TPair<FString, FString>> UProductionComponent::GetCurrentValues() const
 	TArray<TPair<FString, FString>> Values;
 	FString ProductionTypeName = UEnum::GetValueAsString(ProductionType);
 	ProductionTypeName.RemoveFromStart(TEXT("EProductionType::"));
-	Values.Add(TPair<FString, FString>(FString("Production Type"), ProductionTypeName));
+	Values.Emplace(FString("Production Type"), ProductionTypeName);
 
 	FString Active = GetOwner()->GetWorldTimerManager().IsTimerActive(ProductionTimerHandle) ? TEXT("True") : TEXT("False");
-	Values.Add(TPair<FString, FString>(FString("Is Active"), Active));
+	Values.Emplace(FString("Is Active"), Active);
 	
-	Values.Add(TPair<FString, FString>(FString("Production Interval"), FString::SanitizeFloat(ProductionInterval)));
-	Values.Add(TPair<FString, FString>(FString("Resource Per Interval"), FString::SanitizeFloat(ResourcePerInterval)));
+	Values.Emplace(FString("Production Interval"), FString::SanitizeFloat(ProductionInterval));
+	Values.Emplace(FString("Resource Per Interval"), FString::SanitizeFloat(ResourcePerInterval));
 	return Values;
 }
 #pragma endregion Selectables
