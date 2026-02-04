@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "Build/GhostObject.h"
+#include "Grid/GridActor.h"
 #include "Build/BuildData.h"
 #include "UI/GameHUD.h"
 #include "Resources/MoneyComponent.h"
@@ -73,4 +74,9 @@ private:
 	bool bTickEnabled = false;
 	
 	static constexpr float CursorLineTraceDistance = 10000.f;
+
+	// ----- TEMP TEST GRID ----- //
+	UPROPERTY()
+	AGridActor* GridActor;
+	// ----- TEMP TEST GRID ----- //
 };

@@ -1,5 +1,6 @@
 ﻿#include "Build/BuildSubsystem.h"
 
+#include "EngineUtils.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Game/CrowdedGameMode.h"
 #include "Kismet/GameplayStatics.h"
@@ -37,6 +38,14 @@ void UBuildSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 
 	// HUD
 	GameHUD = Cast<AGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+
+	// ----- TEMP TEST GRID ----- //
+	for (TActorIterator<AGridActor> It(GetWorld()); It; ++It)
+	{
+		GridActor = *It;
+		break; 
+	}
+	// ----- TEMP TEST GRID ----- //
 }
 
 TStatId UBuildSubsystem::GetStatId() const
@@ -120,8 +129,34 @@ void UBuildSubsystem::PlaceObject()
 	if (!CurrentGhost || !CurrentBuildData || !CurrentBuildData->BuildClass)
 		return;
 
-	// todo : check if click on ui & return if true
+	FVector GhostLocation = CurrentGhost->GetActorLocation();
+	int Row, Column;
+	if (!GridActor->GetCellAtLocation(GhostLocation, Row, Column))
+		return;
+
+	FGridCell* Cell = GridActor->GetGridCell(Row, Column);
+	if (!Cell || Cell->bOccupied)
+		return;
+
+	TObjectPtr<ABuildableObject> Placed = GetWorld()->SpawnActor<ABuildableObject>(
+		CurrentBuildData->BuildClass,
+		GhostLocation,
+		FRotator::ZeroRotator
+	);
+
+	if (!Placed)
+		return;
+
+	// Scale from default
+	TObjectPtr<ABuildableObject> DefaultBuildable = CurrentBuildData->BuildClass->GetDefaultObject<ABuildableObject>();
+	Placed->SetActorScale3D(DefaultBuildable->GetActorScale3D());
 	
+	Cell->bOccupied = true;
+	
+	if (MoneyComponent)
+		MoneyComponent->RemoveMoney(CurrentBuildData->MoneyCost);
+
+	/* OLD 
 	const FVector Location = CurrentGhost->GetActorLocation();
 	const FVector Extent = CurrentGhost->GetMeshExtent();
 
@@ -146,6 +181,7 @@ void UBuildSubsystem::PlaceObject()
 	// Money
 	if (MoneyComponent)
 		MoneyComponent->RemoveMoney(CurrentBuildData->MoneyCost);
+	*/
 }
 
 
@@ -158,6 +194,21 @@ void UBuildSubsystem::UpdateGhost() const
 	if(!GetCursorHit(HitLocation))
 		return;
 
+	int Row, Column;
+	if (GridActor->GetCellAtLocation(HitLocation, Row, Column))
+	{
+		FVector2D CellLocation;
+		GridActor->GetGridLocation(true, Row, Column, CellLocation);
+
+		FVector SnappedLocation(CellLocation.X, CellLocation.Y, HitLocation.Z); 
+		CurrentGhost->SetActorLocation(SnappedLocation);
+		
+		FGridCell* Cell = GridActor->GetGridCell(Row, Column);
+		bool bValid = Cell && !Cell->bOccupied;
+		CurrentGhost->SetValid(bValid);
+	}
+
+	/* OLD
 	FVector MeshExtent = CurrentGhost->GetMeshExtent(); 
 	FVector GhostLocation = HitLocation + FVector(0.f, 0.f, MeshExtent.Z); // pivot not in the center anymore 
 	
@@ -169,6 +220,7 @@ void UBuildSubsystem::UpdateGhost() const
 	
 	bool bValid = CanPlace(Snapped, CurrentGhost->GetMeshExtent());
 	CurrentGhost->SetValid(bValid);
+	*/
 }
 
 bool UBuildSubsystem::CanPlace(const FVector& Location, const FVector& Extent) const
