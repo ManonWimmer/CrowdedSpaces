@@ -18,8 +18,15 @@ public:
 	virtual void BeginPlay() override;
 	
 	EGameModeState GetGameMode() const { return CurrentGameMode; }
-	
+
+	UFUNCTION(BlueprintCallable, Category = "GameMode")
 	void SetGameMode(EGameModeState NewGameMode);
+
+	UFUNCTION(BlueprintCallable, Category = "GameMode")
+	void SetGameMode_Game() { SetGameMode(EGameModeState::Game); }
+
+	UFUNCTION(BlueprintCallable, Category = "GameMode")
+	void SetGameMode_Building() { SetGameMode(EGameModeState::Building); }
 
 	UPROPERTY(BlueprintAssignable)
 	FOnGameModeChanged OnGameModeChanged;

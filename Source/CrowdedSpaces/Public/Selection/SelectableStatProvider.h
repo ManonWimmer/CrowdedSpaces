@@ -1,5 +1,5 @@
 ﻿#pragma once
-using FStat = TPair<FString, FString> ;
+using FStat = TPair<FString, FString>;
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
@@ -14,7 +14,7 @@ class USelectableStatProvider : public UInterface
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
 	FOnStatChanged,
 	FName, StatId,
-	float, NewValue
+	FString, NewValue
 );
 
 class CROWDEDSPACES_API ISelectableStatProvider

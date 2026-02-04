@@ -1,0 +1,34 @@
+﻿#pragma once
+
+#include "CoreMinimal.h"
+#include "Engine/DataAsset.h"
+#include "TimeSpeedType.h"
+#include "TimeData.generated.h"
+
+USTRUCT(BlueprintType)
+struct FTimeDataStruct
+{
+	GENERATED_USTRUCT_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	ETimeSpeedType TimeSpeedType = ETimeSpeedType::Normal;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float GameSpeedMultiplier = 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float GameTimeDilation = 1;
+};
+
+UCLASS(BlueprintType)
+class CROWDEDSPACES_API UTimeData : public UDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TArray<FTimeDataStruct> TimeData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float MoralEventHour;
+};

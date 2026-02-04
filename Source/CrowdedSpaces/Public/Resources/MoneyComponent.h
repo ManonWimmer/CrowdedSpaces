@@ -5,6 +5,8 @@
 #include "Selection/SelectableStatProvider.h"
 #include "MoneyComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMoneyChanged, int32, NewValue);
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class CROWDEDSPACES_API UMoneyComponent : public UActorComponent, public ISelectableStatProvider
 {
@@ -24,6 +26,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	int GetMoney() {return Money; }
+
+	UPROPERTY(BlueprintAssignable, Category = "Money")
+	FOnMoneyChanged OnMoneyChanged;
 
 	// Selectable
 	UPROPERTY(BlueprintAssignable)

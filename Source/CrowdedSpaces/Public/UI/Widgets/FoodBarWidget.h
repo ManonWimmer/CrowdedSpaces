@@ -17,6 +17,5 @@ protected:
 
 public:
 	UPROPERTY(BlueprintReadWrite, Category = "UI")
-	AActor* OwningActor; // sinon on peut pas le recup quand il est mis en widget component
-	
+	TObjectPtr<AActor> OwningActor; // sinon on peut pas le recup quand il est mis en widget component
 };

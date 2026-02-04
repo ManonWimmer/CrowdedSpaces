@@ -30,14 +30,14 @@ public:
 
 private:
 	UPROPERTY(VisibleAnywhere)
-	UMoneyComponent* MoneyComponent;
+	TObjectPtr<UMoneyComponent> MoneyComponent;
 
 	UPROPERTY(VisibleAnywhere)
-	UElectricityComponent* ElectricityComponent;
+	TObjectPtr<UElectricityComponent> ElectricityComponent;
 
 	UPROPERTY(VisibleAnywhere)
-	UOxygenComponent* OxygenComponent;
+	TObjectPtr<UOxygenComponent> OxygenComponent;
 
 	UPROPERTY(VisibleAnywhere)
-	UFoodComponent* FoodComponent;
+	TObjectPtr<UFoodComponent> FoodComponent;
 };

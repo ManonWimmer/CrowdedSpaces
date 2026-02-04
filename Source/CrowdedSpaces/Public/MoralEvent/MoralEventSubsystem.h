@@ -6,26 +6,38 @@
 #include "UI/GameHUD.h"
 #include "MoralEventSubsystem.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnMoralEventEnded);
+
 UCLASS()
 class CROWDEDSPACES_API UMoralEventSubsystem : public UWorldSubsystem
 {
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, Category="MoralEventManager")
+	UFUNCTION(BlueprintCallable, Category="MoralEvent")
 	void StartNewEvent(TSubclassOf<UMoralEvent> NewEvent);
 
-	UFUNCTION(BlueprintCallable, Category="MoralEventManager")
-	void OnChoiceSelected(EMoralEventChoice Choice);
+	UFUNCTION(BlueprintCallable, Category="MoralEvent")
+	void HandleRandomMoralEvent();
+
+	UFUNCTION(BlueprintCallable, Category="MoralEvent")
+	void OnChoiceSelected(EMoralEventType Choice);
+
+	UFUNCTION(BlueprintCallable, Category="MoralEvent")
+	void SetPossibleEvents(TArray<TSubclassOf<UMoralEvent>> NewPossibleEvents) { PossibleEvents = NewPossibleEvents; }
+
+	UPROPERTY(BlueprintAssignable, Category = "MoralEvent")
+	FOnMoralEventEnded OnMoralEventEnded;
 	
 private:
 	void GetGameHUD();
 	
 	UPROPERTY()
-	UMoralEvent* CurrentEvent = nullptr;
+	TObjectPtr<UMoralEvent> CurrentEvent = nullptr;
 
-// todo : get moral events bp in game state (comme build) ? for random event
+	UPROPERTY()
+	TArray<TSubclassOf<UMoralEvent>> PossibleEvents; // Sent by game state
 	
 	UPROPERTY()
-	AGameHUD* GameHUD = nullptr;
+	TObjectPtr<AGameHUD> GameHUD = nullptr;
 };

@@ -15,7 +15,7 @@ void ADebug::BeginPlay()
 
 void ADebug::SetGameMode_Game() const
 {
-	if (ACrowdedGameMode* GameMode = Cast<ACrowdedGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
+	if (TObjectPtr<ACrowdedGameMode> GameMode = Cast<ACrowdedGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
 	{
 		GameMode->SetGameMode(EGameModeState::Game);
 	}
@@ -23,7 +23,7 @@ void ADebug::SetGameMode_Game() const
 
 void ADebug::SetGameMode_Building() const
 {
-	if (ACrowdedGameMode* GameMode = Cast<ACrowdedGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
+	if (TObjectPtr<ACrowdedGameMode> GameMode = Cast<ACrowdedGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
 	{
 		GameMode->SetGameMode(EGameModeState::Building);
 	}
@@ -31,9 +31,10 @@ void ADebug::SetGameMode_Building() const
 
 void ADebug::StartDebugMoralEvent() const
 {
-	UMoralEventSubsystem* MoralEventSubsystem = GetWorld()->GetSubsystem<UMoralEventSubsystem>();
+	TObjectPtr<UMoralEventSubsystem> MoralEventSubsystem = GetWorld()->GetSubsystem<UMoralEventSubsystem>();
 	
-	if (!MoralEventSubsystem || !DebugEventData) return;
+	if (!MoralEventSubsystem || !DebugEventData)
+		return;
 
 	MoralEventSubsystem->StartNewEvent(DebugEventData);
 }

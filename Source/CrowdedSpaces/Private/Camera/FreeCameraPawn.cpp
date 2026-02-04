@@ -2,6 +2,7 @@
 #include "Camera/CameraComponent.h"
 #include "Player/CrowdedPlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 
 AFreeCameraPawn::AFreeCameraPawn()
@@ -37,28 +38,32 @@ void AFreeCameraPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	ApplyMovement(DeltaTime);
-	ApplyRotation(DeltaTime);
+	float RealDeltaTime = DeltaTime;
+	if (UGameplayStatics::GetGlobalTimeDilation(GetWorld()) >= 1)
+		RealDeltaTime = GetWorld()->GetDeltaSeconds() / UGameplayStatics::GetGlobalTimeDilation(GetWorld());
+	
+	ApplyMovement(RealDeltaTime);
+	ApplyRotation(RealDeltaTime);
 
 	// Smooth zoom
 	SpringArm->TargetArmLength = FMath::FInterpTo(
 	SpringArm->TargetArmLength,
 	TargetZoom,
-	DeltaTime,
+	RealDeltaTime,
 	ZoomSmooth
 	);
 }
 
 void AFreeCameraPawn::BindControllerEvents()
 {
-	APlayerController* PC = Cast<APlayerController>(GetController());
+	TObjectPtr<APlayerController> PC = Cast<APlayerController>(GetController());
 	if (!PC)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Free Camera Pawn : Player Controller Null"));
 		return;
 	}
 
-	ACrowdedPlayerController* CrowdedPC = Cast<ACrowdedPlayerController>(PC);
+	TObjectPtr<ACrowdedPlayerController> CrowdedPC = Cast<ACrowdedPlayerController>(PC);
 	if (!CrowdedPC)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Free Camera Pawn : Crowded Player Controller Null"));

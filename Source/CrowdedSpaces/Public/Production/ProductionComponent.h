@@ -44,10 +44,10 @@ public:
 	void StartProduction();
 
 	UFUNCTION()
-	void PauseProduction() const;
+	void PauseProduction();
 
 	UFUNCTION()
-	void ResumeProduction() const;
+	void ResumeOrStartProduction();
 
 	UFUNCTION()
 	void RestartProduction();
@@ -57,14 +57,16 @@ private:
 	FTimerHandle ProductionTimerHandle;
 
 	UPROPERTY()
-	UMoneyComponent* PlayerMoneyComponent;
+	TObjectPtr<UMoneyComponent> PlayerMoneyComponent;
 
 	UPROPERTY()
-	UElectricityComponent* PlayerElectricityComponent;
+	TObjectPtr<UElectricityComponent> PlayerElectricityComponent;
 
 	UPROPERTY()
-	UOxygenComponent* PlayerOxygenComponent;
+	TObjectPtr<UOxygenComponent> PlayerOxygenComponent;
 
 	UPROPERTY()
-	UFoodComponent* PlayerFoodComponent;
+	TObjectPtr<UFoodComponent> PlayerFoodComponent;
+
+	bool bHasStartedProduction = false;
 };

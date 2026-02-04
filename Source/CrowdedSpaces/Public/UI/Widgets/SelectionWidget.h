@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "UI/CustomWidget.h"
+#include "Selection/SelectionType.h"
 #include "SelectionWidget.generated.h"
 
 class ISelectableStatProvider;
@@ -21,21 +22,30 @@ protected:
 	TArray<TScriptInterface<ISelectableStatProvider>> BoundStats;
 
 	UPROPERTY()
-	AActor* SelectedActor = nullptr;
+	TObjectPtr<AActor> SelectedActor = nullptr;
 
 	UPROPERTY()
 	FString ActorDisplayName = "";
 
 public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
-	void UpdateSelection(const FString& DisplayName, const TMap<FString, FString>& Stats);
+	void UpdateSelection(const FString& DisplayName, const TMap<FString, FString>& Stats, ESelectionType SelectionType);
 
-	void BindToSelectable(AActor* SelectableActor, FString DisplayName);
+	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
+    void Setup(AActor* SelectableActor, ESelectionType SelectionType);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
+	void Unsetup();
+	
+	void BindToSelectable(AActor* SelectableActor, FString DisplayName, ESelectionType SelectionType);
 
 	// Unbind proprement
 	void Unbind();
 	
 	// Callback générique
 	UFUNCTION()
-	void OnAnyStatUpdated(FName StatId, float NewValue);
+	void OnAnyStatUpdated(FName StatId, FString NewValue);
+
+	UPROPERTY()
+	ESelectionType CurrentSelectionType = ESelectionType::Default;
 };

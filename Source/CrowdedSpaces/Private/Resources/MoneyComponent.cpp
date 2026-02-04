@@ -2,12 +2,14 @@
 
 UMoneyComponent::UMoneyComponent()
 {
+	PrimaryComponentTick.bCanEverTick = false;
 }
 
 void UMoneyComponent::AddMoney(int Amount)
 {
 	Money += Amount;
-	OnStatChanged.Broadcast("Money", Money);
+	OnStatChanged.Broadcast("Money", FString::SanitizeFloat(Money));
+	OnMoneyChanged.Broadcast(Money);
 }
 
 void UMoneyComponent::RemoveMoney(int Amount)
@@ -15,7 +17,8 @@ void UMoneyComponent::RemoveMoney(int Amount)
 	if (!HasEnoughMoney(Amount)) return;
 	
 	Money -= Amount;
-	OnStatChanged.Broadcast("Money", Money);
+	OnStatChanged.Broadcast("Money", FString::SanitizeFloat(Money));
+	OnMoneyChanged.Broadcast(Money);
 }
 
 bool UMoneyComponent::HasEnoughMoney(int Amount)
@@ -26,8 +29,8 @@ bool UMoneyComponent::HasEnoughMoney(int Amount)
 #pragma region Selectable
 TArray<TPair<FString, FString>> UMoneyComponent::GetCurrentValues() const
 {
-	TArray<TPair<FString, FString>> values;
-	values.Add(TPair<FString, FString>(FString("Money"), FString::SanitizeFloat(Money)));
-	return values;
+	TArray<TPair<FString, FString>> Values;
+	Values.Emplace(FString("Money"), FString::SanitizeFloat(Money));
+	return Values;
 }
 #pragma endregion Selectable

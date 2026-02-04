@@ -12,24 +12,27 @@ void UBuildSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	Super::OnWorldBeginPlay(InWorld);
 
 	// Game Mode
-	if (ACrowdedGameMode* GameMode = Cast<ACrowdedGameMode>(UGameplayStatics::GetGameMode(GetWorld())))
-	{
-		GameMode->OnGameModeChanged.AddDynamic(this, &UBuildSubsystem::OnGameModeChanged);
-	}
+	TObjectPtr<ACrowdedGameMode> GameMode = Cast<ACrowdedGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (!GameMode)
+		return;
+	
+	GameMode->OnGameModeChanged.AddDynamic(this, &UBuildSubsystem::OnGameModeChanged);
 
 	// Player controller
-	if (APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0))
-	{
-		if (ACrowdedPlayerController* CamPC = Cast<ACrowdedPlayerController>(PC))
-		{
-			CamPC->OnLeftClickBuild.AddDynamic(this, &UBuildSubsystem::PlaceObject);
+	TObjectPtr<APlayerController> PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (!PC)
+		return;
 
-			// Money component
-			if (ACrowdedPlayerState* PS = PC->GetPlayerState<ACrowdedPlayerState>())
-			{
-				MoneyComponent = PS->GetMoneyComponent();
-			}
-		}
+	TObjectPtr<ACrowdedPlayerController> CamPC = Cast<ACrowdedPlayerController>(PC);
+	if (!CamPC)
+		return;
+
+	CamPC->OnLeftClickBuild.AddDynamic(this, &UBuildSubsystem::PlaceObject);
+
+	// Money component
+	if (TObjectPtr<ACrowdedPlayerState> PS = PC->GetPlayerState<ACrowdedPlayerState>())
+	{
+		MoneyComponent = PS->GetMoneyComponent();
 	}
 
 	// HUD
@@ -51,11 +54,13 @@ void UBuildSubsystem::OnGameModeChanged(EGameModeState NewMode)
 	// UI
 	if (NewMode == EGameModeState::Building)
 	{
-		if (GameHUD) GameHUD->ShowBuildWidget(true);
+		if (GameHUD)
+			GameHUD->ShowBuildWidget(true);
 	}
 	else
 	{
-		if (GameHUD) GameHUD->ShowBuildWidget(false);
+		if (GameHUD)
+			GameHUD->ShowBuildWidget(false);
 	}
 }
 
@@ -72,7 +77,8 @@ bool UBuildSubsystem::IsTickable() const
 
 void UBuildSubsystem::StartBuilding(UBuildData* BuildData)
 {
-	if (!BuildData || !BuildData->BuildClass) return;
+	if (!BuildData || !BuildData->BuildClass)
+		return;
 
 	CurrentBuildData = BuildData;
 
@@ -88,12 +94,13 @@ void UBuildSubsystem::StartBuilding(UBuildData* BuildData)
 	CurrentGhost->SetActorHiddenInGame(false);
 
 	// Get mesh from buildable
-	const ABuildableObject* DefaultBuildable =
+	TObjectPtr<ABuildableObject> const DefaultBuildable =
 		BuildData->BuildClass->GetDefaultObject<ABuildableObject>();
 
-	if (!DefaultBuildable) return;
+	if (!DefaultBuildable)
+		return;
 	
-	UStaticMesh* GhostMesh = DefaultBuildable->GetMeshComponent()->GetStaticMesh();
+	TObjectPtr<UStaticMesh> GhostMesh = DefaultBuildable->GetMeshComponent()->GetStaticMesh();
 	CurrentGhost->SetMesh(GhostMesh);
 
 	// Scale
@@ -105,26 +112,7 @@ void UBuildSubsystem::StopBuilding()
 	CurrentBuildData = nullptr;
 
 	if (CurrentGhost)
-	{
 		CurrentGhost->SetActorHiddenInGame(true);
-	}
-}
-
-
-bool IsCursorOverUI(UWorld* World)
-{
-	TArray<UUserWidget*> Widgets;
-	UWidgetBlueprintLibrary::GetAllWidgetsOfClass(World, Widgets, UUserWidget::StaticClass(), true);
-
-	for (UUserWidget* Widget : Widgets)
-	{
-		if (Widget && Widget->IsInViewport() && Widget->IsHovered())
-		{
-			return true; // le curseur est sur un widget UI
-		}
-	}
-
-	return false;
 }
 
 void UBuildSubsystem::PlaceObject()
@@ -140,34 +128,35 @@ void UBuildSubsystem::PlaceObject()
 	if (!CanPlace(Location, Extent))
 		return;
 
-	ABuildableObject* Placed = GetWorld()->SpawnActor<ABuildableObject>(
+	TObjectPtr<ABuildableObject> Placed = GetWorld()->SpawnActor<ABuildableObject>(
 		CurrentBuildData->BuildClass,
 		Location,
 		FRotator::ZeroRotator
 	);
 
-	if (!Placed) return;
+	if (!Placed)
+		return;
 
 	//  Scale from BP
-	const ABuildableObject* DefaultBuildable =
+	TObjectPtr<ABuildableObject> const DefaultBuildable =
 		CurrentBuildData->BuildClass->GetDefaultObject<ABuildableObject>();
 
 	Placed->SetActorScale3D(DefaultBuildable->GetActorScale3D());
 
 	// Money
 	if (MoneyComponent)
-	{
 		MoneyComponent->RemoveMoney(CurrentBuildData->MoneyCost);
-	}
 }
 
 
 void UBuildSubsystem::UpdateGhost() const
 {
-	if(!CurrentGhost) return;
+	if(!CurrentGhost)
+		return;
 
 	FVector HitLocation;
-	if(!GetCursorHit(HitLocation)) return;
+	if(!GetCursorHit(HitLocation))
+		return;
 
 	FVector MeshExtent = CurrentGhost->GetMeshExtent(); 
 	FVector GhostLocation = HitLocation + FVector(0.f, 0.f, MeshExtent.Z); // pivot not in the center anymore 
@@ -204,7 +193,7 @@ bool UBuildSubsystem::CanPlace(const FVector& Location, const FVector& Extent) c
 
 bool UBuildSubsystem::GetCursorHit(FVector& OutHit) const
 {
-	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	TObjectPtr<APlayerController> PC = GetWorld()->GetFirstPlayerController();
 	if (!PC)
 		return false;
 	

@@ -24,10 +24,10 @@ public:
 protected:
 	// Components
 	UPROPERTY(VisibleAnywhere, Category="Camera")
-	USpringArmComponent* SpringArm;
+	TObjectPtr<USpringArmComponent> SpringArm;
 
 	UPROPERTY(VisibleAnywhere, Category="Camera")
-	UCameraComponent* Camera;
+	TObjectPtr<UCameraComponent> Camera;
 	
 	// Movement
 	UPROPERTY(EditAnywhere, Category="Movement")

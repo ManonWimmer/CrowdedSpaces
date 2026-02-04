@@ -1,13 +1,16 @@
 ﻿#include "UI/GameHUD.h"
 #include "Blueprint/UserWidget.h"
 #include "UI/Widgets/MoralEventWidget.h"
+#include "UI/CustomWidget.h"
+#include "UI/Widgets/SelectionWidget.h"
 
 void AGameHUD::BeginPlay()
 {
 	Super::BeginPlay();
 	
 	PlayerController = GetOwningPlayerController();
-	if (!PlayerController) return;
+	if (!PlayerController)
+		return;
 	
 	// Create widgets
 	CreateStartupWidgets();
@@ -15,19 +18,19 @@ void AGameHUD::BeginPlay()
 
 void AGameHUD::CreateStartupWidgets()
 {
-	for (const FWidgetStartupConfig& Config : StartupWidgetsConfig)
+	for (const auto& [WidgetClass, InitialVisibility] : StartupWidgetsConfig)
 	{
-		if (!Config.WidgetClass) continue;
+		if (!WidgetClass) continue;
 
-		UCustomWidget* Widget = CreateWidget<UCustomWidget>(PlayerController, Config.WidgetClass);
+		TObjectPtr<UCustomWidget> Widget = CreateWidget<UCustomWidget>(PlayerController, WidgetClass);
 
 		if (!Widget) continue;
 
 		Widget->AddToViewport();
-		Widget->SetVisibility(Config.InitialVisibility);
+		Widget->SetVisibility(InitialVisibility);
 		Widget->Init();
 
-		WidgetInstances.Add(Config.WidgetClass, Widget);
+		WidgetInstances.Add(WidgetClass, Widget);
 	}
 }
 
@@ -50,38 +53,40 @@ void AGameHUD::ShowSelectionWidget(bool bShow)
 {
 	ShowWidget(SelectionWidgetBP, bShow, ESlateVisibility::SelfHitTestInvisible);
 }
-
-void AGameHUD::UpdateSelectionWidget(const FString DisplayName, const TMap<FString, FString> Stats)
-{
-	auto SelectionWidget = GetOrCreateWidget<USelectionWidget>(SelectionWidgetBP);
-	if (!SelectionWidget) return;
-
-	SelectionWidget->UpdateSelection(DisplayName, Stats);
-}
 #pragma endregion Selection
 
 #pragma region Moral Event
 void AGameHUD::ShowMoralEventWidget(bool bShow)
 {
-	ShowWidget(MoralEventWidgetBP, bShow, ESlateVisibility::SelfHitTestInvisible);
+	ShowWidget(MoralEventWidgetBP, bShow, ESlateVisibility::Visible); // Impossible de cliquer sur boutons pendant (build, time etc)
 }
 
 void AGameHUD::UpdateMoralEventWidget(const UMoralEvent* MoralEvent)
 {
-	auto MoralEventWidget = GetOrCreateWidget<UMoralEventWidget>(MoralEventWidgetBP);
-	if (!MoralEventWidget) return;
+	TObjectPtr<UMoralEventWidget> MoralEventWidget = GetOrCreateWidget<UMoralEventWidget>(MoralEventWidgetBP);
+	if (!MoralEventWidget)
+		return;
 
 	MoralEventWidget->Update(MoralEvent);
 }
 #pragma endregion Moral Event
 
+#pragma region Time
+void AGameHUD::ShowTimeWidget(bool bShow)
+{
+	ShowWidget(TimeBP, bShow, ESlateVisibility::SelfHitTestInvisible);
+}
+#pragma endregion Time
+
 #pragma region Generic Functions
 void AGameHUD::ShowWidget(TSubclassOf<UCustomWidget> WidgetClass, bool bShow, ESlateVisibility VisibilityOnShow)
 {
-	if (!WidgetClass) return;
+	if (!WidgetClass)
+		return;
 
-	UCustomWidget* Widget = GetOrCreateWidget<UCustomWidget>(WidgetClass);
-	if (!Widget) return;
+	TObjectPtr<UCustomWidget> Widget = GetOrCreateWidget<UCustomWidget>(WidgetClass);
+	if (!Widget)
+		return;
 
 	if (bShow)
 	{
@@ -96,18 +101,20 @@ void AGameHUD::ShowWidget(TSubclassOf<UCustomWidget> WidgetClass, bool bShow, ES
 
 
 template <typename T>
-T* AGameHUD::GetOrCreateWidget(TSubclassOf<UCustomWidget> WidgetClass)
+TObjectPtr<T> AGameHUD::GetOrCreateWidget(TSubclassOf<UCustomWidget> WidgetClass)
 {
-	if (!WidgetClass || !PlayerController) return nullptr;
+	if (!WidgetClass || !PlayerController)
+		return nullptr;
 
-	if (UCustomWidget** Found = WidgetInstances.Find(WidgetClass))
+	if (TObjectPtr<UCustomWidget>* Found = WidgetInstances.Find(WidgetClass))
 	{
 		return Cast<T>(*Found); 
 	}
 
-	UCustomWidget* NewWidget = CreateWidget<UCustomWidget>(PlayerController, WidgetClass);
+	TObjectPtr<UCustomWidget> NewWidget = CreateWidget<UCustomWidget>(PlayerController, WidgetClass);
 
-	if (!NewWidget) return nullptr;
+	if (!NewWidget)
+		return nullptr;
 
 	NewWidget->AddToViewport();
 	NewWidget->SetVisibility(ESlateVisibility::Hidden);

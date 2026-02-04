@@ -12,17 +12,17 @@ class CROWDEDSPACES_API UPlayerActionsData : public UDataAsset
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UInputAction* MoveForwardAction;
+	TObjectPtr<UInputAction> MoveForwardAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UInputAction* MoveRightAction;
+	TObjectPtr<UInputAction> MoveRightAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UInputAction* RotateAction;
+	TObjectPtr<UInputAction> RotateAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UInputAction* ZoomAction;
+	TObjectPtr<UInputAction> ZoomAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UInputAction* LeftClickAction;
+	TObjectPtr<UInputAction> LeftClickAction;
 };
