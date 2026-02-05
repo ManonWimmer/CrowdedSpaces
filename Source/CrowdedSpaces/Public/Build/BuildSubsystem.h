@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "BuildRoomData.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "Grid/GridRoomType.h"
 #include "Grid/GridCell.h"
@@ -31,6 +32,9 @@ public:
 	void StartBuilding(UBuildData* BuildData);
 
 	UFUNCTION(BlueprintCallable)
+	void StartRoomBuilding(UBuildRoomData* BuildRoomData);
+
+	UFUNCTION(BlueprintCallable)
 	void StopBuilding();
 
 	UFUNCTION()
@@ -46,7 +50,7 @@ public:
 	void ToggleRoomCell(int Row, int Column);
 
 	UFUNCTION(BlueprintCallable)
-	void ConfirmRoom();
+	void PlaceRoom();
 
 	UFUNCTION()
 	void SetBuildData(const TArray<UBuildData*>& NewBuildData) { BuildDataObjects = NewBuildData; }
@@ -72,6 +76,9 @@ private:
 	TObjectPtr<UBuildData> CurrentBuildData = nullptr;
 
 	UPROPERTY()
+	TObjectPtr<UBuildRoomData> CurrentBuildRoomData = nullptr;
+
+	UPROPERTY()
 	TArray<TObjectPtr<UBuildData>> BuildDataObjects; // Send by game state
 
 	UPROPERTY()
@@ -82,6 +89,9 @@ private:
 
 	UFUNCTION()
 	void UpdateGhost() const;
+
+	UFUNCTION()
+	void UpdateRoomSelection();
 
 	UFUNCTION()
 	bool GetCursorHit(FVector& OutHit) const;

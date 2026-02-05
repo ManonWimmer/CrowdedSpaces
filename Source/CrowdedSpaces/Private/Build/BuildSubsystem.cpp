@@ -78,7 +78,15 @@ void UBuildSubsystem::OnGameModeChanged(EGameModeState NewMode)
 void UBuildSubsystem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	UpdateGhost();
+
+	if (bIsSelectingRoom)
+	{
+		UpdateRoomSelection();
+	}
+	else
+	{
+		UpdateGhost();
+	}
 }
 
 bool UBuildSubsystem::IsTickable() const
@@ -120,6 +128,22 @@ void UBuildSubsystem::StartBuilding(UBuildData* BuildData)
 	CurrentGhost->SetActorScale3D(DefaultBuildable->GetActorScale3D());
 }
 
+void UBuildSubsystem::StartRoomBuilding(UBuildRoomData* BuildRoomData)
+{
+	if (!BuildRoomData)
+		return;
+
+	bIsSelectingRoom = true;
+	
+	CurrentBuildRoomData = BuildRoomData;
+
+	// pour l'instant pas de ghost, a voir plus tard
+	if (CurrentGhost)
+	{
+		CurrentGhost->SetActorHiddenInGame(false);
+	}
+}
+
 void UBuildSubsystem::StopBuilding()
 {
 	CurrentBuildData = nullptr;
@@ -131,7 +155,7 @@ void UBuildSubsystem::StopBuilding()
 	if (GridActor)
 		GridActor->DeselectSelectedCells();
 
-	//todo: Stop room selection
+	SelectedRoomCells.Empty();
 }
 
 void UBuildSubsystem::PlaceObject()
@@ -189,6 +213,39 @@ void UBuildSubsystem::PlaceObject()
 		MoneyComponent->RemoveMoney(CurrentBuildData->MoneyCost);
 }
 
+void UBuildSubsystem::PlaceRoom()
+{
+	if (!CurrentBuildRoomData || !GridActor)
+		return;
+
+	int SizeX = CurrentBuildRoomData->GridRowsX;
+	int SizeY = CurrentBuildRoomData->GridColumnsY;
+	
+	// Check can place
+	for (FGridCell* Cell : SelectedRoomCells)
+	{
+		if (!Cell)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("PlaceRoom: SelectedRoomCells contient nullptr !"));
+			return;
+		}
+
+		if (Cell->RoomId != -1)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("PlaceRoom: SelectedRoomCells contient Room id != -1!"));
+			return;
+		}
+	}
+	
+	GridActor->CreateRoom(CurrentBuildRoomData->RoomType, SelectedRoomCells);
+
+	if (MoneyComponent)
+		MoneyComponent->RemoveMoney(CurrentBuildRoomData->MoneyCost);
+
+	GridActor->DeselectSelectedCells();
+	
+	SelectedRoomCells.Empty();
+}
 
 void UBuildSubsystem::UpdateGhost() const
 {
@@ -246,6 +303,52 @@ void UBuildSubsystem::UpdateGhost() const
 	CurrentGhost->SetActorLocation(SnappedLocation);
 }
 
+void UBuildSubsystem::UpdateRoomSelection()
+{
+	if(!GridActor)
+		return;
+
+	FVector HitLocation;
+	if(!GetCursorHit(HitLocation))
+	{
+		return;
+	}
+
+	int HitRow, HitCol;
+	if (!GridActor->GetCellAtLocation(HitLocation, HitRow, HitCol))
+	{
+		GridActor->DeselectSelectedCells();
+		return;
+	}
+
+	if (!CurrentBuildRoomData)
+		return;
+
+	int SizeX = CurrentBuildRoomData->GridRowsX;
+	int SizeY = CurrentBuildRoomData->GridColumnsY;
+
+	int StartRow = HitRow - (SizeX - 1) / 2;
+	int StartCol = HitCol - (SizeY - 1) / 2;
+
+	StartRow = FMath::Clamp(StartRow, 0, GridActor->GetRows() - SizeX);
+	StartCol = FMath::Clamp(StartCol, 0, GridActor->GetColumns() - SizeY);
+
+	SelectedRoomCells.Empty(); // todo: voir pour pas recreer liste a chaque tick...
+	GridActor->DeselectSelectedCells();
+	for (int Row = StartRow; Row < StartRow + SizeX; ++Row)
+	{
+		for (int Col = StartCol; Col < StartCol + SizeY; ++Col)
+		{
+			FGridCell* Cell = GridActor->GetGridCell(Row, Col);
+			if (Cell)
+			{
+				GridActor->SelectRoomCell(Row, Col);
+				SelectedRoomCells.Add(Cell);
+			}
+		}
+	}
+}
+
 void UBuildSubsystem::StartRoomSelection(EGridRoomType RoomType)
 {
 	CurrentRoomType = RoomType;
@@ -261,20 +364,7 @@ void UBuildSubsystem::LeftClicked()
 {
 	if (bIsSelectingRoom)
 	{
-		FVector HitLocation;
-		if(!GetCursorHit(HitLocation))
-		{
-			GridActor->DeselectSelectedCells();
-			return;
-		}
-
-		int HitRow, HitCol;
-		if (!GridActor->GetCellAtLocation(HitLocation, HitRow, HitCol))
-		{
-			GridActor->DeselectSelectedCells();
-			return;
-		}
-		ToggleRoomCell(HitRow, HitCol);
+		PlaceRoom();
 	}
 	else
 	{
@@ -302,20 +392,6 @@ void UBuildSubsystem::ToggleRoomCell(int Row, int Column)
 		SelectedRoomCells.Add(Cell);
 		GridActor->SelectRoomCell(Row, Column);
 	}
-}
-
-void UBuildSubsystem::ConfirmRoom()
-{
-	if (SelectedRoomCells.Num() == 0 || !bIsSelectingRoom)
-		return;
-
-	//todo: check min size, is in object
-
-	int RoomId = GridActor->CreateRoom(CurrentRoomType, SelectedRoomCells);
-
-	SelectedRoomCells.Empty();
-	GridActor->DeselectSelectedCells();
-	bIsSelectingRoom = false;
 }
 
 bool UBuildSubsystem::GetCursorHit(FVector& OutHit) const

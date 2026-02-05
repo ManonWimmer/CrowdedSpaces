@@ -204,6 +204,8 @@ void AGridActor::SelectRoomCell(const int Row, const int Column)
 
 int AGridActor::CreateRoom(EGridRoomType RoomType, TArray<FGridCell*> CellsToAssign)
 {
+	UE_LOG(LogTemp, Log, TEXT("Create room"));
+	
 	FGridRoom NewRoom;
 	NewRoom.RoomId = NextRoomId++;
 	NewRoom.RoomType = RoomType;
