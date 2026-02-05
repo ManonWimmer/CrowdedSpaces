@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GridCell.h"
+#include "Grid/GridRoom.h"
 #include "GameFramework/Actor.h"
 #include "ProceduralMeshComponent.h"
 #include "GridActor.generated.h"
@@ -29,7 +30,7 @@ public:
 	bool GetGridLocation(bool bIsCenter, int Row, int Column, FVector2D& OutGridLocation) const;
 
 	UFUNCTION(BlueprintCallable, Category = "Grid")
-	void SelectCell(int Row, int Column);
+	void SelectObjectCell(int Row, int Column);
 	
 	UFUNCTION(BlueprintCallable, Category = "Grid")
 	void DeselectSelectedCells();
@@ -39,6 +40,9 @@ public:
 	int GetCellSize() const { return CellSize;}
 	int GetRows() const { return Rows;}
 	int GetColumns() const { return Columns;}
+	void DeselectCell(int Row, int Column);
+	void SelectRoomCell(int Row, int Column);
+	int CreateRoom(EGridRoomType RoomType, TArray<FGridCell*> CellsToAssign);
 
 private:
 	void DrawLine(const FVector& Start, const FVector& End, float Thickness, TArray<FVector>& Vertices, TArray<int>& Triangles);
@@ -79,4 +83,9 @@ private:
 	
 	TMap<FIntPoint, FGridCell> Cells;
 	TArray<FGridCell*> SelectedCells;
+
+	int NextRoomId = 0;
+
+	UPROPERTY()
+	TMap<int, FGridRoom> Rooms; // id - room
 };

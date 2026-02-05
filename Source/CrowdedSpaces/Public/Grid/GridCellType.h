@@ -7,5 +7,6 @@ UENUM(BlueprintType)
 enum class EGridCellType : uint8
 {
 	None			UMETA(DisplayName="None"),
-	Generator		UMETA(DisplayName="Generator")
+	Generator		UMETA(DisplayName="Generator"),
+	Wall			UMETA(DisplayName="Wall"),
 };

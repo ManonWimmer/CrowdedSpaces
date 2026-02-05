@@ -2,12 +2,15 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/WorldSubsystem.h"
+#include "Grid/GridRoomType.h"
+#include "Grid/GridCell.h"
 #include "Build/GhostObject.h"
-#include "Grid/GridActor.h"
 #include "Build/BuildData.h"
 #include "UI/GameHUD.h"
 #include "Resources/MoneyComponent.h"
 #include "BuildSubsystem.generated.h"
+
+class AGridActor;
 
 UCLASS()
 class CROWDEDSPACES_API UBuildSubsystem : public UTickableWorldSubsystem
@@ -32,6 +35,18 @@ public:
 
 	UFUNCTION()
 	void PlaceObject();
+
+	UFUNCTION(BlueprintCallable)
+	void StartRoomSelection(EGridRoomType RoomType);
+
+	UFUNCTION()
+	void LeftClicked();
+
+	UFUNCTION(BlueprintCallable)
+	void ToggleRoomCell(int Row, int Column);
+
+	UFUNCTION(BlueprintCallable)
+	void ConfirmRoom();
 
 	UFUNCTION()
 	void SetBuildData(const TArray<UBuildData*>& NewBuildData) { BuildDataObjects = NewBuildData; }
@@ -74,4 +89,9 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<AGridActor> GridActor;
+
+	// Room
+	EGridRoomType CurrentRoomType = EGridRoomType::None;
+	TArray<FGridCell*> SelectedRoomCells;
+	bool bIsSelectingRoom = false;
 };

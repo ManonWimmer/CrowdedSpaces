@@ -1,7 +1,7 @@
 ﻿#include "Build/BuildSubsystem.h"
 
 #include "EngineUtils.h"
-#include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Grid/GridActor.h"
 #include "Game/CrowdedGameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/CrowdedPlayerController.h"
@@ -28,7 +28,7 @@ void UBuildSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	if (!CamPC)
 		return;
 
-	CamPC->OnLeftClickBuild.AddDynamic(this, &UBuildSubsystem::PlaceObject);
+	CamPC->OnLeftClickBuild.AddDynamic(this, &UBuildSubsystem::LeftClicked);
 
 	// Money component
 	if (TObjectPtr<ACrowdedPlayerState> PS = PC->GetPlayerState<ACrowdedPlayerState>())
@@ -91,6 +91,8 @@ void UBuildSubsystem::StartBuilding(UBuildData* BuildData)
 	if (!BuildData || !BuildData->BuildClass)
 		return;
 
+	bIsSelectingRoom = false;
+	
 	CurrentBuildData = BuildData;
 
 	if (!CurrentGhost)
@@ -122,11 +124,14 @@ void UBuildSubsystem::StopBuilding()
 {
 	CurrentBuildData = nullptr;
 
+	// Stop object selection
 	if (CurrentGhost)
 		CurrentGhost->SetActorHiddenInGame(true);
 
 	if (GridActor)
 		GridActor->DeselectSelectedCells();
+
+	//todo: Stop room selection
 }
 
 void UBuildSubsystem::PlaceObject()
@@ -196,7 +201,6 @@ void UBuildSubsystem::UpdateGhost() const
 	FVector HitLocation;
 	if(!GetCursorHit(HitLocation))
 	{
-		GridActor->DeselectSelectedCells();
 		return;
 	}
 
@@ -226,7 +230,7 @@ void UBuildSubsystem::UpdateGhost() const
 		{
 			FGridCell* Cell = GridActor->GetGridCell(Row, Col);
 			if (Cell)
-				GridActor->SelectCell(Row, Col);
+				GridActor->SelectObjectCell(Row, Col);
 		}
 	}
 	
@@ -242,6 +246,77 @@ void UBuildSubsystem::UpdateGhost() const
 	CurrentGhost->SetActorLocation(SnappedLocation);
 }
 
+void UBuildSubsystem::StartRoomSelection(EGridRoomType RoomType)
+{
+	CurrentRoomType = RoomType;
+	bIsSelectingRoom = true;
+
+	SelectedRoomCells.Empty();
+
+	if (CurrentGhost)
+		CurrentGhost->SetActorHiddenInGame(true);
+}
+
+void UBuildSubsystem::LeftClicked()
+{
+	if (bIsSelectingRoom)
+	{
+		FVector HitLocation;
+		if(!GetCursorHit(HitLocation))
+		{
+			GridActor->DeselectSelectedCells();
+			return;
+		}
+
+		int HitRow, HitCol;
+		if (!GridActor->GetCellAtLocation(HitLocation, HitRow, HitCol))
+		{
+			GridActor->DeselectSelectedCells();
+			return;
+		}
+		ToggleRoomCell(HitRow, HitCol);
+	}
+	else
+	{
+		PlaceObject();
+	}
+}
+
+void UBuildSubsystem::ToggleRoomCell(int Row, int Column)
+{
+	if (!bIsSelectingRoom)
+		return;
+	
+	FGridCell* Cell = GridActor->GetGridCell(Row, Column);
+
+	if (!Cell || Cell->CellType == EGridCellType::Wall)
+		return;
+
+	if (SelectedRoomCells.Contains(Cell))
+	{
+		SelectedRoomCells.Remove(Cell);
+		GridActor->DeselectCell(Row, Column);
+	}
+	else
+	{
+		SelectedRoomCells.Add(Cell);
+		GridActor->SelectRoomCell(Row, Column);
+	}
+}
+
+void UBuildSubsystem::ConfirmRoom()
+{
+	if (SelectedRoomCells.Num() == 0 || !bIsSelectingRoom)
+		return;
+
+	//todo: check min size, is in object
+
+	int RoomId = GridActor->CreateRoom(CurrentRoomType, SelectedRoomCells);
+
+	SelectedRoomCells.Empty();
+	GridActor->DeselectSelectedCells();
+	bIsSelectingRoom = false;
+}
 
 bool UBuildSubsystem::GetCursorHit(FVector& OutHit) const
 {

@@ -1,5 +1,7 @@
 ﻿#include "Grid/GridActor.h"
 
+#include "Grid/GridRoom.h"
+
 
 AGridActor::AGridActor()
 {
@@ -168,7 +170,7 @@ bool AGridActor::GetGridLocation(const bool bIsCenter, const int Row, const int 
 	return true;
 }
 
-void AGridActor::SelectCell(const int Row, const int Column)
+void AGridActor::SelectObjectCell(const int Row, const int Column)
 {
 	FGridCell* NewSelectedCell = GetGridCell(Row, Column);
 	if (!NewSelectedCell)
@@ -182,6 +184,41 @@ void AGridActor::SelectCell(const int Row, const int Column)
 		NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Green);
 	
 	SelectedCells.Add(NewSelectedCell);
+}
+
+void AGridActor::SelectRoomCell(const int Row, const int Column)
+{
+	FGridCell* NewSelectedCell = GetGridCell(Row, Column);
+	if (!NewSelectedCell)
+		return;
+	
+	NewSelectedCell->CellProceduralMesh->SetVisibility(true);
+
+	if (NewSelectedCell->RoomId != -1)
+		NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Red);
+	else
+		NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Green);
+	
+	SelectedCells.Add(NewSelectedCell);
+}
+
+int AGridActor::CreateRoom(EGridRoomType RoomType, TArray<FGridCell*> CellsToAssign)
+{
+	FGridRoom NewRoom;
+	NewRoom.RoomId = NextRoomId++;
+	NewRoom.RoomType = RoomType;
+
+	for (FGridCell* Cell : CellsToAssign)
+	{
+		Cell->RoomId = NewRoom.RoomId;
+		Cell->RoomType = NewRoom.RoomType;
+
+		NewRoom.Cells.Add(Cell);
+	}
+
+	Rooms.Add(NewRoom.RoomId, NewRoom);
+
+	return NewRoom.RoomId;
 }
 
 void AGridActor::DeselectSelectedCells()
@@ -198,6 +235,13 @@ void AGridActor::DeselectSelectedCells()
 FGridCell* AGridActor::GetGridCell(int Row, int Column)
 {
 	return Cells.Find(FIntPoint(Row, Column));
+}
+
+void AGridActor::DeselectCell(int Row, int Column)
+{
+	FGridCell* Cell = GetGridCell(Row, Column);
+	if (Cell)
+		Cell->CellProceduralMesh->SetVisibility(false);
 }
 
 void AGridActor::DrawLine(const FVector& Start, const FVector& End, const float Thickness, TArray<FVector>& Vertices, TArray<int>& Triangles)
