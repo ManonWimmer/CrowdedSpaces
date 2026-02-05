@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "BuildModeType.h"
 #include "BuildRoomData.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "Grid/GridRoomType.h"
@@ -27,6 +28,9 @@ public:
 	
 	virtual void Tick(float DeltaTime) override;
 	virtual bool IsTickable() const override;
+
+	UFUNCTION(BlueprintCallable)
+	void OnBuildModeSelected(EBuildModeType BuildMode);
 	
 	UFUNCTION(BlueprintCallable)
 	void StartBuilding(UBuildData* BuildData);
@@ -38,16 +42,10 @@ public:
 	void StopBuilding();
 
 	UFUNCTION()
-	void PlaceObject();
-
-	UFUNCTION(BlueprintCallable)
-	void StartRoomSelection(EGridRoomType RoomType);
-
+	void PlaceObject() const;
+	
 	UFUNCTION()
 	void LeftClicked();
-
-	UFUNCTION(BlueprintCallable)
-	void ToggleRoomCell(int Row, int Column);
 
 	UFUNCTION(BlueprintCallable)
 	void PlaceRoom();
@@ -111,7 +109,7 @@ private:
 	TObjectPtr<AGridActor> GridActor;
 
 	// Room
-	EGridRoomType CurrentRoomType = EGridRoomType::None;
+	EGridRoomType CurrentRoomType = EGridRoomType::Any;
 	TArray<FGridCell*> SelectedRoomCells;
 	bool bIsSelectingRoom = false;
 };

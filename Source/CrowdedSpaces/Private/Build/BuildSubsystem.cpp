@@ -94,6 +94,21 @@ bool UBuildSubsystem::IsTickable() const
 	return bTickEnabled;
 }
 
+void UBuildSubsystem::OnBuildModeSelected(EBuildModeType BuildMode)
+{
+	switch (BuildMode)
+	{
+		case EBuildModeType::Objects:
+			GridActor->SetIsShowingRooms(true);
+			GridActor->ShowPlacedRooms(true);
+			break;
+		case EBuildModeType::Rooms:
+			GridActor->SetIsShowingRooms(true);
+			GridActor->ShowPlacedRooms(true);
+			break;
+	}
+}
+
 void UBuildSubsystem::StartBuilding(UBuildData* BuildData)
 {
 	if (!BuildData || !BuildData->BuildClass)
@@ -136,17 +151,17 @@ void UBuildSubsystem::StartRoomBuilding(UBuildRoomData* BuildRoomData)
 	bIsSelectingRoom = true;
 	
 	CurrentBuildRoomData = BuildRoomData;
-
-	// pour l'instant pas de ghost, a voir plus tard
+	
 	if (CurrentGhost)
 	{
-		CurrentGhost->SetActorHiddenInGame(false);
+		CurrentGhost->SetActorHiddenInGame(true);
 	}
 }
 
 void UBuildSubsystem::StopBuilding()
 {
 	CurrentBuildData = nullptr;
+	CurrentBuildRoomData = nullptr;
 
 	// Stop object selection
 	if (CurrentGhost)
@@ -156,9 +171,11 @@ void UBuildSubsystem::StopBuilding()
 		GridActor->DeselectSelectedCells();
 
 	SelectedRoomCells.Empty();
+
+	GridActor->SetIsShowingRooms(true); 
 }
 
-void UBuildSubsystem::PlaceObject()
+void UBuildSubsystem::PlaceObject() const
 {
 	if (!CurrentGhost || !CurrentBuildData || !CurrentBuildData->BuildClass || !GridActor)
 		return;
@@ -181,8 +198,17 @@ void UBuildSubsystem::PlaceObject()
 		for (int Col = StartCol; Col < StartCol + SizeY; ++Col)
 		{
 			FGridCell* Cell = GridActor->GetGridCell(Row, Col);
-			if (!Cell || Cell->bOccupied)
-				return; 
+			if (CurrentBuildData->RoomType == EGridRoomType::Any)
+			{
+				if (!Cell || Cell->bOccupied)
+					return; 
+			}
+			else
+			{
+				if (!Cell || Cell->bOccupied || Cell->RoomType != CurrentBuildData->RoomType)
+					return; 
+			}
+			
 		}
 	}
 	TObjectPtr<ABuildableObject> Placed = GetWorld()->SpawnActor<ABuildableObject>(
@@ -237,7 +263,7 @@ void UBuildSubsystem::PlaceRoom()
 		}
 	}
 	
-	GridActor->CreateRoom(CurrentBuildRoomData->RoomType, SelectedRoomCells);
+	GridActor->CreateRoom(CurrentBuildRoomData, SelectedRoomCells);
 
 	if (MoneyComponent)
 		MoneyComponent->RemoveMoney(CurrentBuildRoomData->MoneyCost);
@@ -287,7 +313,7 @@ void UBuildSubsystem::UpdateGhost() const
 		{
 			FGridCell* Cell = GridActor->GetGridCell(Row, Col);
 			if (Cell)
-				GridActor->SelectObjectCell(Row, Col);
+				GridActor->SelectObjectCell(Row, Col, CurrentBuildData->RoomType);
 		}
 	}
 	
@@ -349,17 +375,6 @@ void UBuildSubsystem::UpdateRoomSelection()
 	}
 }
 
-void UBuildSubsystem::StartRoomSelection(EGridRoomType RoomType)
-{
-	CurrentRoomType = RoomType;
-	bIsSelectingRoom = true;
-
-	SelectedRoomCells.Empty();
-
-	if (CurrentGhost)
-		CurrentGhost->SetActorHiddenInGame(true);
-}
-
 void UBuildSubsystem::LeftClicked()
 {
 	if (bIsSelectingRoom)
@@ -369,28 +384,6 @@ void UBuildSubsystem::LeftClicked()
 	else
 	{
 		PlaceObject();
-	}
-}
-
-void UBuildSubsystem::ToggleRoomCell(int Row, int Column)
-{
-	if (!bIsSelectingRoom)
-		return;
-	
-	FGridCell* Cell = GridActor->GetGridCell(Row, Column);
-
-	if (!Cell || Cell->CellType == EGridCellType::Wall)
-		return;
-
-	if (SelectedRoomCells.Contains(Cell))
-	{
-		SelectedRoomCells.Remove(Cell);
-		GridActor->DeselectCell(Row, Column);
-	}
-	else
-	{
-		SelectedRoomCells.Add(Cell);
-		GridActor->SelectRoomCell(Row, Column);
 	}
 }
 

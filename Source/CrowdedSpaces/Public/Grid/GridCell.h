@@ -42,7 +42,7 @@ struct FGridCell
 	EGridCellType CellType = EGridCellType::None;
 
 	UPROPERTY()
-	EGridRoomType RoomType = EGridRoomType::None;
+	EGridRoomType RoomType = EGridRoomType::Any;
 
 	UPROPERTY()
 	int RoomId = -1;

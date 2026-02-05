@@ -95,7 +95,7 @@ void AGridActor::BeginPlay()
 			
 			TArray<FVector> NewCellVertices;
 			TArray<int> NewCellTriangles;
-			float HalfCell = CellSize / 2;
+			float HalfCell = CellSize / 2 - LineThickness / 2;
 			
 			DrawLine(FVector(0, HalfCell, 0), FVector(CellSize, HalfCell, 0), CellSize, NewCellVertices, NewCellTriangles);
 
@@ -130,7 +130,7 @@ void AGridActor::BeginPlay()
 
 			Cells.Emplace(
 				Key,
-				FGridCell(Row, Column, false, EGridCellType::None, EGridRoomType::None,
+				FGridCell(Row, Column, false, EGridCellType::None, EGridRoomType::Any,
 				NewCellProceduralMesh, NewCellMaterialInstance));
 		}
 	}
@@ -170,7 +170,7 @@ bool AGridActor::GetGridLocation(const bool bIsCenter, const int Row, const int 
 	return true;
 }
 
-void AGridActor::SelectObjectCell(const int Row, const int Column)
+void AGridActor::SelectObjectCell(const int Row, const int Column, EGridRoomType RoomType)
 {
 	FGridCell* NewSelectedCell = GetGridCell(Row, Column);
 	if (!NewSelectedCell)
@@ -178,10 +178,20 @@ void AGridActor::SelectObjectCell(const int Row, const int Column)
 	
 	NewSelectedCell->CellProceduralMesh->SetVisibility(true);
 
-	if (NewSelectedCell->bOccupied)
-		NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Red);
+	if (RoomType == EGridRoomType::Any)
+	{
+		if (NewSelectedCell->bOccupied)
+			NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Red);
+		else
+			NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Green);
+	}
 	else
-		NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Green);
+	{
+		if (NewSelectedCell->bOccupied || NewSelectedCell->RoomType != RoomType)
+			NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Red);
+		else
+			NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Green);
+	}
 	
 	SelectedCells.Add(NewSelectedCell);
 }
@@ -197,18 +207,36 @@ void AGridActor::SelectRoomCell(const int Row, const int Column)
 	if (NewSelectedCell->RoomId != -1)
 		NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Red);
 	else
-		NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Green);
+		NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Green); 
 	
 	SelectedCells.Add(NewSelectedCell);
 }
 
-int AGridActor::CreateRoom(EGridRoomType RoomType, TArray<FGridCell*> CellsToAssign)
+void AGridActor::ShowPlacedRooms(bool bShow)
 {
-	UE_LOG(LogTemp, Log, TEXT("Create room"));
-	
+	for (TTuple<int, FGridRoom> Room : Rooms)
+	{
+		for (FGridCell* Cell : Room.Value.Cells)
+		{
+			if (bShow)
+			{
+				Cell->CellProceduralMesh->SetVisibility(true);
+				Cell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), Room.Value.GridColor);
+			}
+			else
+			{
+				Cell->CellProceduralMesh->SetVisibility(false);
+			}
+		}
+	}
+}
+
+int AGridActor::CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> CellsToAssign)
+{
 	FGridRoom NewRoom;
 	NewRoom.RoomId = NextRoomId++;
-	NewRoom.RoomType = RoomType;
+	NewRoom.RoomType = BuildData->RoomType;
+	NewRoom.GridColor = BuildData->GridColor;
 
 	for (FGridCell* Cell : CellsToAssign)
 	{
@@ -220,7 +248,24 @@ int AGridActor::CreateRoom(EGridRoomType RoomType, TArray<FGridCell*> CellsToAss
 
 	Rooms.Add(NewRoom.RoomId, NewRoom);
 
+	ShowPlacedRooms(true);
+
 	return NewRoom.RoomId;
+}
+
+bool AGridActor::CheckIfCellInPlacedRoom(FGridCell* Cell, FLinearColor& OutGridColor)
+{
+	if (Cell->RoomId != -1)
+	{
+		const FGridRoom* Room = Rooms.Find(Cell->RoomId);
+		if (Room)
+		{
+			OutGridColor = Room->GridColor;
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void AGridActor::DeselectSelectedCells()
@@ -228,7 +273,18 @@ void AGridActor::DeselectSelectedCells()
 	for (FGridCell* Cell : SelectedCells)
 	{
 		if (Cell)
-			Cell->CellProceduralMesh->SetVisibility(false);
+		{
+			FLinearColor OutGridColor = FLinearColor::White;
+			if (bIsShowingRooms && CheckIfCellInPlacedRoom(Cell, OutGridColor))
+			{
+				Cell->CellProceduralMesh->SetVisibility(true);
+				Cell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), OutGridColor);
+			}
+			else
+			{
+				Cell->CellProceduralMesh->SetVisibility(false); 
+			}
+		}
 	}
 
 	SelectedCells.Empty();

@@ -5,6 +5,7 @@
 #include "Grid/GridRoom.h"
 #include "GameFramework/Actor.h"
 #include "ProceduralMeshComponent.h"
+#include "Build/BuildRoomData.h"
 #include "GridActor.generated.h"
 
 UCLASS()
@@ -30,10 +31,13 @@ public:
 	bool GetGridLocation(bool bIsCenter, int Row, int Column, FVector2D& OutGridLocation) const;
 
 	UFUNCTION(BlueprintCallable, Category = "Grid")
-	void SelectObjectCell(int Row, int Column);
+	void SelectObjectCell(const int Row, const int Column, EGridRoomType RoomType);
 	
 	UFUNCTION(BlueprintCallable, Category = "Grid")
 	void DeselectSelectedCells();
+
+	UFUNCTION(BlueprintCallable, Category = "Grid")
+	void SetIsShowingRooms(bool bShow) { bIsShowingRooms = bShow; }
 	
 	FGridCell* GetGridCell(int Row, int Column);
 	
@@ -42,7 +46,9 @@ public:
 	int GetColumns() const { return Columns;}
 	void DeselectCell(int Row, int Column);
 	void SelectRoomCell(int Row, int Column);
-	int CreateRoom(EGridRoomType RoomType, TArray<FGridCell*> CellsToAssign);
+	void ShowPlacedRooms(bool bShow);
+	int CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> CellsToAssign);
+	bool CheckIfCellInPlacedRoom(FGridCell* Cell, FLinearColor& OutGridColor);
 
 private:
 	void DrawLine(const FVector& Start, const FVector& End, float Thickness, TArray<FVector>& Vertices, TArray<int>& Triangles);
@@ -88,4 +94,6 @@ private:
 
 	UPROPERTY()
 	TMap<int, FGridRoom> Rooms; // id - room
+
+	bool bIsShowingRooms = false;
 };

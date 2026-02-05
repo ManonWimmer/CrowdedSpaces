@@ -10,10 +10,13 @@ struct FGridRoom
 	GENERATED_BODY()
 
 	UPROPERTY()
-	EGridRoomType RoomType = EGridRoomType::None;
+	EGridRoomType RoomType = EGridRoomType::Any;
 
 	UPROPERTY()
 	int RoomId = -1;
 	
 	TArray<FGridCell*> Cells;
+
+	UPROPERTY()
+	FLinearColor GridColor = FLinearColor::Yellow;
 };

@@ -34,5 +34,8 @@ public:
 	int GridColumnsY = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	EGridRoomType RoomType = EGridRoomType::None;
+	EGridRoomType RoomType = EGridRoomType::Any;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Room")
+	FLinearColor GridColor = FLinearColor::Yellow;
 };
