@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
 #include "Build/BuildData.h"
+#include "Build/BuildRoomData.h"
 #include "MoralEvent/MoralEvent.h"
 #include "Time/TimeData.h"
 #include "CrowdedGameState.generated.h"
@@ -18,6 +19,9 @@ public:
 	// Build
 	UPROPERTY(EditAnywhere, Category = "Build")
 	TArray<TObjectPtr<UBuildData>> BuildDataObjects;
+
+	UPROPERTY(EditAnywhere, Category = "Build")
+	TArray<TObjectPtr<UBuildRoomData>> BuildDataRooms;
 
 	UPROPERTY(EditAnywhere, Category = "Build")
 	float SnapSize = 100.f;

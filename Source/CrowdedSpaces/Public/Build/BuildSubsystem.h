@@ -52,10 +52,17 @@ public:
 	void SetBuildData(const TArray<UBuildData*>& NewBuildData) { BuildDataObjects = NewBuildData; }
 
 	UFUNCTION()
+	void SetBuildRoomData(const TArray<UBuildRoomData*>& NewBuildRoomData) { BuildDataRooms = NewBuildRoomData; }
+
+	UFUNCTION()
 	void SetSnapSize(const float NewSnapSize) { SnapSize = NewSnapSize; }
 
 	UFUNCTION(BlueprintCallable)
 	TArray<UBuildData*> GetBuildDataObjects() { return BuildDataObjects;}
+
+	UFUNCTION(BlueprintCallable)
+	TArray<UBuildRoomData*> GetBuildDataRooms() { return BuildDataRooms;}
+	
 
 private:
 	UPROPERTY()
@@ -66,6 +73,9 @@ private:
 
 	UPROPERTY()
 	TArray<TObjectPtr<UBuildData>> BuildDataObjects; // Send by game state
+
+	UPROPERTY()
+	TArray<TObjectPtr<UBuildRoomData>> BuildDataRooms; // Send by game state
 
 	UPROPERTY()
 	float SnapSize = 100.f; // Send by game state
