@@ -48,7 +48,9 @@ public:
 	void SelectRoomCell(int Row, int Column);
 	void ShowPlacedRooms(bool bShow);
 	int CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> CellsToAssign);
-	bool CheckIfCellInPlacedRoom(FGridCell* Cell, FLinearColor& OutGridColor);
+	bool CheckIfCellInPlacedRoom(const FGridCell* Cell, FLinearColor& OutGridColor);
+	void SpawnWallsForRoom(const TArray<FGridCell*>& RoomCells);
+	void TrySpawnWall(const int Row, const int Column, const FGridCell* OriginCell, FRotator Rotation);
 
 private:
 	void DrawLine(const FVector& Start, const FVector& End, float Thickness, TArray<FVector>& Vertices, TArray<int>& Triangles);
@@ -96,4 +98,7 @@ private:
 	TMap<int, FGridRoom> Rooms; // id - room
 
 	bool bIsShowingRooms = false;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> WallClass;
 };

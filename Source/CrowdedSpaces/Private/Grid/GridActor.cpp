@@ -249,11 +249,13 @@ int AGridActor::CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> C
 	Rooms.Add(NewRoom.RoomId, NewRoom);
 
 	ShowPlacedRooms(true);
-
+	
+	SpawnWallsForRoom(NewRoom.Cells);
+	
 	return NewRoom.RoomId;
 }
 
-bool AGridActor::CheckIfCellInPlacedRoom(FGridCell* Cell, FLinearColor& OutGridColor)
+bool AGridActor::CheckIfCellInPlacedRoom(const FGridCell* Cell, FLinearColor& OutGridColor)
 {
 	if (Cell->RoomId != -1)
 	{
@@ -266,6 +268,60 @@ bool AGridActor::CheckIfCellInPlacedRoom(FGridCell* Cell, FLinearColor& OutGridC
 	}
 
 	return false;
+}
+
+void AGridActor::SpawnWallsForRoom(const TArray<FGridCell*>& RoomCells)
+{
+	if (!WallClass) return;
+
+	for (const FGridCell* Cell : RoomCells)
+	{
+		if (!Cell) continue;
+
+		int Row = Cell->Row;
+		int Col = Cell->Column;
+
+		TrySpawnWall(Row - 1, Col, Cell, FRotator::ZeroRotator); // North
+		TrySpawnWall(Row + 1, Col, Cell, FRotator::ZeroRotator); // South
+		TrySpawnWall(Row, Col - 1, Cell, FRotator(0,90,0)); // West
+		TrySpawnWall(Row, Col + 1, Cell, FRotator(0,90,0)); // East
+	}
+}
+
+void AGridActor::TrySpawnWall(const int Row, const int Column, const FGridCell* OriginCell, FRotator Rotation)
+{
+	const FGridCell* Neighbor = GetGridCell(Row, Column);
+
+	if (Neighbor && Neighbor->RoomId == OriginCell->RoomId)
+		return;
+
+	FVector2D CellPos;
+	GetGridLocation(true, OriginCell->Row, OriginCell->Column, CellPos);
+
+	FVector SpawnLoc(CellPos.X, CellPos.Y, GetActorLocation().Z);
+
+	float Half = GetCellSize() * 0.5f;
+	
+	// Decalage selon direction
+	if (Row < OriginCell->Row)        // NORTH
+		SpawnLoc.X -= Half;
+
+	else if (Row > OriginCell->Row)   // SOUTH
+		SpawnLoc.X += Half;
+
+	else if (Column < OriginCell->Column) // WEST
+		SpawnLoc.Y -= Half;
+
+	else if (Column > OriginCell->Column) // EAST
+		SpawnLoc.Y += Half;
+
+	GetWorld()->SpawnActor<AActor>(
+		WallClass,
+		SpawnLoc,
+		Rotation
+	);
+
+	GetWorld()->SpawnActor<AActor>(WallClass, SpawnLoc, Rotation);
 }
 
 void AGridActor::DeselectSelectedCells()
