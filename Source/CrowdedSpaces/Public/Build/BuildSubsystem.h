@@ -72,8 +72,6 @@ private:
 	
 	static constexpr float CursorLineTraceDistance = 10000.f;
 
-	// ----- TEMP TEST GRID ----- //
 	UPROPERTY()
-	AGridActor* GridActor;
-	// ----- TEMP TEST GRID ----- //
+	TObjectPtr<AGridActor> GridActor;
 };

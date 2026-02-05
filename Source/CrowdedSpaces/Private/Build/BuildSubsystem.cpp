@@ -39,13 +39,15 @@ void UBuildSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	// HUD
 	GameHUD = Cast<AGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
 
-	// ----- TEMP TEST GRID ----- //
+	// Grid actor
 	for (TActorIterator<AGridActor> It(GetWorld()); It; ++It)
 	{
 		GridActor = *It;
 		break; 
 	}
-	// ----- TEMP TEST GRID ----- //
+
+	if (!GridActor)
+		UE_LOG(LogTemp, Error, TEXT("BuildSubsystem: couldn't find GridActor in world"));
 }
 
 TStatId UBuildSubsystem::GetStatId() const
