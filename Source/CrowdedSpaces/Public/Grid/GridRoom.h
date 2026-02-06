@@ -9,14 +9,14 @@ struct FGridRoom
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Room")
 	EGridRoomType RoomType = EGridRoomType::Any;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Room")
 	int RoomId = -1;
 	
 	TArray<FGridCell*> Cells;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Room")
 	FLinearColor GridColor = FLinearColor::Yellow;
 };

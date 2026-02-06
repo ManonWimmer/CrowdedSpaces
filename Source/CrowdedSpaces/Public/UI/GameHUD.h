@@ -5,6 +5,7 @@
 #include "MoralEvent/MoralEvent.h"
 #include "Selection/SelectionType.h"
 #include "WidgetStartupConfig.h"
+#include "Grid/GridRoom.h"
 #include "GameHUD.generated.h"
 
 class UCustomWidget;
@@ -39,8 +40,13 @@ public:
 	void ShowPlayerResourcesWidget(bool bShow);
 
 	// Selection
-	UFUNCTION(BlueprintCallable, Category="Widgets")
 	void ShowSelectionWidget(AActor* SelectableActor, bool bShow, ESelectionType SelectionType);
+	
+	void ShowSelectionWidget(FGridRoom& Room, bool bShow, ESelectionType SelectionType);
+
+	UCustomWidget* GetWidgetFromSelectionType(ESelectionType Type);
+
+	void HideCurrentSelectionWidget();
 	
 	// Moral Event
 	UFUNCTION(BlueprintCallable, Category="Widgets")
@@ -102,5 +108,7 @@ private:
 	int CursorOverUI = 0;
 
 	bool bUIClickThisFrame = false;
+
+	const FGridRoom* CurrentlySelectedRoom = nullptr;
 };
 

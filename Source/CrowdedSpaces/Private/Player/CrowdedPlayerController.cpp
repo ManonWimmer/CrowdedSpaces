@@ -150,7 +150,7 @@ void ACrowdedPlayerController::HandleSelection() const
 
 		if (GridActor->GetRoomAtWorldLocation(Hit.Location, Room))
 		{
-			GameHUD->ShowSelectionWidget(GridActor, true, ESelectionType::Room);
+			GameHUD->ShowSelectionWidget(*Room, true, ESelectionType::Room);
 			return;
 		}
 	}

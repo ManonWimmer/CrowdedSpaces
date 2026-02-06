@@ -1,21 +1,14 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Grid/GridRoom.h"
 #include "UI/CustomWidget.h"
-#include "RoomSelectionWidget.generated.h"
+#include "NPCSelectionWidget.generated.h"
 
 UCLASS()
-class CROWDEDSPACES_API URoomSelectionWidget : public UCustomWidget
+class CROWDEDSPACES_API UNPCSelectionWidget : public UCustomWidget
 {
 	GENERATED_BODY()
 
-public:
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Widget")
-	void SetupRoom(const FGridRoom& Room);
-
-	void SetupRoom_Implementation(const FGridRoom& Room);
-	
 protected:
 	virtual void NativeConstruct() override;
 	

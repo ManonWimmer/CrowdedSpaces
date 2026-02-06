@@ -3,6 +3,7 @@
 #include "UI/Widgets/MoralEventWidget.h"
 #include "UI/CustomWidget.h"
 #include "UI/Widgets/SelectionWidget.h"
+#include "UI/Widgets/Selection/RoomSelectionWidget.h"
 
 void AGameHUD::BeginPlay()
 {
@@ -51,89 +52,96 @@ void AGameHUD::ShowPlayerResourcesWidget(bool bShow)
 #pragma region Selection
 void AGameHUD::ShowSelectionWidget(AActor* SelectableActor, bool bShow, ESelectionType SelectionType)
 {
-	if (bShow && SelectableActor != nullptr)
+	if (!bShow || !SelectableActor)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Show"));
-		if (CurrentlySelectedActor != nullptr)
-		{
-			if (CurrentlySelectedActor == SelectableActor)
-			{
-				UE_LOG(LogTemp, Log, TEXT("Already show, hide"));
-				// Desac widget if already shown
-				UCustomWidget* Widget = ShowWidget(CurrentlyShownSelectionWidgetBP, false, ESlateVisibility::SelfHitTestInvisible);
-				if (Widget)
-					Widget->Unsetup();
-				CurrentlySelectedActor = nullptr;
-				CurrentlyShownSelectionWidgetBP = nullptr;
-				return;
-			}
-			else
-			{
-				UE_LOG(LogTemp, Log, TEXT("Hide last widget"));
-				// Desac last widget if not the same
-				UCustomWidget* Widget = nullptr;
-				switch (SelectionType)
-				{
-					case ESelectionType::Room:
-						Widget = ShowWidget(CurrentlyShownSelectionWidgetBP, false, ESlateVisibility::SelfHitTestInvisible);
-						break;
-					default:
-						break;
-				}
-				
-				if (Widget)
-					Widget->Unsetup();
-
-				CurrentlyShownSelectionWidgetBP = nullptr;
-			}
-		}
-
-		
-		UE_LOG(LogTemp, Log, TEXT("Show widget"));
-		// Show new widget ui depending on type type
-		UCustomWidget* Widget = nullptr;
-		switch (SelectionType)
-		{
-			case ESelectionType::Default:
-				break;
-			
-			case ESelectionType::NPC: 
-				Widget = ShowWidget(NPCSelectionWidgetBP, true, ESlateVisibility::SelfHitTestInvisible);
-				CurrentlyShownSelectionWidgetBP = NPCSelectionWidgetBP;
-				break;
-				break;
-			
-			case ESelectionType::Generator: 
-				Widget = ShowWidget(GeneratorSelectionWidgetBP, true, ESlateVisibility::SelfHitTestInvisible);
-				CurrentlyShownSelectionWidgetBP = GeneratorSelectionWidgetBP;
-				break;
-			
-			case ESelectionType::Room:
-				Widget = ShowWidget(RoomSelectionWidgetBP, true, ESlateVisibility::SelfHitTestInvisible);
-				CurrentlyShownSelectionWidgetBP = RoomSelectionWidgetBP;
-				break;
-			default:
-				break;
-		}
-		
-		if (Widget)
-		{
-			UE_LOG(LogTemp, Log, TEXT("setup widget"));
-			Widget->Setup(SelectableActor);
-		}
-		CurrentlySelectedActor = SelectableActor;
+		HideCurrentSelectionWidget();
+		return;
 	}
-	else
+
+	// Toggle
+	if (CurrentlySelectedActor == SelectableActor)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Hide widget"));
-		if (!CurrentlyShownSelectionWidgetBP)
-			return;
-		
-		UCustomWidget* Widget = ShowWidget(CurrentlyShownSelectionWidgetBP, false, ESlateVisibility::SelfHitTestInvisible);
-		if (Widget)
-			Widget->Unsetup();
-		CurrentlySelectedActor = nullptr;
+		HideCurrentSelectionWidget();
+		return;
 	}
+
+	// Hide previous
+	HideCurrentSelectionWidget();
+
+	UCustomWidget* Widget = GetWidgetFromSelectionType(SelectionType);
+	if (!Widget)
+		return;
+
+	Widget->Setup(SelectableActor);
+
+	CurrentlySelectedActor = SelectableActor;
+}
+
+void AGameHUD::ShowSelectionWidget(FGridRoom& Room, bool bShow, ESelectionType SelectionType)
+{
+	if (!bShow)
+	{
+		HideCurrentSelectionWidget();
+		return;
+	}
+
+	// Toggle ONLY if same room
+	if (CurrentlySelectedRoom == &Room)
+	{
+		HideCurrentSelectionWidget();
+		return;
+	}
+
+	UCustomWidget* Widget = GetWidgetFromSelectionType(SelectionType);
+	if (!Widget)
+		return;
+
+	URoomSelectionWidget* RoomWidget = Cast<URoomSelectionWidget>(Widget);
+	if (!RoomWidget)
+		return;
+
+	RoomWidget->SetupRoom(Room);
+
+	CurrentlySelectedRoom = &Room;
+	CurrentlySelectedActor = nullptr;
+}
+
+void AGameHUD::HideCurrentSelectionWidget()
+{
+	if (!CurrentlyShownSelectionWidgetBP)
+		return;
+
+	UCustomWidget* Widget = ShowWidget(CurrentlyShownSelectionWidgetBP, false, ESlateVisibility::SelfHitTestInvisible);
+
+	if (Widget)
+		Widget->Unsetup();
+
+	CurrentlyShownSelectionWidgetBP = nullptr;
+	CurrentlySelectedActor = nullptr;
+	CurrentlySelectedRoom = nullptr;
+}
+
+UCustomWidget* AGameHUD::GetWidgetFromSelectionType(ESelectionType Type)
+{
+	switch (Type)
+	{
+	case ESelectionType::NPC:
+		CurrentlyShownSelectionWidgetBP = NPCSelectionWidgetBP;
+		break;
+
+	case ESelectionType::Generator:
+		CurrentlyShownSelectionWidgetBP = GeneratorSelectionWidgetBP;
+		break;
+
+	case ESelectionType::Room:
+		CurrentlyShownSelectionWidgetBP = RoomSelectionWidgetBP;
+		break;
+
+	default:
+		return nullptr;
+	}
+
+	return ShowWidget(CurrentlyShownSelectionWidgetBP, true, ESlateVisibility::SelfHitTestInvisible);
 }
 #pragma endregion Selection
 

@@ -24,3 +24,7 @@ void URoomSelectionWidget::Unsetup_Implementation()
 {
 	Super::Unsetup_Implementation();
 }
+
+void URoomSelectionWidget::SetupRoom_Implementation(const FGridRoom& Room)
+{
+}
