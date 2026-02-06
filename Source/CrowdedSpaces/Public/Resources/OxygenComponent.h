@@ -23,7 +23,7 @@ public:
 	bool HasEnoughOxygen(int Amount);
 
 	UFUNCTION(BlueprintCallable)
-	int GetOxygen() {return Oxygen; }
+	int GetOxygen() const {return Oxygen; }
 
 	// Selectable
 	UPROPERTY(BlueprintAssignable)

@@ -25,7 +25,7 @@ public:
 	bool HasEnoughMoney(int Amount);
 
 	UFUNCTION(BlueprintCallable)
-	int GetMoney() {return Money; }
+	int GetMoney() const {return Money; }
 
 	UPROPERTY(BlueprintAssignable, Category = "Money")
 	FOnMoneyChanged OnMoneyChanged;

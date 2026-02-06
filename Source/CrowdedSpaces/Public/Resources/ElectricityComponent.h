@@ -24,7 +24,7 @@ public:
 	bool HasEnoughElectricity(int Amount);
 	
 	UFUNCTION(BlueprintCallable)
-	int GetElectricity() {return Electricity; }
+	int GetElectricity() const { return Electricity; }
 
 	// Selectable
 	UPROPERTY(BlueprintAssignable)

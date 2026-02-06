@@ -6,6 +6,8 @@
 #include "FoodComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFoodFull); // To know when to stop eating
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFoodChanged, int32, Value); 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIsEatingChanged, bool, Value); 
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class CROWDEDSPACES_API UFoodComponent : public UActorComponent, public ISelectableStatProvider
@@ -37,13 +39,22 @@ public:
 	void SetEating(bool bEating);
 
 	UFUNCTION(BlueprintCallable)
-	int GetFood() {return Food; }
+	int GetFood() const { return Food; }
 
 	UFUNCTION(BlueprintCallable)
-	bool GetIsEating() { return bIsEating; }
+	int GetMaxFood() const { return MaxFood; }
+
+	UFUNCTION(BlueprintCallable)
+	bool GetIsEating() const { return bIsEating; }
 
 	UPROPERTY(BlueprintAssignable)
 	FOnFoodFull OnFoodFull;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnFoodChanged OnFoodChanged;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnIsEatingChanged OnIsEatingChanged;
 
 	UFUNCTION(BlueprintCallable)
 	void SetSufferHunger(bool bHunger) { bSufferHunger = bHunger; }

@@ -25,6 +25,7 @@ void ANPC::SetCurrentAction(ENPCAction NewAction)
 	CurrentAction = NewAction;
 	FString ActionString = StaticEnum<ENPCAction>()->GetDisplayNameTextByValue(static_cast<int64>(CurrentAction)).ToString();
 	OnStatChanged.Broadcast("Current Action", ActionString);
+	OnCurrentActionChanged.Broadcast(CurrentAction);
 }
 
 void ANPC::BeginPlay()

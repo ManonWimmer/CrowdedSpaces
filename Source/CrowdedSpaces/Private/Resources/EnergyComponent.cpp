@@ -20,6 +20,7 @@ void UEnergyComponent::AddEnergy(int Amount)
 	if (Energy != OldEnergy)
 	{
 		OnStatChanged.Broadcast("Energy", FString::SanitizeFloat(Energy));
+		OnEnergyChanged.Broadcast(Energy);
 	}
 
 	if (Energy >= MaxEnergy)
@@ -32,6 +33,7 @@ void UEnergyComponent::RemoveEnergy(int Amount)
 {
 	Energy = FMath::Clamp(Energy - Amount, 0, MaxEnergy);
 	OnStatChanged.Broadcast("Energy", FString::SanitizeFloat(Energy));
+	OnEnergyChanged.Broadcast(Energy);
 }
 
 bool UEnergyComponent::HasEnoughEnergy(int Amount)
@@ -68,6 +70,7 @@ void UEnergyComponent::SetSleeping(bool bSleeping)
 	bIsSleeping = bSleeping;
 	FString Result = bIsSleeping ? TEXT("True") : TEXT("False");
 	OnStatChanged.Broadcast("Is Sleeping", Result);
+	OnIsSleepingChanged.Broadcast(bIsSleeping);
 }
 
 void UEnergyComponent::EnergyTick()

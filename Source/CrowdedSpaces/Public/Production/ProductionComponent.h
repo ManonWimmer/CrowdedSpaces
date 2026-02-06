@@ -32,19 +32,19 @@ public:
 	EProductionType ProductionType = EProductionType::Money;
 
 	UFUNCTION(BlueprintCallable, Category = "Production")
-	EProductionType GetProductionType() { return ProductionType; }
+	EProductionType GetProductionType() const { return ProductionType; }
 	
 	UPROPERTY(EditAnywhere, Category="Production")
 	float ProductionInterval = 1.0f;
 
 	UFUNCTION(BlueprintCallable, Category = "Production")
-	float GetProductionInterval() { return ProductionInterval; }
+	float GetProductionInterval() const { return ProductionInterval; }
 
 	UPROPERTY(EditAnywhere, Category="Production")
 	int32 ResourcePerInterval = 10;
 
 	UFUNCTION(BlueprintCallable, Category = "Production")
-	float GetResourcePerInterval() { return ResourcePerInterval; }
+	float GetResourcePerInterval() const { return ResourcePerInterval; }
 
 	UFUNCTION()
 	void GenerateProduction() const;

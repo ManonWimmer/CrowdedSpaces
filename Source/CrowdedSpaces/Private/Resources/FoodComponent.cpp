@@ -24,6 +24,7 @@ void UFoodComponent::AddFood(int Amount)
 		if (Food != OldFood)
 		{
 			OnStatChanged.Broadcast("Food", FString::SanitizeFloat(Food));
+			OnFoodChanged.Broadcast(Food);
 		}
 
 		if (Food >= MaxFood)
@@ -35,6 +36,7 @@ void UFoodComponent::AddFood(int Amount)
 	{
 		Food += Amount;
 		OnStatChanged.Broadcast("Food", FString::SanitizeFloat(Food));
+		OnFoodChanged.Broadcast(Food);
 	}
 }
 
@@ -44,6 +46,7 @@ void UFoodComponent::RemoveFood(int Amount)
 	
 	Food -= Amount;
 	OnStatChanged.Broadcast("Food", FString::SanitizeFloat(Food));
+	OnFoodChanged.Broadcast(Food);
 }
 
 bool UFoodComponent::HasEnoughFood(int Amount)
@@ -75,6 +78,7 @@ void UFoodComponent::SetEating(bool bEating)
 	bIsEating = bEating;
 	FString Result = bIsEating ? TEXT("True") : TEXT("False");
 	OnStatChanged.Broadcast("Is Eating", Result);
+	OnIsEatingChanged.Broadcast(bIsEating);
 }
 
 void UFoodComponent::FoodTick()

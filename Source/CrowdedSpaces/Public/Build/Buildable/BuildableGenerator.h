@@ -28,6 +28,7 @@ public:
 	virtual FString GetDisplayName() const override;
 	virtual TObjectPtr<AActor> GetSelectableActor() override;
 
+	UFUNCTION(BlueprintCallable, Category = "Upgrade")
 	UProductionComponent* GetProductionComponent() const { return ProductionComponent; }
 
 	UFUNCTION(BlueprintCallable, Category = "Upgrade")
@@ -40,13 +41,10 @@ public:
 	FUpgradeStruct GetNextUpgrade();
 
 	UFUNCTION(BlueprintCallable, Category = "Upgrade")
-	UMoneyComponent* GetPlayerMoneyComponent() { return PlayerMoneyComponent; }
-
+	UMoneyComponent* GetPlayerMoneyComponent() const { return PlayerMoneyComponent; }
+	
 	UFUNCTION(BlueprintCallable, Category = "Upgrade")
-	UProductionComponent* GetProductionComponent() { return ProductionComponent; }
-
-	UFUNCTION(BlueprintCallable, Category = "Upgrade")
-	bool GetHasNPCWorking() { return bHasNPCWorking; }
+	bool GetHasNPCWorking() const { return bHasNPCWorking; }
 
 	UPROPERTY(BlueprintAssignable)
 	FOnNPCWorkingChanged OnNPCWorkingChanged;

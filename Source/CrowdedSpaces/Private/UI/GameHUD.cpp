@@ -97,13 +97,13 @@ void AGameHUD::ShowSelectionWidget(AActor* SelectableActor, bool bShow, ESelecti
 			case ESelectionType::Default:
 				break;
 			
-			case ESelectionType::NPC: // to change with new ui
-				Widget = ShowWidget(SelectionWidgetBP, true, ESlateVisibility::SelfHitTestInvisible);
-				CurrentlyShownSelectionWidgetBP = SelectionWidgetBP;
+			case ESelectionType::NPC: 
+				Widget = ShowWidget(NPCSelectionWidgetBP, true, ESlateVisibility::SelfHitTestInvisible);
+				CurrentlyShownSelectionWidgetBP = NPCSelectionWidgetBP;
 				break;
 				break;
 			
-			case ESelectionType::Generator: // to change with new ui
+			case ESelectionType::Generator: 
 				Widget = ShowWidget(GeneratorSelectionWidgetBP, true, ESlateVisibility::SelfHitTestInvisible);
 				CurrentlyShownSelectionWidgetBP = GeneratorSelectionWidgetBP;
 				break;

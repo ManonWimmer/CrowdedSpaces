@@ -11,6 +11,8 @@
 #include "NPCAction.h"
 #include "NPC.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentActionChanged, ENPCAction, Value); 
+
 UCLASS()
 class CROWDEDSPACES_API ANPC : public ACharacter, public ISelectable, public ISelectableStatProvider
 {
@@ -29,6 +31,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="AI")
 	void SetCurrentAction(ENPCAction NewAction);
+
+	UFUNCTION(BlueprintCallable)
+	ENPCAction GetCurrentAction() const { return CurrentAction; }
+
+	UPROPERTY(BlueprintAssignable)
+	FOnCurrentActionChanged OnCurrentActionChanged;
 
 protected:
 	virtual void BeginPlay() override;

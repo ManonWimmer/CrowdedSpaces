@@ -76,6 +76,9 @@ private:
 	TSubclassOf<UCustomWidget> GeneratorSelectionWidgetBP;
 
 	UPROPERTY(EditAnywhere, Category="Widgets")
+	TSubclassOf<UCustomWidget> NPCSelectionWidgetBP;
+
+	UPROPERTY(EditAnywhere, Category="Widgets")
 	AActor* CurrentlySelectedActor = nullptr;
 
 	UPROPERTY(EditAnywhere, Category="Widgets")

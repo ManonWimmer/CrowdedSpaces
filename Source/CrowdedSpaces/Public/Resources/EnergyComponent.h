@@ -6,6 +6,8 @@
 #include "EnergyComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEnergyFull); // To know when to get out of bed ;)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnergyChanged, int32, Value); 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIsSleepingChanged, bool, Value); 
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class CROWDEDSPACES_API UEnergyComponent : public UActorComponent, public ISelectableStatProvider
@@ -40,13 +42,22 @@ public:
 	void SetSleeping(bool bSleeping);
 	
 	UFUNCTION(BlueprintCallable)
-	bool GetIsSleeping() { return bIsSleeping; }
+	bool GetIsSleeping() const { return bIsSleeping; }
 	
 	UFUNCTION(BlueprintCallable)
-	int GetEnergy() {return Energy; }
+	int GetEnergy() const { return Energy; }
+
+	UFUNCTION(BlueprintCallable)
+	int GetMaxEnergy() const { return MaxEnergy; }
 
 	UPROPERTY(BlueprintAssignable)
 	FOnEnergyFull OnEnergyFull;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnEnergyChanged OnEnergyChanged;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnIsSleepingChanged OnIsSleepingChanged;
 	
 	// Selectable
 	UPROPERTY(BlueprintAssignable)
