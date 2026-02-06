@@ -71,6 +71,18 @@ public:
 	UFUNCTION()
 	void TryRotateBuildRight();
 
+	UFUNCTION()
+	void ResetBuildRotation();
+
+	UFUNCTION()
+	void UpdateRotation();
+
+	UFUNCTION()
+	void GetObjectRotatedSize(int& OutX, int& OutY) const;
+
+	UFUNCTION()
+	void GetRoomRotatedSize(int& OutX, int& OutY) const;
+
 private:
 	UPROPERTY()
 	TObjectPtr<AGhostObject> CurrentGhost;
@@ -117,4 +129,8 @@ private:
 	EGridRoomType CurrentRoomType = EGridRoomType::Any;
 	TArray<FGridCell*> SelectedRoomCells;
 	bool bIsSelectingRoom = false;
+
+	// Rotate
+	int32 RotationIndex = 0;
+	FRotator CurrentBuildRotation = FRotator(0, 0, 0);
 };

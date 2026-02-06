@@ -152,6 +152,10 @@ void UBuildSubsystem::StartBuilding(UBuildData* BuildData)
 
 	// Scale
 	CurrentGhost->SetActorScale3D(DefaultBuildable->GetActorScale3D());
+
+	ResetBuildRotation();
+
+	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Start object building");
 }
 
 void UBuildSubsystem::StartRoomBuilding(UBuildRoomData* BuildRoomData)
@@ -167,6 +171,10 @@ void UBuildSubsystem::StartRoomBuilding(UBuildRoomData* BuildRoomData)
 	{
 		CurrentGhost->SetActorHiddenInGame(true);
 	}
+
+	ResetBuildRotation();
+	
+	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Start room building");
 }
 
 void UBuildSubsystem::StopBuilding()
@@ -183,7 +191,10 @@ void UBuildSubsystem::StopBuilding()
 
 	SelectedRoomCells.Empty();
 
-	GridActor->SetIsShowingRooms(true); 
+	GridActor->SetIsShowingRooms(true);
+	ResetBuildRotation();
+
+	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Stop building");
 }
 
 void UBuildSubsystem::PlaceObject() const
@@ -193,6 +204,8 @@ void UBuildSubsystem::PlaceObject() const
 
 	int SizeX = CurrentBuildData->GridRowsX;
 	int SizeY = CurrentBuildData->GridColumnsY;
+	
+	GetObjectRotatedSize(SizeX, SizeY);
 
 	int StartRow = 0, StartCol = 0;
 	GridActor->GetCellAtLocation(CurrentGhost->GetActorLocation(), StartRow, StartCol);
@@ -225,7 +238,7 @@ void UBuildSubsystem::PlaceObject() const
 	TObjectPtr<ABuildableObject> Placed = GetWorld()->SpawnActor<ABuildableObject>(
 		CurrentBuildData->BuildClass,
 		CurrentGhost->GetActorLocation(),
-		FRotator::ZeroRotator
+		CurrentBuildRotation
 	);
 
 	if (!Placed)
@@ -257,6 +270,8 @@ void UBuildSubsystem::PlaceRoom()
 
 	int SizeX = CurrentBuildRoomData->GridRowsX;
 	int SizeY = CurrentBuildRoomData->GridColumnsY;
+
+	GetRoomRotatedSize(SizeX, SizeY);
 	
 	// Check can place
 	for (FGridCell* Cell : SelectedRoomCells)
@@ -286,10 +301,50 @@ void UBuildSubsystem::PlaceRoom()
 
 void UBuildSubsystem::TryRotateBuildLeft()
 {
+	RotationIndex = (RotationIndex + 1) % 4;
+	UpdateRotation();
 }
 
 void UBuildSubsystem::TryRotateBuildRight()
 {
+	RotationIndex = (RotationIndex + 3) % 4; 
+	UpdateRotation();
+}
+
+void UBuildSubsystem::ResetBuildRotation()
+{
+	RotationIndex = 0;
+	CurrentBuildRotation = FRotator(0, 0, 0);
+}
+
+void UBuildSubsystem::UpdateRotation()
+{
+	CurrentBuildRotation = FRotator(0.f, RotationIndex * 90.f, 0.f);
+
+	if(CurrentGhost)
+		CurrentGhost->SetActorRotation(CurrentBuildRotation);
+}
+
+void UBuildSubsystem::GetObjectRotatedSize(int& OutX, int& OutY) const
+{
+	OutX = CurrentBuildData->GridRowsX;
+	OutY = CurrentBuildData->GridColumnsY;
+
+	if (RotationIndex % 2 == 1) // 90 ou 270
+	{
+		Swap(OutX, OutY);
+	}
+}
+
+void UBuildSubsystem::GetRoomRotatedSize(int& OutX, int& OutY) const
+{
+	OutX = CurrentBuildRoomData->GridRowsX;
+	OutY = CurrentBuildRoomData->GridColumnsY;
+
+	if (RotationIndex % 2 == 1) // 90 ou 270
+	{
+		Swap(OutX, OutY);
+	}
 }
 
 void UBuildSubsystem::UpdateGhost() const
@@ -318,6 +373,8 @@ void UBuildSubsystem::UpdateGhost() const
 
 	int SizeX = CurrentBuildData->GridRowsX;
 	int SizeY = CurrentBuildData->GridColumnsY;
+	
+	GetObjectRotatedSize(SizeX, SizeY);
 
 	int StartRow = HitRow - (SizeX - 1) / 2;
 	int StartCol = HitCol - (SizeY - 1) / 2;
@@ -371,6 +428,8 @@ void UBuildSubsystem::UpdateRoomSelection()
 
 	int SizeX = CurrentBuildRoomData->GridRowsX;
 	int SizeY = CurrentBuildRoomData->GridColumnsY;
+
+	GetRoomRotatedSize(SizeX, SizeY);
 
 	int StartRow = HitRow - (SizeX - 1) / 2;
 	int StartCol = HitCol - (SizeY - 1) / 2;
