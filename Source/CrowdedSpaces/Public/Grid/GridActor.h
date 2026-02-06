@@ -3,9 +3,11 @@
 #include "CoreMinimal.h"
 #include "GridCell.h"
 #include "Grid/GridRoom.h"
+#include "Grid/GridWallEdge.h"
 #include "GameFramework/Actor.h"
 #include "ProceduralMeshComponent.h"
 #include "Build/BuildRoomData.h"
+#include "Components/InstancedStaticMeshComponent.h"
 #include "GridActor.generated.h"
 
 UCLASS()
@@ -44,14 +46,20 @@ public:
 	int GetCellSize() const { return CellSize;}
 	int GetRows() const { return Rows;}
 	int GetColumns() const { return Columns;}
+	
 	void DeselectCell(int Row, int Column);
 	void SelectRoomCell(int Row, int Column);
+	
 	void ShowPlacedRooms(bool bShow);
 	int CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> CellsToAssign);
 	bool CheckIfCellInPlacedRoom(const FGridCell* Cell, FLinearColor& OutGridColor);
+	
 	void SpawnWallsForRoom(const TArray<FGridCell*>& RoomCells);
 	void TrySpawnWall(const int Row, const int Column, const FGridCell* OriginCell, FRotator Rotation);
-
+	void ToggleEdge(const FGridWallEdge& Edge);
+	void UpdateWallsForRoom(const TArray<FGridCell*>& RoomCells);
+	void RebuildWalls();
+	
 private:
 	void DrawLine(const FVector& Start, const FVector& End, float Thickness, TArray<FVector>& Vertices, TArray<int>& Triangles);
 	float LineWidth() const; 
@@ -101,4 +109,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> WallClass;
+	
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UInstancedStaticMeshComponent> WallISM;
+
+	TSet<FGridWallEdge> WallEdges;
 };

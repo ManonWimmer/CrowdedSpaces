@@ -5,10 +5,13 @@
 
 AGridActor::AGridActor()
 {
-	LinesProceduralMesh = CreateDefaultSubobject<UProceduralMeshComponent>("LinesProceduralMesh");
-
 	RootComponent = CreateDefaultSubobject<USceneComponent>("Root");
+	
+	LinesProceduralMesh = CreateDefaultSubobject<UProceduralMeshComponent>("LinesProceduralMesh");
 	LinesProceduralMesh->SetupAttachment(RootComponent);
+
+	WallISM = CreateDefaultSubobject<UInstancedStaticMeshComponent>("WallISM");
+	WallISM->SetupAttachment(RootComponent);
 	
 	PrimaryActorTick.bCanEverTick = false;
 }
@@ -250,7 +253,10 @@ int AGridActor::CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> C
 
 	ShowPlacedRooms(true);
 	
-	SpawnWallsForRoom(NewRoom.Cells);
+	//SpawnWallsForRoom(NewRoom.Cells);
+
+	UpdateWallsForRoom(NewRoom.Cells);
+	RebuildWalls();
 	
 	return NewRoom.RoomId;
 }
@@ -314,14 +320,77 @@ void AGridActor::TrySpawnWall(const int Row, const int Column, const FGridCell* 
 
 	else if (Column > OriginCell->Column) // EAST
 		SpawnLoc.Y += Half;
-
-	GetWorld()->SpawnActor<AActor>(
-		WallClass,
-		SpawnLoc,
-		Rotation
-	);
-
+	
 	GetWorld()->SpawnActor<AActor>(WallClass, SpawnLoc, Rotation);
+}
+
+void AGridActor::ToggleEdge(const FGridWallEdge& Edge)
+{
+	if (WallEdges.Contains(Edge))
+		WallEdges.Remove(Edge);
+	else
+		WallEdges.Add(Edge);
+}
+
+void AGridActor::UpdateWallsForRoom(const TArray<FGridCell*>& RoomCells)
+{
+	for (const FGridCell* Cell : RoomCells)
+	{
+		if (!Cell) continue;
+
+		FIntPoint Pos(Cell->Row, Cell->Column);
+
+		ToggleEdge({Pos, EGridWallDirection::North});
+		ToggleEdge({Pos, EGridWallDirection::East});
+		ToggleEdge({Pos, EGridWallDirection::South});
+		ToggleEdge({Pos, EGridWallDirection::West});
+
+		// Toggle edges voisins pour supprimer murs internes
+		ToggleEdge({FIntPoint(Cell->Row-1, Cell->Column), EGridWallDirection::South});
+		ToggleEdge({FIntPoint(Cell->Row+1, Cell->Column), EGridWallDirection::North});
+		ToggleEdge({FIntPoint(Cell->Row, Cell->Column-1), EGridWallDirection::East});
+		ToggleEdge({FIntPoint(Cell->Row, Cell->Column+1), EGridWallDirection::West});
+	}
+}
+
+void AGridActor::RebuildWalls()
+{
+	WallISM->ClearInstances();
+
+	float Half = CellSize * 0.5f;
+
+	for (const FGridWallEdge& Edge : WallEdges)
+	{
+		FVector2D CellPos;
+		if (!GetGridLocation(true, Edge.Cell.X, Edge.Cell.Y, CellPos))
+			continue;
+		
+		FVector SpawnLoc(CellPos.X - GetActorLocation().X, CellPos.Y - GetActorLocation().Y, 0);
+		FRotator Rot = FRotator::ZeroRotator;
+
+		switch (Edge.Direction)
+		{
+		case EGridWallDirection::North:
+			SpawnLoc.X -= Half;
+			break;
+
+		case EGridWallDirection::South:
+			SpawnLoc.X += Half;
+			break;
+
+		case EGridWallDirection::West:
+			SpawnLoc.Y -= Half;
+			Rot = FRotator(0,90,0);
+			break;
+
+		case EGridWallDirection::East:
+			SpawnLoc.Y += Half;
+			Rot = FRotator(0,90,0);
+			break;
+		}
+
+		WallISM->AddInstance(FTransform(Rot, SpawnLoc));
+	}
 }
 
 void AGridActor::DeselectSelectedCells()
