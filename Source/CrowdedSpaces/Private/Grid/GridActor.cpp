@@ -274,46 +274,6 @@ bool AGridActor::CheckIfCellInPlacedRoom(const FGridCell* Cell, FLinearColor& Ou
 	return false;
 }
 
-void AGridActor::ToggleEdge(const FGridWallEdge& Edge)
-{
-	if (WallEdges.Contains(Edge))
-		WallEdges.Remove(Edge);
-	else
-		WallEdges.Add(Edge);
-}
-
-void AGridActor::UpdateWallsForRoom(const TArray<FGridCell*>& RoomCells)
-{
-	for (const FGridCell* Cell : RoomCells)
-	{
-		if (!Cell) continue;
-
-		FIntPoint Pos(Cell->Row, Cell->Column);
-
-		ToggleEdge({Pos, EGridWallDirection::North});
-		ToggleEdge({Pos, EGridWallDirection::East});
-		ToggleEdge({Pos, EGridWallDirection::South});
-		ToggleEdge({Pos, EGridWallDirection::West});
-
-		// Merge rooms only if same room type
-		FGridCell* SouthNeighbor = GetGridCell(Cell->Row-1, Cell->Column);
-		if (SouthNeighbor && SouthNeighbor->RoomType == Cell->RoomType && Cell->RoomType != EGridRoomType::Any)
-			ToggleEdge({FIntPoint(Cell->Row-1, Cell->Column), EGridWallDirection::South});
-
-		FGridCell* NorthNeighbor = GetGridCell(Cell->Row+1, Cell->Column);
-		if (NorthNeighbor && NorthNeighbor->RoomType == Cell->RoomType && Cell->RoomType != EGridRoomType::Any)
-			ToggleEdge({FIntPoint(Cell->Row+1, Cell->Column), EGridWallDirection::North});
-
-		FGridCell* EastNeighbor = GetGridCell(Cell->Row, Cell->Column-1);
-		if (NorthNeighbor && EastNeighbor->RoomType == Cell->RoomType && Cell->RoomType != EGridRoomType::Any)
-			ToggleEdge({FIntPoint(Cell->Row, Cell->Column-1), EGridWallDirection::East});
-
-		FGridCell* WestNeighbor = GetGridCell(Cell->Row, Cell->Column+1);
-		if (WestNeighbor && WestNeighbor->RoomType == Cell->RoomType && Cell->RoomType != EGridRoomType::Any)
-			ToggleEdge({FIntPoint(Cell->Row, Cell->Column+1), EGridWallDirection::West});
-	}
-}
-
 void AGridActor::RebuildWalls()
 {
 	WallISM->ClearInstances();

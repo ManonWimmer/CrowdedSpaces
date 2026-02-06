@@ -29,6 +29,8 @@ void UBuildSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 		return;
 
 	CamPC->OnLeftClickBuild.AddDynamic(this, &UBuildSubsystem::LeftClicked);
+	CamPC->OnLeftRotateBuild.AddDynamic(this, &UBuildSubsystem::TryRotateBuildLeft);
+	CamPC->OnRightRotateBuild.AddDynamic(this, &UBuildSubsystem::TryRotateBuildRight);
 
 	// Money component
 	if (TObjectPtr<ACrowdedPlayerState> PS = PC->GetPlayerState<ACrowdedPlayerState>())
@@ -280,6 +282,14 @@ void UBuildSubsystem::PlaceRoom()
 	GridActor->DeselectSelectedCells();
 	
 	SelectedRoomCells.Empty();
+}
+
+void UBuildSubsystem::TryRotateBuildLeft()
+{
+}
+
+void UBuildSubsystem::TryRotateBuildRight()
+{
 }
 
 void UBuildSubsystem::UpdateGhost() const

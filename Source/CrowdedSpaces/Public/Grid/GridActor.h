@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "GridCell.h"
 #include "Grid/GridRoom.h"
-#include "Grid/GridWallEdge.h"
+#include "Grid/GridWallDirection.h"
 #include "GameFramework/Actor.h"
 #include "ProceduralMeshComponent.h"
 #include "Build/BuildRoomData.h"
@@ -54,8 +54,6 @@ public:
 	int CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> CellsToAssign);
 	bool CheckIfCellInPlacedRoom(const FGridCell* Cell, FLinearColor& OutGridColor);
 	
-	void ToggleEdge(const FGridWallEdge& Edge);
-	void UpdateWallsForRoom(const TArray<FGridCell*>& RoomCells);
 	void RebuildWalls();
 	void TryAddWall(FGridCell* Cell, int NeighborRow, int NeighborCol, EGridWallDirection Dir, float Half);
 	
@@ -108,8 +106,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UInstancedStaticMeshComponent> WallISM;
-
-	TSet<FGridWallEdge> WallEdges;
-
+	
 	TSet<FVector> CreatedWallsPositions;
 };

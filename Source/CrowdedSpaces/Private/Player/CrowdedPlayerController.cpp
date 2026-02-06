@@ -25,7 +25,7 @@ void ACrowdedPlayerController::SetupInputComponent()
 	EIC->BindAction(PlayerInputsData->MoveRightAction, ETriggerEvent::Triggered, this, &ACrowdedPlayerController::MoveRightInput);
 	EIC->BindAction(PlayerInputsData->MoveRightAction, ETriggerEvent::Completed, this, &ACrowdedPlayerController::StopMoveRightInput);
 
-	// Rotate
+	// Camera rotate
 	EIC->BindAction(PlayerInputsData->RotateAction, ETriggerEvent::Started, this, &ACrowdedPlayerController::RotateInput);
 	EIC->BindAction(PlayerInputsData->RotateAction, ETriggerEvent::Triggered, this, &ACrowdedPlayerController::RotateInput);
 	EIC->BindAction(PlayerInputsData->RotateAction, ETriggerEvent::Completed, this, &ACrowdedPlayerController::StopRotateInput);
@@ -36,6 +36,10 @@ void ACrowdedPlayerController::SetupInputComponent()
 	// Left click
 	EIC->BindAction(PlayerInputsData->LeftClickAction, ETriggerEvent::Started, this, &ACrowdedPlayerController::LeftClickInput);
 
+	// Build rotate
+	EIC->BindAction(PlayerInputsData->LeftRotateBuildAction, ETriggerEvent::Started, this, &ACrowdedPlayerController::LeftRotateBuildInput);
+	EIC->BindAction(PlayerInputsData->RightRotateBuildAction, ETriggerEvent::Started, this, &ACrowdedPlayerController::RightRotateBuildInput);
+	
 	// Add IMC
 	TObjectPtr<ULocalPlayer> LP = GetLocalPlayer();
 	if (!LP)
@@ -110,4 +114,28 @@ void ACrowdedPlayerController::LeftClickInput(const FInputActionValue& Value)
 			GameHUD->GetSelectionWidget()->BindToSelectable(Hit.GetActor(), SelectedObject->GetDisplayName(), SelectedObject->SelectionType);
 		}
 	}
+}
+
+void ACrowdedPlayerController::LeftRotateBuildInput(const FInputActionValue& Value)
+{
+	TObjectPtr<ACrowdedGameMode> GameMode = Cast<ACrowdedGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (!GameMode)
+		return;
+	
+	if (GameMode->GetGameMode() != EGameModeState::Building)
+		return;
+
+	OnLeftRotateBuild.Broadcast();
+}
+
+void ACrowdedPlayerController::RightRotateBuildInput(const FInputActionValue& Value)
+{
+	TObjectPtr<ACrowdedGameMode> GameMode = Cast<ACrowdedGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (!GameMode)
+		return;
+	
+	if (GameMode->GetGameMode() != EGameModeState::Building)
+		return;
+
+	OnRightRotateBuild.Broadcast();
 }

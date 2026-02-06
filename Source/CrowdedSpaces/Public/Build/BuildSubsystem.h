@@ -64,7 +64,12 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	TArray<UBuildRoomData*> GetBuildDataRooms() { return BuildDataRooms;}
-	
+
+	UFUNCTION()
+	void TryRotateBuildLeft();
+
+	UFUNCTION()
+	void TryRotateBuildRight();
 
 private:
 	UPROPERTY()
