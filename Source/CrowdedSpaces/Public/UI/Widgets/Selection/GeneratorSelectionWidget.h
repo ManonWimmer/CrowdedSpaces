@@ -2,10 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "UI/CustomWidget.h"
-#include "RoomSelectionWidget.generated.h"
+#include "GeneratorSelectionWidget.generated.h"
 
 UCLASS()
-class CROWDEDSPACES_API URoomSelectionWidget : public UCustomWidget
+class CROWDEDSPACES_API UGeneratorSelectionWidget : public UCustomWidget
 {
 	GENERATED_BODY()
 

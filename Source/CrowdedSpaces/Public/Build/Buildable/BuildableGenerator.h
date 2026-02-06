@@ -9,6 +9,8 @@
 
 class UMoneyComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNPCWorkingChanged, bool, Value);
+
 UCLASS()
 class CROWDEDSPACES_API ABuildableGenerator : public ABuildableObject, public ISelectable
 {
@@ -39,6 +41,15 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Upgrade")
 	UMoneyComponent* GetPlayerMoneyComponent() { return PlayerMoneyComponent; }
+
+	UFUNCTION(BlueprintCallable, Category = "Upgrade")
+	UProductionComponent* GetProductionComponent() { return ProductionComponent; }
+
+	UFUNCTION(BlueprintCallable, Category = "Upgrade")
+	bool GetHasNPCWorking() { return bHasNPCWorking; }
+
+	UPROPERTY(BlueprintAssignable)
+	FOnNPCWorkingChanged OnNPCWorkingChanged;
 
 protected:
 	virtual void BeginPlay() override;

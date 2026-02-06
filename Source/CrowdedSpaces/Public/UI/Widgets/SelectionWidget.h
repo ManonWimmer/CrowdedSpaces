@@ -2,10 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "UI/CustomWidget.h"
-#include "Selection/SelectionType.h"
 #include "SelectionWidget.generated.h"
-
-class ISelectableStatProvider;
 
 UCLASS()
 class CROWDEDSPACES_API USelectionWidget : public UCustomWidget
@@ -21,18 +18,5 @@ protected:
 	virtual void Unsetup_Implementation() override;
 
 	UPROPERTY()
-	TArray<TScriptInterface<ISelectableStatProvider>> BoundStats;
-
-	UPROPERTY()
 	TObjectPtr<AActor> SelectedActor = nullptr;
-
-	UPROPERTY()
-	FString ActorDisplayName = "";
-
-public:
-	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
-	void UpdateSelection(const FString& DisplayName, const TMap<FString, FString>& Stats, ESelectionType SelectionType);
-
-	UPROPERTY()
-	ESelectionType CurrentSelectionType = ESelectionType::Default;
 };

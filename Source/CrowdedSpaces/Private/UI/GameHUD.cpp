@@ -60,7 +60,7 @@ void AGameHUD::ShowSelectionWidget(AActor* SelectableActor, bool bShow, ESelecti
 			{
 				UE_LOG(LogTemp, Log, TEXT("Already show, hide"));
 				// Desac widget if already shown
-				UCustomWidget* Widget = ShowWidget(SelectionWidgetBP, false, ESlateVisibility::SelfHitTestInvisible);
+				UCustomWidget* Widget = ShowWidget(CurrentlyShownSelectionWidgetBP, false, ESlateVisibility::SelfHitTestInvisible);
 				if (Widget)
 					Widget->Unsetup();
 				CurrentlySelectedActor = nullptr;
@@ -104,8 +104,8 @@ void AGameHUD::ShowSelectionWidget(AActor* SelectableActor, bool bShow, ESelecti
 				break;
 			
 			case ESelectionType::Generator: // to change with new ui
-				Widget = ShowWidget(SelectionWidgetBP, true, ESlateVisibility::SelfHitTestInvisible);
-				CurrentlyShownSelectionWidgetBP = SelectionWidgetBP;
+				Widget = ShowWidget(GeneratorSelectionWidgetBP, true, ESlateVisibility::SelfHitTestInvisible);
+				CurrentlyShownSelectionWidgetBP = GeneratorSelectionWidgetBP;
 				break;
 			
 			case ESelectionType::Room:

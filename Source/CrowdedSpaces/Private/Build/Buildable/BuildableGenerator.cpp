@@ -77,12 +77,15 @@ void ABuildableGenerator::EndPlay(const EEndPlayReason::Type EndPlayReason)
 #pragma region Work
 void ABuildableGenerator::SetNPCWorking(bool bWorking)
 {
+	// todo : check is available
 	bHasNPCWorking = bWorking;
 
 	if (bHasNPCWorking)
 		ProductionComponent->ResumeOrStartProduction();
 	else
 		ProductionComponent->PauseProduction();
+
+	OnNPCWorkingChanged.Broadcast(bHasNPCWorking);
 }
 #pragma endregion Work
 

@@ -3,13 +3,11 @@
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
 #include "MoralEvent/MoralEvent.h"
+#include "Selection/SelectionType.h"
 #include "WidgetStartupConfig.h"
 #include "GameHUD.generated.h"
 
-enum class ESelectionType : uint8;
 class UCustomWidget;
-class USelectionWidget;
-class UGeneratorSelectionWidget;
 
 UCLASS()
 class CROWDEDSPACES_API AGameHUD : public AHUD
@@ -44,9 +42,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Widgets")
 	void ShowSelectionWidget(AActor* SelectableActor, bool bShow, ESelectionType SelectionType);
 	
-	UFUNCTION()
-	USelectionWidget* GetSelectionWidget() { return GetOrCreateWidget<USelectionWidget>(SelectionWidgetBP); }
-	
 	// Moral Event
 	UFUNCTION(BlueprintCallable, Category="Widgets")
 	void ShowMoralEventWidget(bool bShow);
@@ -76,6 +71,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category="Widgets")
 	TSubclassOf<UCustomWidget> RoomSelectionWidgetBP;
+
+	UPROPERTY(EditAnywhere, Category="Widgets")
+	TSubclassOf<UCustomWidget> GeneratorSelectionWidgetBP;
 
 	UPROPERTY(EditAnywhere, Category="Widgets")
 	AActor* CurrentlySelectedActor = nullptr;

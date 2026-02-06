@@ -1,7 +1,5 @@
 ﻿#include "UI/Widgets/SelectionWidget.h"
 
-#include "Selection/SelectableStatProvider.h"
-
 void USelectionWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
