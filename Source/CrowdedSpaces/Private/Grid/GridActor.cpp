@@ -279,30 +279,53 @@ void AGridActor::RebuildWalls()
 
 	float Half = CellSize * 0.5f;
 
-	for (auto& Pair : Cells)
+	for (auto& Pair : Rooms)
 	{
-		FGridCell* Cell = &Pair.Value;
+		FGridRoom& Room = Pair.Value;
 
-		if (Cell->RoomType == EGridRoomType::Any)
-			continue;
+		// Get room borders
+		int MinRow = INT_MAX, MaxRow = INT_MIN;
+		int MinCol = INT_MAX, MaxCol = INT_MIN;
 
-		int Row = Cell->Row;
-		int Col = Cell->Column;
+		for (FGridCell* Cell : Room.Cells)
+		{
+			if (!Cell) continue;
+			if (Cell->Row < MinRow) MinRow = Cell->Row;
+			if (Cell->Row > MaxRow) MaxRow = Cell->Row;
+			if (Cell->Column < MinCol) MinCol = Cell->Column;
+			if (Cell->Column > MaxCol) MaxCol = Cell->Column;
+		}
 
-		TryAddWall(Cell, Row-1, Col, EGridWallDirection::North, Half);
-		TryAddWall(Cell, Row+1, Col, EGridWallDirection::South, Half);
-		TryAddWall(Cell, Row, Col-1, EGridWallDirection::West, Half);
-		TryAddWall(Cell, Row, Col+1, EGridWallDirection::East, Half);
+		// Get doors at center of each side
+		TSet<FIntPoint> DoorCells;
+		DoorCells.Add(FIntPoint(MinRow, (MinCol + MaxCol) / 2)); // North
+		DoorCells.Add(FIntPoint(MaxRow, (MinCol + MaxCol) / 2)); // South
+		DoorCells.Add(FIntPoint((MinRow + MaxRow) / 2, MinCol)); // West
+		DoorCells.Add(FIntPoint((MinRow + MaxRow) / 2, MaxCol)); // East
+		
+		for (FGridCell* Cell : Room.Cells)
+		{
+			if (!Cell) continue;
+
+			int Row = Cell->Row;
+			int Col = Cell->Column;
+			
+			TryAddWall(Cell, Row - 1, Col, EGridWallDirection::North, Half, DoorCells);
+			TryAddWall(Cell, Row + 1, Col, EGridWallDirection::South, Half, DoorCells);
+			TryAddWall(Cell, Row, Col - 1, EGridWallDirection::West, Half, DoorCells);
+			TryAddWall(Cell, Row, Col + 1, EGridWallDirection::East, Half, DoorCells);
+		}
 	}
 }
 
-void AGridActor::TryAddWall(FGridCell* Cell, int NeighborRow, int NeighborCol, EGridWallDirection Dir, float Half)
+void AGridActor::TryAddWall(FGridCell* Cell, int NeighborRow, int NeighborCol, EGridWallDirection Dir, float Half, const TSet<FIntPoint>& DoorCells)
 {
 	FGridCell* Neighbor = GetGridCell(NeighborRow, NeighborCol);
 
+	// Si voisin même salle : pas de mur
 	if (Neighbor && Neighbor->RoomType == Cell->RoomType)
 		return;
-	
+
 	FVector2D CellPos;
 	if (!GetGridLocation(true, Cell->Row, Cell->Column, CellPos))
 		return;
@@ -315,29 +338,34 @@ void AGridActor::TryAddWall(FGridCell* Cell, int NeighborRow, int NeighborCol, E
 
 	switch (Dir)
 	{
-	case EGridWallDirection::North:
-		SpawnLoc.X -= Half;
-		break;
-
-	case EGridWallDirection::South:
-		SpawnLoc.X += Half;
-		break;
-
-	case EGridWallDirection::West:
-		SpawnLoc.Y -= Half;
-		Rot = FRotator(0,90,0);
-		break;
-
-	case EGridWallDirection::East:
-		SpawnLoc.Y += Half;
-		Rot = FRotator(0,90,0);
-		break;
+	case EGridWallDirection::North: SpawnLoc.X -= Half; break;
+	case EGridWallDirection::South: SpawnLoc.X += Half; break;
+	case EGridWallDirection::West:  SpawnLoc.Y -= Half; Rot = FRotator(0, 90, 0); break;
+	case EGridWallDirection::East:  SpawnLoc.Y += Half; Rot = FRotator(0, 90, 0); break;
 	}
 
 	if (CreatedWallsPositions.Contains(SpawnLoc))
-		return; // already created
+		return;
 
-	WallISM->AddInstance(FTransform(Rot, SpawnLoc));
+	// Passage auto si cellule = porte
+	bool bCreatePassage = DoorCells.Contains(FIntPoint(Cell->Row, Cell->Column));
+
+	float PassageHeight = 180.f;
+	float WallHeight = 220.f;
+
+	if (bCreatePassage)
+	{
+		// Passage
+		FVector TopLoc = SpawnLoc + FVector(0, 0, PassageHeight + (WallHeight - PassageHeight) / 2);
+		FVector TopScale(1.f, 1.f, (WallHeight - PassageHeight) / WallHeight);
+		WallISM->AddInstance(FTransform(Rot, TopLoc, TopScale));
+	}
+	else
+	{
+		// Mur
+		WallISM->AddInstance(FTransform(Rot, SpawnLoc));
+	}
+
 	CreatedWallsPositions.Add(SpawnLoc);
 }
 
