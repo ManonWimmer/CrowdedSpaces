@@ -20,3 +20,11 @@ void UCustomWidget::Init_Implementation()
 void UCustomWidget::Reset_Implementation()
 {
 }
+
+void UCustomWidget::Setup_Implementation(AActor* SelectableActor)
+{
+}
+
+void UCustomWidget::Unsetup_Implementation()
+{
+}

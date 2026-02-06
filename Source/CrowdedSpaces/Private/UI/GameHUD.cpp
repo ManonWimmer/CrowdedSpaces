@@ -49,9 +49,91 @@ void AGameHUD::ShowPlayerResourcesWidget(bool bShow)
 #pragma endregion Player Resources
 
 #pragma region Selection
-void AGameHUD::ShowSelectionWidget(bool bShow)
+void AGameHUD::ShowSelectionWidget(AActor* SelectableActor, bool bShow, ESelectionType SelectionType)
 {
-	ShowWidget(SelectionWidgetBP, bShow, ESlateVisibility::SelfHitTestInvisible);
+	if (bShow && SelectableActor != nullptr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Show"));
+		if (CurrentlySelectedActor != nullptr)
+		{
+			if (CurrentlySelectedActor == SelectableActor)
+			{
+				UE_LOG(LogTemp, Log, TEXT("Already show, hide"));
+				// Desac widget if already shown
+				UCustomWidget* Widget = ShowWidget(SelectionWidgetBP, false, ESlateVisibility::SelfHitTestInvisible);
+				if (Widget)
+					Widget->Unsetup();
+				CurrentlySelectedActor = nullptr;
+				CurrentlyShownSelectionWidgetBP = nullptr;
+				return;
+			}
+			else
+			{
+				UE_LOG(LogTemp, Log, TEXT("Hide last widget"));
+				// Desac last widget if not the same
+				UCustomWidget* Widget = nullptr;
+				switch (SelectionType)
+				{
+					case ESelectionType::Room:
+						Widget = ShowWidget(CurrentlyShownSelectionWidgetBP, false, ESlateVisibility::SelfHitTestInvisible);
+						break;
+					default:
+						break;
+				}
+				
+				if (Widget)
+					Widget->Unsetup();
+
+				CurrentlyShownSelectionWidgetBP = nullptr;
+			}
+		}
+
+		
+		UE_LOG(LogTemp, Log, TEXT("Show widget"));
+		// Show new widget ui depending on type type
+		UCustomWidget* Widget = nullptr;
+		switch (SelectionType)
+		{
+			case ESelectionType::Default:
+				break;
+			
+			case ESelectionType::NPC: // to change with new ui
+				Widget = ShowWidget(SelectionWidgetBP, true, ESlateVisibility::SelfHitTestInvisible);
+				CurrentlyShownSelectionWidgetBP = SelectionWidgetBP;
+				break;
+				break;
+			
+			case ESelectionType::Generator: // to change with new ui
+				Widget = ShowWidget(SelectionWidgetBP, true, ESlateVisibility::SelfHitTestInvisible);
+				CurrentlyShownSelectionWidgetBP = SelectionWidgetBP;
+				break;
+			
+			case ESelectionType::Room:
+				Widget = ShowWidget(RoomSelectionWidgetBP, true, ESlateVisibility::SelfHitTestInvisible);
+				CurrentlyShownSelectionWidgetBP = RoomSelectionWidgetBP;
+				break;
+			default:
+				break;
+		}
+		
+		if (Widget)
+		{
+			UE_LOG(LogTemp, Log, TEXT("setup widget"));
+			Widget->Setup(SelectableActor);
+		}
+		CurrentlySelectedActor = SelectableActor;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("Hide widget"));
+		if (!CurrentlyShownSelectionWidgetBP)
+			return;
+		
+		UCustomWidget* Widget = ShowWidget(CurrentlyShownSelectionWidgetBP, false, ESlateVisibility::SelfHitTestInvisible);
+		if (Widget)
+			Widget->Unsetup();
+		CurrentlySelectedActor = nullptr;
+	}
 }
 #pragma endregion Selection
 
@@ -79,23 +161,33 @@ void AGameHUD::ShowTimeWidget(bool bShow)
 #pragma endregion Time
 
 #pragma region Generic Functions
-void AGameHUD::ShowWidget(TSubclassOf<UCustomWidget> WidgetClass, bool bShow, ESlateVisibility VisibilityOnShow)
+UCustomWidget* AGameHUD::ShowWidget(TSubclassOf<UCustomWidget> WidgetClass, bool bShow, ESlateVisibility VisibilityOnShow)
 {
 	if (!WidgetClass)
-		return;
+	{
+		UE_LOG(LogTemp, Log, TEXT("return !widgetclass"));
+		return nullptr;
+	}
 
 	TObjectPtr<UCustomWidget> Widget = GetOrCreateWidget<UCustomWidget>(WidgetClass);
 	if (!Widget)
-		return;
+	{
+		UE_LOG(LogTemp, Log, TEXT("return !widget"));
+		return nullptr;
+	}
 
 	if (bShow)
 	{
+		UE_LOG(LogTemp, Log, TEXT("bshow"));
 		Widget->SetVisibility(VisibilityOnShow);
-		Widget->Reset(); 
+		Widget->Reset();
+		return Widget;
 	}
 	else
 	{
+		UE_LOG(LogTemp, Log, TEXT("bshow false"));
 		Widget->SetVisibility(ESlateVisibility::Hidden);
+		return Widget;
 	}
 }
 

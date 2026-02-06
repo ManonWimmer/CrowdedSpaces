@@ -24,7 +24,7 @@ public:
 	TObjectPtr<T> GetOrCreateWidget(TSubclassOf<UCustomWidget> WidgetClass);
 
 	UFUNCTION()
-	void ShowWidget(TSubclassOf<UCustomWidget> WidgetClass, bool bShow, ESlateVisibility VisibilityOnShow);
+	UCustomWidget* ShowWidget(TSubclassOf<UCustomWidget> WidgetClass, bool bShow, ESlateVisibility VisibilityOnShow);
 
 	UPROPERTY(EditAnywhere, Category="Widgets")
 	TArray<FWidgetStartupConfig> StartupWidgetsConfig;
@@ -42,7 +42,7 @@ public:
 
 	// Selection
 	UFUNCTION(BlueprintCallable, Category="Widgets")
-	void ShowSelectionWidget(bool bShow);
+	void ShowSelectionWidget(AActor* SelectableActor, bool bShow, ESelectionType SelectionType);
 	
 	UFUNCTION()
 	USelectionWidget* GetSelectionWidget() { return GetOrCreateWidget<USelectionWidget>(SelectionWidgetBP); }
@@ -73,6 +73,15 @@ private:
 	// Selection
 	UPROPERTY(EditAnywhere, Category="Widgets")
 	TSubclassOf<UCustomWidget> SelectionWidgetBP;
+
+	UPROPERTY(EditAnywhere, Category="Widgets")
+	TSubclassOf<UCustomWidget> RoomSelectionWidgetBP;
+
+	UPROPERTY(EditAnywhere, Category="Widgets")
+	AActor* CurrentlySelectedActor = nullptr;
+
+	UPROPERTY(EditAnywhere, Category="Widgets")
+	TSubclassOf<UCustomWidget> CurrentlyShownSelectionWidgetBP = nullptr;
 	
 	// Moral Event
 	UPROPERTY(EditAnywhere, Category="Widgets")

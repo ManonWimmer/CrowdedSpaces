@@ -8,6 +8,8 @@
 ABuildableGenerator::ABuildableGenerator()
 {
 	ProductionComponent = CreateDefaultSubobject<UProductionComponent>("ProductionComponent");
+	
+	// Selectable
 	SelectionType = ESelectionType::Generator;
 }
 

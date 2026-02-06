@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "InputMappingContext.h"
+#include "Grid/GridActor.h"
 #include "Player/PlayerActionsData.h"
 #include "Selection/Selectable.h"
 #include "UI/GameHUD.h"
@@ -76,8 +77,14 @@ private:
 	void LeftRotateBuildInput(const FInputActionValue& Value);
 	void RightRotateBuildInput(const FInputActionValue& Value);
 
-	// Selectable
-	ISelectable* SelectedObject = nullptr;
+	// Selection
+	void HandleSelection() const;
+
+	UPROPERTY()
+	AGridActor* GridActor = nullptr;
+	
+	UPROPERTY()
+	AActor* SelectedObject = nullptr;
 
 	UPROPERTY()
 	TObjectPtr<AGameHUD> GameHUD = nullptr;

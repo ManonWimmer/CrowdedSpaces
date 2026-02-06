@@ -1,4 +1,6 @@
 ﻿#include "Player/CrowdedPlayerController.h"
+
+#include "EngineUtils.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "Game/CrowdedGameMode.h"
@@ -50,6 +52,13 @@ void ACrowdedPlayerController::SetupInputComponent()
 		return;
 	
 	InputSubsystem->AddMappingContext(CameraIMC, 0);
+
+	// Grid actor (selection room)
+	for (TActorIterator<AGridActor> It(GetWorld()); It; ++It)
+	{
+		GridActor = *It;
+		break;
+	}
 }
 
 void ACrowdedPlayerController::BeginPlay()
@@ -89,31 +98,7 @@ void ACrowdedPlayerController::LeftClickInput(const FInputActionValue& Value)
 	if (!GameHUD)
 		return;
 	
-	// Handle click selection
-	FHitResult Hit;
-	bool bHit = GetHitResultUnderCursor(ECC_Visibility, false, Hit);
-	
-	if (SelectedObject)
-	{
-		SelectedObject->OnDeselected();
-		SelectedObject = nullptr;
-		GameHUD->ShowSelectionWidget(false);
-		GameHUD->GetSelectionWidget()->Unbind();
-	}
-
-	if (Hit.GetActor() && Hit.GetActor()->Implements<USelectable>())
-	{
-		SelectedObject = Cast<ISelectable>(Hit.GetActor());
-		SelectedObject->OnSelected();
-
-		GameHUD->ShowSelectionWidget(true);
-
-		if (GameHUD->GetSelectionWidget())
-		{
-			// Bind automatique à toutes les stats du composant
-			GameHUD->GetSelectionWidget()->BindToSelectable(Hit.GetActor(), SelectedObject->GetDisplayName(), SelectedObject->SelectionType);
-		}
-	}
+	HandleSelection();
 }
 
 void ACrowdedPlayerController::LeftRotateBuildInput(const FInputActionValue& Value)
@@ -138,4 +123,38 @@ void ACrowdedPlayerController::RightRotateBuildInput(const FInputActionValue& Va
 		return;
 
 	OnRightRotateBuild.Broadcast();
+}
+
+void ACrowdedPlayerController::HandleSelection() const
+{
+	FHitResult Hit;
+	bool bHit = GetHitResultUnderCursor(ECC_Visibility, false, Hit);
+	
+	if (!GameHUD)
+		return;
+
+	AActor* HitActor = Hit.GetActor();
+
+	// 1. Selectable actor (NPC, generator)
+	if (HitActor && HitActor->Implements<USelectable>())
+	{
+		ISelectable* Selectable = Cast<ISelectable>(HitActor);
+		GameHUD->ShowSelectionWidget(HitActor, true, Selectable->GetSelectionType());
+		return;
+	}
+
+	// 2. Room
+	if (GridActor)
+	{
+		FGridRoom* Room;
+
+		if (GridActor->GetRoomAtWorldLocation(Hit.Location, Room))
+		{
+			GameHUD->ShowSelectionWidget(GridActor, true, ESelectionType::Room);
+			return;
+		}
+	}
+
+	// 3. Nothing
+	GameHUD->ShowSelectionWidget(nullptr, false, ESelectionType::Default);
 }

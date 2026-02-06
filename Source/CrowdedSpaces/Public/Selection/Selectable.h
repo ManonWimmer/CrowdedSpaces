@@ -25,4 +25,6 @@ public:
 	virtual TObjectPtr<AActor> GetSelectableActor() = 0;
 
 	ESelectionType SelectionType = ESelectionType::Default;
+
+	ESelectionType GetSelectionType() const { return SelectionType; }
 };

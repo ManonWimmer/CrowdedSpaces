@@ -20,9 +20,17 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Widget")
 	void Reset();
 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Widget")
+	void Setup(AActor* SelectableActor);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Widget")
+	void Unsetup();
+
 protected:
 	virtual void Init_Implementation();
 	virtual void Reset_Implementation();
+	virtual void Setup_Implementation(AActor* SelectableActor);
+	virtual void Unsetup_Implementation();
 
 	UPROPERTY()
 	TObjectPtr<AGameHUD> GameHUD = nullptr;

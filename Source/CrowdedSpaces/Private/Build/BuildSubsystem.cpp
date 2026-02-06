@@ -45,7 +45,7 @@ void UBuildSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	for (TActorIterator<AGridActor> It(GetWorld()); It; ++It)
 	{
 		GridActor = *It;
-		GridActor->SetActorHiddenInGame(true);
+		GridActor->ShowGrid(false);
 		break; 
 	}
 
@@ -72,7 +72,7 @@ void UBuildSubsystem::OnGameModeChanged(EGameModeState NewMode)
 			GameHUD->ShowBuildWidget(true);
 
 		if (GridActor)
-			GridActor->SetActorHiddenInGame(false);
+			GridActor->ShowGrid(true);
 	}
 	else
 	{
@@ -80,7 +80,7 @@ void UBuildSubsystem::OnGameModeChanged(EGameModeState NewMode)
 			GameHUD->ShowBuildWidget(false);
 
 		if (GridActor)
-			GridActor->SetActorHiddenInGame(true);
+			GridActor->ShowGrid(false);
 
 		StopBuilding();
 	}
@@ -185,10 +185,7 @@ void UBuildSubsystem::StopBuilding()
 	// Stop object selection
 	if (CurrentGhost)
 		CurrentGhost->SetActorHiddenInGame(true);
-
-	if (GridActor)
-		GridActor->DeselectSelectedCells();
-
+	
 	SelectedRoomCells.Empty();
 
 	GridActor->SetIsShowingRooms(true);

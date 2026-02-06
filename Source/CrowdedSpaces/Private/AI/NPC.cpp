@@ -15,6 +15,9 @@ ANPC::ANPC()
 
 	// Energy
 	EnergyComponent = CreateDefaultSubobject<UEnergyComponent>(TEXT("EnergyComponent"));
+
+	// Selectable
+	SelectionType = ESelectionType::NPC;
 }
 
 void ANPC::SetCurrentAction(ENPCAction NewAction)

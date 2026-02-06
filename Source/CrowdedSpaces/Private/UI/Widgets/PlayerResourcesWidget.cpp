@@ -15,3 +15,13 @@ void UPlayerResourcesWidget::Reset_Implementation()
 {
 	Super::Reset_Implementation();
 }
+
+void UPlayerResourcesWidget::Setup_Implementation(AActor* SelectableActor)
+{
+	Super::Setup_Implementation(SelectableActor);
+}
+
+void UPlayerResourcesWidget::Unsetup_Implementation()
+{
+	Super::Unsetup_Implementation();
+}

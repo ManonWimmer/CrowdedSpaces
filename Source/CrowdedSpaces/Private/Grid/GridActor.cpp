@@ -23,8 +23,6 @@ void AGridActor::OnConstruction(const FTransform& Transform)
 	#pragma region Create Lines
 	LinesProceduralMesh->ClearAllMeshSections();
 	
-	TObjectPtr<UMaterialInstanceDynamic> CellMaterialInstance = CreateMaterialInstance(CellColor, CellOpacity);
-	
 	TArray<FVector> LineVertices;
 	TArray<int> LineTriangles;
 
@@ -71,7 +69,7 @@ void AGridActor::OnConstruction(const FTransform& Transform)
 		false         
 	);
 
-	TObjectPtr<UMaterialInstanceDynamic> LinesMaterialInstance = CreateMaterialInstance(LineColor, LineOpacity);
+	LinesMaterialInstance = CreateMaterialInstance(LineColor, LineOpacity);
 	LinesProceduralMesh->SetMaterial(0, LinesMaterialInstance);
 	#pragma endregion
 }
@@ -343,6 +341,35 @@ void AGridActor::TryAddWall(FGridCell* Cell, int NeighborRow, int NeighborCol, E
 	CreatedWallsPositions.Add(SpawnLoc);
 }
 
+bool AGridActor::GetRoomAtWorldLocation(const FVector& WorldLoc, FGridRoom*& OutRoom)
+{
+	int Row, Col;
+
+	if (!GetCellAtLocation(WorldLoc, Row, Col))
+		return false;
+
+	FGridCell* Cell = GetGridCell(Row, Col);
+	if (!Cell || Cell->RoomId == -1)
+		return false;
+
+	OutRoom = Rooms.Find(Cell->RoomId);
+
+	return OutRoom != nullptr;
+}
+
+void AGridActor::ShowGrid(bool bShow)
+{
+	LinesProceduralMesh->SetVisibility(bShow);
+
+	for (auto& Pair : Cells)
+	{
+		FGridCell* Cell = &Pair.Value;
+		if (!Cell)
+			continue;
+
+		Cell->CellProceduralMesh->SetVisibility(false);
+	}
+}
 
 void AGridActor::DeselectSelectedCells()
 {

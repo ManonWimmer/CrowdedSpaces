@@ -11,6 +11,16 @@ void UBuildWidget::Reset_Implementation()
 	// En BP, reset selected objects
 }
 
+void UBuildWidget::Setup_Implementation(AActor* SelectableActor)
+{
+	Super::Setup_Implementation(SelectableActor);
+}
+
+void UBuildWidget::Unsetup_Implementation()
+{
+	Super::Unsetup_Implementation();
+}
+
 void UBuildWidget::Init_Implementation()
 {
 	Super::Init_Implementation();

@@ -56,6 +56,11 @@ public:
 	
 	void RebuildWalls();
 	void TryAddWall(FGridCell* Cell, int NeighborRow, int NeighborCol, EGridWallDirection Dir, float Half);
+
+	bool GetRoomAtWorldLocation(const FVector& WorldLoc, FGridRoom*& OutRoom);
+
+	UFUNCTION(BlueprintCallable, Category = "Grid")
+	void ShowGrid(bool bShow);
 	
 private:
 	void DrawLine(const FVector& Start, const FVector& End, float Thickness, TArray<FVector>& Vertices, TArray<int>& Triangles);
@@ -65,7 +70,10 @@ private:
 	TObjectPtr<UMaterialInstanceDynamic> CreateMaterialInstance(FLinearColor Color, float Opacity);
 	
 	UPROPERTY(EditAnywhere, Category = "Grid")
+	
 	TObjectPtr<UProceduralMeshComponent> LinesProceduralMesh;
+	UPROPERTY()
+	TObjectPtr<UMaterialInstanceDynamic> LinesMaterialInstance = nullptr;
 
 	UPROPERTY(EditAnywhere, Category="Grid")
 	TObjectPtr<UMaterialInterface> BaseMaterial;

@@ -17,6 +17,8 @@ protected:
 	
 	virtual void Init_Implementation() override;
 	virtual void Reset_Implementation() override;
+	virtual void Setup_Implementation(AActor* SelectableActor) override;
+	virtual void Unsetup_Implementation() override;
 
 	UPROPERTY()
 	TArray<TScriptInterface<ISelectableStatProvider>> BoundStats;
@@ -30,21 +32,6 @@ protected:
 public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
 	void UpdateSelection(const FString& DisplayName, const TMap<FString, FString>& Stats, ESelectionType SelectionType);
-
-	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
-    void Setup(AActor* SelectableActor, ESelectionType SelectionType);
-
-	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
-	void Unsetup();
-	
-	void BindToSelectable(AActor* SelectableActor, FString DisplayName, ESelectionType SelectionType);
-
-	// Unbind proprement
-	void Unbind();
-	
-	// Callback générique
-	UFUNCTION()
-	void OnAnyStatUpdated(FName StatId, FString NewValue);
 
 	UPROPERTY()
 	ESelectionType CurrentSelectionType = ESelectionType::Default;
