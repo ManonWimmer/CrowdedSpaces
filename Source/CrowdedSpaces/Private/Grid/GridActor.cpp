@@ -253,9 +253,7 @@ int AGridActor::CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> C
 
 	ShowPlacedRooms(true);
 	
-	//SpawnWallsForRoom(NewRoom.Cells);
-
-	UpdateWallsForRoom(NewRoom.Cells);
+	//UpdateWallsForRoom(NewRoom.Cells);
 	RebuildWalls();
 	
 	return NewRoom.RoomId;
@@ -274,54 +272,6 @@ bool AGridActor::CheckIfCellInPlacedRoom(const FGridCell* Cell, FLinearColor& Ou
 	}
 
 	return false;
-}
-
-void AGridActor::SpawnWallsForRoom(const TArray<FGridCell*>& RoomCells)
-{
-	if (!WallClass) return;
-
-	for (const FGridCell* Cell : RoomCells)
-	{
-		if (!Cell) continue;
-
-		int Row = Cell->Row;
-		int Col = Cell->Column;
-
-		TrySpawnWall(Row - 1, Col, Cell, FRotator::ZeroRotator); // North
-		TrySpawnWall(Row + 1, Col, Cell, FRotator::ZeroRotator); // South
-		TrySpawnWall(Row, Col - 1, Cell, FRotator(0,90,0)); // West
-		TrySpawnWall(Row, Col + 1, Cell, FRotator(0,90,0)); // East
-	}
-}
-
-void AGridActor::TrySpawnWall(const int Row, const int Column, const FGridCell* OriginCell, FRotator Rotation)
-{
-	const FGridCell* Neighbor = GetGridCell(Row, Column);
-
-	if (Neighbor && Neighbor->RoomId == OriginCell->RoomId)
-		return;
-
-	FVector2D CellPos;
-	GetGridLocation(true, OriginCell->Row, OriginCell->Column, CellPos);
-
-	FVector SpawnLoc(CellPos.X, CellPos.Y, GetActorLocation().Z);
-
-	float Half = GetCellSize() * 0.5f;
-	
-	// Decalage selon direction
-	if (Row < OriginCell->Row)        // NORTH
-		SpawnLoc.X -= Half;
-
-	else if (Row > OriginCell->Row)   // SOUTH
-		SpawnLoc.X += Half;
-
-	else if (Column < OriginCell->Column) // WEST
-		SpawnLoc.Y -= Half;
-
-	else if (Column > OriginCell->Column) // EAST
-		SpawnLoc.Y += Half;
-	
-	GetWorld()->SpawnActor<AActor>(WallClass, SpawnLoc, Rotation);
 }
 
 void AGridActor::ToggleEdge(const FGridWallEdge& Edge)
@@ -345,53 +295,94 @@ void AGridActor::UpdateWallsForRoom(const TArray<FGridCell*>& RoomCells)
 		ToggleEdge({Pos, EGridWallDirection::South});
 		ToggleEdge({Pos, EGridWallDirection::West});
 
-		// Toggle edges voisins pour supprimer murs internes
-		ToggleEdge({FIntPoint(Cell->Row-1, Cell->Column), EGridWallDirection::South});
-		ToggleEdge({FIntPoint(Cell->Row+1, Cell->Column), EGridWallDirection::North});
-		ToggleEdge({FIntPoint(Cell->Row, Cell->Column-1), EGridWallDirection::East});
-		ToggleEdge({FIntPoint(Cell->Row, Cell->Column+1), EGridWallDirection::West});
+		// Merge rooms only if same room type
+		FGridCell* SouthNeighbor = GetGridCell(Cell->Row-1, Cell->Column);
+		if (SouthNeighbor && SouthNeighbor->RoomType == Cell->RoomType && Cell->RoomType != EGridRoomType::Any)
+			ToggleEdge({FIntPoint(Cell->Row-1, Cell->Column), EGridWallDirection::South});
+
+		FGridCell* NorthNeighbor = GetGridCell(Cell->Row+1, Cell->Column);
+		if (NorthNeighbor && NorthNeighbor->RoomType == Cell->RoomType && Cell->RoomType != EGridRoomType::Any)
+			ToggleEdge({FIntPoint(Cell->Row+1, Cell->Column), EGridWallDirection::North});
+
+		FGridCell* EastNeighbor = GetGridCell(Cell->Row, Cell->Column-1);
+		if (NorthNeighbor && EastNeighbor->RoomType == Cell->RoomType && Cell->RoomType != EGridRoomType::Any)
+			ToggleEdge({FIntPoint(Cell->Row, Cell->Column-1), EGridWallDirection::East});
+
+		FGridCell* WestNeighbor = GetGridCell(Cell->Row, Cell->Column+1);
+		if (WestNeighbor && WestNeighbor->RoomType == Cell->RoomType && Cell->RoomType != EGridRoomType::Any)
+			ToggleEdge({FIntPoint(Cell->Row, Cell->Column+1), EGridWallDirection::West});
 	}
 }
 
 void AGridActor::RebuildWalls()
 {
 	WallISM->ClearInstances();
+	CreatedWallsPositions.Empty();
 
 	float Half = CellSize * 0.5f;
 
-	for (const FGridWallEdge& Edge : WallEdges)
+	for (auto& Pair : Cells)
 	{
-		FVector2D CellPos;
-		if (!GetGridLocation(true, Edge.Cell.X, Edge.Cell.Y, CellPos))
+		FGridCell* Cell = &Pair.Value;
+
+		if (Cell->RoomType == EGridRoomType::Any)
 			continue;
-		
-		FVector SpawnLoc(CellPos.X - GetActorLocation().X, CellPos.Y - GetActorLocation().Y, 0);
-		FRotator Rot = FRotator::ZeroRotator;
 
-		switch (Edge.Direction)
-		{
-		case EGridWallDirection::North:
-			SpawnLoc.X -= Half;
-			break;
+		int Row = Cell->Row;
+		int Col = Cell->Column;
 
-		case EGridWallDirection::South:
-			SpawnLoc.X += Half;
-			break;
-
-		case EGridWallDirection::West:
-			SpawnLoc.Y -= Half;
-			Rot = FRotator(0,90,0);
-			break;
-
-		case EGridWallDirection::East:
-			SpawnLoc.Y += Half;
-			Rot = FRotator(0,90,0);
-			break;
-		}
-
-		WallISM->AddInstance(FTransform(Rot, SpawnLoc));
+		TryAddWall(Cell, Row-1, Col, EGridWallDirection::North, Half);
+		TryAddWall(Cell, Row+1, Col, EGridWallDirection::South, Half);
+		TryAddWall(Cell, Row, Col-1, EGridWallDirection::West, Half);
+		TryAddWall(Cell, Row, Col+1, EGridWallDirection::East, Half);
 	}
 }
+
+void AGridActor::TryAddWall(FGridCell* Cell, int NeighborRow, int NeighborCol, EGridWallDirection Dir, float Half)
+{
+	FGridCell* Neighbor = GetGridCell(NeighborRow, NeighborCol);
+
+	if (Neighbor && Neighbor->RoomType == Cell->RoomType)
+		return;
+	
+	FVector2D CellPos;
+	if (!GetGridLocation(true, Cell->Row, Cell->Column, CellPos))
+		return;
+
+	FVector SpawnLoc(CellPos.X - GetActorLocation().X,
+					 CellPos.Y - GetActorLocation().Y,
+					 0);
+
+	FRotator Rot = FRotator::ZeroRotator;
+
+	switch (Dir)
+	{
+	case EGridWallDirection::North:
+		SpawnLoc.X -= Half;
+		break;
+
+	case EGridWallDirection::South:
+		SpawnLoc.X += Half;
+		break;
+
+	case EGridWallDirection::West:
+		SpawnLoc.Y -= Half;
+		Rot = FRotator(0,90,0);
+		break;
+
+	case EGridWallDirection::East:
+		SpawnLoc.Y += Half;
+		Rot = FRotator(0,90,0);
+		break;
+	}
+
+	if (CreatedWallsPositions.Contains(SpawnLoc))
+		return; // already created
+
+	WallISM->AddInstance(FTransform(Rot, SpawnLoc));
+	CreatedWallsPositions.Add(SpawnLoc);
+}
+
 
 void AGridActor::DeselectSelectedCells()
 {

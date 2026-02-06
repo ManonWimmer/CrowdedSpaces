@@ -54,11 +54,10 @@ public:
 	int CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> CellsToAssign);
 	bool CheckIfCellInPlacedRoom(const FGridCell* Cell, FLinearColor& OutGridColor);
 	
-	void SpawnWallsForRoom(const TArray<FGridCell*>& RoomCells);
-	void TrySpawnWall(const int Row, const int Column, const FGridCell* OriginCell, FRotator Rotation);
 	void ToggleEdge(const FGridWallEdge& Edge);
 	void UpdateWallsForRoom(const TArray<FGridCell*>& RoomCells);
 	void RebuildWalls();
+	void TryAddWall(FGridCell* Cell, int NeighborRow, int NeighborCol, EGridWallDirection Dir, float Half);
 	
 private:
 	void DrawLine(const FVector& Start, const FVector& End, float Thickness, TArray<FVector>& Vertices, TArray<int>& Triangles);
@@ -107,11 +106,10 @@ private:
 
 	bool bIsShowingRooms = false;
 
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<AActor> WallClass;
-	
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UInstancedStaticMeshComponent> WallISM;
 
 	TSet<FGridWallEdge> WallEdges;
+
+	TSet<FVector> CreatedWallsPositions;
 };
