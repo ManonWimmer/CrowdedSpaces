@@ -43,6 +43,7 @@ void UBuildSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	for (TActorIterator<AGridActor> It(GetWorld()); It; ++It)
 	{
 		GridActor = *It;
+		GridActor->SetActorHiddenInGame(true);
 		break; 
 	}
 
@@ -67,11 +68,19 @@ void UBuildSubsystem::OnGameModeChanged(EGameModeState NewMode)
 	{
 		if (GameHUD)
 			GameHUD->ShowBuildWidget(true);
+
+		if (GridActor)
+			GridActor->SetActorHiddenInGame(false);
 	}
 	else
 	{
 		if (GameHUD)
 			GameHUD->ShowBuildWidget(false);
+
+		if (GridActor)
+			GridActor->SetActorHiddenInGame(true);
+
+		StopBuilding();
 	}
 }
 
