@@ -70,9 +70,13 @@ void UBuildSubsystem::OnGameModeChanged(EGameModeState NewMode)
 	{
 		if (GameHUD)
 			GameHUD->ShowBuildWidget(true);
-
+		
 		if (GridActor)
+		{
+			GridActor->SetIsShowingRooms(true);
+			GridActor->ShowPlacedRooms(true);
 			GridActor->ShowGrid(true);
+		}
 	}
 	else
 	{
