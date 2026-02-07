@@ -137,6 +137,14 @@ UCustomWidget* AGameHUD::GetWidgetFromSelectionType(ESelectionType Type)
 		CurrentlyShownSelectionWidgetBP = RoomSelectionWidgetBP;
 		break;
 
+	case ESelectionType::Food:
+		CurrentlyShownSelectionWidgetBP = FoodSelectionWidgetBP;
+		break;
+		
+	case ESelectionType::Bed:
+		CurrentlyShownSelectionWidgetBP = BedSelectionWidgetBP;
+		break;
+
 	default:
 		return nullptr;
 	}

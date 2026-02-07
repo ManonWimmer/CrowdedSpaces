@@ -85,6 +85,12 @@ private:
 	TSubclassOf<UCustomWidget> NPCSelectionWidgetBP;
 
 	UPROPERTY(EditAnywhere, Category="Widgets")
+	TSubclassOf<UCustomWidget> FoodSelectionWidgetBP;
+
+	UPROPERTY(EditAnywhere, Category="Widgets")
+	TSubclassOf<UCustomWidget> BedSelectionWidgetBP;
+
+	UPROPERTY(EditAnywhere, Category="Widgets")
 	AActor* CurrentlySelectedActor = nullptr;
 
 	UPROPERTY(EditAnywhere, Category="Widgets")

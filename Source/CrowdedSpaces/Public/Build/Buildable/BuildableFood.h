@@ -6,6 +6,8 @@
 #include "Selection/SelectableStatProvider.h"
 #include "BuildableFood.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIsFoodAvailableChanged, bool, Value);
+
 UCLASS()
 class CROWDEDSPACES_API ABuildableFood : public ABuildableObject, public ISelectable, public ISelectableStatProvider
 {
@@ -27,9 +29,15 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnStatChanged OnStatChanged;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnIsFoodAvailableChanged OnIsFoodAvailableChanged;
 	
 	virtual TArray<FStat> GetCurrentValues() const override;
 	virtual FOnStatChanged& GetOnStatChanged() override { return OnStatChanged; }
+
+	UFUNCTION(BlueprintCallable, Category = "Food")
+	bool GetIsAvailable() const { return bIsAvailable; }
 
 protected:
 	virtual void BeginPlay() override;

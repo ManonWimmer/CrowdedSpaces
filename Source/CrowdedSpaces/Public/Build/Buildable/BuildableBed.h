@@ -6,6 +6,8 @@
 #include "Selection/SelectableStatProvider.h"
 #include "BuildableBed.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIsBedAvailableChanged, bool, Value);
+
 UCLASS()
 class CROWDEDSPACES_API ABuildableBed : public ABuildableObject, public ISelectable, public ISelectableStatProvider
 {
@@ -27,9 +29,15 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnStatChanged OnStatChanged;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnIsBedAvailableChanged OnIsBedAvailableChanged;
 	
 	virtual TArray<FStat> GetCurrentValues() const override;
 	virtual FOnStatChanged& GetOnStatChanged() override { return OnStatChanged; }
+
+	UFUNCTION(BlueprintCallable, Category = "Bed")
+	bool GetIsAvailable() const { return bIsAvailable; }
 
 protected:
 	virtual void BeginPlay() override;

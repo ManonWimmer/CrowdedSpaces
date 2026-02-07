@@ -4,6 +4,8 @@
 
 ABuildableBed::ABuildableBed()
 {
+	// Selectable
+	SelectionType = ESelectionType::Bed;
 }
 
 void ABuildableBed::BeginPlay()
@@ -36,6 +38,7 @@ void ABuildableBed::SetAvailable(bool NewAvailable)
 	bIsAvailable = NewAvailable;
 	FString Result = bIsAvailable ? TEXT("True") : TEXT("False");
 	OnStatChanged.Broadcast("Is Available", Result);
+	OnIsBedAvailableChanged.Broadcast(bIsAvailable);
 }
 
 #pragma region Selectable

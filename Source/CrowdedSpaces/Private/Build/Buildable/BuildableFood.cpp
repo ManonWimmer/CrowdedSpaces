@@ -4,6 +4,8 @@
 
 ABuildableFood::ABuildableFood()
 {
+	// Selectable
+	SelectionType = ESelectionType::Food;
 }
 
 void ABuildableFood::BeginPlay()
@@ -36,6 +38,7 @@ void ABuildableFood::SetAvailable(bool NewAvailable)
 	bIsAvailable = NewAvailable;
 	FString Result = bIsAvailable ? TEXT("True") : TEXT("False");
 	OnStatChanged.Broadcast("Is Available", Result);
+	OnIsFoodAvailableChanged.Broadcast(bIsAvailable);
 }
 
 #pragma region Selectable
