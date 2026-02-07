@@ -41,7 +41,10 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableGenerator::ExecuteTask(UBehavior
 		if (!Generator.IsValid())
 			continue;
 
-		if (Generator->GetHasNPCWorking())
+		if (Generator->HasNPCWorking())
+			continue;
+
+		if (Generator->HasNPCComing())
 			continue;
 		
 		// Get nearest generator of production type in radius
@@ -76,6 +79,8 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableGenerator::ExecuteTask(UBehavior
 		
 		// Target generator key
 		Blackboard->SetValueAsObject(TargetGeneratorKey.SelectedKeyName, NearestGenerator);
+
+		NearestGenerator->SetHasNPCComing(true);
 		
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		return EBTNodeResult::Succeeded;

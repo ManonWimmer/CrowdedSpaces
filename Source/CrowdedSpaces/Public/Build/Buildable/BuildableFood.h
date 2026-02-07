@@ -7,6 +7,7 @@
 #include "BuildableFood.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIsFoodAvailableChanged, bool, Value);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNPCComingToFoodChanged, bool, Value);
 
 UCLASS()
 class CROWDEDSPACES_API ABuildableFood : public ABuildableObject, public ISelectable, public ISelectableStatProvider
@@ -16,9 +17,14 @@ class CROWDEDSPACES_API ABuildableFood : public ABuildableObject, public ISelect
 public:
 	ABuildableFood();
 
+	UFUNCTION(BlueprintCallable, Category = "Food")
 	bool IsAvailable() const { return bIsAvailable; }
+
+	UFUNCTION(BlueprintCallable, Category = "Food")
+	bool HasNPCComing() const { return bHasNPCComing; }
 	
 	void SetAvailable(bool NewAvailable);
+	void SetHasNPCComing(bool NewAvailable);
 
 	// Selectable
 	virtual void OnSelected() override;
@@ -29,6 +35,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnStatChanged OnStatChanged;
+	
+	UPROPERTY(BlueprintAssignable)
+	FOnNPCComingToFoodChanged OnNPCComingToFoodChanged;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnIsFoodAvailableChanged OnIsFoodAvailableChanged;
@@ -36,12 +45,10 @@ public:
 	virtual TArray<FStat> GetCurrentValues() const override;
 	virtual FOnStatChanged& GetOnStatChanged() override { return OnStatChanged; }
 
-	UFUNCTION(BlueprintCallable, Category = "Food")
-	bool GetIsAvailable() const { return bIsAvailable; }
-
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
 	bool bIsAvailable = true;
+	bool bHasNPCComing = false;
 };

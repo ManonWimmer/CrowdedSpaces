@@ -25,9 +25,6 @@ EBTNodeResult::Type UBTTask_UseGenerator::ExecuteTask(UBehaviorTreeComponent& Ow
 	NPC = Cast<ANPC>(Controller->GetPawn());
 	if (!NPC)
 		return EBTNodeResult::Failed;
-
-	// Action
-	StartAction();
 	
 	// Get the target bed from blackboard
 	TObjectPtr<UBlackboardComponent> Blackboard = OwnerComp.GetBlackboardComponent();
@@ -37,11 +34,15 @@ EBTNodeResult::Type UBTTask_UseGenerator::ExecuteTask(UBehaviorTreeComponent& Ow
 	TObjectPtr<ABuildableGenerator> TargetGenerator = Cast<ABuildableGenerator>(Blackboard->GetValueAsObject(TargetGeneratorKey.SelectedKeyName));
 	if (!TargetGenerator)
 		return EBTNodeResult::Failed;
+
+	if (TargetGenerator->HasNPCWorking())
+		return EBTNodeResult::Failed;
 	
-	// Set generator as working
 	TargetGenerator->SetNPCWorking(true);
 	
-	return EBTNodeResult::InProgress; // Infinite as long as behavior tree doesn't change it (hungry, tired, event...)
+	StartAction();
+	
+	return EBTNodeResult::InProgress; 
 }
 
 

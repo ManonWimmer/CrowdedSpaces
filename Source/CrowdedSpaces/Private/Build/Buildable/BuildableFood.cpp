@@ -35,10 +35,22 @@ void ABuildableFood::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void ABuildableFood::SetAvailable(bool NewAvailable)
 {
+	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Set food available");
+	
 	bIsAvailable = NewAvailable;
 	FString Result = bIsAvailable ? TEXT("True") : TEXT("False");
 	OnStatChanged.Broadcast("Is Available", Result);
 	OnIsFoodAvailableChanged.Broadcast(bIsAvailable);
+
+	if (!bIsAvailable)
+		SetHasNPCComing(false);
+}
+
+void ABuildableFood::SetHasNPCComing(bool NewAvailable)
+{
+	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Set npc coming to food");
+	bHasNPCComing = NewAvailable;
+	OnNPCComingToFoodChanged.Broadcast(bHasNPCComing);
 }
 
 #pragma region Selectable

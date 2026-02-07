@@ -39,6 +39,15 @@ void ABuildableBed::SetAvailable(bool NewAvailable)
 	FString Result = bIsAvailable ? TEXT("True") : TEXT("False");
 	OnStatChanged.Broadcast("Is Available", Result);
 	OnIsBedAvailableChanged.Broadcast(bIsAvailable);
+
+	if (!bIsAvailable)
+		SetHasNPCComing(false);
+}
+
+void ABuildableBed::SetHasNPCComing(bool NewAvailable)
+{
+	bHasNPCComing = NewAvailable;
+	OnNPCComingToBedChanged.Broadcast(bHasNPCComing);
 }
 
 #pragma region Selectable

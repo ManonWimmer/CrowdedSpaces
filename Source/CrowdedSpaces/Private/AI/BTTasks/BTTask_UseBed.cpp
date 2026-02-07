@@ -26,9 +26,6 @@ EBTNodeResult::Type UBTTask_UseBed::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 	if (!NPC)
 		return EBTNodeResult::Failed;
 
-	// Action
-	StartAction();
-	
 	// Get the target bed from blackboard
 	TObjectPtr<UBlackboardComponent> Blackboard = OwnerComp.GetBlackboardComponent();
 	if (!Blackboard)
@@ -37,19 +34,20 @@ EBTNodeResult::Type UBTTask_UseBed::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 	TObjectPtr<ABuildableBed> TargetBed = Cast<ABuildableBed>(Blackboard->GetValueAsObject(TargetBedKey.SelectedKeyName));
 	if (!TargetBed)
 		return EBTNodeResult::Failed;
-	
-	// Set bed as unavailable
-	TargetBed->SetAvailable(false);
 
-	// Get NPC EnergyComponent
+	if (!TargetBed->IsAvailable())
+		return EBTNodeResult::Failed;
+	
+	TargetBed->SetAvailable(false);
+	
+	StartAction();
+	
 	EnergyComp = NPC->FindComponentByClass<UEnergyComponent>();
 	if (!EnergyComp.IsValid())
 		return EBTNodeResult::Failed;
-
-	// Set NPC sleeping
+	
 	EnergyComp->SetSleeping(true);
-
-	// Bind callback to energy full
+	
 	EnergyComp->OnEnergyFull.AddDynamic(this, &UBTTask_UseBed::OnEnergyFull);
 
 	OwnerCompPtr = &OwnerComp;

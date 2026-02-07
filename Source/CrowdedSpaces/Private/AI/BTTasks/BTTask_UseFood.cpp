@@ -25,9 +25,6 @@ EBTNodeResult::Type UBTTask_UseFood::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 	NPC = Cast<ANPC>(Controller->GetPawn());
 	if (!NPC)
 		return EBTNodeResult::Failed;
-
-	// Action
-	StartAction();
 	
 	// Get the target bed from blackboard
 	TObjectPtr<UBlackboardComponent> Blackboard = OwnerComp.GetBlackboardComponent();
@@ -37,19 +34,20 @@ EBTNodeResult::Type UBTTask_UseFood::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 	TObjectPtr<ABuildableFood> TargetFood = Cast<ABuildableFood>(Blackboard->GetValueAsObject(TargetFoodKey.SelectedKeyName));
 	if (!TargetFood)
 		return EBTNodeResult::Failed;
-	
-	// Set food as unavailable
-	TargetFood->SetAvailable(false);
 
-	// Get NPC FoodComponent
+	if (!TargetFood->IsAvailable())
+		return EBTNodeResult::Failed;
+	
+	TargetFood->SetAvailable(false);
+	
+	StartAction();
+	
 	FoodComp = NPC->FindComponentByClass<UFoodComponent>();
 	if (!FoodComp.IsValid())
 		return EBTNodeResult::Failed;
-
-	// Set NPC eating
+	
 	FoodComp->SetEating(true);
-
-	// Bind callback to food full
+	
 	FoodComp->OnFoodFull.AddDynamic(this, &UBTTask_UseFood::OnFoodFull);
 
 	OwnerCompPtr = &OwnerComp;
