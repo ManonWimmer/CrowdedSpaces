@@ -4,15 +4,15 @@
 #include "AI/CustomBTTask.h"
 #include "Production/ProductionType.h"
 #include "BehaviorTree/Tasks/BTTask_BlackboardBase.h"
-#include "BTTask_FindNearestGeneratorLocation.generated.h"
+#include "BTTask_FindNearestAvailableGenerator.generated.h"
 
 UCLASS()
-class CROWDEDSPACES_API UBTTask_FindNearestGeneratorLocation : public UCustomBTTask
+class CROWDEDSPACES_API UBTTask_FindNearestAvailableGenerator : public UCustomBTTask
 {
 	GENERATED_BODY()
 
 public:
-	explicit UBTTask_FindNearestGeneratorLocation(FObjectInitializer const& ObjectInitializer);
+	explicit UBTTask_FindNearestAvailableGenerator(FObjectInitializer const& ObjectInitializer);
 	
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 	virtual void OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult) override;
