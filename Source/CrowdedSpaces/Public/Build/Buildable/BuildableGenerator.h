@@ -1,6 +1,8 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "AI/NPC.h"
+#include "AI/BTTasks/BTTask_FindNearestAvailableGenerator.h"
 #include "Build/BuildableObject.h"
 #include "Production/ProductionComponent.h"
 #include "Production/ProductionUpgradeData.h"
@@ -22,9 +24,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Generator")
 	bool HasNPCComing() const { return bHasNPCComing; }
-
-	void SetNPCWorking(bool bWorking);
-	void SetHasNPCComing(bool NewAvailable);
 	
 	// Selectable
 	virtual void OnSelected() override;
@@ -51,11 +50,19 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Upgrade")
 	bool HasNPCWorking() const { return bHasNPCWorking; }
 
+	
+
 	UPROPERTY(BlueprintAssignable)
 	FOnNPCWorkingChanged OnNPCWorkingChanged;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnNPCComingToGeneratorChanged OnNPCComingToGeneratorChanged;
+
+	bool TryReserve(ANPC* NPC);
+	bool IsReservedByOther(TObjectPtr<ANPC> NPC);
+	void Release(ANPC* NPC);
+	void StartWorking(ANPC* NPC);
+	void StopWorking(ANPC* NPC);
 
 protected:
 	virtual void BeginPlay() override;
@@ -87,4 +94,10 @@ private:
 	bool bHasNPCWorking = false;
 	
 	bool bHasNPCComing = false;
+
+	UPROPERTY()
+	TWeakObjectPtr<ANPC> ComingNPC;
+
+	UPROPERTY()
+	TWeakObjectPtr<ANPC> WorkingNPC;
 };

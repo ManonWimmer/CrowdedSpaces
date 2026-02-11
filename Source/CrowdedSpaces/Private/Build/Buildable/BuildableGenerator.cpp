@@ -13,6 +13,65 @@ ABuildableGenerator::ABuildableGenerator()
 	SelectionType = ESelectionType::Generator;
 }
 
+bool ABuildableGenerator::TryReserve(ANPC* NPC)
+{
+	if (ComingNPC.IsValid())
+		return false;
+
+	ComingNPC = NPC;
+	
+	bHasNPCComing = true;
+	OnNPCComingToGeneratorChanged.Broadcast(bHasNPCComing);
+	
+	return true;
+}
+
+bool ABuildableGenerator::IsReservedByOther(TObjectPtr<ANPC> NPC)
+{
+	return ComingNPC.IsValid() && ComingNPC != NPC;
+}
+
+void ABuildableGenerator::Release(ANPC* NPC)
+{
+	if (ComingNPC == NPC)
+	{
+		ComingNPC = nullptr;
+		
+		bHasNPCComing = false;
+		OnNPCComingToGeneratorChanged.Broadcast(bHasNPCComing);
+	}
+}
+
+void ABuildableGenerator::StartWorking(ANPC* NPC)
+{
+	if (ComingNPC == NPC)
+	{
+		ComingNPC = nullptr;
+		WorkingNPC = NPC;
+		
+		bHasNPCComing = false;
+		OnNPCComingToGeneratorChanged.Broadcast(bHasNPCComing);
+
+		bHasNPCWorking = true;
+		OnNPCWorkingChanged.Broadcast(bHasNPCComing);
+
+		ProductionComponent->ResumeOrStartProduction();
+	}
+}
+
+void ABuildableGenerator::StopWorking(ANPC* NPC)
+{
+	if (WorkingNPC == NPC)
+	{
+		WorkingNPC = nullptr;
+		
+		bHasNPCWorking = false;
+		OnNPCWorkingChanged.Broadcast(bHasNPCComing);
+
+		ProductionComponent->PauseProduction();
+	}
+}
+
 void ABuildableGenerator::BeginPlay()
 {
 	Super::BeginPlay();
@@ -73,29 +132,6 @@ void ABuildableGenerator::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	BRS->UnregisterGenerator(this);
 }
-
-#pragma region Work
-void ABuildableGenerator::SetNPCWorking(bool bWorking)
-{
-	bHasNPCWorking = bWorking;
-
-	if (bHasNPCWorking)
-		ProductionComponent->ResumeOrStartProduction();
-	else
-		ProductionComponent->PauseProduction();
-
-	OnNPCWorkingChanged.Broadcast(bHasNPCWorking);
-
-	if (bHasNPCWorking)
-		SetHasNPCComing(false);
-}
-
-void ABuildableGenerator::SetHasNPCComing(bool NewAvailable)
-{
-	bHasNPCComing = NewAvailable;
-	OnNPCComingToGeneratorChanged.Broadcast(bHasNPCComing);
-}
-#pragma endregion Work
 
 #pragma region Upgrade
 void ABuildableGenerator::OnNextUpgrade()

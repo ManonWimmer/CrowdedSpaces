@@ -37,6 +37,9 @@ EBTNodeResult::Type UBTTask_UseFood::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 
 	if (!TargetFood->IsAvailable())
 		return EBTNodeResult::Failed;
+
+	if (TargetFood->HasNPCComing())
+		return EBTNodeResult::Failed;
 	
 	TargetFood->SetAvailable(false);
 	
@@ -83,7 +86,7 @@ void UBTTask_UseFood::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* N
 	Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);
 	
 	// Set food as available
-	TObjectPtr<UBlackboardComponent> Blackboard = OwnerCompPtr->GetBlackboardComponent();
+	TObjectPtr<UBlackboardComponent> Blackboard = OwnerComp.GetBlackboardComponent();
 	if (!Blackboard)
 		return;
 	

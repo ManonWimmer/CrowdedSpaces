@@ -37,8 +37,11 @@ EBTNodeResult::Type UBTTask_UseGenerator::ExecuteTask(UBehaviorTreeComponent& Ow
 
 	if (TargetGenerator->HasNPCWorking())
 		return EBTNodeResult::Failed;
+
+	if (TargetGenerator->IsReservedByOther(NPC))
+		return EBTNodeResult::Failed;
 	
-	TargetGenerator->SetNPCWorking(true);
+	TargetGenerator->StartWorking(NPC);
 	
 	StartAction();
 	
@@ -63,7 +66,7 @@ void UBTTask_UseGenerator::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uin
 	if (!TargetGenerator)
 		return ;
 	
-	TargetGenerator->SetNPCWorking(false);
+	TargetGenerator->StopWorking(NPC);
 	
 	StopAction();
 }

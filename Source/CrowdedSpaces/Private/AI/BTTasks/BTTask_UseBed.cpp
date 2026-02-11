@@ -37,6 +37,9 @@ EBTNodeResult::Type UBTTask_UseBed::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 
 	if (!TargetBed->IsAvailable())
 		return EBTNodeResult::Failed;
+
+	if (TargetBed->HasNPCComing())
+		return EBTNodeResult::Failed;
 	
 	TargetBed->SetAvailable(false);
 	
@@ -83,7 +86,7 @@ void UBTTask_UseBed::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* No
 	Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);
 	
 	// Set bed as available
-	TObjectPtr<UBlackboardComponent> Blackboard = OwnerCompPtr->GetBlackboardComponent();
+	TObjectPtr<UBlackboardComponent> Blackboard = OwnerComp.GetBlackboardComponent();
 	if (!Blackboard)
 		return;
 	
@@ -94,7 +97,12 @@ void UBTTask_UseBed::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* No
 	TargetBed->SetAvailable(true); 
 
 	// Set NPC not sleeping
-	EnergyComp->SetSleeping(false);
+	if (EnergyComp.IsValid())
+	{
+		EnergyComp->OnEnergyFull.RemoveDynamic(this, &UBTTask_UseBed::OnEnergyFull);
+		EnergyComp->SetSleeping(false);
+	}
+
 	
 	if(GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Use Target Bed stop action");
