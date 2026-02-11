@@ -44,32 +44,32 @@ void ABuildableGenerator::Release(ANPC* NPC)
 
 void ABuildableGenerator::StartWorking(ANPC* NPC)
 {
-	if (ComingNPC == NPC)
-	{
-		ComingNPC = nullptr;
-		WorkingNPC = NPC;
-		
-		bHasNPCComing = false;
-		OnNPCComingToGeneratorChanged.Broadcast(bHasNPCComing);
+	if (ComingNPC != NPC)
+		return;
+	
+	ComingNPC = nullptr;
+	WorkingNPC = NPC;
+	
+	bHasNPCComing = false;
+	OnNPCComingToGeneratorChanged.Broadcast(bHasNPCComing);
 
-		bHasNPCWorking = true;
-		OnNPCWorkingChanged.Broadcast(bHasNPCComing);
+	bHasNPCWorking = true;
+	OnNPCWorkingChanged.Broadcast(bHasNPCComing);
 
-		ProductionComponent->ResumeOrStartProduction();
-	}
+	ProductionComponent->ResumeOrStartProduction();
 }
 
 void ABuildableGenerator::StopWorking(ANPC* NPC)
 {
-	if (WorkingNPC == NPC)
-	{
-		WorkingNPC = nullptr;
-		
-		bHasNPCWorking = false;
-		OnNPCWorkingChanged.Broadcast(bHasNPCComing);
+	if (WorkingNPC != NPC)
+		return;
+	
+	WorkingNPC = nullptr;
+	
+	bHasNPCWorking = false;
+	OnNPCWorkingChanged.Broadcast(bHasNPCComing);
 
-		ProductionComponent->PauseProduction();
-	}
+	ProductionComponent->PauseProduction();
 }
 
 void ABuildableGenerator::BeginPlay()

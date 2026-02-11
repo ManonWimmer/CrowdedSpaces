@@ -42,10 +42,10 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableFood::ExecuteTask(UBehaviorTreeC
 			continue; 
 		
 		// Get nearest food AVAILABLE
-		if (!Food->IsAvailable())
+		if (Food->HasNPCEating())
 			continue;
 
-		if (Food->HasNPCComing())
+		if (Food->IsReservedByOther(NPC))
 			continue;
 		
 		float Distance = FVector::Distance(Origin, Food->GetActorLocation());
@@ -73,14 +73,15 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableFood::ExecuteTask(UBehaviorTreeC
 		TObjectPtr<UBlackboardComponent> Blackboard = OwnerComp.GetBlackboardComponent();
 		if (!Blackboard)
 			return EBTNodeResult::Failed;
+
+		if (!NearestAvailableFood->TryReserve(NPC))
+			return EBTNodeResult::Failed;
 		
 		// Target location key
 		Blackboard->SetValueAsVector(TargetLocationKey.SelectedKeyName, NearestAvailableFood->GetActorLocation());
 
 		// Target food key
 		Blackboard->SetValueAsObject(TargetFoodKey.SelectedKeyName, NearestAvailableFood);
-
-		NearestAvailableFood->SetHasNPCComing(true);
 		
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		return EBTNodeResult::Succeeded;
