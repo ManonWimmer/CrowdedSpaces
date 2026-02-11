@@ -9,23 +9,6 @@ UProductionComponent::UProductionComponent(): PlayerMoneyComponent(nullptr), Pla
 {
 }
 
-#pragma region Selectable
-TArray<TPair<FString, FString>> UProductionComponent::GetCurrentValues() const
-{
-	TArray<TPair<FString, FString>> Values;
-	FString ProductionTypeName = UEnum::GetValueAsString(ProductionType);
-	ProductionTypeName.RemoveFromStart(TEXT("EProductionType::"));
-	Values.Emplace(FString("Production Type"), ProductionTypeName);
-
-	FString Active = GetOwner()->GetWorldTimerManager().IsTimerActive(ProductionTimerHandle) ? TEXT("True") : TEXT("False");
-	Values.Emplace(FString("Is Active"), Active);
-	
-	Values.Emplace(FString("Production Interval"), FString::SanitizeFloat(ProductionInterval));
-	Values.Emplace(FString("Resource Per Interval"), FString::SanitizeFloat(ResourcePerInterval));
-	return Values;
-}
-#pragma endregion Selectables
-
 void UProductionComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -106,7 +89,7 @@ void UProductionComponent::StartProduction()
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Yellow, "Production Started");
 
-	OnStatChanged.Broadcast("Is Active", "True");
+	OnIsActiveChanged.Broadcast(true);
 }
 
 void UProductionComponent::PauseProduction()
@@ -122,7 +105,7 @@ void UProductionComponent::PauseProduction()
 		GetOwner()->GetWorldTimerManager().PauseTimer(ProductionTimerHandle);
 	}
 
-	OnStatChanged.Broadcast("Is Active", "False");
+	OnIsActiveChanged.Broadcast(false);
 }
 
 void UProductionComponent::ResumeOrStartProduction()
@@ -141,7 +124,7 @@ void UProductionComponent::ResumeOrStartProduction()
 		GetOwner()->GetWorldTimerManager().UnPauseTimer(ProductionTimerHandle);
 	}
 
-	OnStatChanged.Broadcast("Is Active", "False");
+	OnIsActiveChanged.Broadcast(false);
 }
 
 void UProductionComponent::RestartProduction()

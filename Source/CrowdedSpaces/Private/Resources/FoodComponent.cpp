@@ -23,7 +23,6 @@ void UFoodComponent::AddFood(int Amount)
 		
 		if (Food != OldFood)
 		{
-			OnStatChanged.Broadcast("Food", FString::SanitizeFloat(Food));
 			OnFoodChanged.Broadcast(Food);
 		}
 
@@ -35,7 +34,6 @@ void UFoodComponent::AddFood(int Amount)
 	else // Player controller
 	{
 		Food += Amount;
-		OnStatChanged.Broadcast("Food", FString::SanitizeFloat(Food));
 		OnFoodChanged.Broadcast(Food);
 	}
 }
@@ -45,7 +43,6 @@ void UFoodComponent::RemoveFood(int Amount)
 	if (!HasEnoughFood(Amount)) return; // todo: plus tard event on no more food et mettre à 0 ? 
 	
 	Food -= Amount;
-	OnStatChanged.Broadcast("Food", FString::SanitizeFloat(Food));
 	OnFoodChanged.Broadcast(Food);
 }
 
@@ -76,8 +73,6 @@ void UFoodComponent::StopFoodTimer()
 void UFoodComponent::SetEating(bool bEating)
 {
 	bIsEating = bEating;
-	FString Result = bIsEating ? TEXT("True") : TEXT("False");
-	OnStatChanged.Broadcast("Is Eating", Result);
 	OnIsEatingChanged.Broadcast(bIsEating);
 }
 
@@ -92,14 +87,3 @@ void UFoodComponent::FoodTick()
 		RemoveFood(FoodLossPerTick);
 	}
 }
-
-#pragma region Selectable
-TArray<TPair<FString, FString>> UFoodComponent::GetCurrentValues() const
-{
-	TArray<TPair<FString, FString>> Values;
-	Values.Emplace(FString("Food"), FString::SanitizeFloat(Food));
-	FString Result = bIsEating ? TEXT("True") : TEXT("False");
-	Values.Emplace(FString("Is Eating"), Result);
-	return Values;
-}
-#pragma endregion Selectable

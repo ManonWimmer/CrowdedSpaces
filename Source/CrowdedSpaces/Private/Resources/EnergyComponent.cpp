@@ -19,7 +19,6 @@ void UEnergyComponent::AddEnergy(int Amount)
 
 	if (Energy != OldEnergy)
 	{
-		OnStatChanged.Broadcast("Energy", FString::SanitizeFloat(Energy));
 		OnEnergyChanged.Broadcast(Energy);
 	}
 
@@ -32,7 +31,6 @@ void UEnergyComponent::AddEnergy(int Amount)
 void UEnergyComponent::RemoveEnergy(int Amount)
 {
 	Energy = FMath::Clamp(Energy - Amount, 0, MaxEnergy);
-	OnStatChanged.Broadcast("Energy", FString::SanitizeFloat(Energy));
 	OnEnergyChanged.Broadcast(Energy);
 }
 
@@ -68,8 +66,6 @@ void UEnergyComponent::StopEnergyTimer()
 void UEnergyComponent::SetSleeping(bool bSleeping)
 {
 	bIsSleeping = bSleeping;
-	FString Result = bIsSleeping ? TEXT("True") : TEXT("False");
-	OnStatChanged.Broadcast("Is Sleeping", Result);
 	OnIsSleepingChanged.Broadcast(bIsSleeping);
 }
 
@@ -84,14 +80,3 @@ void UEnergyComponent::EnergyTick()
 		RemoveEnergy(EnergyLossPerTick);
 	}
 }
-
-#pragma region Selectable
-TArray<TPair<FString, FString>> UEnergyComponent::GetCurrentValues() const
-{
-	TArray<TPair<FString, FString>> Values;
-	Values.Emplace(FString("Energy"), FString::SanitizeFloat(Energy));
-	FString Result = bIsSleeping ? TEXT("True") : TEXT("False");
-	Values.Emplace(FString("Is Sleeping"), Result);
-	return Values;
-}
-#pragma endregion Selectable

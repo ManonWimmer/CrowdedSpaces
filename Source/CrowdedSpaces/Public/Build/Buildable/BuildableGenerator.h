@@ -28,9 +28,6 @@ public:
 	// Selectable
 	virtual void OnSelected() override;
 	virtual void OnDeselected() override;
-	
-	virtual FString GetDisplayName() const override;
-	virtual TObjectPtr<AActor> GetSelectableActor() override;
 
 	UFUNCTION(BlueprintCallable, Category = "Upgrade")
 	UProductionComponent* GetProductionComponent() const { return ProductionComponent; }
@@ -49,8 +46,6 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Upgrade")
 	bool HasNPCWorking() const { return bHasNPCWorking; }
-
-	
 
 	UPROPERTY(BlueprintAssignable)
 	FOnNPCWorkingChanged OnNPCWorkingChanged;

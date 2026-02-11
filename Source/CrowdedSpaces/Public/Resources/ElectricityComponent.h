@@ -2,12 +2,12 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Selection/SelectableStatProvider.h"
 #include "ElectricityComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnElectricityChanged, int32, NewValue);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class CROWDEDSPACES_API UElectricityComponent : public UActorComponent, public ISelectableStatProvider
+class CROWDEDSPACES_API UElectricityComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -26,12 +26,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	int GetElectricity() const { return Electricity; }
 
-	// Selectable
-	UPROPERTY(BlueprintAssignable)
-	FOnStatChanged OnStatChanged;
-	
-	virtual TArray<FStat> GetCurrentValues() const override;
-	virtual FOnStatChanged& GetOnStatChanged() override { return OnStatChanged; }
+	UPROPERTY(BlueprintAssignable, Category = "Money")
+	FOnElectricityChanged OnElectricityChanged;
 	
 private:
 	UPROPERTY(EditAnywhere)

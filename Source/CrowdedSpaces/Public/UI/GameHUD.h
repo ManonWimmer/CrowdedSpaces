@@ -73,9 +73,6 @@ private:
 
 	// Selection
 	UPROPERTY(EditAnywhere, Category="Widgets")
-	TSubclassOf<UCustomWidget> SelectionWidgetBP;
-
-	UPROPERTY(EditAnywhere, Category="Widgets")
 	TSubclassOf<UCustomWidget> RoomSelectionWidgetBP;
 
 	UPROPERTY(EditAnywhere, Category="Widgets")

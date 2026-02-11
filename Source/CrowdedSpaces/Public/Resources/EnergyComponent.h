@@ -2,7 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Selection/SelectableStatProvider.h"
 #include "EnergyComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEnergyFull); // To know when to get out of bed ;)
@@ -10,7 +9,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnergyChanged, int32, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIsSleepingChanged, bool, Value); 
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class CROWDEDSPACES_API UEnergyComponent : public UActorComponent, public ISelectableStatProvider
+class CROWDEDSPACES_API UEnergyComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -58,13 +57,6 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnIsSleepingChanged OnIsSleepingChanged;
-	
-	// Selectable
-	UPROPERTY(BlueprintAssignable)
-	FOnStatChanged OnStatChanged;
-	
-	virtual TArray<FStat> GetCurrentValues() const override;
-	virtual FOnStatChanged& GetOnStatChanged() override { return OnStatChanged; }
 	
 private:
 	UPROPERTY(EditAnywhere, Category="Energy")

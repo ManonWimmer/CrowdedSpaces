@@ -4,14 +4,13 @@
 #include "AI/NPC.h"
 #include "Build/BuildableObject.h"
 #include "Selection/Selectable.h"
-#include "Selection/SelectableStatProvider.h"
 #include "BuildableBed.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNPCSleepingChanged, bool, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNPCComingToBedChanged, bool, Value);
 
 UCLASS()
-class CROWDEDSPACES_API ABuildableBed : public ABuildableObject, public ISelectable, public ISelectableStatProvider
+class CROWDEDSPACES_API ABuildableBed : public ABuildableObject, public ISelectable
 {
 	GENERATED_BODY()
 
@@ -28,21 +27,12 @@ public:
 	virtual void OnSelected() override;
 	virtual void OnDeselected() override;
 	
-	virtual FString GetDisplayName() const override;
-	virtual TObjectPtr<AActor> GetSelectableActor() override;
-
-	UPROPERTY(BlueprintAssignable)
-	FOnStatChanged OnStatChanged;
-
 	UPROPERTY(BlueprintAssignable)
 	FOnNPCComingToBedChanged OnNPCComingToBedChanged;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnNPCSleepingChanged OnNPCSleepingChanged;
 	
-	virtual TArray<FStat> GetCurrentValues() const override;
-	virtual FOnStatChanged& GetOnStatChanged() override { return OnStatChanged; }
-
 	bool TryReserve(ANPC* NPC);
 	bool IsReservedByOther(TObjectPtr<ANPC> NPC);
 	void Release(ANPC* NPC);

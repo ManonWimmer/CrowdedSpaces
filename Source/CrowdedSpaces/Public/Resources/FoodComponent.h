@@ -2,7 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Selection/SelectableStatProvider.h"
 #include "FoodComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFoodFull); // To know when to stop eating
@@ -10,7 +9,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFoodChanged, int32, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIsEatingChanged, bool, Value); 
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class CROWDEDSPACES_API UFoodComponent : public UActorComponent, public ISelectableStatProvider
+class CROWDEDSPACES_API UFoodComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -58,13 +57,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetSufferHunger(bool bHunger) { bSufferHunger = bHunger; }
-	
-	// Selectable
-	UPROPERTY(BlueprintAssignable)
-	FOnStatChanged OnStatChanged;
-	
-	virtual TArray<FStat> GetCurrentValues() const override;
-	virtual FOnStatChanged& GetOnStatChanged() override { return OnStatChanged; }
 	
 private:
 	UPROPERTY(EditAnywhere)

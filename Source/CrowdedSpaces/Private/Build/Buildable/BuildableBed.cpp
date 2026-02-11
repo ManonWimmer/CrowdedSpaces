@@ -8,6 +8,7 @@ ABuildableBed::ABuildableBed()
 	SelectionType = ESelectionType::Bed;
 }
 
+
 void ABuildableBed::BeginPlay()
 {
 	Super::BeginPlay();
@@ -32,34 +33,6 @@ void ABuildableBed::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	BRS->UnregisterBed(this);
 }
-
-#pragma region Selectable
-void ABuildableBed::OnSelected()
-{
-}
-
-void ABuildableBed::OnDeselected()
-{
-}
-
-FString ABuildableBed::GetDisplayName() const
-{
-	return "Bed";
-}
-
-TObjectPtr<AActor> ABuildableBed::GetSelectableActor()
-{
-	return this;
-}
-
-TArray<FStat> ABuildableBed::GetCurrentValues() const
-{
-	TArray<TPair<FString, FString>> Values;
-	FString Result = bIsAvailable ? TEXT("True") : TEXT("False");
-	Values.Emplace(FString("Is Available"), Result);
-	return Values;
-}
-#pragma endregion Selectable
 
 bool ABuildableBed::TryReserve(ANPC* NPC)
 {
@@ -116,4 +89,13 @@ void ABuildableBed::StopSleeping(ANPC* NPC)
 	OnNPCSleepingChanged.Broadcast(bHasNPCComing);
 }
 
+#pragma region Selectable
+void ABuildableBed::OnSelected()
+{
+}
+
+void ABuildableBed::OnDeselected()
+{
+}
+#pragma endregion
 

@@ -8,7 +8,7 @@ UElectricityComponent::UElectricityComponent()
 void UElectricityComponent::AddElectricity(int Amount)
 {
 	Electricity += Amount;
-	OnStatChanged.Broadcast("Electricity", FString::SanitizeFloat(Electricity));
+	OnElectricityChanged.Broadcast(Electricity);
 }
 
 void UElectricityComponent::RemoveElectricity(int Amount)
@@ -16,20 +16,11 @@ void UElectricityComponent::RemoveElectricity(int Amount)
 	if (!HasEnoughElectricity(Amount)) return;
 	
 	Electricity -= Amount;
-	OnStatChanged.Broadcast("Electricity", FString::SanitizeFloat(Electricity));
+	OnElectricityChanged.Broadcast(Electricity);
 }
 
 bool UElectricityComponent::HasEnoughElectricity(int Amount)
 {
 	return Electricity >= Amount;
 }
-
-#pragma region Selectable
-TArray<TPair<FString, FString>> UElectricityComponent::GetCurrentValues() const
-{
-	TArray<TPair<FString, FString>> Values;
-	Values.Emplace(FString("Electricity"), FString::SanitizeFloat(Electricity));
-	return Values;
-}
-#pragma endregion Selectable
 

@@ -143,8 +143,8 @@ void ABuildableGenerator::OnNextUpgrade()
 	ProductionComponent->ProductionInterval = ProductionUpgradeData->UpgradesInOrder[CurrentUpgrade].UpgradeProductionInterval;
 	ProductionComponent->ResourcePerInterval = ProductionUpgradeData->UpgradesInOrder[CurrentUpgrade].UpgradeResourcePerInterval;
 	
-	ProductionComponent->OnStatChanged.Broadcast("Production Interval", FString::SanitizeFloat(ProductionComponent->ProductionInterval));
-	ProductionComponent->OnStatChanged.Broadcast("Resource Per Interval", FString::SanitizeFloat(ProductionComponent->ResourcePerInterval));
+	ProductionComponent->OnProductionIntervalChanged.Broadcast(ProductionComponent->ProductionInterval);
+	ProductionComponent->OnResourcePerIntervalChanged.Broadcast(ProductionComponent->ResourcePerInterval);
 	
 	// Cost
 	PlayerMoneyComponent->RemoveMoney(ProductionUpgradeData->UpgradesInOrder[CurrentUpgrade].UpgradeCost);
@@ -181,16 +181,6 @@ void ABuildableGenerator::OnSelected()
 
 void ABuildableGenerator::OnDeselected()
 {
-}
-
-FString ABuildableGenerator::GetDisplayName() const
-{
-	return "Generator";
-}
-
-TObjectPtr<AActor> ABuildableGenerator::GetSelectableActor()
-{
-	return this;
 }
 #pragma endregion Selectable
 

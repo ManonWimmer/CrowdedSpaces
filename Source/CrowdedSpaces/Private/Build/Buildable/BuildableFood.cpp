@@ -33,34 +33,6 @@ void ABuildableFood::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	BRS->UnregisterFood(this);
 }
 
-#pragma region Selectable
-void ABuildableFood::OnSelected()
-{
-}
-
-void ABuildableFood::OnDeselected()
-{
-}
-
-FString ABuildableFood::GetDisplayName() const
-{
-	return "Food";
-}
-
-TObjectPtr<AActor> ABuildableFood::GetSelectableActor()
-{
-	return this;
-}
-
-TArray<FStat> ABuildableFood::GetCurrentValues() const
-{
-	TArray<TPair<FString, FString>> Values;
-	//FString Result = bIsAvailable ? TEXT("True") : TEXT("False");
-	//Values.Emplace(FString("Is Available"), Result);
-	return Values;
-}
-#pragma endregion Selectable
-
 bool ABuildableFood::TryReserve(ANPC* NPC)
 {
 	if (ComingNPC.IsValid())
@@ -115,5 +87,15 @@ void ABuildableFood::StopEating(ANPC* NPC)
 	bHasNPCEating = false;
 	OnNPCEatingChanged.Broadcast(bHasNPCComing);
 }
+
+#pragma region Selectable
+void ABuildableFood::OnSelected()
+{
+}
+
+void ABuildableFood::OnDeselected()
+{
+}
+#pragma endregion
 
 

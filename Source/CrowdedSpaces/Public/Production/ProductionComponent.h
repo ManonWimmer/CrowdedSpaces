@@ -9,8 +9,12 @@
 #include "Resources/FoodComponent.h"
 #include "ProductionComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIsActiveChanged, bool, Value);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnProductionIntervalChanged, float, Value);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnResourcePerIntervalChanged, float, Value);
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class CROWDEDSPACES_API UProductionComponent : public UActorComponent, public ISelectableStatProvider
+class CROWDEDSPACES_API UProductionComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -19,13 +23,6 @@ public:
 
 public:
 	virtual void BeginPlay() override;
-	
-	// Selectable
-	UPROPERTY(BlueprintAssignable)
-	FOnStatChanged OnStatChanged;
-	
-	virtual TArray<TPair<FString, FString>> GetCurrentValues() const override;
-	virtual FOnStatChanged& GetOnStatChanged() override { return OnStatChanged; }
 
 	// Production
 	UPROPERTY(EditAnywhere, Category="Production")
@@ -60,6 +57,15 @@ public:
 
 	UFUNCTION()
 	void RestartProduction();
+
+	UPROPERTY(BlueprintAssignable)
+	FOnIsActiveChanged OnIsActiveChanged;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnProductionIntervalChanged OnProductionIntervalChanged;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnResourcePerIntervalChanged OnResourcePerIntervalChanged;
 
 private:
 	UPROPERTY()

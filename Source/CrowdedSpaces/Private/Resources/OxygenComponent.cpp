@@ -8,7 +8,7 @@ UOxygenComponent::UOxygenComponent()
 void UOxygenComponent::AddOxygen(int Amount)
 {
 	Oxygen += Amount;
-	OnStatChanged.Broadcast("Oxygen", FString::SanitizeFloat(Oxygen));
+	OnOxygenChanged.Broadcast(Oxygen);
 }
 
 void UOxygenComponent::RemoveOxygen(int Amount)
@@ -16,21 +16,12 @@ void UOxygenComponent::RemoveOxygen(int Amount)
 	if (!HasEnoughOxygen(Amount)) return;
 	
 	Oxygen -= Amount;
-	OnStatChanged.Broadcast("Oxygen", FString::SanitizeFloat(Oxygen));
+	OnOxygenChanged.Broadcast(Oxygen);
 }
 
 bool UOxygenComponent::HasEnoughOxygen(int Amount)
 {
 	return Oxygen >= Amount;
 }
-
-#pragma region Selectable
-TArray<TPair<FString, FString>> UOxygenComponent::GetCurrentValues() const
-{
-	TArray<TPair<FString, FString>> Values;
-	Values.Emplace(FString("Oxygen"), FString::SanitizeFloat(Oxygen));
-	return Values;
-}
-#pragma endregion Selectable
 
 

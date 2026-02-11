@@ -24,7 +24,6 @@ void ANPC::SetCurrentAction(ENPCAction NewAction)
 {
 	CurrentAction = NewAction;
 	FString ActionString = StaticEnum<ENPCAction>()->GetDisplayNameTextByValue(static_cast<int64>(CurrentAction)).ToString();
-	OnStatChanged.Broadcast("Current Action", ActionString);
 	OnCurrentActionChanged.Broadcast(CurrentAction);
 }
 
@@ -56,32 +55,10 @@ void ANPC::RemoveFood() const
 #pragma region Selectable
 void ANPC::OnSelected()
 {
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "on selected ");
 }
 
 void ANPC::OnDeselected()
 {
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "on deselected ");
 }
-
-FString ANPC::GetDisplayName() const
-{
-	return "NPC";
-}
-
-TObjectPtr<AActor> ANPC::GetSelectableActor()
-{
-	return this;
-}
-
-TArray<FStat> ANPC::GetCurrentValues() const
-{
-	TArray<TPair<FString, FString>> Values;
-	FString ActionString = StaticEnum<ENPCAction>()->GetDisplayNameTextByValue(static_cast<int64>(CurrentAction)).ToString();
-	Values.Emplace(FString("Current Action"), ActionString);
-	return Values;
-}
-#pragma endregion Selectable
+#pragma endregion
 

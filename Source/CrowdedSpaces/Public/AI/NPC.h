@@ -14,7 +14,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentActionChanged, ENPCAction, Value); 
 
 UCLASS()
-class CROWDEDSPACES_API ANPC : public ACharacter, public ISelectable, public ISelectableStatProvider
+class CROWDEDSPACES_API ANPC : public ACharacter, public ISelectable
 {
 	GENERATED_BODY()
 
@@ -80,13 +80,4 @@ private:
 public:
 	virtual void OnSelected() override;
 	virtual void OnDeselected() override;
-
-	virtual FString GetDisplayName() const override;
-	virtual TObjectPtr<AActor> GetSelectableActor() override;
-
-	UPROPERTY(BlueprintAssignable)
-	FOnStatChanged OnStatChanged; // Current action changed
-	
-	virtual TArray<FStat> GetCurrentValues() const override;
-	virtual FOnStatChanged& GetOnStatChanged() override { return OnStatChanged; }
 };
