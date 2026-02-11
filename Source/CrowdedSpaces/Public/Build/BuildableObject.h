@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Build/ObjectType.h"
 #include "AI/NPC.h"
+#include "AI/BTTasks/BTTask_UseBuildableObject.h"
 #include "GameFramework/Actor.h"
 #include "BuildableObject.generated.h"
 
@@ -47,11 +48,14 @@ public:
 	void StartUsing(ANPC* NPC);
 	void StopUsing(ANPC* NPC);
 	
-	virtual void StartUsingImplementation();
-	virtual void StopUsingImplementation();
+	virtual bool StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask);
+	virtual bool StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask);
 
 	UFUNCTION(BlueprintCallable, Category = "Object")
 	EObjectType GetObjectType() const { return ObjectType; }
+
+	UFUNCTION(BlueprintCallable, Category = "Object")
+	ENPCAction GetNPCAction() const { return NPCAction;}
 	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -74,4 +78,7 @@ protected:
 
 	UPROPERTY()
 	EObjectType ObjectType = EObjectType::Default;
+
+	UPROPERTY()
+	ENPCAction NPCAction = ENPCAction::Idle;
 };

@@ -17,8 +17,8 @@ class CROWDEDSPACES_API ABuildableGenerator : public ABuildableObject, public IS
 public:
 	ABuildableGenerator();
 
-	virtual void StartUsingImplementation() override;
-	virtual void StopUsingImplementation() override;
+	virtual bool StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask) override;
+	virtual bool StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask) override;
 	
 	// Selectable
 	virtual void OnSelected() override;

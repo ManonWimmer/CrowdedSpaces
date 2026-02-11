@@ -11,6 +11,7 @@ ABuildableGenerator::ABuildableGenerator()
 	
 	SelectionType = ESelectionType::Generator;
 	ObjectType = EObjectType::Generator;
+	NPCAction = ENPCAction::Work;
 }
 
 void ABuildableGenerator::BeginPlay()
@@ -74,18 +75,16 @@ void ABuildableGenerator::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	BRS->UnregisterGenerator(this);
 }
 
-void ABuildableGenerator::StartUsingImplementation()
+bool ABuildableGenerator::StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
-	Super::StartUsingImplementation();
-	
-	ProductionComponent->ResumeOrStartProduction();
+	ProductionComponent->StartProduction();
+	return true; 
 }
 
-void ABuildableGenerator::StopUsingImplementation()
+bool ABuildableGenerator::StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
-	Super::StopUsingImplementation();
-
 	ProductionComponent->PauseProduction();
+	return true; 
 }
 
 #pragma region Upgrade

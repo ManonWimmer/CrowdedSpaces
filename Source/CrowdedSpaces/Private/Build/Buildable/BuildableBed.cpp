@@ -6,6 +6,7 @@ ABuildableBed::ABuildableBed()
 {
 	SelectionType = ESelectionType::Bed;
 	ObjectType = EObjectType::Bed;
+	NPCAction = ENPCAction::Sleep;
 }
 
 void ABuildableBed::BeginPlay()
@@ -33,14 +34,30 @@ void ABuildableBed::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	BRS->UnregisterBed(this);
 }
 
-void ABuildableBed::StartUsingImplementation()
+bool ABuildableBed::StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
-	Super::StartUsingImplementation();
+	UEnergyComponent* EnergyComp = UsingNPC->FindComponentByClass<UEnergyComponent>();
+	if (!EnergyComp)
+		return false;
+	
+	EnergyComp->SetSleeping(true);
+	
+	EnergyComp->OnEnergyFull.AddDynamic(UseObjectTask, &UBTTask_UseBuildableObject::OnStopAction);
+
+	return true;
 }
 
-void ABuildableBed::StopUsingImplementation()
+bool ABuildableBed::StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
-	Super::StopUsingImplementation();
+	UEnergyComponent* EnergyComp = UsingNPC->FindComponentByClass<UEnergyComponent>();
+	if (!EnergyComp)
+		return false;
+
+	EnergyComp->SetSleeping(false);
+
+	EnergyComp->OnEnergyFull.RemoveDynamic(UseObjectTask, &UBTTask_UseBuildableObject::OnStopAction);
+	
+	return true;
 }
 
 #pragma region Selectable

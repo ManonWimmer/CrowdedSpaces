@@ -26,7 +26,7 @@ FVector ABuildableObject::GetExtent() const
 
 bool ABuildableObject::TryReserve(ANPC* NPC)
 {
-	if (ComingNPC.IsValid())
+	if (ComingNPC.IsValid() && ComingNPC != NPC)
 		return false;
 
 	ComingNPC = NPC;
@@ -65,7 +65,7 @@ void ABuildableObject::StartUsing(ANPC* NPC)
 	OnNPCComingChanged.Broadcast(bHasNPCComing);
 
 	bHasNPCUsing = true;
-	OnNPCUsingChanged.Broadcast(bHasNPCComing);
+	OnNPCUsingChanged.Broadcast(bHasNPCUsing);
 }
 
 void ABuildableObject::StopUsing(ANPC* NPC)
@@ -76,17 +76,17 @@ void ABuildableObject::StopUsing(ANPC* NPC)
 	UsingNPC = nullptr;
 	
 	bHasNPCUsing = false;
-	OnNPCUsingChanged.Broadcast(bHasNPCComing);
-
-	StopUsingImplementation();
+	OnNPCUsingChanged.Broadcast(bHasNPCUsing);
 }
 
-void ABuildableObject::StartUsingImplementation()
+bool ABuildableObject::StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
+	return true; 
 }
 
-void ABuildableObject::StopUsingImplementation()
+bool ABuildableObject::StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
+	return true;
 }
 
 

@@ -6,6 +6,7 @@ ABuildableFood::ABuildableFood()
 {
 	SelectionType = ESelectionType::Food;
 	ObjectType = EObjectType::Food;
+	NPCAction = ENPCAction::Eat;
 }
 
 void ABuildableFood::BeginPlay()
@@ -33,14 +34,30 @@ void ABuildableFood::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	BRS->UnregisterFood(this);
 }
 
-void ABuildableFood::StartUsingImplementation()
+bool ABuildableFood::StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
-	Super::StartUsingImplementation();
+	UFoodComponent* FoodComp = UsingNPC->FindComponentByClass<UFoodComponent>();
+	if (!FoodComp)
+		return false;
+	
+	FoodComp->SetEating(true);
+	
+	FoodComp->OnFoodFull.AddDynamic(UseObjectTask, &UBTTask_UseBuildableObject::OnStopAction);
+
+	return true;
 }
 
-void ABuildableFood::StopUsingImplementation()
+bool ABuildableFood::StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
-	Super::StopUsingImplementation();
+	UFoodComponent* FoodComp = UsingNPC->FindComponentByClass<UFoodComponent>();
+	if (!FoodComp)
+		return false;
+
+	FoodComp->SetEating(false);
+
+	FoodComp->OnFoodFull.RemoveDynamic(UseObjectTask, &UBTTask_UseBuildableObject::OnStopAction);
+	
+	return true;
 }
 
 #pragma region Selectable
