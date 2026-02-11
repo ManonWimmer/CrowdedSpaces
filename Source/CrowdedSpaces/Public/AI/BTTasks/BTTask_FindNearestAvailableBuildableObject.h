@@ -2,17 +2,17 @@
 
 #include "CoreMinimal.h"
 #include "AI/CustomBTTask.h"
-#include "Production/ProductionType.h"
 #include "BehaviorTree/Tasks/BTTask_BlackboardBase.h"
-#include "BTTask_FindNearestAvailableGenerator.generated.h"
+#include "Build/ObjectType.h"
+#include "BTTask_FindNearestAvailableBuildableObject.generated.h"
 
 UCLASS()
-class CROWDEDSPACES_API UBTTask_FindNearestAvailableGenerator : public UCustomBTTask
+class CROWDEDSPACES_API UBTTask_FindNearestAvailableBuildableObject : public UCustomBTTask
 {
 	GENERATED_BODY()
-
+	
 public:
-	explicit UBTTask_FindNearestAvailableGenerator(FObjectInitializer const& ObjectInitializer);
+	explicit UBTTask_FindNearestAvailableBuildableObject(FObjectInitializer const& ObjectInitializer);
 	
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 	virtual void OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult) override;
@@ -25,8 +25,8 @@ private:
 	FBlackboardKeySelector TargetLocationKey;
 	
 	UPROPERTY(EditAnywhere, Category="Blackboard")
-	FBlackboardKeySelector TargetGeneratorKey;
+	FBlackboardKeySelector TargetObjectKey;
 
-	UPROPERTY(EditAnywhere, Category = "AI")
-	EProductionType ProductionType = EProductionType::Money;
+	UPROPERTY(EditAnywhere, Category="Blackboard")
+	EObjectType BuildableObjectType = EObjectType::Default;
 };

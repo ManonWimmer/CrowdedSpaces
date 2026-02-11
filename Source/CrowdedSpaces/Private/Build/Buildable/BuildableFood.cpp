@@ -4,8 +4,8 @@
 
 ABuildableFood::ABuildableFood()
 {
-	// Selectable
 	SelectionType = ESelectionType::Food;
+	ObjectType = EObjectType::Food;
 }
 
 void ABuildableFood::BeginPlay()
@@ -33,59 +33,14 @@ void ABuildableFood::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	BRS->UnregisterFood(this);
 }
 
-bool ABuildableFood::TryReserve(ANPC* NPC)
+void ABuildableFood::StartUsingImplementation()
 {
-	if (ComingNPC.IsValid())
-		return false;
-
-	ComingNPC = NPC;
-	
-	bHasNPCComing = true;
-	OnNPCComingToFoodChanged.Broadcast(bHasNPCComing);
-	
-	return true;
+	Super::StartUsingImplementation();
 }
 
-bool ABuildableFood::IsReservedByOther(TObjectPtr<ANPC> NPC)
+void ABuildableFood::StopUsingImplementation()
 {
-	return ComingNPC.IsValid() && ComingNPC != NPC;
-}
-
-void ABuildableFood::Release(ANPC* NPC)
-{
-	if (ComingNPC != NPC)
-		return;
-	
-	ComingNPC = nullptr;
-	
-	bHasNPCComing = false;
-	OnNPCComingToFoodChanged.Broadcast(bHasNPCComing);
-}
-
-void ABuildableFood::StartEating(ANPC* NPC)
-{
-	if (ComingNPC != NPC)
-		return;
-	
-	ComingNPC = nullptr;
-	EatingNPC = NPC;
-	
-	bHasNPCComing = false;
-	OnNPCComingToFoodChanged.Broadcast(bHasNPCComing);
-
-	bHasNPCEating = true;
-	OnNPCEatingChanged.Broadcast(bHasNPCComing);
-}
-
-void ABuildableFood::StopEating(ANPC* NPC)
-{
-	if (EatingNPC != NPC)
-		return;
-	
-	EatingNPC = nullptr;
-	
-	bHasNPCEating = false;
-	OnNPCEatingChanged.Broadcast(bHasNPCComing);
+	Super::StopUsingImplementation();
 }
 
 #pragma region Selectable

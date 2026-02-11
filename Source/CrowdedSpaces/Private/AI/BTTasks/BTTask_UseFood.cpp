@@ -35,6 +35,8 @@ EBTNodeResult::Type UBTTask_UseFood::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 	if (!TargetFood)
 		return EBTNodeResult::Failed;
 
+
+	/*
 	if (TargetFood->HasNPCEating())
 		return EBTNodeResult::Failed;
 
@@ -42,6 +44,7 @@ EBTNodeResult::Type UBTTask_UseFood::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 		return EBTNodeResult::Failed;
 	
 	TargetFood->StartEating(NPC);
+	*/
 	
 	StartAction();
 	
@@ -92,7 +95,7 @@ void UBTTask_UseFood::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* N
 	if (!TargetFood)
 		return;
 	
-	TargetFood->StopEating(NPC);
+	//TargetFood->StopEating(NPC);
 	
 	if (FoodComp.IsValid())
 		FoodComp->SetEating(false);

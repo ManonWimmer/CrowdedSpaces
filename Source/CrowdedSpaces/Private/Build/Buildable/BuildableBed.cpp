@@ -4,10 +4,9 @@
 
 ABuildableBed::ABuildableBed()
 {
-	// Selectable
 	SelectionType = ESelectionType::Bed;
+	ObjectType = EObjectType::Bed;
 }
-
 
 void ABuildableBed::BeginPlay()
 {
@@ -34,59 +33,14 @@ void ABuildableBed::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	BRS->UnregisterBed(this);
 }
 
-bool ABuildableBed::TryReserve(ANPC* NPC)
+void ABuildableBed::StartUsingImplementation()
 {
-	if (ComingNPC.IsValid())
-		return false;
-
-	ComingNPC = NPC;
-	
-	bHasNPCComing = true;
-	OnNPCComingToBedChanged.Broadcast(bHasNPCComing);
-	
-	return true;
+	Super::StartUsingImplementation();
 }
 
-bool ABuildableBed::IsReservedByOther(TObjectPtr<ANPC> NPC)
+void ABuildableBed::StopUsingImplementation()
 {
-	return ComingNPC.IsValid() && ComingNPC != NPC;
-}
-
-void ABuildableBed::Release(ANPC* NPC)
-{
-	if (ComingNPC != NPC)
-		return;
-	
-	ComingNPC = nullptr;
-	
-	bHasNPCComing = false;
-	OnNPCComingToBedChanged.Broadcast(bHasNPCComing);
-}
-
-void ABuildableBed::StartSleeping(ANPC* NPC)
-{
-	if (ComingNPC != NPC)
-		return;
-	
-	ComingNPC = nullptr;
-	EatingNPC = NPC;
-	
-	bHasNPCComing = false;
-	OnNPCComingToBedChanged.Broadcast(bHasNPCComing);
-
-	bHasNPCSleeping = true;
-	OnNPCSleepingChanged.Broadcast(bHasNPCComing);
-}
-
-void ABuildableBed::StopSleeping(ANPC* NPC)
-{
-	if (EatingNPC != NPC)
-		return;
-	
-	EatingNPC = nullptr;
-	
-	bHasNPCSleeping = false;
-	OnNPCSleepingChanged.Broadcast(bHasNPCComing);
+	Super::StopUsingImplementation();
 }
 
 #pragma region Selectable

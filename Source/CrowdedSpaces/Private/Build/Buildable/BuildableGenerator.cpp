@@ -9,67 +9,8 @@ ABuildableGenerator::ABuildableGenerator()
 {
 	ProductionComponent = CreateDefaultSubobject<UProductionComponent>("ProductionComponent");
 	
-	// Selectable
 	SelectionType = ESelectionType::Generator;
-}
-
-bool ABuildableGenerator::TryReserve(ANPC* NPC)
-{
-	if (ComingNPC.IsValid())
-		return false;
-
-	ComingNPC = NPC;
-	
-	bHasNPCComing = true;
-	OnNPCComingToGeneratorChanged.Broadcast(bHasNPCComing);
-	
-	return true;
-}
-
-bool ABuildableGenerator::IsReservedByOther(TObjectPtr<ANPC> NPC)
-{
-	return ComingNPC.IsValid() && ComingNPC != NPC;
-}
-
-void ABuildableGenerator::Release(ANPC* NPC)
-{
-	if (ComingNPC != NPC)
-		return;
-		
-	ComingNPC = nullptr;
-	
-	bHasNPCComing = false;
-	OnNPCComingToGeneratorChanged.Broadcast(bHasNPCComing);
-}
-
-void ABuildableGenerator::StartWorking(ANPC* NPC)
-{
-	if (ComingNPC != NPC)
-		return;
-	
-	ComingNPC = nullptr;
-	WorkingNPC = NPC;
-	
-	bHasNPCComing = false;
-	OnNPCComingToGeneratorChanged.Broadcast(bHasNPCComing);
-
-	bHasNPCWorking = true;
-	OnNPCWorkingChanged.Broadcast(bHasNPCComing);
-
-	ProductionComponent->ResumeOrStartProduction();
-}
-
-void ABuildableGenerator::StopWorking(ANPC* NPC)
-{
-	if (WorkingNPC != NPC)
-		return;
-	
-	WorkingNPC = nullptr;
-	
-	bHasNPCWorking = false;
-	OnNPCWorkingChanged.Broadcast(bHasNPCComing);
-
-	ProductionComponent->PauseProduction();
+	ObjectType = EObjectType::Generator;
 }
 
 void ABuildableGenerator::BeginPlay()
@@ -131,6 +72,20 @@ void ABuildableGenerator::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		return;
 
 	BRS->UnregisterGenerator(this);
+}
+
+void ABuildableGenerator::StartUsingImplementation()
+{
+	Super::StartUsingImplementation();
+	
+	ProductionComponent->ResumeOrStartProduction();
+}
+
+void ABuildableGenerator::StopUsingImplementation()
+{
+	Super::StopUsingImplementation();
+
+	ProductionComponent->PauseProduction();
 }
 
 #pragma region Upgrade

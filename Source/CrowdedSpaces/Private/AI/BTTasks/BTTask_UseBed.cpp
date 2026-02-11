@@ -34,6 +34,7 @@ EBTNodeResult::Type UBTTask_UseBed::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 	if (!TargetBed)
 		return EBTNodeResult::Failed;
 
+	/*
 	if (TargetBed->HasNPCSleeping())
 		return EBTNodeResult::Failed;
 
@@ -41,6 +42,7 @@ EBTNodeResult::Type UBTTask_UseBed::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 		return EBTNodeResult::Failed;
 	
 	TargetBed->StartSleeping(NPC);
+	*/
 	
 	StartAction();
 	
@@ -91,7 +93,7 @@ void UBTTask_UseBed::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* No
 	if (!TargetBed)
 		return;
 	
-	TargetBed->StopSleeping(NPC); 
+	//TargetBed->StopSleeping(NPC); 
 	
 	if (EnergyComp.IsValid())
 		EnergyComp->SetSleeping(false);

@@ -1,8 +1,6 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "AI/NPC.h"
-#include "AI/BTTasks/BTTask_FindNearestAvailableGenerator.h"
 #include "Build/BuildableObject.h"
 #include "Production/ProductionComponent.h"
 #include "Production/ProductionUpgradeData.h"
@@ -10,9 +8,6 @@
 #include "BuildableGenerator.generated.h"
 
 class UMoneyComponent;
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNPCWorkingChanged, bool, Value);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNPCComingToGeneratorChanged, bool, Value);
 
 UCLASS()
 class CROWDEDSPACES_API ABuildableGenerator : public ABuildableObject, public ISelectable
@@ -22,8 +17,8 @@ class CROWDEDSPACES_API ABuildableGenerator : public ABuildableObject, public IS
 public:
 	ABuildableGenerator();
 
-	UFUNCTION(BlueprintCallable, Category = "Generator")
-	bool HasNPCComing() const { return bHasNPCComing; }
+	virtual void StartUsingImplementation() override;
+	virtual void StopUsingImplementation() override;
 	
 	// Selectable
 	virtual void OnSelected() override;
@@ -43,21 +38,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Upgrade")
 	UMoneyComponent* GetPlayerMoneyComponent() const { return PlayerMoneyComponent; }
-	
-	UFUNCTION(BlueprintCallable, Category = "Upgrade")
-	bool HasNPCWorking() const { return bHasNPCWorking; }
-
-	UPROPERTY(BlueprintAssignable)
-	FOnNPCWorkingChanged OnNPCWorkingChanged;
-
-	UPROPERTY(BlueprintAssignable)
-	FOnNPCComingToGeneratorChanged OnNPCComingToGeneratorChanged;
-
-	bool TryReserve(ANPC* NPC);
-	bool IsReservedByOther(TObjectPtr<ANPC> NPC);
-	void Release(ANPC* NPC);
-	void StartWorking(ANPC* NPC);
-	void StopWorking(ANPC* NPC);
 
 protected:
 	virtual void BeginPlay() override;
@@ -83,16 +63,4 @@ private:
 
 	UPROPERTY()
 	UMoneyComponent* PlayerMoneyComponent;
-
-	// Work
-	UPROPERTY()
-	bool bHasNPCWorking = false;
-	
-	bool bHasNPCComing = false;
-
-	UPROPERTY()
-	TWeakObjectPtr<ANPC> ComingNPC;
-
-	UPROPERTY()
-	TWeakObjectPtr<ANPC> WorkingNPC;
 };
