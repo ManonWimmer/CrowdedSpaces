@@ -81,13 +81,13 @@ bool ABuildableFood::IsReservedByOther(TObjectPtr<ANPC> NPC)
 
 void ABuildableFood::Release(ANPC* NPC)
 {
-	if (ComingNPC == NPC)
-	{
-		ComingNPC = nullptr;
-		
-		bHasNPCComing = false;
-		OnNPCComingToFoodChanged.Broadcast(bHasNPCComing);
-	}
+	if (ComingNPC != NPC)
+		return;
+	
+	ComingNPC = nullptr;
+	
+	bHasNPCComing = false;
+	OnNPCComingToFoodChanged.Broadcast(bHasNPCComing);
 }
 
 void ABuildableFood::StartEating(ANPC* NPC)
@@ -103,8 +103,6 @@ void ABuildableFood::StartEating(ANPC* NPC)
 
 	bHasNPCEating = true;
 	OnNPCEatingChanged.Broadcast(bHasNPCComing);
-
-	//ProductionComponent->ResumeOrStartProduction();
 }
 
 void ABuildableFood::StopEating(ANPC* NPC)
@@ -116,8 +114,6 @@ void ABuildableFood::StopEating(ANPC* NPC)
 	
 	bHasNPCEating = false;
 	OnNPCEatingChanged.Broadcast(bHasNPCComing);
-
-	//ProductionComponent->PauseProduction();
 }
 
 

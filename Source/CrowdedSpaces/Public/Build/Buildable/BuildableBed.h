@@ -1,12 +1,13 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "AI/NPC.h"
 #include "Build/BuildableObject.h"
 #include "Selection/Selectable.h"
 #include "Selection/SelectableStatProvider.h"
 #include "BuildableBed.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIsBedAvailableChanged, bool, Value);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNPCSleepingChanged, bool, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNPCComingToBedChanged, bool, Value);
 
 UCLASS()
@@ -18,14 +19,11 @@ public:
 	ABuildableBed();
 
 	UFUNCTION(BlueprintCallable, Category = "Bed")
-	bool IsAvailable() const { return bIsAvailable; }
+	bool HasNPCSleeping() const { return bHasNPCSleeping; }
 	
 	UFUNCTION(BlueprintCallable, Category = "Bed")
 	bool HasNPCComing() const { return bHasNPCComing; }
 	
-	void SetAvailable(bool NewAvailable);
-	void SetHasNPCComing(bool NewAvailable);
-
 	// Selectable
 	virtual void OnSelected() override;
 	virtual void OnDeselected() override;
@@ -40,10 +38,16 @@ public:
 	FOnNPCComingToBedChanged OnNPCComingToBedChanged;
 
 	UPROPERTY(BlueprintAssignable)
-	FOnIsBedAvailableChanged OnIsBedAvailableChanged;
+	FOnNPCSleepingChanged OnNPCSleepingChanged;
 	
 	virtual TArray<FStat> GetCurrentValues() const override;
 	virtual FOnStatChanged& GetOnStatChanged() override { return OnStatChanged; }
+
+	bool TryReserve(ANPC* NPC);
+	bool IsReservedByOther(TObjectPtr<ANPC> NPC);
+	void Release(ANPC* NPC);
+	void StartSleeping(ANPC* NPC);
+	void StopSleeping(ANPC* NPC);
 
 protected:
 	virtual void BeginPlay() override;
@@ -51,4 +55,13 @@ protected:
 	
 	bool bIsAvailable = true;
 	bool bHasNPCComing = false;
+
+	UPROPERTY()
+	bool bHasNPCSleeping = false;
+	
+	UPROPERTY()
+	TWeakObjectPtr<ANPC> ComingNPC;
+
+	UPROPERTY()
+	TWeakObjectPtr<ANPC> EatingNPC;
 };

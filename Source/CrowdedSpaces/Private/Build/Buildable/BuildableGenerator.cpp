@@ -33,13 +33,13 @@ bool ABuildableGenerator::IsReservedByOther(TObjectPtr<ANPC> NPC)
 
 void ABuildableGenerator::Release(ANPC* NPC)
 {
-	if (ComingNPC == NPC)
-	{
-		ComingNPC = nullptr;
+	if (ComingNPC != NPC)
+		return;
 		
-		bHasNPCComing = false;
-		OnNPCComingToGeneratorChanged.Broadcast(bHasNPCComing);
-	}
+	ComingNPC = nullptr;
+	
+	bHasNPCComing = false;
+	OnNPCComingToGeneratorChanged.Broadcast(bHasNPCComing);
 }
 
 void ABuildableGenerator::StartWorking(ANPC* NPC)

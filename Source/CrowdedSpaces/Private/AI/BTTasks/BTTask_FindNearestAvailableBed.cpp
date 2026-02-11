@@ -42,10 +42,10 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBed::ExecuteTask(UBehaviorTreeCo
 			continue; 
 		
 		// Get nearest bed AVAILABLE
-		if (!Bed->IsAvailable())
+		if (Bed->HasNPCSleeping())
 			continue;
 
-		if (Bed->HasNPCComing())
+		if (Bed->IsReservedByOther(NPC))
 			continue;
 		
 		float Distance = FVector::Distance(Origin, Bed->GetActorLocation());
@@ -73,14 +73,15 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBed::ExecuteTask(UBehaviorTreeCo
 		TObjectPtr<UBlackboardComponent> Blackboard = OwnerComp.GetBlackboardComponent();
 		if (!Blackboard)
 			return EBTNodeResult::Failed;
+
+		if (!NearestAvailableBed->TryReserve(NPC))
+			return EBTNodeResult::Failed;
 		
 		// Target location key
 		Blackboard->SetValueAsVector(TargetLocationKey.SelectedKeyName, NearestAvailableBed->GetActorLocation());
 
 		// Target bed key
 		Blackboard->SetValueAsObject(TargetBedKey.SelectedKeyName, NearestAvailableBed);
-
-		NearestAvailableBed->SetHasNPCComing(true);
 		
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		return EBTNodeResult::Succeeded;

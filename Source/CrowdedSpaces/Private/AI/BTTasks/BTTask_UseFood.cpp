@@ -70,8 +70,7 @@ void UBTTask_UseFood::OnFoodFull()
 	NPC = Cast<ANPC>(Controller->GetPawn());
 	if (!NPC)
 		return;
-
-	// Unbind
+	
 	FoodComp->OnFoodFull.RemoveDynamic(this, &UBTTask_UseFood::OnFoodFull);
 
 	if(GEngine)
@@ -85,7 +84,6 @@ void UBTTask_UseFood::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* N
 {
 	Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);
 	
-	// Set food as available
 	TObjectPtr<UBlackboardComponent> Blackboard = OwnerComp.GetBlackboardComponent();
 	if (!Blackboard)
 		return;
@@ -95,9 +93,9 @@ void UBTTask_UseFood::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* N
 		return;
 	
 	TargetFood->StopEating(NPC);
-
-	// Set NPC not eating
-	FoodComp->SetEating(false);
+	
+	if (FoodComp.IsValid())
+		FoodComp->SetEating(false);
 	
 	if(GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Use target food stop action");

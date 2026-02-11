@@ -12,7 +12,6 @@ UBTTask_UseBed::UBTTask_UseBed(FObjectInitializer const& ObjectInitializer)
 	bCreateNodeInstance = true; // Chaque NPC a sa propre instance    
 	bNotifyTaskFinished = true;
 
-	// Action
 	NPCAction = ENPCAction::Sleep;
 }
 
@@ -35,13 +34,13 @@ EBTNodeResult::Type UBTTask_UseBed::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 	if (!TargetBed)
 		return EBTNodeResult::Failed;
 
-	if (!TargetBed->IsAvailable())
+	if (TargetBed->HasNPCSleeping())
 		return EBTNodeResult::Failed;
 
-	if (TargetBed->HasNPCComing())
+	if (TargetBed->IsReservedByOther(NPC))
 		return EBTNodeResult::Failed;
 	
-	TargetBed->SetAvailable(false);
+	TargetBed->StartSleeping(NPC);
 	
 	StartAction();
 	
@@ -70,8 +69,7 @@ void UBTTask_UseBed::OnEnergyFull()
 	NPC = Cast<ANPC>(Controller->GetPawn());
 	if (!NPC)
 		return;
-
-	// Unbind
+	
 	EnergyComp->OnEnergyFull.RemoveDynamic(this, &UBTTask_UseBed::OnEnergyFull);
 
 	if(GEngine)
@@ -85,7 +83,6 @@ void UBTTask_UseBed::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* No
 {
 	Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);
 	
-	// Set bed as available
 	TObjectPtr<UBlackboardComponent> Blackboard = OwnerComp.GetBlackboardComponent();
 	if (!Blackboard)
 		return;
@@ -94,15 +91,10 @@ void UBTTask_UseBed::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* No
 	if (!TargetBed)
 		return;
 	
-	TargetBed->SetAvailable(true); 
-
-	// Set NPC not sleeping
+	TargetBed->StopSleeping(NPC); 
+	
 	if (EnergyComp.IsValid())
-	{
-		EnergyComp->OnEnergyFull.RemoveDynamic(this, &UBTTask_UseBed::OnEnergyFull);
 		EnergyComp->SetSleeping(false);
-	}
-
 	
 	if(GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Use Target Bed stop action");
