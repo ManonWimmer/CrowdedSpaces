@@ -28,6 +28,9 @@ public:
 	int MoneyCost;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int DestroyMoney;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int GridRowsX = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)

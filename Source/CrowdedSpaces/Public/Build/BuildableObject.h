@@ -7,6 +7,12 @@
 #include "GameFramework/Actor.h"
 #include "BuildableObject.generated.h"
 
+class UBuildableRegistrySubsystem;
+class AGameHUD;
+class ACrowdedPlayerState;
+class ACrowdedPlayerController;
+class UBuildData;
+class UBuildSubsystem;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNPCUsingChanged, bool, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNPCComingChanged, bool, Value);
 
@@ -17,6 +23,8 @@ class CROWDEDSPACES_API ABuildableObject : public AActor
 
 public:
 	ABuildableObject();
+
+	virtual void BeginPlay() override;
 
 	UFUNCTION()
 	void SetMesh(UStaticMesh* Mesh) const;
@@ -56,6 +64,15 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Object")
 	ENPCAction GetNPCAction() const { return NPCAction;}
+
+	UFUNCTION(BlueprintCallable, Category = "Object")
+	void SetBuildData(UBuildData* NewData) { BuildData = NewData; }
+	
+	UFUNCTION(BlueprintCallable, Category = "Object")
+	UBuildData* GetBuildData() const { return BuildData; }
+	
+	UFUNCTION(BlueprintCallable, Category = "Object")
+	void DestroyObject();
 	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -81,4 +98,25 @@ protected:
 
 	UPROPERTY()
 	ENPCAction NPCAction = ENPCAction::Idle;
+
+	UPROPERTY()
+	TObjectPtr<UBuildData> BuildData;
+
+	UPROPERTY()
+	TObjectPtr<UBuildSubsystem> BuildSubsystem;
+
+	UPROPERTY()
+	TObjectPtr<ACrowdedPlayerController> CrowdedPlayerController;
+
+	UPROPERTY()
+	TObjectPtr<ACrowdedPlayerState> CrowdedPlayerState;
+
+	UPROPERTY()
+	TObjectPtr<AGameHUD> GameHUD;
+
+	UPROPERTY()
+	TObjectPtr<UBuildableRegistrySubsystem> BRS;
+	
+	UPROPERTY()
+	TArray<UBTTask_UseBuildableObject*> CurrentUsers;
 };

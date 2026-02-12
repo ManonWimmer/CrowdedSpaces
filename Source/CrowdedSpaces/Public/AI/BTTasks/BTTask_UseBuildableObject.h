@@ -21,6 +21,9 @@ public:
 	UFUNCTION()
 	void OnStopAction();
 
+	UFUNCTION()
+	void OnTargetDestroyed() const;
+
 private:
 	UPROPERTY(EditAnywhere, Category="Blackboard")
 	FBlackboardKeySelector TargetObjectKey;

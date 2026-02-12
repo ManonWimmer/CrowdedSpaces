@@ -43,6 +43,9 @@ public:
 
 	UFUNCTION()
 	void PlaceObject() const;
+
+	UFUNCTION()
+	void RemoveObject(ABuildableObject* Object) const;
 	
 	UFUNCTION()
 	void LeftClicked();

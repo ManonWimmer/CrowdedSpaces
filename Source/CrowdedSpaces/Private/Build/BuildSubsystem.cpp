@@ -236,11 +236,14 @@ void UBuildSubsystem::PlaceObject() const
 			
 		}
 	}
+	
 	TObjectPtr<ABuildableObject> Placed = GetWorld()->SpawnActor<ABuildableObject>(
 		CurrentBuildData->BuildClass,
 		CurrentGhost->GetActorLocation(),
 		CurrentBuildRotation
 	);
+
+	Placed->SetBuildData(CurrentBuildData);
 
 	if (!Placed)
 		return;
@@ -262,6 +265,42 @@ void UBuildSubsystem::PlaceObject() const
 
 	if (MoneyComponent)
 		MoneyComponent->RemoveMoney(CurrentBuildData->MoneyCost);
+}
+
+void UBuildSubsystem::RemoveObject(ABuildableObject* Object) const
+{
+	int SizeX = Object->GetBuildData()->GridRowsX;
+	int SizeY = Object->GetBuildData()->GridColumnsY;
+
+	// Rotation
+	if (Object->GetActorRotation() == FRotator(0.f, 90.f, 0.f) ||
+		Object->GetActorRotation() == FRotator(0.f, 270.f, 0.f)) 
+	{
+		Swap(SizeX, SizeY);
+	}
+	
+	int StartRow = 0, StartCol = 0;
+	GridActor->GetCellAtLocation(Object->GetActorLocation(), StartRow, StartCol);
+	
+	StartRow -= SizeX / 2;
+	StartCol -= SizeY / 2;
+
+	StartRow = FMath::Clamp(StartRow, 0, GridActor->GetRows() - SizeX);
+	StartCol = FMath::Clamp(StartCol, 0, GridActor->GetColumns() - SizeY);
+	
+	// Set cells unoccupied
+	for (int Row = StartRow; Row < StartRow + SizeX; ++Row)
+	{
+		for (int Col = StartCol; Col < StartCol + SizeY; ++Col)
+		{
+			FGridCell* Cell = GridActor->GetGridCell(Row, Col);
+			if (Cell)
+				Cell->bOccupied = false;
+		}
+	}
+	
+	if (MoneyComponent)
+		MoneyComponent->AddMoney(Object->GetBuildData()->DestroyMoney);
 }
 
 void UBuildSubsystem::PlaceRoom()

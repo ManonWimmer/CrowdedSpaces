@@ -13,21 +13,18 @@ void ABuildableBed::BeginPlay()
 {
 	Super::BeginPlay();
 
-	TObjectPtr<UBuildableRegistrySubsystem> BRS = GetWorld()->GetSubsystem<UBuildableRegistrySubsystem>();
 	if (!BRS)
 		return;
 
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Register bed");
-
+	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "BeginPlay avec BRS bed");
+	
 	BRS->RegisterBed(this);
 }
 
 void ABuildableBed::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-
-	TObjectPtr<UBuildableRegistrySubsystem> BRS = GetWorld()->GetSubsystem<UBuildableRegistrySubsystem>();
+	
 	if (!BRS)
 		return;
 
@@ -36,6 +33,8 @@ void ABuildableBed::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 bool ABuildableBed::StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
+	CurrentUsers.Add(UseObjectTask);
+	
 	UEnergyComponent* EnergyComp = UsingNPC->FindComponentByClass<UEnergyComponent>();
 	if (!EnergyComp)
 		return false;
@@ -49,6 +48,8 @@ bool ABuildableBed::StartUsingImplementation(UBTTask_UseBuildableObject* UseObje
 
 bool ABuildableBed::StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
+	CurrentUsers.Remove(UseObjectTask);
+	
 	UEnergyComponent* EnergyComp = UsingNPC->FindComponentByClass<UEnergyComponent>();
 	if (!EnergyComp)
 		return false;

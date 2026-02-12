@@ -46,6 +46,7 @@ public:
 
 	UCustomWidget* GetWidgetFromSelectionType(ESelectionType Type);
 
+	UFUNCTION(BlueprintCallable, Category="Widgets")
 	void HideCurrentSelectionWidget();
 	
 	// Moral Event

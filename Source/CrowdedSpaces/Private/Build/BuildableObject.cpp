@@ -1,5 +1,12 @@
 ﻿#include "Build/BuildableObject.h"
 
+#include "Build/BuildableRegistrySubsystem.h"
+#include "Build/BuildSubsystem.h"
+#include "Kismet/GameplayStatics.h"
+#include "Player/CrowdedPlayerController.h"
+#include "Player/CrowdedPlayerState.h"
+#include "UI/GameHUD.h"
+
 ABuildableObject::ABuildableObject()
 {
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
@@ -7,6 +14,31 @@ ABuildableObject::ABuildableObject()
 	MeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	MeshComp->SetCollisionObjectType(ECC_GameTraceChannel1); // Build
 	MeshComp->SetCollisionResponseToAllChannels(ECR_Block);
+}
+
+void ABuildableObject::BeginPlay()
+{
+	Super::BeginPlay();
+
+	BuildSubsystem = GetWorld()->GetSubsystem<UBuildSubsystem>();
+	if (!BuildSubsystem)
+		return;
+	
+	CrowdedPlayerController = Cast<ACrowdedPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	if (!CrowdedPlayerController)
+		return;
+	
+	CrowdedPlayerState = CrowdedPlayerController->GetPlayerState<ACrowdedPlayerState>();
+	if (!CrowdedPlayerState)
+		return;
+
+	GameHUD = Cast<AGameHUD>(CrowdedPlayerController->GetHUD());
+	if (!GameHUD)
+		return;
+
+	BRS = GetWorld()->GetSubsystem<UBuildableRegistrySubsystem>();
+	if (!BRS)
+		return;
 }
 
 void ABuildableObject::SetMesh(UStaticMesh* Mesh) const
@@ -87,6 +119,26 @@ bool ABuildableObject::StartUsingImplementation(UBTTask_UseBuildableObject* UseO
 bool ABuildableObject::StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
 	return true;
+}
+
+void ABuildableObject::DestroyObject()
+{
+	if (!BuildSubsystem)
+		return;
+
+	BuildSubsystem->RemoveObject(this);
+
+	for (UBTTask_UseBuildableObject* Task : CurrentUsers)
+	{
+		if (Task)
+		{
+			Task->OnTargetDestroyed();
+		}
+	}
+
+	GameHUD->HideCurrentSelectionWidget();
+	
+	Destroy();
 }
 
 

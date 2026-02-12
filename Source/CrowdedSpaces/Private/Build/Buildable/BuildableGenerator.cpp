@@ -19,28 +19,17 @@ void ABuildableGenerator::BeginPlay()
 	Super::BeginPlay();
 
 	// Register generator
-	UBuildableRegistrySubsystem* BRS = GetWorld()->GetSubsystem<UBuildableRegistrySubsystem>();
 	if (!BRS)
 		return;
-		
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Register generator");
 
 	BRS->RegisterGenerator(this);
 
 	// Get player money component
-	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	if (!PC)
-		return;
-
-	ACrowdedPlayerController* CamPC = Cast<ACrowdedPlayerController>(PC);
-	if (!CamPC)
+	
+	if (!CrowdedPlayerState)
 		return;
 	
-	if (ACrowdedPlayerState* PS = PC->GetPlayerState<ACrowdedPlayerState>())
-	{
-		PlayerMoneyComponent = PS->GetMoneyComponent();
-	}
+	PlayerMoneyComponent = CrowdedPlayerState->GetMoneyComponent();
 
 	// Assign start production values
 	if (!ProductionComponent)
@@ -67,8 +56,7 @@ void ABuildableGenerator::BeginPlay()
 void ABuildableGenerator::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-
-	UBuildableRegistrySubsystem* BRS = GetWorld()->GetSubsystem<UBuildableRegistrySubsystem>();
+	
 	if (!BRS)
 		return;
 
@@ -77,12 +65,16 @@ void ABuildableGenerator::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 bool ABuildableGenerator::StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
+	CurrentUsers.Add(UseObjectTask);
+	
 	ProductionComponent->StartProduction();
 	return true; 
 }
 
 bool ABuildableGenerator::StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
+	CurrentUsers.Remove(UseObjectTask);
+	
 	ProductionComponent->PauseProduction();
 	return true; 
 }

@@ -12,8 +12,7 @@ ABuildableFood::ABuildableFood()
 void ABuildableFood::BeginPlay()
 {
 	Super::BeginPlay();
-
-	UBuildableRegistrySubsystem* BRS = GetWorld()->GetSubsystem<UBuildableRegistrySubsystem>();
+	
 	if (!BRS)
 		return;
 
@@ -26,8 +25,7 @@ void ABuildableFood::BeginPlay()
 void ABuildableFood::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-
-	UBuildableRegistrySubsystem* BRS = GetWorld()->GetSubsystem<UBuildableRegistrySubsystem>();
+	
 	if (!BRS)
 		return;
 	
@@ -36,6 +34,8 @@ void ABuildableFood::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 bool ABuildableFood::StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
+	CurrentUsers.Add(UseObjectTask);
+	
 	UFoodComponent* FoodComp = UsingNPC->FindComponentByClass<UFoodComponent>();
 	if (!FoodComp)
 		return false;
@@ -49,6 +49,8 @@ bool ABuildableFood::StartUsingImplementation(UBTTask_UseBuildableObject* UseObj
 
 bool ABuildableFood::StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
+	CurrentUsers.Remove(UseObjectTask);
+	
 	UFoodComponent* FoodComp = UsingNPC->FindComponentByClass<UFoodComponent>();
 	if (!FoodComp)
 		return false;

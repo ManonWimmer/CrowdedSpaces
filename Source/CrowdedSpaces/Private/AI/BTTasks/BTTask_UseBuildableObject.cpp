@@ -62,14 +62,25 @@ void UBTTask_UseBuildableObject::OnStopAction()
 	FinishLatentTask(*OwnerCompPtr, EBTNodeResult::Succeeded);
 }
 
+void UBTTask_UseBuildableObject::OnTargetDestroyed() const
+{
+	if(GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, "use task on target destroyed");
+	
+	OwnerCompPtr->GetBlackboardComponent()->SetValueAsObject(TargetObjectKey.SelectedKeyName, nullptr);
+	FinishLatentTask(*OwnerCompPtr, EBTNodeResult::Failed);
+}
+
 void UBTTask_UseBuildableObject::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory,
-	EBTNodeResult::Type TaskResult)
+                                                EBTNodeResult::Type TaskResult)
 {
 	Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);
 	
 	TObjectPtr<UBlackboardComponent> Blackboard = OwnerComp.GetBlackboardComponent();
 	if (!Blackboard)
 		return;
+
+	StopAction();
 	
 	TObjectPtr<ABuildableObject> TargetObject = Cast<ABuildableObject>(Blackboard->GetValueAsObject(TargetObjectKey.SelectedKeyName));
 	if (!TargetObject)
@@ -82,6 +93,4 @@ void UBTTask_UseBuildableObject::OnTaskFinished(UBehaviorTreeComponent& OwnerCom
 	
 	if(GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, "Use target object stop action");
-	
-	StopAction();
 }
