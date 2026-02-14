@@ -26,12 +26,18 @@ void UEnergyComponent::AddEnergy(int Amount)
 	{
 		OnEnergyFull.Broadcast();
 	}
+
+	
 }
 
 void UEnergyComponent::RemoveEnergy(int Amount)
 {
 	Energy = FMath::Clamp(Energy - Amount, 0, MaxEnergy);
-	OnEnergyChanged.Broadcast(Energy);
+	
+	if (Energy <= 0)
+		OnNoMoreEnergy.Broadcast();
+	else
+		OnEnergyChanged.Broadcast(Energy);
 }
 
 bool UEnergyComponent::HasEnoughEnergy(int Amount)

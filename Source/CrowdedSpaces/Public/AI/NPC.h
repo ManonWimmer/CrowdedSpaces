@@ -38,8 +38,12 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnCurrentActionChanged OnCurrentActionChanged;
 
+	UFUNCTION()
+	void Die();
+
 protected:
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AI")
 	TObjectPtr<UBehaviorTree> BehaviorTree;

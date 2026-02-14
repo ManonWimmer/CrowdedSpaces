@@ -43,7 +43,11 @@ void UFoodComponent::RemoveFood(int Amount)
 	if (!HasEnoughFood(Amount)) return; // todo: plus tard event on no more food et mettre à 0 ? 
 	
 	Food -= Amount;
-	OnFoodChanged.Broadcast(Food);
+	
+	if (Food <= 0)
+		OnNoMoreFood.Broadcast();
+	else
+		OnFoodChanged.Broadcast(Food);
 }
 
 bool UFoodComponent::HasEnoughFood(int Amount)

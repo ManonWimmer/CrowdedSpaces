@@ -27,6 +27,16 @@ void ANPC::SetCurrentAction(ENPCAction NewAction)
 	OnCurrentActionChanged.Broadcast(CurrentAction);
 }
 
+void ANPC::Die()
+{
+	// todo: animation ?
+
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Npc died.");
+	
+	Destroy();
+}
+
 void ANPC::BeginPlay()
 {
 	Super::BeginPlay();
@@ -45,6 +55,17 @@ void ANPC::BeginPlay()
 	
 	FoodWidget->OwningActor = this;
 	FoodWidget->Init();
+
+	FoodComponent->OnNoMoreFood.AddDynamic(this, &ANPC::Die);
+	EnergyComponent->OnNoMoreEnergy.AddDynamic(this, &ANPC::Die);
+}
+
+void ANPC::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	FoodComponent->OnNoMoreFood.RemoveDynamic(this, &ANPC::Die);
+	EnergyComponent->OnNoMoreEnergy.RemoveDynamic(this, &ANPC::Die);
+	
+	Super::EndPlay(EndPlayReason);
 }
 
 void ANPC::RemoveFood() const

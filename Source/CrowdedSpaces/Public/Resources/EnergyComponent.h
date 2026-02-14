@@ -6,7 +6,8 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEnergyFull); // To know when to get out of bed ;)
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnergyChanged, int32, Value); 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIsSleepingChanged, bool, Value); 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIsSleepingChanged, bool, Value);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNoMoreEnergy); 
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class CROWDEDSPACES_API UEnergyComponent : public UActorComponent
@@ -57,6 +58,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnIsSleepingChanged OnIsSleepingChanged;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnNoMoreEnergy OnNoMoreEnergy;
 	
 private:
 	UPROPERTY(EditAnywhere, Category="Energy")
