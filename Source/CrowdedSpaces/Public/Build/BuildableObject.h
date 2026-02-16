@@ -118,5 +118,5 @@ protected:
 	TObjectPtr<UBuildableRegistrySubsystem> BRS;
 	
 	UPROPERTY()
-	TArray<UBTTask_UseBuildableObject*> CurrentUsers;
+	TArray<UBTTask_UseBuildableObject*> CurrentTasks;
 };

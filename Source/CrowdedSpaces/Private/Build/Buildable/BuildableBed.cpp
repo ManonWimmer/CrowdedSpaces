@@ -33,7 +33,7 @@ void ABuildableBed::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 bool ABuildableBed::StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
-	CurrentUsers.Add(UseObjectTask);
+	CurrentTasks.Add(UseObjectTask);
 	
 	UEnergyComponent* EnergyComp = UsingNPC->FindComponentByClass<UEnergyComponent>();
 	if (!EnergyComp)
@@ -48,7 +48,7 @@ bool ABuildableBed::StartUsingImplementation(UBTTask_UseBuildableObject* UseObje
 
 bool ABuildableBed::StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
-	CurrentUsers.Remove(UseObjectTask);
+	CurrentTasks.Remove(UseObjectTask);
 	
 	UEnergyComponent* EnergyComp = UsingNPC->FindComponentByClass<UEnergyComponent>();
 	if (!EnergyComp)

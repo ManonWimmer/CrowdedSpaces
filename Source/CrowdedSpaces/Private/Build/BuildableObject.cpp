@@ -128,7 +128,7 @@ void ABuildableObject::DestroyObject()
 
 	BuildSubsystem->RemoveObject(this);
 
-	for (UBTTask_UseBuildableObject* Task : CurrentUsers)
+	for (UBTTask_UseBuildableObject* Task : CurrentTasks)
 	{
 		if (Task)
 		{

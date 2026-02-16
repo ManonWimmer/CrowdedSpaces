@@ -34,7 +34,7 @@ void ABuildableFood::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 bool ABuildableFood::StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
-	CurrentUsers.Add(UseObjectTask);
+	CurrentTasks.Add(UseObjectTask);
 	
 	UFoodComponent* FoodComp = UsingNPC->FindComponentByClass<UFoodComponent>();
 	if (!FoodComp)
@@ -49,7 +49,7 @@ bool ABuildableFood::StartUsingImplementation(UBTTask_UseBuildableObject* UseObj
 
 bool ABuildableFood::StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
-	CurrentUsers.Remove(UseObjectTask);
+	CurrentTasks.Remove(UseObjectTask);
 	
 	UFoodComponent* FoodComp = UsingNPC->FindComponentByClass<UFoodComponent>();
 	if (!FoodComp)

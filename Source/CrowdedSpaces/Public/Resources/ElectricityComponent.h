@@ -26,7 +26,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	int GetElectricity() const { return Electricity; }
 
-	UPROPERTY(BlueprintAssignable, Category = "Money")
+	UPROPERTY(BlueprintAssignable, Category = "Electricity")
 	FOnElectricityChanged OnElectricityChanged;
 	
 private:

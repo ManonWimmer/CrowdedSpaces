@@ -65,7 +65,7 @@ void ABuildableGenerator::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 bool ABuildableGenerator::StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
-	CurrentUsers.Add(UseObjectTask);
+	CurrentTasks.Add(UseObjectTask);
 	
 	ProductionComponent->StartProduction();
 	return true; 
@@ -73,7 +73,7 @@ bool ABuildableGenerator::StartUsingImplementation(UBTTask_UseBuildableObject* U
 
 bool ABuildableGenerator::StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
-	CurrentUsers.Remove(UseObjectTask);
+	CurrentTasks.Remove(UseObjectTask);
 	
 	ProductionComponent->PauseProduction();
 	return true; 
