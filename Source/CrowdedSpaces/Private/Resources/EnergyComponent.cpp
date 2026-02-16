@@ -26,8 +26,6 @@ void UEnergyComponent::AddEnergy(int Amount)
 	{
 		OnEnergyFull.Broadcast();
 	}
-
-	
 }
 
 void UEnergyComponent::RemoveEnergy(int Amount)
