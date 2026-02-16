@@ -99,7 +99,7 @@ private:
 
 	// Type
 	UPROPERTY(EditAnywhere)
-	EResourceType ResourceType;
+	EResourceType ResourceType = EResourceType::Money;
 
 protected:
 	virtual void BeginPlay() override;

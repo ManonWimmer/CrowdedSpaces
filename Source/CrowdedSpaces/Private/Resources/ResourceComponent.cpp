@@ -1,5 +1,7 @@
 ﻿#include "Resources/ResourceComponent.h"
 
+#include "Resources/ResourceDefaultsData.h"
+
 UResourceComponent::UResourceComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
@@ -8,8 +10,33 @@ UResourceComponent::UResourceComponent()
 void UResourceComponent::SetType(EResourceType NewType)
 {
 	ResourceType = NewType;
-	
+
 	// Set default values
+	static UResourceDefaultsData* DefaultsData = nullptr;
+	if (!DefaultsData)
+	{
+		ConstructorHelpers::FObjectFinder<UResourceDefaultsData> Finder(TEXT("/Game/Project/Data/Resources/DA_ResourceDefaults.DA_ResourceDefaults"));
+		if (Finder.Succeeded())
+		{
+			DefaultsData = Finder.Object;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ResourceDefaultsData not found!"));
+			return;
+		}
+	}
+	
+	if (DefaultsData && DefaultsData->DefaultsByType.Contains(ResourceType))
+	{
+		const FResourceDefaults& Defaults = DefaultsData->DefaultsByType[ResourceType];
+		MaxResource = Defaults.MaxResource;
+		Resource = MaxResource;
+		CanLoseAndRegenResource = Defaults.CanLoseAndRegenResource;
+		ResourceLossPerTick = Defaults.ResourceLossPerTick;
+		ResourceRegenPerTick = Defaults.ResourceRegenPerTick;
+		TickInterval = Defaults.TickInterval;
+	}
 }
 
 void UResourceComponent::BeginPlay()
