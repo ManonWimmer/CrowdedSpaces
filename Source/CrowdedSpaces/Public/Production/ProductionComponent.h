@@ -3,10 +3,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "ProductionType.h"
-#include "Resources/MoneyComponent.h"
-#include "Resources/ElectricityComponent.h"
-#include "Resources/OxygenComponent.h"
-#include "Resources/FoodComponent.h"
+#include "Resources/ResourceComponent.h"
 #include "ProductionComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIsActiveChanged, bool, Value);
@@ -72,16 +69,16 @@ private:
 	FTimerHandle ProductionTimerHandle;
 
 	UPROPERTY()
-	TObjectPtr<UMoneyComponent> PlayerMoneyComponent;
+	TObjectPtr<UResourceComponent> PlayerMoneyComponent;
 
 	UPROPERTY()
-	TObjectPtr<UElectricityComponent> PlayerElectricityComponent;
+	TObjectPtr<UResourceComponent> PlayerElectricityComponent;
 
 	UPROPERTY()
-	TObjectPtr<UOxygenComponent> PlayerOxygenComponent;
+	TObjectPtr<UResourceComponent> PlayerOxygenComponent;
 
 	UPROPERTY()
-	TObjectPtr<UFoodComponent> PlayerFoodComponent;
+	TObjectPtr<UResourceComponent> PlayerFoodComponent;
 
 	bool bHasStartedProduction = false;
 };

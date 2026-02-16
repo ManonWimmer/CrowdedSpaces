@@ -20,6 +20,9 @@ public:
 
 	// Type
 	void SetType(EResourceType NewType);
+
+	UFUNCTION(BlueprintCallable)
+	EResourceType GetType() { return ResourceType;}
 	
 	// Change value
 	UFUNCTION(BlueprintCallable)
@@ -50,6 +53,9 @@ public:
 	void StopResourceTimer();
 
 	// Using
+	UFUNCTION(BlueprintCallable)
+	void SetCanLoseAndRegenResource(bool bCanLoseAndRegen);
+	
 	UFUNCTION(BlueprintCallable)
 	void SetIsInRegen(bool bInRegen);
 	

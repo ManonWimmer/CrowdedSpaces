@@ -3,10 +3,8 @@
 #include "CoreMinimal.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "GameFramework/Character.h"
-#include "Resources/FoodComponent.h"
+#include "Resources/ResourceComponent.h"
 #include "Components/WidgetComponent.h"
-#include "Resources/OxygenComponent.h"
-#include "Resources/EnergyComponent.h"
 #include "Selection/Selectable.h"
 #include "NPCAction.h"
 #include "NPC.generated.h"
@@ -24,10 +22,13 @@ public:
 	UBehaviorTree* GetBehaviorTree() const { return BehaviorTree; }
 
 	UFUNCTION(BlueprintCallable, Category="AI")
-	UFoodComponent* GetFoodComponent() const { return FoodComponent; }
+	UResourceComponent* GetFoodComponent() const { return FoodComponent; }
 
 	UFUNCTION(BlueprintCallable, Category="AI")
-	UEnergyComponent* GetEnergyComponent() const { return EnergyComponent; }
+	UResourceComponent* GetEnergyComponent() const { return EnergyComponent; }
+
+	UFUNCTION(BlueprintCallable, Category="AI")
+	UResourceComponent* GetOxygenComponent() const { return OxygenComponent; }
 
 	UFUNCTION(BlueprintCallable, Category="AI")
 	void SetCurrentAction(ENPCAction NewAction);
@@ -51,7 +52,7 @@ protected:
 private:
 	// Food
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<UFoodComponent> FoodComponent;
+	TObjectPtr<UResourceComponent> FoodComponent;
 	
 	UPROPERTY(EditAnywhere, Category="Food")
 	float RemoveFoodInterval = 1.0f;
@@ -61,7 +62,7 @@ private:
 
 	// Oxygen
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<UOxygenComponent> OxygenComponent;
+	TObjectPtr<UResourceComponent> OxygenComponent;
 
 	UFUNCTION()
 	void RemoveFood() const;
@@ -74,7 +75,7 @@ private:
 
 	// Energy
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<UEnergyComponent> EnergyComponent;
+	TObjectPtr<UResourceComponent> EnergyComponent;
 
 	// Action
 	UPROPERTY()

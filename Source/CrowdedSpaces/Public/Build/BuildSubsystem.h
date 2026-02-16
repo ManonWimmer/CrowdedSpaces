@@ -9,10 +9,10 @@
 #include "Build/GhostObject.h"
 #include "Build/BuildData.h"
 #include "UI/GameHUD.h"
-#include "Resources/MoneyComponent.h"
 #include "BuildSubsystem.generated.h"
 
 class AGridActor;
+class UResourceComponent;
 
 UCLASS()
 class CROWDEDSPACES_API UBuildSubsystem : public UTickableWorldSubsystem
@@ -118,7 +118,7 @@ private:
 	TObjectPtr<AGameHUD> GameHUD;
 
 	UPROPERTY()
-	TObjectPtr<UMoneyComponent> MoneyComponent;
+	TObjectPtr<UResourceComponent> MoneyComponent;
 
 	UPROPERTY()
 	bool bTickEnabled = false;

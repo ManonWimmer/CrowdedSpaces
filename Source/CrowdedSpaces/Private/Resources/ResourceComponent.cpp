@@ -51,7 +51,10 @@ void UResourceComponent::AddResource(int Amount)
 {
 	const int32 OldResource = Resource;
 
-	Resource = FMath::Clamp(Resource + Amount, 0, MaxResource);
+	if (MaxResource != -1)
+		Resource = FMath::Clamp(Resource + Amount, 0, MaxResource);
+	else
+		Resource += Amount;
 
 	if (Resource != OldResource)
 	{
@@ -66,7 +69,10 @@ void UResourceComponent::AddResource(int Amount)
 
 void UResourceComponent::RemoveResource(int Amount)
 {
-	Resource = FMath::Clamp(Resource - Amount, 0, MaxResource);
+	if (MaxResource != -1)
+		Resource = FMath::Clamp(Resource - Amount, 0, MaxResource);
+	else
+		Resource -= Amount;
 	
 	if (Resource <= 0)
 		OnNoMoreResource.Broadcast();
@@ -101,6 +107,11 @@ void UResourceComponent::StopResourceTimer()
 {
 	if (!GetWorld()) return;
 	GetWorld()->GetTimerManager().ClearTimer(ResourceTimerHandle);
+}
+
+void UResourceComponent::SetCanLoseAndRegenResource(bool bCanLoseAndRegen)
+{
+	CanLoseAndRegenResource = bCanLoseAndRegen;
 }
 
 void UResourceComponent::SetIsInRegen(bool bInRegen)

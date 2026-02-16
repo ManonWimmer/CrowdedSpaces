@@ -16,7 +16,7 @@ AGhostObject::AGhostObject()
 	Mesh->SetRenderCustomDepth(true);
 }
 
-void AGhostObject::SetMesh(UStaticMesh* InMesh)
+void AGhostObject::SetMesh(UStaticMesh* InMesh) const
 {
 	if (InMesh && Mesh)
 	{

@@ -36,13 +36,16 @@ bool ABuildableFood::StartUsingImplementation(UBTTask_UseBuildableObject* UseObj
 {
 	CurrentTasks.Add(UseObjectTask);
 	
-	UFoodComponent* FoodComp = UsingNPC->FindComponentByClass<UFoodComponent>();
+	if (!UsingNPC.IsValid())
+		return false;
+	
+	UResourceComponent* FoodComp = UsingNPC->GetFoodComponent();
 	if (!FoodComp)
 		return false;
 	
-	FoodComp->SetEating(true);
+	FoodComp->SetIsInRegen(true);
 	
-	FoodComp->OnFoodFull.AddDynamic(UseObjectTask, &UBTTask_UseBuildableObject::OnStopAction);
+	FoodComp->OnResourceFull.AddDynamic(UseObjectTask, &UBTTask_UseBuildableObject::OnStopAction);
 
 	return true;
 }
@@ -51,13 +54,16 @@ bool ABuildableFood::StopUsingImplementation(UBTTask_UseBuildableObject* UseObje
 {
 	CurrentTasks.Remove(UseObjectTask);
 	
-	UFoodComponent* FoodComp = UsingNPC->FindComponentByClass<UFoodComponent>();
+	if (!UsingNPC.IsValid())
+		return false;
+	
+	UResourceComponent* FoodComp = UsingNPC->GetFoodComponent();
 	if (!FoodComp)
 		return false;
 
-	FoodComp->SetEating(false);
+	FoodComp->SetIsInRegen(false);
 
-	FoodComp->OnFoodFull.RemoveDynamic(UseObjectTask, &UBTTask_UseBuildableObject::OnStopAction);
+	FoodComp->OnResourceFull.RemoveDynamic(UseObjectTask, &UBTTask_UseBuildableObject::OnStopAction);
 	
 	return true;
 }

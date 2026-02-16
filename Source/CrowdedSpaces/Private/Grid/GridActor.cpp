@@ -251,7 +251,6 @@ int AGridActor::CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> C
 
 	ShowPlacedRooms(true);
 	
-	//UpdateWallsForRoom(NewRoom.Cells);
 	RebuildWalls();
 	
 	return NewRoom.RoomId;
@@ -442,10 +441,10 @@ void AGridActor::DrawLine(const FVector& Start, const FVector& End, const float 
 	Direction = FVector::CrossProduct(Direction, FVector(0,0,1));
 
 	int StartIndex = Vertices.Num();
-	Vertices.Add(Start + (Direction * HalfThickness)); // Top left corner
-	Vertices.Add(End + (Direction * HalfThickness)); // Top right corner
-	Vertices.Add(Start - (Direction * HalfThickness)); // Bottom left corner
-	Vertices.Add(End - (Direction * HalfThickness)); // Bottom right corner
+	Vertices.Add(Start + (Direction * HalfThickness));	// Top left corner
+	Vertices.Add(End + (Direction * HalfThickness));	// Top right corner
+	Vertices.Add(Start - (Direction * HalfThickness));	// Bottom left corner
+	Vertices.Add(End - (Direction * HalfThickness));	// Bottom right corner
 
 	Triangles.Add(StartIndex + 0);
 	Triangles.Add(StartIndex + 2);

@@ -2,12 +2,19 @@
 
 ACrowdedPlayerState::ACrowdedPlayerState()
 {
-	MoneyComponent = CreateDefaultSubobject<UMoneyComponent>(TEXT("MoneyComponent"));
+	MoneyComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("MoneyComponent"));
+	MoneyComponent->SetType(EResourceType::Money);
+	MoneyComponent->SetCanLoseAndRegenResource(false);
 	
-	ElectricityComponent = CreateDefaultSubobject<UElectricityComponent>(TEXT("ElectricityComponent"));
+	ElectricityComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("ElectricityComponent"));
+	ElectricityComponent->SetType(EResourceType::Electricity);
+	ElectricityComponent->SetCanLoseAndRegenResource(false);
 	
-	OxygenComponent = CreateDefaultSubobject<UOxygenComponent>(TEXT("OxygenComponent"));
+	OxygenComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("OxygenComponent"));
+	OxygenComponent->SetType(EResourceType::Oxygen);
+	OxygenComponent->SetCanLoseAndRegenResource(false);
 	
-	FoodComponent = CreateDefaultSubobject<UFoodComponent>(TEXT("FoodComponent"));
-	FoodComponent->SetSufferHunger(false);
+	FoodComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("FoodComponent"));
+	FoodComponent->SetType(EResourceType::Food);
+	FoodComponent->SetCanLoseAndRegenResource(false);
 }

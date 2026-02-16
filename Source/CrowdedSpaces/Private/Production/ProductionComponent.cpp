@@ -40,7 +40,7 @@ void UProductionComponent::GenerateProduction() const
 		case EProductionType::Money:
 			if (PlayerMoneyComponent)
 			{
-				PlayerMoneyComponent->AddMoney(ResourcePerInterval);
+				PlayerMoneyComponent->AddResource(ResourcePerInterval);
 			}
 			break;
 
@@ -48,7 +48,7 @@ void UProductionComponent::GenerateProduction() const
 		case EProductionType::Electricity:
 			if (PlayerElectricityComponent)
 			{
-				PlayerElectricityComponent->AddElectricity(ResourcePerInterval);
+				PlayerElectricityComponent->AddResource(ResourcePerInterval);
 			}
 			break;
 
@@ -56,7 +56,7 @@ void UProductionComponent::GenerateProduction() const
 		case EProductionType::Oxygen:
 			if (PlayerOxygenComponent)
 			{
-				PlayerOxygenComponent->AddOxygen(ResourcePerInterval);
+				PlayerOxygenComponent->AddResource(ResourcePerInterval);
 			}
 			break;
 
@@ -64,7 +64,7 @@ void UProductionComponent::GenerateProduction() const
 		case EProductionType::Food:
 			if (PlayerFoodComponent)
 			{
-				PlayerFoodComponent->AddFood(ResourcePerInterval);
+				PlayerFoodComponent->AddResource(ResourcePerInterval);
 			}
 			break;
 		

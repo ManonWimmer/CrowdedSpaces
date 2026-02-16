@@ -34,14 +34,17 @@ void ABuildableBed::EndPlay(const EEndPlayReason::Type EndPlayReason)
 bool ABuildableBed::StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
 	CurrentTasks.Add(UseObjectTask);
+
+	if (!UsingNPC.IsValid())
+		return false;
 	
-	UEnergyComponent* EnergyComp = UsingNPC->FindComponentByClass<UEnergyComponent>();
+	UResourceComponent* EnergyComp = UsingNPC->GetEnergyComponent();
 	if (!EnergyComp)
 		return false;
 	
-	EnergyComp->SetSleeping(true);
+	EnergyComp->SetIsInRegen(true);
 	
-	EnergyComp->OnEnergyFull.AddDynamic(UseObjectTask, &UBTTask_UseBuildableObject::OnStopAction);
+	EnergyComp->OnResourceFull.AddDynamic(UseObjectTask, &UBTTask_UseBuildableObject::OnStopAction);
 
 	return true;
 }
@@ -50,13 +53,16 @@ bool ABuildableBed::StopUsingImplementation(UBTTask_UseBuildableObject* UseObjec
 {
 	CurrentTasks.Remove(UseObjectTask);
 	
-	UEnergyComponent* EnergyComp = UsingNPC->FindComponentByClass<UEnergyComponent>();
+	if (!UsingNPC.IsValid())
+		return false;
+	
+	UResourceComponent* EnergyComp = UsingNPC->GetEnergyComponent();
 	if (!EnergyComp)
 		return false;
 
-	EnergyComp->SetSleeping(false);
+	EnergyComp->SetIsInRegen(false);
 
-	EnergyComp->OnEnergyFull.RemoveDynamic(UseObjectTask, &UBTTask_UseBuildableObject::OnStopAction);
+	EnergyComp->OnResourceFull.RemoveDynamic(UseObjectTask, &UBTTask_UseBuildableObject::OnStopAction);
 	
 	return true;
 }

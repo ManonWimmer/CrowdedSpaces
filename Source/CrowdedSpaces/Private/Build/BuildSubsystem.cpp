@@ -5,7 +5,7 @@
 #include "Game/CrowdedGameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/CrowdedPlayerController.h"
-#include "Resources/MoneyComponent.h"
+#include "Resources/ResourceComponent.h"
 #include "Player/CrowdedPlayerState.h"
 
 void UBuildSubsystem::OnWorldBeginPlay(UWorld& InWorld)
@@ -264,7 +264,7 @@ void UBuildSubsystem::PlaceObject() const
 	}
 
 	if (MoneyComponent)
-		MoneyComponent->RemoveMoney(CurrentBuildData->MoneyCost);
+		MoneyComponent->RemoveResource(CurrentBuildData->MoneyCost);
 }
 
 void UBuildSubsystem::RemoveObject(ABuildableObject* Object) const
@@ -300,7 +300,7 @@ void UBuildSubsystem::RemoveObject(ABuildableObject* Object) const
 	}
 	
 	if (MoneyComponent)
-		MoneyComponent->AddMoney(Object->GetBuildData()->DestroyMoney);
+		MoneyComponent->AddResource(Object->GetBuildData()->DestroyMoney);
 }
 
 void UBuildSubsystem::PlaceRoom()
@@ -332,7 +332,7 @@ void UBuildSubsystem::PlaceRoom()
 	GridActor->CreateRoom(CurrentBuildRoomData, SelectedRoomCells);
 
 	if (MoneyComponent)
-		MoneyComponent->RemoveMoney(CurrentBuildRoomData->MoneyCost);
+		MoneyComponent->RemoveResource(CurrentBuildRoomData->MoneyCost);
 
 	GridActor->DeselectSelectedCells();
 	

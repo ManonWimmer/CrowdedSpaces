@@ -7,7 +7,7 @@
 #include "Selection/Selectable.h"
 #include "BuildableGenerator.generated.h"
 
-class UMoneyComponent;
+class UResourceComponent;
 
 UCLASS()
 class CROWDEDSPACES_API ABuildableGenerator : public ABuildableObject, public ISelectable
@@ -37,7 +37,7 @@ public:
 	FUpgradeStruct GetNextUpgrade();
 
 	UFUNCTION(BlueprintCallable, Category = "Upgrade")
-	UMoneyComponent* GetPlayerMoneyComponent() const { return PlayerMoneyComponent; }
+	UResourceComponent* GetPlayerMoneyComponent() const { return PlayerMoneyComponent; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -62,5 +62,5 @@ private:
 	FUpgradeStruct NextUpgrade;
 
 	UPROPERTY()
-	UMoneyComponent* PlayerMoneyComponent;
+	UResourceComponent* PlayerMoneyComponent;
 };

@@ -12,7 +12,7 @@ class CROWDEDSPACES_API AGhostObject : public AActor
 public:
 	AGhostObject();
 
-	void SetMesh(UStaticMesh* InMesh);
+	void SetMesh(UStaticMesh* InMesh) const;
 	
 private:
 	UPROPERTY()

@@ -5,16 +5,22 @@
 ANPC::ANPC()
 {
 	// Food
-	FoodComponent = CreateDefaultSubobject<UFoodComponent>(TEXT("FoodComponent"));
-	FoodComponent->SetSufferHunger(true);
+	FoodComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("FoodComponent"));
+	FoodComponent->SetType(EResourceType::Food);
+	FoodComponent->SetCanLoseAndRegenResource(true);
+	
 	FoodBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("FoodBarWidget"));
 	FoodBarWidget->SetupAttachment(GetMesh());
 
 	// Oxygen
-	OxygenComponent = CreateDefaultSubobject<UOxygenComponent>(TEXT("OxygenComponent"));
+	OxygenComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("OxygenComponent"));
+	OxygenComponent->SetType(EResourceType::Oxygen);
+	OxygenComponent->SetCanLoseAndRegenResource(false);
 
 	// Energy
-	EnergyComponent = CreateDefaultSubobject<UEnergyComponent>(TEXT("EnergyComponent"));
+	EnergyComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("EnergyComponent"));
+	EnergyComponent->SetType(EResourceType::Energy);
+	EnergyComponent->SetCanLoseAndRegenResource(true);
 
 	// Selectable
 	SelectionType = ESelectionType::NPC;
@@ -55,22 +61,22 @@ void ANPC::BeginPlay()
 	
 	FoodWidget->OwningActor = this;
 	FoodWidget->Init();
-
-	FoodComponent->OnNoMoreFood.AddDynamic(this, &ANPC::Die);
-	EnergyComponent->OnNoMoreEnergy.AddDynamic(this, &ANPC::Die);
+	
+	FoodComponent->OnNoMoreResource.AddDynamic(this, &ANPC::Die);
+	EnergyComponent->OnNoMoreResource.AddDynamic(this, &ANPC::Die);
 }
 
 void ANPC::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	FoodComponent->OnNoMoreFood.RemoveDynamic(this, &ANPC::Die);
-	EnergyComponent->OnNoMoreEnergy.RemoveDynamic(this, &ANPC::Die);
+	FoodComponent->OnNoMoreResource.RemoveDynamic(this, &ANPC::Die);
+	EnergyComponent->OnNoMoreResource.RemoveDynamic(this, &ANPC::Die);
 	
 	Super::EndPlay(EndPlayReason);
 }
 
 void ANPC::RemoveFood() const
 {
-	FoodComponent->RemoveFood(RemoveFoodPerInterval);
+	FoodComponent->RemoveResource(RemoveFoodPerInterval);
 }
 
 #pragma region Selectable

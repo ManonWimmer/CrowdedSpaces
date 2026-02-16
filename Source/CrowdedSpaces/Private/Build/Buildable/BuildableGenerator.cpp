@@ -25,7 +25,6 @@ void ABuildableGenerator::BeginPlay()
 	BRS->RegisterGenerator(this);
 
 	// Get player money component
-	
 	if (!CrowdedPlayerState)
 		return;
 	
@@ -93,7 +92,7 @@ void ABuildableGenerator::OnNextUpgrade()
 	ProductionComponent->OnResourcePerIntervalChanged.Broadcast(ProductionComponent->ResourcePerInterval);
 	
 	// Cost
-	PlayerMoneyComponent->RemoveMoney(ProductionUpgradeData->UpgradesInOrder[CurrentUpgrade].UpgradeCost);
+	PlayerMoneyComponent->RemoveResource(ProductionUpgradeData->UpgradesInOrder[CurrentUpgrade].UpgradeCost);
 
 	// Check next upgrade
 	CurrentUpgrade++; 
