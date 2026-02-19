@@ -1,6 +1,7 @@
 ﻿#include "AI/NPC.h"
 
 #include "UI/Widgets/FoodBarWidget.h"
+#include "UI/Widgets/NPCActionWidget.h"
 
 ANPC::ANPC()
 {
@@ -11,6 +12,9 @@ ANPC::ANPC()
 	
 	FoodBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("FoodBarWidget"));
 	FoodBarWidget->SetupAttachment(GetMesh());
+
+	NPCActionWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("NPCActionWidget"));
+	NPCActionWidget->SetupAttachment(GetMesh());
 
 	// Oxygen
 	OxygenComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("OxygenComponent"));
@@ -30,6 +34,7 @@ void ANPC::SetCurrentAction(ENPCAction NewAction)
 {
 	CurrentAction = NewAction;
 	FString ActionString = StaticEnum<ENPCAction>()->GetDisplayNameTextByValue(static_cast<int64>(CurrentAction)).ToString();
+	
 	OnCurrentActionChanged.Broadcast(CurrentAction);
 }
 
@@ -51,17 +56,33 @@ void ANPC::BeginPlay()
 	if (!FoodBarWidget)
 		return;
 
-	TObjectPtr<UUserWidget> UserWidget = FoodBarWidget->GetUserWidgetObject();
-	if (!UserWidget)
+	TObjectPtr<UUserWidget> FoodBarUserWidget = FoodBarWidget->GetUserWidgetObject();
+	if (!FoodBarUserWidget)
 		return;
 
-	TObjectPtr<UFoodBarWidget> FoodWidget = Cast<UFoodBarWidget>(UserWidget);
-	if (!FoodWidget)
+	TObjectPtr<UFoodBarWidget> FoodBarWidgetPtr = Cast<UFoodBarWidget>(FoodBarUserWidget);
+	if (!FoodBarWidgetPtr)
 		return;
 	
-	FoodWidget->OwningActor = this;
-	FoodWidget->Init();
+	FoodBarWidgetPtr->OwningActor = this;
+	FoodBarWidgetPtr->Init();
+
+	// Same for npc action widget
+	if (!NPCActionWidget)
+		return;
+
+	TObjectPtr<UUserWidget> NPCActionUserWidget = NPCActionWidget->GetUserWidgetObject();
+	if (!NPCActionUserWidget)
+		return;
+
+	TObjectPtr<UNPCActionWidget> NPCActionWidgetPtr = Cast<UNPCActionWidget>(NPCActionUserWidget);
+	if (!NPCActionWidgetPtr)
+		return;
 	
+	NPCActionWidgetPtr->OwningActor = this;
+	NPCActionWidgetPtr->Init();
+
+	// Die
 	FoodComponent->OnNoMoreResource.AddDynamic(this, &ANPC::Die);
 	EnergyComponent->OnNoMoreResource.AddDynamic(this, &ANPC::Die);
 }

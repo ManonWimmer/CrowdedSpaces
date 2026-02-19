@@ -73,6 +73,9 @@ private:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UWidgetComponent> FoodBarWidget;
 
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UWidgetComponent> NPCActionWidget;
+
 	// Energy
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UResourceComponent> EnergyComponent;
