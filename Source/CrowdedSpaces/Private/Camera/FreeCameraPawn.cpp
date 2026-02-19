@@ -87,7 +87,7 @@ void AFreeCameraPawn::OnMoveRight(float Value)
 
 void AFreeCameraPawn::OnRotate(float Value)
 {
-	CurrentYawInput = Value * RotationSpeed;
+	CurrentYawInput = -Value * RotationSpeed;
 }
 
 void AFreeCameraPawn::OnZoom(float Value)
