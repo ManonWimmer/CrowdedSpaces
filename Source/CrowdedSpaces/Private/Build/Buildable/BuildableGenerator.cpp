@@ -11,7 +11,7 @@ ABuildableGenerator::ABuildableGenerator()
 	
 	SelectionType = ESelectionType::Generator;
 	ObjectType = EObjectType::Generator;
-	NPCAction = ENPCAction::Work;
+	NPCAction = ENPCActionWidget::Work;
 }
 
 void ABuildableGenerator::BeginPlay()

@@ -2,9 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "FreeCameraPawn.generated.h"
 
-class USpringArmComponent;
 class UCameraComponent;
 
 UCLASS()
@@ -14,6 +14,12 @@ class CROWDEDSPACES_API AFreeCameraPawn : public APawn
 
 public:
 	AFreeCameraPawn();
+
+	UFUNCTION()
+	UCameraComponent* GetCameraComponent() const { return Camera; }
+
+	float GetCurrentZoom() const { return SpringArm->TargetArmLength; }
+	float GetDefaultZoom() const { return 1500.f; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -41,6 +47,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category="Rotation")
 	float RotationSmooth = 50.f;
+
+	UPROPERTY(EditDefaultsOnly)
+	float DefaultZoom = 1500.f;
 
 	UPROPERTY(EditAnywhere, Category="Zoom")
 	float ZoomSpeed = 500.f;

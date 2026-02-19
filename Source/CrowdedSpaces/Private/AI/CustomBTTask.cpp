@@ -17,5 +17,5 @@ void UCustomBTTask::StopAction()  // Send idle action to NPC, called on task fin
 	if (!NPC)
 		return;
 
-	NPC->SetCurrentAction(ENPCAction::Idle);
+	NPC->SetCurrentAction(ENPCActionWidget::Idle);
 }

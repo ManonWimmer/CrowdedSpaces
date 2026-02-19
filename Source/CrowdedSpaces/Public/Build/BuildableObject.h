@@ -63,7 +63,7 @@ public:
 	EObjectType GetObjectType() const { return ObjectType; }
 
 	UFUNCTION(BlueprintCallable, Category = "Object")
-	ENPCAction GetNPCAction() const { return NPCAction;}
+	ENPCActionWidget GetNPCAction() const { return NPCAction;}
 
 	UFUNCTION(BlueprintCallable, Category = "Object")
 	void SetBuildData(UBuildData* NewData) { BuildData = NewData; }
@@ -97,7 +97,7 @@ protected:
 	EObjectType ObjectType = EObjectType::Default;
 
 	UPROPERTY()
-	ENPCAction NPCAction = ENPCAction::Idle;
+	ENPCActionWidget NPCAction = ENPCActionWidget::Idle;
 
 	UPROPERTY()
 	TObjectPtr<UBuildData> BuildData;

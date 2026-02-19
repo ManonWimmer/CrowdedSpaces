@@ -1,5 +1,8 @@
 ﻿#include "AI/NPC.h"
 
+#include "Camera/FreeCameraPawn.h"
+#include "Camera/CameraComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "UI/Widgets/FoodBarWidget.h"
 #include "UI/Widgets/NPCActionWidget.h"
 
@@ -30,10 +33,10 @@ ANPC::ANPC()
 	SelectionType = ESelectionType::NPC;
 }
 
-void ANPC::SetCurrentAction(ENPCAction NewAction)
+void ANPC::SetCurrentAction(ENPCActionWidget NewAction)
 {
 	CurrentAction = NewAction;
-	FString ActionString = StaticEnum<ENPCAction>()->GetDisplayNameTextByValue(static_cast<int64>(CurrentAction)).ToString();
+	FString ActionString = StaticEnum<ENPCActionWidget>()->GetDisplayNameTextByValue(static_cast<int64>(CurrentAction)).ToString();
 	
 	OnCurrentActionChanged.Broadcast(CurrentAction);
 }
@@ -93,6 +96,36 @@ void ANPC::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	EnergyComponent->OnNoMoreResource.RemoveDynamic(this, &ANPC::Die);
 	
 	Super::EndPlay(EndPlayReason);
+}
+
+void ANPC::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	// Widgets world look at camera
+	if (!FoodBarWidget || !NPCActionWidget) return;
+
+	const APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	if (!PC) return;
+
+	const AFreeCameraPawn* CamPawn = Cast<AFreeCameraPawn>(PC->GetPawn());
+	if (!CamPawn) return;
+
+	const UCameraComponent* Cam = CamPawn->GetCameraComponent();
+	if (!Cam) return;
+
+	const FVector CameraLocation = Cam->GetComponentLocation();
+	const FVector FoodBarWidgetLocation = FoodBarWidget->GetComponentLocation();
+	const FVector NPCActionWidgetLocation = NPCActionWidget->GetComponentLocation();
+
+	const FRotator LookAtFoodBar = UKismetMathLibrary::FindLookAtRotation(FoodBarWidgetLocation, CameraLocation);
+	const FRotator LookAtNPCAction = UKismetMathLibrary::FindLookAtRotation(NPCActionWidgetLocation, CameraLocation);
+	
+	const FRotator YawOnlyFoodBar(0.f, LookAtFoodBar.Yaw, 0.f);
+	const FRotator YawOnlyNPCAction(0.f, LookAtFoodBar.Yaw, 0.f);
+
+	FoodBarWidget->SetWorldRotation(YawOnlyFoodBar);
+	NPCActionWidget->SetWorldRotation(YawOnlyNPCAction);
 }
 
 void ANPC::RemoveFood() const

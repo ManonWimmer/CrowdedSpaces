@@ -6,7 +6,7 @@ ABuildableFood::ABuildableFood()
 {
 	SelectionType = ESelectionType::Food;
 	ObjectType = EObjectType::Food;
-	NPCAction = ENPCAction::Eat;
+	NPCAction = ENPCActionWidget::Eat;
 }
 
 void ABuildableFood::BeginPlay()

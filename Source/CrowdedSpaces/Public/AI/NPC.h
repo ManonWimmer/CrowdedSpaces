@@ -9,7 +9,7 @@
 #include "NPCAction.h"
 #include "NPC.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentActionChanged, ENPCAction, Value); 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentActionChanged, ENPCActionWidget, Value); 
 
 UCLASS()
 class CROWDEDSPACES_API ANPC : public ACharacter, public ISelectable
@@ -31,10 +31,10 @@ public:
 	UResourceComponent* GetOxygenComponent() const { return OxygenComponent; }
 
 	UFUNCTION(BlueprintCallable, Category="AI")
-	void SetCurrentAction(ENPCAction NewAction);
+	void SetCurrentAction(ENPCActionWidget NewAction);
 
 	UFUNCTION(BlueprintCallable)
-	ENPCAction GetCurrentAction() const { return CurrentAction; }
+	ENPCActionWidget GetCurrentAction() const { return CurrentAction; }
 
 	UPROPERTY(BlueprintAssignable)
 	FOnCurrentActionChanged OnCurrentActionChanged;
@@ -45,6 +45,8 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	virtual void Tick(float DeltaSeconds) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AI")
 	TObjectPtr<UBehaviorTree> BehaviorTree;
@@ -82,7 +84,7 @@ private:
 
 	// Action
 	UPROPERTY()
-	ENPCAction CurrentAction = ENPCAction::Idle;
+	ENPCActionWidget CurrentAction = ENPCActionWidget::Idle;
 	
 	// Selectable
 public:

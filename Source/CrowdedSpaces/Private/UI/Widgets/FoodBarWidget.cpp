@@ -1,5 +1,7 @@
 ﻿#include "UI/Widgets/FoodBarWidget.h"
 
+#include "Kismet/KismetMathLibrary.h"
+
 void UFoodBarWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -24,5 +26,4 @@ void UFoodBarWidget::Unsetup_Implementation()
 {
 	Super::Unsetup_Implementation();
 }
-
 

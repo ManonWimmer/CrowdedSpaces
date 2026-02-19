@@ -16,7 +16,7 @@ protected:
 	virtual void Reset_Implementation() override;
 	virtual void Setup_Implementation(AActor* SelectableActor) override;
 	virtual void Unsetup_Implementation() override;
-
+	
 public:
 	UPROPERTY(BlueprintReadWrite, Category = "UI")
 	TObjectPtr<AActor> OwningActor; // sinon on peut pas le recup quand il est mis en widget component
