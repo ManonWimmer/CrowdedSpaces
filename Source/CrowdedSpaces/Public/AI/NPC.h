@@ -7,6 +7,7 @@
 #include "Components/WidgetComponent.h"
 #include "Selection/Selectable.h"
 #include "NPCAction.h"
+#include "Production/ProductionType.h"
 #include "NPC.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentActionChanged, ENPCActionWidget, Value); 
@@ -41,6 +42,12 @@ public:
 
 	UFUNCTION()
 	void Die();
+
+	UFUNCTION(BlueprintCallable, Category="AI")
+	EProductionType GetWorkOnGeneratorType() const { return WorkOnGeneratorType; }
+
+	UFUNCTION(BlueprintCallable, Category="AI")
+	void SetWorkOnGeneratorType(EProductionType NewType);
 
 protected:
 	virtual void BeginPlay() override;
@@ -85,6 +92,10 @@ private:
 	// Action
 	UPROPERTY()
 	ENPCActionWidget CurrentAction = ENPCActionWidget::Idle;
+
+	// Work
+	UPROPERTY(EditAnywhere)
+	EProductionType WorkOnGeneratorType = EProductionType::Money;
 	
 	// Selectable
 public:

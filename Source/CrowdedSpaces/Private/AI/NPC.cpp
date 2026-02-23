@@ -58,6 +58,13 @@ void ANPC::Die()
 	Destroy();
 }
 
+void ANPC::SetWorkOnGeneratorType(EProductionType NewType)
+{
+	WorkOnGeneratorType = NewType;
+
+	//todo : cancel current task in case was working on a generator
+}
+
 void ANPC::BeginPlay()
 {
 	Super::BeginPlay();

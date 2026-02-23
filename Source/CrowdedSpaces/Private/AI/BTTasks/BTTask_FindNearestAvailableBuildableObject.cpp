@@ -2,7 +2,6 @@
 
 #include "AI/NPCController.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "Build/Buildable/BuildableBed.h"
 #include "Build/BuildableRegistrySubsystem.h"
 
 UBTTask_FindNearestAvailableBuildableObject::UBTTask_FindNearestAvailableBuildableObject(FObjectInitializer const& ObjectInitializer)
@@ -52,6 +51,14 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBe
 
 		if (Object->IsReservedByOther(NPC))
 			continue;
+
+		// Check same generator type as npc should work on
+		if (BuildableObjectType == EObjectType::Generator)
+		{
+			ABuildableGenerator* Generator = Cast<ABuildableGenerator>(Object);
+			if (NPC->GetWorkOnGeneratorType() != Generator->GetProductionType())
+				continue;
+		}
 		
 		float Distance = FVector::Distance(Origin, Object->GetActorLocation());
 		if (Distance < SearchRadius / 2)

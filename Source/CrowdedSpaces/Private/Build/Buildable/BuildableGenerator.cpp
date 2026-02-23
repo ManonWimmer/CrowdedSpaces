@@ -79,6 +79,11 @@ bool ABuildableGenerator::StopUsingImplementation(UBTTask_UseBuildableObject* Us
 }
 
 #pragma region Upgrade
+EProductionType ABuildableGenerator::GetProductionType() const
+{
+	return ProductionComponent->ProductionType;
+}
+
 void ABuildableGenerator::OnNextUpgrade()
 {
 	if (!bHasNextUpgrade)
