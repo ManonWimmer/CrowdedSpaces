@@ -5,6 +5,7 @@
 #include "GameFramework/GameMode.h"
 #include "CrowdedGameMode.generated.h"
 
+class ANPC;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameModeChanged, EGameModeState, NewGameMode);
 
 UCLASS()
@@ -37,6 +38,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "GameMode"	)
 	int GetMaxDaysToSurvive() const { return MaxDaysToSurvive; }
+
+	void RegisterNPC(ANPC* NPC);
+	void UnregisterNPC(ANPC* NPC);
 	
 	UPROPERTY(BlueprintAssignable)
 	FOnGameModeChanged OnGameModeChanged;
@@ -47,4 +51,7 @@ private:
 
 	UPROPERTY()
 	EGameModeState CurrentGameMode = EGameModeState::Game;
+
+	UPROPERTY()
+	int AliveNPCCount = 0;
 };

@@ -2,6 +2,7 @@
 
 #include "Camera/FreeCameraPawn.h"
 #include "Camera/CameraComponent.h"
+#include "Game/CrowdedGameMode.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "UI/Widgets/FoodBarWidget.h"
 #include "UI/Widgets/NPCActionWidget.h"
@@ -47,6 +48,12 @@ void ANPC::Die()
 
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Npc died.");
+
+	ACrowdedGameMode* GameMode = GetWorld()->GetAuthGameMode<ACrowdedGameMode>();
+	if (!GameMode)
+		return;
+
+	GameMode->UnregisterNPC(this);
 	
 	Destroy();
 }
@@ -88,6 +95,12 @@ void ANPC::BeginPlay()
 	// Die
 	FoodComponent->OnNoMoreResource.AddDynamic(this, &ANPC::Die);
 	EnergyComponent->OnNoMoreResource.AddDynamic(this, &ANPC::Die);
+
+	ACrowdedGameMode* GameMode = GetWorld()->GetAuthGameMode<ACrowdedGameMode>();
+	if (!GameMode)
+		return;
+
+	GameMode->RegisterNPC(this);
 }
 
 void ANPC::EndPlay(const EEndPlayReason::Type EndPlayReason)

@@ -64,3 +64,18 @@ void ACrowdedGameMode::EndGame(bool bSurvived) const
 	UGameplayStatics::OpenLevel(this, "LVL_EndScreen");
 }
 
+void ACrowdedGameMode::RegisterNPC(ANPC* NPC)
+{
+	AliveNPCCount++;
+}
+
+void ACrowdedGameMode::UnregisterNPC(ANPC* NPC)
+{
+	AliveNPCCount--;
+
+	if (AliveNPCCount <= 0)
+	{
+		EndGame(false); 
+	}
+}
+
