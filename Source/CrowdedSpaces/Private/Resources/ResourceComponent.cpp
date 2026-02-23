@@ -92,7 +92,8 @@ bool UResourceComponent::HasMaxResource()
 
 void UResourceComponent::StartResourceTimer()
 {
-	if (!GetWorld()) return;
+	if (!GetWorld())
+		return;
 
 	GetWorld()->GetTimerManager().SetTimer(
 		ResourceTimerHandle,
@@ -103,9 +104,32 @@ void UResourceComponent::StartResourceTimer()
 	);
 }
 
+void UResourceComponent::ToggleResourceTimer()
+{
+	if (!GetWorld())
+		return;
+
+	FTimerManager& TimerManager = GetWorld()->GetTimerManager();
+	
+
+	if (TimerManager.IsTimerActive(ResourceTimerHandle))
+	{
+		TimerManager.PauseTimer(ResourceTimerHandle);
+	}
+	else if (TimerManager.IsTimerPaused(ResourceTimerHandle))
+	{
+		TimerManager.UnPauseTimer(ResourceTimerHandle);
+	}
+	else
+	{
+		StartResourceTimer();
+	}
+}
+
 void UResourceComponent::StopResourceTimer()
 {
-	if (!GetWorld()) return;
+	if (!GetWorld())
+		return;
 	GetWorld()->GetTimerManager().ClearTimer(ResourceTimerHandle);
 }
 

@@ -50,6 +50,9 @@ public:
 	void StartResourceTimer();
 
 	UFUNCTION(BlueprintCallable)
+	void ToggleResourceTimer();
+	
+	UFUNCTION(BlueprintCallable)
 	void StopResourceTimer();
 
 	// Using
