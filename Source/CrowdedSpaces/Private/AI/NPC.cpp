@@ -1,5 +1,8 @@
 ﻿#include "AI/NPC.h"
 
+#include "AI/NPCController.h"
+#include "BehaviorTree/BlackboardComponent.h"
+#include "Build/BuildableObject.h"
 #include "Camera/FreeCameraPawn.h"
 #include "Camera/CameraComponent.h"
 #include "Game/CrowdedGameMode.h"
@@ -60,9 +63,25 @@ void ANPC::Die()
 
 void ANPC::SetWorkOnGeneratorType(EProductionType NewType)
 {
+	if (WorkOnGeneratorType == NewType)
+		return;
+	
 	WorkOnGeneratorType = NewType;
 
-	//todo : cancel current task in case was working on a generator
+	// Cancel use generator task in cas was working on genrator with diferent type
+	if (ANPCController* ControllerNPC = Cast<ANPCController>(GetController()))
+	{
+		if (UBlackboardComponent* BB = ControllerNPC->GetBlackboardComponent())
+		{
+			TObjectPtr<ABuildableObject> TargetObject = Cast<ABuildableObject>(BB->GetValueAsObject("TargetObject"));
+			
+			if (TargetObject && TargetObject->GetObjectType() == EObjectType::Generator)
+			{
+				if (UBehaviorTreeComponent* BTComp = Cast<UBehaviorTreeComponent>(ControllerNPC->GetBrainComponent()))
+					BTComp->RestartTree();
+			}
+		}
+	}
 }
 
 void ANPC::BeginPlay()
