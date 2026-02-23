@@ -16,6 +16,7 @@ public:
 	ACrowdedGameMode();
 
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
 	EGameModeState GetGameMode() const { return CurrentGameMode; }
 
@@ -28,9 +29,22 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "GameMode")
 	void SetGameMode_Building() { SetGameMode(EGameModeState::Building); }
 
+	UFUNCTION()
+	void CheckEndGame(int NewDay);
+
+	UFUNCTION()
+	void EndGame(bool bSurvived) const;
+
+	UFUNCTION(BlueprintCallable, Category = "GameMode"	)
+	int GetMaxDaysToSurvive() const { return MaxDaysToSurvive; }
+	
 	UPROPERTY(BlueprintAssignable)
 	FOnGameModeChanged OnGameModeChanged;
 
 private:
+	UPROPERTY(EditAnywhere, Category = "GameMode")
+	int MaxDaysToSurvive = 10;
+
+	UPROPERTY()
 	EGameModeState CurrentGameMode = EGameModeState::Game;
 };

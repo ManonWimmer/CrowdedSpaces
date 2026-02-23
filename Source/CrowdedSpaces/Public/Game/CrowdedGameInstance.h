@@ -12,4 +12,8 @@ class CROWDEDSPACES_API UCrowdedGameInstance : public UGameInstance
 	virtual void Init() override;
 
 	void OnPostWorldInitialization(UWorld* World, const UWorld::InitializationValues IVS);
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bLastGameSurvived = false;
 };

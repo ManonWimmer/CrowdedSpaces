@@ -1,5 +1,9 @@
 ﻿#include "Game/CrowdedGameMode.h"
 
+#include "Game/CrowdedGameInstance.h"
+#include "Kismet/GameplayStatics.h"
+#include "Time/TimeSubsystem.h"
+
 ACrowdedGameMode::ACrowdedGameMode()
 {
 }
@@ -9,6 +13,23 @@ void ACrowdedGameMode::BeginPlay()
 	Super::BeginPlay();
 	
 	SetGameMode(EGameModeState::Game);
+
+	const TObjectPtr<UTimeSubsystem> TimeSubsystem = GetWorld()->GetSubsystem<UTimeSubsystem>();
+	if (!TimeSubsystem)
+		return;
+	
+	TimeSubsystem->OnDayChanged.AddDynamic(this, &ACrowdedGameMode::CheckEndGame);
+}
+
+void ACrowdedGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	UTimeSubsystem* TimeSubsystem = GetWorld()->GetSubsystem<UTimeSubsystem>();
+	if (!TimeSubsystem)
+		return;
+	
+	TimeSubsystem->OnDayChanged.RemoveDynamic(this, &ACrowdedGameMode::CheckEndGame);
 }
 
 void ACrowdedGameMode::SetGameMode(EGameModeState NewGameMode)
@@ -19,5 +40,27 @@ void ACrowdedGameMode::SetGameMode(EGameModeState NewGameMode)
 	CurrentGameMode = NewGameMode;
 	
 	OnGameModeChanged.Broadcast(NewGameMode);
+}
+
+void ACrowdedGameMode::CheckEndGame(int NewDay)
+{
+	if (NewDay > MaxDaysToSurvive)
+	{
+		EndGame(true);
+	}
+}
+
+void ACrowdedGameMode::EndGame(bool bSurvived) const
+{
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "EndGame");
+
+	UCrowdedGameInstance* GameInstance = GetGameInstance<UCrowdedGameInstance>();
+	if (!GameInstance)
+		return;
+	
+	GameInstance->bLastGameSurvived = bSurvived;
+
+	UGameplayStatics::OpenLevel(this, "LVL_EndScreen");
 }
 
