@@ -40,6 +40,9 @@ public:
 	void SetResourcePerInterval(const int NewResourcePerInterval) { ResourcePerInterval = NewResourcePerInterval; }
 
 	UFUNCTION(BlueprintCallable, Category = "Production")
+	int GetProductionMultiplier() { return ProductionMultiplier; }
+	
+	UFUNCTION(BlueprintCallable, Category = "Production")
 	void SetProductionMultiplier(const int Multiplier) { ProductionMultiplier = Multiplier; }
 	
 	UFUNCTION()

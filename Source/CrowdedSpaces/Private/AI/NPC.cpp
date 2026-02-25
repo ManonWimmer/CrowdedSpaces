@@ -35,11 +35,6 @@ ANPC::ANPC()
 
 	// Selectable
 	SelectionType = ESelectionType::NPC;
-
-	// Multipliers
-	FoodProductionMultiplier = FMath::RandRange(1, 5);
-	ElectricityProductionMultiplier = FMath::RandRange(1, 5);
-	MoneyProductionMultiplier = FMath::RandRange(1, 5);
 }
 
 void ANPC::SetCurrentAction(ENPCActionWidget NewAction)
@@ -150,6 +145,11 @@ void ANPC::BeginPlay()
 		return;
 
 	GameMode->RegisterNPC(this);
+
+	// Multipliers
+	FoodProductionMultiplier = FMath::RandRange(1, 5);
+	ElectricityProductionMultiplier = FMath::RandRange(1, 5);
+	MoneyProductionMultiplier = FMath::RandRange(1, 5);
 }
 
 void ANPC::EndPlay(const EEndPlayReason::Type EndPlayReason)
