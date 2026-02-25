@@ -37,9 +37,9 @@ void ABuildableGenerator::BeginPlay()
 	if (!ProductionUpgradeData)
 		return;
 
-	ProductionComponent->ProductionType = ProductionUpgradeData->ProductionType;
-	ProductionComponent->ProductionInterval = ProductionUpgradeData->StartProductionInterval;
-	ProductionComponent->ResourcePerInterval = ProductionUpgradeData->StartResourcePerInterval;
+	ProductionComponent->SetProductionType(ProductionUpgradeData->ProductionType);
+	ProductionComponent->SetProductionInterval(ProductionUpgradeData->StartProductionInterval);
+	ProductionComponent->SetResourcePerInterval(ProductionUpgradeData->StartResourcePerInterval);
 
 	if (ProductionUpgradeData->UpgradesInOrder.Num() > 0)
 	{
@@ -65,7 +65,8 @@ void ABuildableGenerator::EndPlay(const EEndPlayReason::Type EndPlayReason)
 bool ABuildableGenerator::StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
 	CurrentTasks.Add(UseObjectTask);
-	
+
+	ProductionComponent->SetProductionMultiplier(UsingNPC->GetProductionMultiplierForType(ProductionComponent->GetProductionType()));
 	ProductionComponent->StartProduction();
 	return true; 
 }
@@ -73,7 +74,8 @@ bool ABuildableGenerator::StartUsingImplementation(UBTTask_UseBuildableObject* U
 bool ABuildableGenerator::StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
 	CurrentTasks.Remove(UseObjectTask);
-	
+
+	ProductionComponent->SetProductionMultiplier(1);
 	ProductionComponent->PauseProduction();
 	return true; 
 }
@@ -81,7 +83,7 @@ bool ABuildableGenerator::StopUsingImplementation(UBTTask_UseBuildableObject* Us
 #pragma region Upgrade
 EProductionType ABuildableGenerator::GetProductionType() const
 {
-	return ProductionComponent->ProductionType;
+	return ProductionComponent->GetProductionType();
 }
 
 void ABuildableGenerator::OnNextUpgrade()
@@ -90,11 +92,11 @@ void ABuildableGenerator::OnNextUpgrade()
 		return;
 	
 	// Upgrade stats
-	ProductionComponent->ProductionInterval = ProductionUpgradeData->UpgradesInOrder[CurrentUpgrade].UpgradeProductionInterval;
-	ProductionComponent->ResourcePerInterval = ProductionUpgradeData->UpgradesInOrder[CurrentUpgrade].UpgradeResourcePerInterval;
+	ProductionComponent->SetProductionInterval(ProductionUpgradeData->UpgradesInOrder[CurrentUpgrade].UpgradeProductionInterval);
+	ProductionComponent->SetResourcePerInterval(ProductionUpgradeData->UpgradesInOrder[CurrentUpgrade].UpgradeResourcePerInterval);
 	
-	ProductionComponent->OnProductionIntervalChanged.Broadcast(ProductionComponent->ProductionInterval);
-	ProductionComponent->OnResourcePerIntervalChanged.Broadcast(ProductionComponent->ResourcePerInterval);
+	ProductionComponent->OnProductionIntervalChanged.Broadcast(ProductionComponent->GetProductionInterval());
+	ProductionComponent->OnResourcePerIntervalChanged.Broadcast(ProductionComponent->GetResourcePerInterval());
 	
 	// Cost
 	PlayerMoneyComponent->RemoveResource(ProductionUpgradeData->UpgradesInOrder[CurrentUpgrade].UpgradeCost);

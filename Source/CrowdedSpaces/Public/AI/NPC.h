@@ -49,6 +49,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="AI")
 	void SetWorkOnGeneratorType(EProductionType NewType);
 
+	UFUNCTION(BlueprintCallable, Category="AI")
+	int GetProductionMultiplierForType(EProductionType Type) const;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -96,6 +99,16 @@ private:
 	// Work
 	UPROPERTY(EditAnywhere)
 	EProductionType WorkOnGeneratorType = EProductionType::Money;
+
+	// Multipliers
+	UPROPERTY()
+	int FoodProductionMultiplier = 1;
+
+	UPROPERTY()
+	int ElectricityProductionMultiplier = 1;
+
+	UPROPERTY()
+	int MoneyProductionMultiplier = 1;
 	
 	// Selectable
 public:

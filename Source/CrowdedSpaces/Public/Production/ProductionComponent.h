@@ -20,26 +20,28 @@ public:
 
 public:
 	virtual void BeginPlay() override;
-
-	// Production
-	UPROPERTY(EditAnywhere, Category="Production")
-	EProductionType ProductionType = EProductionType::Money;
-
+	
 	UFUNCTION(BlueprintCallable, Category = "Production")
 	EProductionType GetProductionType() const { return ProductionType; }
-	
-	UPROPERTY(EditAnywhere, Category="Production")
-	float ProductionInterval = 1.0f;
 
+	UFUNCTION(BlueprintCallable, Category = "Production")
+	void SetProductionType(const EProductionType NewProductionType) { ProductionType = NewProductionType; }
+	
 	UFUNCTION(BlueprintCallable, Category = "Production")
 	float GetProductionInterval() const { return ProductionInterval; }
 
-	UPROPERTY(EditAnywhere, Category="Production")
-	int32 ResourcePerInterval = 10;
+	UFUNCTION(BlueprintCallable, Category = "Production")
+	void SetProductionInterval(const int NewProductionInterval) { ProductionInterval = NewProductionInterval; }
 
 	UFUNCTION(BlueprintCallable, Category = "Production")
 	float GetResourcePerInterval() const { return ResourcePerInterval; }
 
+	UFUNCTION(BlueprintCallable, Category = "Production")
+	void SetResourcePerInterval(const int NewResourcePerInterval) { ResourcePerInterval = NewResourcePerInterval; }
+
+	UFUNCTION(BlueprintCallable, Category = "Production")
+	void SetProductionMultiplier(const int Multiplier) { ProductionMultiplier = Multiplier; }
+	
 	UFUNCTION()
 	void GenerateProduction() const;
 
@@ -65,6 +67,18 @@ public:
 	FOnResourcePerIntervalChanged OnResourcePerIntervalChanged;
 
 private:
+	UPROPERTY(EditAnywhere, Category="Production")
+	EProductionType ProductionType = EProductionType::Money;
+
+	UPROPERTY(EditAnywhere, Category="Production")
+	float ProductionInterval = 1.0f;
+
+	UPROPERTY(EditAnywhere, Category="Production")
+	int32 ResourcePerInterval = 10;
+
+	UPROPERTY(EditAnywhere, Category="Production")
+	int ProductionMultiplier = 1;
+	
 	UPROPERTY()
 	FTimerHandle ProductionTimerHandle;
 

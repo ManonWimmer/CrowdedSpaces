@@ -35,6 +35,11 @@ ANPC::ANPC()
 
 	// Selectable
 	SelectionType = ESelectionType::NPC;
+
+	// Multipliers
+	FoodProductionMultiplier = FMath::RandRange(1, 5);
+	ElectricityProductionMultiplier = FMath::RandRange(1, 5);
+	MoneyProductionMultiplier = FMath::RandRange(1, 5);
 }
 
 void ANPC::SetCurrentAction(ENPCActionWidget NewAction)
@@ -81,6 +86,24 @@ void ANPC::SetWorkOnGeneratorType(EProductionType NewType)
 					BTComp->RestartTree();
 			}
 		}
+	}
+}
+
+int ANPC::GetProductionMultiplierForType(const EProductionType Type) const
+{
+	switch (Type)
+	{
+		case EProductionType::Money:
+			return MoneyProductionMultiplier;
+			
+		case EProductionType::Food:
+			return FoodProductionMultiplier;
+			
+		case EProductionType::Electricity:
+			return ElectricityProductionMultiplier;
+			
+		default:
+			return 1;
 	}
 }
 
