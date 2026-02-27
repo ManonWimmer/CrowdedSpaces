@@ -131,7 +131,7 @@ void AGridActor::BeginPlay()
 
 			Cells.Emplace(
 				Key,
-				FGridCell(Row, Column, false, EGridCellType::None, EGridRoomType::Any,
+				FGridCell(Row, Column, false, EGridCellType::None, EGridRoomType::None,
 				NewCellProceduralMesh, NewCellMaterialInstance));
 		}
 	}
@@ -205,7 +205,7 @@ void AGridActor::SelectRoomCell(const int Row, const int Column)
 	
 	NewSelectedCell->CellProceduralMesh->SetVisibility(true);
 
-	if (NewSelectedCell->RoomId != -1)
+	if (NewSelectedCell->RoomType != EGridRoomType::None)
 		NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Red);
 	else
 		NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Green); 
@@ -258,7 +258,7 @@ int AGridActor::CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> C
 
 bool AGridActor::CheckIfCellInPlacedRoom(const FGridCell* Cell, FLinearColor& OutGridColor)
 {
-	if (Cell->RoomId != -1)
+	if (Cell->RoomType != EGridRoomType::None)
 	{
 		const FGridRoom* Room = Rooms.Find(Cell->RoomId);
 		if (Room)
@@ -376,7 +376,7 @@ bool AGridActor::GetRoomAtWorldLocation(const FVector& WorldLoc, FGridRoom*& Out
 		return false;
 
 	FGridCell* Cell = GetGridCell(Row, Col);
-	if (!Cell || Cell->RoomId == -1)
+	if (!Cell || Cell->RoomType == EGridRoomType::None)
 		return false;
 
 	OutRoom = Rooms.Find(Cell->RoomId);

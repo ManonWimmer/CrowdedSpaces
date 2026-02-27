@@ -322,9 +322,9 @@ void UBuildSubsystem::PlaceRoom()
 			return;
 		}
 
-		if (Cell->RoomId != -1)
+		if (Cell->RoomType != EGridRoomType::None)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("PlaceRoom: SelectedRoomCells contient Room id != -1!"));
+			UE_LOG(LogTemp, Warning, TEXT("PlaceRoom: SelectedRoomCells contient une room non set"));
 			return;
 		}
 	}
