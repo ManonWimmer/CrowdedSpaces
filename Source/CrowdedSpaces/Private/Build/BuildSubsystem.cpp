@@ -222,7 +222,7 @@ void UBuildSubsystem::PlaceObject() const
 	{
 		for (int Col = StartCol; Col < StartCol + SizeY; ++Col)
 		{
-			FGridCell* Cell = GridActor->GetGridCell(Row, Col);
+			const FGridCell* Cell = GridActor->GetGridCell(Row, Col);
 			if (CurrentBuildData->RoomType == EGridRoomType::Any)
 			{
 				if (!Cell || Cell->bOccupied)
@@ -314,7 +314,7 @@ void UBuildSubsystem::PlaceRoom()
 	GetRoomRotatedSize(SizeX, SizeY);
 	
 	// Check can place
-	for (FGridCell* Cell : SelectedRoomCells)
+	for (const FGridCell* Cell : SelectedRoomCells)
 	{
 		if (!Cell)
 		{
