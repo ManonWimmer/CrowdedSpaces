@@ -42,7 +42,7 @@ public:
 	// Selection
 	void ShowSelectionWidget(AActor* SelectableActor, bool bShow, ESelectionType SelectionType);
 	
-	void ShowSelectionWidget(FGridRoom& Room, bool bShow, ESelectionType SelectionType);
+	void ShowSelectionWidget(const FGridRoom& Room, bool bShow, ESelectionType SelectionType);
 
 	UCustomWidget* GetWidgetFromSelectionType(ESelectionType Type);
 

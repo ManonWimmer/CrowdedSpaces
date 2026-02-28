@@ -12,6 +12,10 @@ AGridActor::AGridActor()
 
 	WallISM = CreateDefaultSubobject<UInstancedStaticMeshComponent>("WallISM");
 	WallISM->SetupAttachment(RootComponent);
+	WallISM->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	WallISM->SetCollisionObjectType(ECC_WorldStatic);
+	WallISM->SetCollisionResponseToAllChannels(ECR_Block);
+	WallISM->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
 	
 	PrimaryActorTick.bCanEverTick = false;
 }
@@ -48,9 +52,9 @@ void AGridActor::OnConstruction(const FTransform& Transform)
 
 	// Create line mesh & material
 	TArray<FVector> LinesNormals;         
-	TArray<FVector2D> LinesUV0;           
-	TArray<FColor> LinesVertexColors;     
-	TArray<FProcMeshTangent> LinesTangents;
+	TArray<FVector2D> LinesUV0;
+	const TArray<FColor> LinesVertexColors;
+	const TArray<FProcMeshTangent> LinesTangents;
 
 	for (int i = 0; i < LineVertices.Num(); i++)
 	{
@@ -276,7 +280,7 @@ void AGridActor::RebuildWalls()
 	WallISM->ClearInstances();
 	CreatedWallsPositions.Empty();
 
-	float Half = CellSize * 0.5f;
+	const float Half = CellSize * 0.5f;
 
 	for (auto& Pair : Rooms)
 	{
@@ -347,16 +351,16 @@ void AGridActor::TryAddWall(FGridCell* Cell, int NeighborRow, int NeighborCol, E
 		return;
 
 	// Passage auto si cellule = porte
-	bool bCreatePassage = DoorCells.Contains(FIntPoint(Cell->Row, Cell->Column));
-
-	float PassageHeight = 180.f;
-	float WallHeight = 220.f;
+	const bool bCreatePassage = DoorCells.Contains(FIntPoint(Cell->Row, Cell->Column));
 
 	if (bCreatePassage)
 	{
+		constexpr float PassageHeight = 180.f;
+		constexpr float WallHeight = 223.f;
+		
 		// Passage
-		FVector TopLoc = SpawnLoc + FVector(0, 0, PassageHeight + (WallHeight - PassageHeight) / 2);
-		FVector TopScale(1.f, 1.f, (WallHeight - PassageHeight) / WallHeight);
+		const FVector TopLoc = SpawnLoc + FVector(0, 0, PassageHeight + (WallHeight - PassageHeight) / 2);
+		const FVector TopScale(1.f, 1.f, (WallHeight - PassageHeight) / WallHeight);
 		WallISM->AddInstance(FTransform(Rot, TopLoc, TopScale));
 	}
 	else
@@ -400,7 +404,7 @@ void AGridActor::ShowGrid(bool bShow)
 
 void AGridActor::DeselectSelectedCells()
 {
-	for (FGridCell* Cell : SelectedCells)
+	for (const FGridCell* Cell : SelectedCells)
 	{
 		if (Cell)
 		{
@@ -427,20 +431,20 @@ FGridCell* AGridActor::GetGridCell(int Row, int Column)
 
 void AGridActor::DeselectCell(int Row, int Column)
 {
-	FGridCell* Cell = GetGridCell(Row, Column);
+	const FGridCell* Cell = GetGridCell(Row, Column);
 	if (Cell)
 		Cell->CellProceduralMesh->SetVisibility(false);
 }
 
 void AGridActor::DrawLine(const FVector& Start, const FVector& End, const float Thickness, TArray<FVector>& Vertices, TArray<int>& Triangles)
 {
-	float HalfThickness = Thickness / 2;
+	const float HalfThickness = Thickness / 2;
 
 	FVector Direction = End - Start;
 	Direction.Normalize();
 	Direction = FVector::CrossProduct(Direction, FVector(0,0,1));
 
-	int StartIndex = Vertices.Num();
+	const int StartIndex = Vertices.Num();
 	Vertices.Add(Start + (Direction * HalfThickness));	// Top left corner
 	Vertices.Add(End + (Direction * HalfThickness));	// Top right corner
 	Vertices.Add(Start - (Direction * HalfThickness));	// Bottom left corner
