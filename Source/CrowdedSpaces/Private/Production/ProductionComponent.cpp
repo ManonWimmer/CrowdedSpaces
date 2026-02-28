@@ -26,10 +26,10 @@ void UProductionComponent::BeginPlay()
 		return;
 	
 	// Get player components
-	PlayerMoneyComponent = PS->GetMoneyComponent();
-	PlayerElectricityComponent = PS->GetElectricityComponent();
-	PlayerOxygenComponent = PS->GetOxygenComponent();
-	PlayerFoodComponent = PS->GetFoodComponent();
+	PlayerMoneyComponent = PS->GetResourceComponent<EResourceType::Money>();
+	PlayerElectricityComponent = PS->GetResourceComponent<EResourceType::Electricity>();
+	PlayerOxygenComponent = PS->GetResourceComponent<EResourceType::Oxygen>();
+	PlayerFoodComponent = PS->GetResourceComponent<EResourceType::Food>();
 }
 
 void UProductionComponent::GenerateProduction() const

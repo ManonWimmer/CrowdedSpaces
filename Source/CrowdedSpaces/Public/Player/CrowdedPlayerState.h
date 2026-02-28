@@ -14,16 +14,10 @@ public:
 	ACrowdedPlayerState();
 
 	UFUNCTION(BlueprintCallable)
-	UResourceComponent* GetMoneyComponent() const { return MoneyComponent; }
-	
-	UFUNCTION(BlueprintCallable)
-	UResourceComponent* GetElectricityComponent() const { return ElectricityComponent; }
+	UResourceComponent* GetResourceComponentByType(EResourceType Type) const;
 
-	UFUNCTION(BlueprintCallable)
-	UResourceComponent* GetOxygenComponent() const { return OxygenComponent; }
-
-	UFUNCTION(BlueprintCallable)
-	UResourceComponent* GetFoodComponent() const { return FoodComponent; }
+	template <EResourceType Type>
+	UResourceComponent* GetResourceComponent() const;
 
 private:
 	UPROPERTY(EditAnywhere)
@@ -37,4 +31,13 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UResourceComponent> FoodComponent;
+
+	UPROPERTY()
+	TMap<EResourceType, TObjectPtr<UResourceComponent>> ResourceMap;
 };
+
+template <EResourceType Type>
+UResourceComponent* ACrowdedPlayerState::GetResourceComponent() const
+{
+	return GetResourceComponentByType(Type);
+}

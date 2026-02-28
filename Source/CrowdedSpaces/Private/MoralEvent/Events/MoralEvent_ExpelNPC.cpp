@@ -58,7 +58,7 @@ void UMoralEvent_ExpelNPC::ClickOnChoice(EMoralEventType Choice)
 		
 			if (TObjectPtr<ACrowdedPlayerState> PS = PC->GetPlayerState<ACrowdedPlayerState>())
 			{
-				MoneyComponent = PS->GetMoneyComponent();
+				MoneyComponent = PS->GetResourceComponent<EResourceType::Money>();
 			}
 
 			if (!MoneyComponent)

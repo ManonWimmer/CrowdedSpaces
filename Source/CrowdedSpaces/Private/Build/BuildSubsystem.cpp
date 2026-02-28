@@ -35,7 +35,7 @@ void UBuildSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	// Money component
 	if (TObjectPtr<ACrowdedPlayerState> PS = PC->GetPlayerState<ACrowdedPlayerState>())
 	{
-		MoneyComponent = PS->GetMoneyComponent();
+		MoneyComponent = PS->GetResourceComponent<EResourceType::Money>();
 	}
 
 	// HUD

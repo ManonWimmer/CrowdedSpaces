@@ -28,7 +28,7 @@ void ABuildableGenerator::BeginPlay()
 	if (!CrowdedPlayerState)
 		return;
 	
-	PlayerMoneyComponent = CrowdedPlayerState->GetMoneyComponent();
+	PlayerMoneyComponent = CrowdedPlayerState->GetResourceComponent<EResourceType::Money>();
 
 	// Assign start production values
 	if (!ProductionComponent)
