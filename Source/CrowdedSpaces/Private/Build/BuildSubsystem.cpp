@@ -33,7 +33,7 @@ void UBuildSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	CamPC->OnRightRotateBuild.AddDynamic(this, &UBuildSubsystem::TryRotateBuildRight);
 
 	// Money component
-	if (TObjectPtr<ACrowdedPlayerState> PS = PC->GetPlayerState<ACrowdedPlayerState>())
+	if (const TObjectPtr<ACrowdedPlayerState> PS = PC->GetPlayerState<ACrowdedPlayerState>())
 	{
 		MoneyComponent = PS->GetResourceComponent<EResourceType::Money>();
 	}

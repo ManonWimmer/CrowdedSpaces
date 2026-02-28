@@ -16,6 +16,7 @@ ANPC::ANPC()
 	FoodComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("FoodComponent"));
 	FoodComponent->SetType(EResourceType::Food);
 	FoodComponent->SetCanLoseAndRegenResource(true);
+	ResourceMap.Add(EResourceType::Food, FoodComponent);
 	
 	FoodBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("FoodBarWidget"));
 	FoodBarWidget->SetupAttachment(GetMesh());
@@ -27,17 +28,37 @@ ANPC::ANPC()
 	OxygenComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("OxygenComponent"));
 	OxygenComponent->SetType(EResourceType::Oxygen);
 	OxygenComponent->SetCanLoseAndRegenResource(false);
+	ResourceMap.Add(EResourceType::Oxygen, OxygenComponent);
 
 	// Energy
 	EnergyComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("EnergyComponent"));
 	EnergyComponent->SetType(EResourceType::Energy);
 	EnergyComponent->SetCanLoseAndRegenResource(true);
+	ResourceMap.Add(EResourceType::Energy, EnergyComponent);
 
 	// Selectable
 	SelectionType = ESelectionType::NPC;
 }
 
-void ANPC::SetCurrentAction(ENPCActionWidget NewAction)
+UResourceComponent* ANPC::GetResourceComponentByType(const EResourceType Type) const
+{
+	if (const TObjectPtr<UResourceComponent>* Found = ResourceMap.Find(Type))
+	{
+		return Found->Get();
+	}
+
+	return nullptr;
+}
+
+int ANPC::GetResourceByType(const EResourceType Type) const
+{
+	if (!GetResourceComponentByType(Type))
+		return 0;
+	else
+		return GetResourceComponentByType(Type)->GetResource();
+}
+
+void ANPC::SetCurrentAction(const ENPCActionWidget NewAction)
 {
 	CurrentAction = NewAction;
 	FString ActionString = StaticEnum<ENPCActionWidget>()->GetDisplayNameTextByValue(static_cast<int64>(CurrentAction)).ToString();
@@ -61,7 +82,7 @@ void ANPC::Die()
 	Destroy();
 }
 
-void ANPC::SetWorkOnGeneratorType(EProductionType NewType)
+void ANPC::SetWorkOnGeneratorType(const EProductionType NewType)
 {
 	if (WorkOnGeneratorType == NewType)
 		return;
@@ -160,7 +181,7 @@ void ANPC::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
-void ANPC::Tick(float DeltaSeconds)
+void ANPC::Tick(const float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 

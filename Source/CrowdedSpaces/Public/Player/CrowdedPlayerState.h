@@ -16,22 +16,16 @@ public:
 	UFUNCTION(BlueprintCallable)
 	UResourceComponent* GetResourceComponentByType(EResourceType Type) const;
 
+	UFUNCTION(BlueprintCallable)
+	int GetResourceByType(EResourceType Type) const;
+
 	template <EResourceType Type>
 	UResourceComponent* GetResourceComponent() const;
 
+	template <EResourceType Type>
+	int GetResource() const;
+
 private:
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UResourceComponent> MoneyComponent;
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UResourceComponent> ElectricityComponent;
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UResourceComponent> OxygenComponent;
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UResourceComponent> FoodComponent;
-
 	UPROPERTY()
 	TMap<EResourceType, TObjectPtr<UResourceComponent>> ResourceMap;
 };
@@ -40,4 +34,13 @@ template <EResourceType Type>
 UResourceComponent* ACrowdedPlayerState::GetResourceComponent() const
 {
 	return GetResourceComponentByType(Type);
+}
+
+template <EResourceType Type>
+int ACrowdedPlayerState::GetResource() const
+{
+	if (!GetResourceComponentByType(Type))
+		return 0;
+	else
+		return GetResourceComponentByType(Type)->GetResource();
 }

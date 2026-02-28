@@ -2,22 +2,22 @@
 
 ACrowdedPlayerState::ACrowdedPlayerState()
 {
-	MoneyComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("MoneyComponent"));
+	const TObjectPtr<UResourceComponent> MoneyComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("MoneyComponent"));
 	MoneyComponent->SetType(EResourceType::Money);
 	MoneyComponent->SetCanLoseAndRegenResource(false);
 	ResourceMap.Add(EResourceType::Money, MoneyComponent);
-	
-	ElectricityComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("ElectricityComponent"));
+
+	const TObjectPtr<UResourceComponent> ElectricityComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("ElectricityComponent"));
 	ElectricityComponent->SetType(EResourceType::Electricity);
 	ElectricityComponent->SetCanLoseAndRegenResource(false);
 	ResourceMap.Add(EResourceType::Electricity, ElectricityComponent);
-	
-	OxygenComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("OxygenComponent"));
+
+	const TObjectPtr<UResourceComponent> OxygenComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("OxygenComponent"));
 	OxygenComponent->SetType(EResourceType::Oxygen);
 	OxygenComponent->SetCanLoseAndRegenResource(false);
 	ResourceMap.Add(EResourceType::Oxygen, OxygenComponent);
-	
-	FoodComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("FoodComponent"));
+
+	const TObjectPtr<UResourceComponent> FoodComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("FoodComponent"));
 	FoodComponent->SetType(EResourceType::Food);
 	FoodComponent->SetCanLoseAndRegenResource(false);
 	ResourceMap.Add(EResourceType::Food, FoodComponent);
@@ -31,4 +31,12 @@ UResourceComponent* ACrowdedPlayerState::GetResourceComponentByType(const EResou
 	}
 
 	return nullptr;
+}
+
+int ACrowdedPlayerState::GetResourceByType(const EResourceType Type) const
+{
+	if (!GetResourceComponentByType(Type))
+		return 0;
+	else
+		return GetResourceComponentByType(Type)->GetResource();
 }

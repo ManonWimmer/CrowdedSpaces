@@ -20,17 +20,22 @@ class CROWDEDSPACES_API ANPC : public ACharacter, public ISelectable
 public:
 	ANPC();
 
+	// Resource
+	UFUNCTION(BlueprintCallable)
+	UResourceComponent* GetResourceComponentByType(EResourceType Type) const;
+
+	UFUNCTION(BlueprintCallable)
+	int GetResourceByType(EResourceType Type) const;
+
+	template <EResourceType Type>
+	UResourceComponent* GetResourceComponent() const;
+
+	template <EResourceType Type>
+	int GetResource() const;
+
+	// AI
 	UBehaviorTree* GetBehaviorTree() const { return BehaviorTree; }
-
-	UFUNCTION(BlueprintCallable, Category="AI")
-	UResourceComponent* GetFoodComponent() const { return FoodComponent; }
-
-	UFUNCTION(BlueprintCallable, Category="AI")
-	UResourceComponent* GetEnergyComponent() const { return EnergyComponent; }
-
-	UFUNCTION(BlueprintCallable, Category="AI")
-	UResourceComponent* GetOxygenComponent() const { return OxygenComponent; }
-
+	
 	UFUNCTION(BlueprintCallable, Category="AI")
 	void SetCurrentAction(ENPCActionWidget NewAction);
 
@@ -43,6 +48,7 @@ public:
 	UFUNCTION()
 	void Die();
 
+	// Work
 	UFUNCTION(BlueprintCallable, Category="AI")
 	EProductionType GetWorkOnGeneratorType() const { return WorkOnGeneratorType; }
 
@@ -62,6 +68,9 @@ protected:
 	TObjectPtr<UBehaviorTree> BehaviorTree;
 
 private:
+	UPROPERTY()
+	TMap<EResourceType, TObjectPtr<UResourceComponent>> ResourceMap;
+	
 	// Food
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UResourceComponent> FoodComponent;
@@ -115,3 +124,15 @@ public:
 	virtual void OnSelected() override;
 	virtual void OnDeselected() override;
 };
+
+template <EResourceType Type>
+UResourceComponent* ANPC::GetResourceComponent() const
+{
+	return GetResourceComponentByType(Type);
+}
+
+template <EResourceType Type>
+int ANPC::GetResource() const
+{
+	return GetResourceByType(Type);
+}
