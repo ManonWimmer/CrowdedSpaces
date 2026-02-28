@@ -24,12 +24,6 @@ ANPC::ANPC()
 	NPCActionWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("NPCActionWidget"));
 	NPCActionWidget->SetupAttachment(GetMesh());
 
-	// Oxygen
-	OxygenComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("OxygenComponent"));
-	OxygenComponent->SetType(EResourceType::Oxygen);
-	OxygenComponent->SetCanLoseAndRegenResource(false);
-	ResourceMap.Add(EResourceType::Oxygen, OxygenComponent);
-
 	// Energy
 	EnergyComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("EnergyComponent"));
 	EnergyComponent->SetType(EResourceType::Energy);

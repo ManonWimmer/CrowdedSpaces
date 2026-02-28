@@ -92,9 +92,6 @@ private:
 	TObjectPtr<UResourceComponent> PlayerElectricityComponent;
 
 	UPROPERTY()
-	TObjectPtr<UResourceComponent> PlayerOxygenComponent;
-
-	UPROPERTY()
 	TObjectPtr<UResourceComponent> PlayerFoodComponent;
 
 	bool bHasStartedProduction = false;

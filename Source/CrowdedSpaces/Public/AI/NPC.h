@@ -80,11 +80,7 @@ private:
 
 	UPROPERTY(EditAnywhere, Category="Food")
 	int32 RemoveFoodPerInterval = 10;
-
-	// Oxygen
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UResourceComponent> OxygenComponent;
-
+	
 	UFUNCTION()
 	void RemoveFood() const;
 

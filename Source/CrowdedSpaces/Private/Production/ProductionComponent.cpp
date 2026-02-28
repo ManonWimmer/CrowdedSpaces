@@ -4,8 +4,7 @@
 #include "Player/CrowdedPlayerController.h"
 #include "Player/CrowdedPlayerState.h"
 
-UProductionComponent::UProductionComponent(): PlayerMoneyComponent(nullptr), PlayerElectricityComponent(nullptr),
-											  PlayerOxygenComponent(nullptr), PlayerFoodComponent(nullptr)
+UProductionComponent::UProductionComponent(): PlayerMoneyComponent(nullptr), PlayerElectricityComponent(nullptr), PlayerFoodComponent(nullptr)
 {
 }
 
@@ -28,7 +27,6 @@ void UProductionComponent::BeginPlay()
 	// Get player components
 	PlayerMoneyComponent = PS->GetResourceComponent<EResourceType::Money>();
 	PlayerElectricityComponent = PS->GetResourceComponent<EResourceType::Electricity>();
-	PlayerOxygenComponent = PS->GetResourceComponent<EResourceType::Oxygen>();
 	PlayerFoodComponent = PS->GetResourceComponent<EResourceType::Food>();
 }
 
@@ -49,14 +47,6 @@ void UProductionComponent::GenerateProduction() const
 			if (PlayerElectricityComponent)
 			{
 				PlayerElectricityComponent->AddResource(ResourcePerInterval * ProductionMultiplier);
-			}
-			break;
-
-		// Oxygen
-		case EProductionType::Oxygen:
-			if (PlayerOxygenComponent)
-			{
-				PlayerOxygenComponent->AddResource(ResourcePerInterval * ProductionMultiplier);
 			}
 			break;
 

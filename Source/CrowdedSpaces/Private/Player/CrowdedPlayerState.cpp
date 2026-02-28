@@ -12,11 +12,6 @@ ACrowdedPlayerState::ACrowdedPlayerState()
 	ElectricityComponent->SetCanLoseAndRegenResource(false);
 	ResourceMap.Add(EResourceType::Electricity, ElectricityComponent);
 
-	const TObjectPtr<UResourceComponent> OxygenComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("OxygenComponent"));
-	OxygenComponent->SetType(EResourceType::Oxygen);
-	OxygenComponent->SetCanLoseAndRegenResource(false);
-	ResourceMap.Add(EResourceType::Oxygen, OxygenComponent);
-
 	const TObjectPtr<UResourceComponent> FoodComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("FoodComponent"));
 	FoodComponent->SetType(EResourceType::Food);
 	FoodComponent->SetCanLoseAndRegenResource(false);
