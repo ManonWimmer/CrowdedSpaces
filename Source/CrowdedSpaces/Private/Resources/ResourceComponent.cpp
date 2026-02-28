@@ -1,0 +1,134 @@
+﻿#include "Resources/ResourceComponent.h"
+
+#include "Resources/ResourceDefaultsData.h"
+
+UResourceComponent::UResourceComponent()
+{
+	PrimaryComponentTick.bCanEverTick = false;
+}
+
+void UResourceComponent::SetType(EResourceType NewType)
+{
+	ResourceType = NewType;
+
+	// Set default values
+	static UResourceDefaultsData* DefaultsData = nullptr;
+	if (!DefaultsData)
+	{
+		ConstructorHelpers::FObjectFinder<UResourceDefaultsData> Finder(TEXT("/Game/Project/Data/Resources/DA_ResourceDefaults.DA_ResourceDefaults"));
+		if (Finder.Succeeded())
+		{
+			DefaultsData = Finder.Object;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ResourceDefaultsData not found!"));
+			return;
+		}
+	}
+	
+	if (DefaultsData && DefaultsData->DefaultsByType.Contains(ResourceType))
+	{
+		const FResourceDefaults& Defaults = DefaultsData->DefaultsByType[ResourceType];
+		MaxResource = Defaults.MaxResource;
+		Resource = MaxResource;
+		CanLoseAndRegenResource = Defaults.CanLoseAndRegenResource;
+		ResourceLossPerTick = Defaults.ResourceLossPerTick;
+		ResourceRegenPerTick = Defaults.ResourceRegenPerTick;
+		TickInterval = Defaults.TickInterval;
+	}
+}
+
+void UResourceComponent::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	if (CanLoseAndRegenResource)
+		StartResourceTimer();
+}
+
+void UResourceComponent::AddResource(int Amount)
+{
+	const int32 OldResource = Resource;
+
+	if (MaxResource != -1)
+		Resource = FMath::Clamp(Resource + Amount, 0, MaxResource);
+	else
+		Resource += Amount;
+
+	if (Resource != OldResource)
+	{
+		OnResourceChanged.Broadcast(Resource);
+	}
+
+	if (Resource >= MaxResource)
+	{
+		OnResourceFull.Broadcast();
+	}
+}
+
+void UResourceComponent::RemoveResource(int Amount)
+{
+	if (MaxResource != -1)
+		Resource = FMath::Clamp(Resource - Amount, 0, MaxResource);
+	else
+		Resource -= Amount;
+	
+	if (Resource <= 0)
+		OnNoMoreResource.Broadcast();
+	else
+		OnResourceChanged.Broadcast(Resource);
+}
+
+bool UResourceComponent::HasEnoughResource(int Amount)
+{
+	return Resource >= Amount;
+}
+
+bool UResourceComponent::HasMaxResource()
+{
+	return Resource >= MaxResource;
+}
+
+void UResourceComponent::StartResourceTimer()
+{
+	if (!GetWorld()) return;
+
+	GetWorld()->GetTimerManager().SetTimer(
+		ResourceTimerHandle,
+		this,
+		&UResourceComponent::ResourceTick,
+		TickInterval,
+		true
+	);
+}
+
+void UResourceComponent::StopResourceTimer()
+{
+	if (!GetWorld()) return;
+	GetWorld()->GetTimerManager().ClearTimer(ResourceTimerHandle);
+}
+
+void UResourceComponent::SetCanLoseAndRegenResource(bool bCanLoseAndRegen)
+{
+	CanLoseAndRegenResource = bCanLoseAndRegen;
+}
+
+void UResourceComponent::SetIsInRegen(bool bInRegen)
+{
+	bIsInRegen = bInRegen;
+	OnIsInRegenChanged.Broadcast(bIsInRegen);
+}
+
+void UResourceComponent::ResourceTick()
+{
+	if (bIsInRegen)
+	{
+		AddResource(ResourceRegenPerTick);
+	}
+	else
+	{
+		RemoveResource(ResourceLossPerTick);
+	}
+}
+

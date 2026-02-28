@@ -1,10 +1,11 @@
 ﻿#include "Build/BuildSubsystem.h"
 
-#include "Blueprint/WidgetBlueprintLibrary.h"
+#include "EngineUtils.h"
+#include "Grid/GridActor.h"
 #include "Game/CrowdedGameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/CrowdedPlayerController.h"
-#include "Resources/MoneyComponent.h"
+#include "Resources/ResourceComponent.h"
 #include "Player/CrowdedPlayerState.h"
 
 void UBuildSubsystem::OnWorldBeginPlay(UWorld& InWorld)
@@ -27,7 +28,9 @@ void UBuildSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	if (!CamPC)
 		return;
 
-	CamPC->OnLeftClickBuild.AddDynamic(this, &UBuildSubsystem::PlaceObject);
+	CamPC->OnLeftClickBuild.AddDynamic(this, &UBuildSubsystem::LeftClicked);
+	CamPC->OnLeftRotateBuild.AddDynamic(this, &UBuildSubsystem::TryRotateBuildLeft);
+	CamPC->OnRightRotateBuild.AddDynamic(this, &UBuildSubsystem::TryRotateBuildRight);
 
 	// Money component
 	if (TObjectPtr<ACrowdedPlayerState> PS = PC->GetPlayerState<ACrowdedPlayerState>())
@@ -37,6 +40,17 @@ void UBuildSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 
 	// HUD
 	GameHUD = Cast<AGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+
+	// Grid actor
+	for (TActorIterator<AGridActor> It(GetWorld()); It; ++It)
+	{
+		GridActor = *It;
+		GridActor->ShowGrid(false);
+		break; 
+	}
+
+	if (!GridActor)
+		UE_LOG(LogTemp, Error, TEXT("BuildSubsystem: couldn't find GridActor in world"));
 }
 
 TStatId UBuildSubsystem::GetStatId() const
@@ -56,18 +70,38 @@ void UBuildSubsystem::OnGameModeChanged(EGameModeState NewMode)
 	{
 		if (GameHUD)
 			GameHUD->ShowBuildWidget(true);
+		
+		if (GridActor)
+		{
+			GridActor->SetIsShowingRooms(true);
+			GridActor->ShowPlacedRooms(true);
+			GridActor->ShowGrid(true);
+		}
 	}
 	else
 	{
 		if (GameHUD)
 			GameHUD->ShowBuildWidget(false);
+
+		if (GridActor)
+			GridActor->ShowGrid(false);
+
+		StopBuilding();
 	}
 }
 
 void UBuildSubsystem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	UpdateGhost();
+
+	if (bIsSelectingRoom)
+	{
+		UpdateRoomSelection();
+	}
+	else
+	{
+		UpdateGhost();
+	}
 }
 
 bool UBuildSubsystem::IsTickable() const
@@ -75,11 +109,28 @@ bool UBuildSubsystem::IsTickable() const
 	return bTickEnabled;
 }
 
+void UBuildSubsystem::OnBuildModeSelected(EBuildModeType BuildMode)
+{
+	switch (BuildMode)
+	{
+		case EBuildModeType::Objects:
+			GridActor->SetIsShowingRooms(true);
+			GridActor->ShowPlacedRooms(true);
+			break;
+		case EBuildModeType::Rooms:
+			GridActor->SetIsShowingRooms(true);
+			GridActor->ShowPlacedRooms(true);
+			break;
+	}
+}
+
 void UBuildSubsystem::StartBuilding(UBuildData* BuildData)
 {
 	if (!BuildData || !BuildData->BuildClass)
 		return;
 
+	bIsSelectingRoom = false;
+	
 	CurrentBuildData = BuildData;
 
 	if (!CurrentGhost)
@@ -105,90 +156,353 @@ void UBuildSubsystem::StartBuilding(UBuildData* BuildData)
 
 	// Scale
 	CurrentGhost->SetActorScale3D(DefaultBuildable->GetActorScale3D());
+
+	ResetBuildRotation();
+
+	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Start object building");
+}
+
+void UBuildSubsystem::StartRoomBuilding(UBuildRoomData* BuildRoomData)
+{
+	if (!BuildRoomData)
+		return;
+
+	bIsSelectingRoom = true;
+	
+	CurrentBuildRoomData = BuildRoomData;
+	
+	if (CurrentGhost)
+	{
+		CurrentGhost->SetActorHiddenInGame(true);
+	}
+
+	ResetBuildRotation();
+	
+	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Start room building");
 }
 
 void UBuildSubsystem::StopBuilding()
 {
 	CurrentBuildData = nullptr;
+	CurrentBuildRoomData = nullptr;
 
+	// Stop object selection
 	if (CurrentGhost)
 		CurrentGhost->SetActorHiddenInGame(true);
+	
+	SelectedRoomCells.Empty();
+
+	GridActor->SetIsShowingRooms(true);
+	ResetBuildRotation();
+
+	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Stop building");
 }
 
-void UBuildSubsystem::PlaceObject()
+void UBuildSubsystem::PlaceObject() const
 {
-	if (!CurrentGhost || !CurrentBuildData || !CurrentBuildData->BuildClass)
+	if (!CurrentGhost || !CurrentBuildData || !CurrentBuildData->BuildClass || !GridActor)
 		return;
 
-	// todo : check if click on ui & return if true
+	int SizeX = CurrentBuildData->GridRowsX;
+	int SizeY = CurrentBuildData->GridColumnsY;
 	
-	const FVector Location = CurrentGhost->GetActorLocation();
-	const FVector Extent = CurrentGhost->GetMeshExtent();
+	GetObjectRotatedSize(SizeX, SizeY);
 
-	if (!CanPlace(Location, Extent))
-		return;
+	int StartRow = 0, StartCol = 0;
+	GridActor->GetCellAtLocation(CurrentGhost->GetActorLocation(), StartRow, StartCol);
+	
+	StartRow -= SizeX / 2;
+	StartCol -= SizeY / 2;
 
+	StartRow = FMath::Clamp(StartRow, 0, GridActor->GetRows() - SizeX);
+	StartCol = FMath::Clamp(StartCol, 0, GridActor->GetColumns() - SizeY);
+
+	// Check can place
+	for (int Row = StartRow; Row < StartRow + SizeX; ++Row)
+	{
+		for (int Col = StartCol; Col < StartCol + SizeY; ++Col)
+		{
+			FGridCell* Cell = GridActor->GetGridCell(Row, Col);
+			if (CurrentBuildData->RoomType == EGridRoomType::Any)
+			{
+				if (!Cell || Cell->bOccupied)
+					return; 
+			}
+			else
+			{
+				if (!Cell || Cell->bOccupied || Cell->RoomType != CurrentBuildData->RoomType)
+					return; 
+			}
+			
+		}
+	}
+	
 	TObjectPtr<ABuildableObject> Placed = GetWorld()->SpawnActor<ABuildableObject>(
 		CurrentBuildData->BuildClass,
-		Location,
-		FRotator::ZeroRotator
+		CurrentGhost->GetActorLocation(),
+		CurrentBuildRotation
 	);
+
+	Placed->SetBuildData(CurrentBuildData);
 
 	if (!Placed)
 		return;
 
-	//  Scale from BP
-	TObjectPtr<ABuildableObject> const DefaultBuildable =
-		CurrentBuildData->BuildClass->GetDefaultObject<ABuildableObject>();
-
+	// Default scale
+	TObjectPtr<ABuildableObject> DefaultBuildable = CurrentBuildData->BuildClass->GetDefaultObject<ABuildableObject>();
 	Placed->SetActorScale3D(DefaultBuildable->GetActorScale3D());
 
-	// Money
+	// Set cells occupied
+	for (int Row = StartRow; Row < StartRow + SizeX; ++Row)
+	{
+		for (int Col = StartCol; Col < StartCol + SizeY; ++Col)
+		{
+			FGridCell* Cell = GridActor->GetGridCell(Row, Col);
+			if (Cell)
+				Cell->bOccupied = true;
+		}
+	}
+
 	if (MoneyComponent)
-		MoneyComponent->RemoveMoney(CurrentBuildData->MoneyCost);
+		MoneyComponent->RemoveResource(CurrentBuildData->MoneyCost);
 }
 
+void UBuildSubsystem::RemoveObject(ABuildableObject* Object) const
+{
+	int SizeX = Object->GetBuildData()->GridRowsX;
+	int SizeY = Object->GetBuildData()->GridColumnsY;
+
+	// Rotation
+	if (Object->GetActorRotation() == FRotator(0.f, 90.f, 0.f) ||
+		Object->GetActorRotation() == FRotator(0.f, 270.f, 0.f)) 
+	{
+		Swap(SizeX, SizeY);
+	}
+	
+	int StartRow = 0, StartCol = 0;
+	GridActor->GetCellAtLocation(Object->GetActorLocation(), StartRow, StartCol);
+	
+	StartRow -= SizeX / 2;
+	StartCol -= SizeY / 2;
+
+	StartRow = FMath::Clamp(StartRow, 0, GridActor->GetRows() - SizeX);
+	StartCol = FMath::Clamp(StartCol, 0, GridActor->GetColumns() - SizeY);
+	
+	// Set cells unoccupied
+	for (int Row = StartRow; Row < StartRow + SizeX; ++Row)
+	{
+		for (int Col = StartCol; Col < StartCol + SizeY; ++Col)
+		{
+			FGridCell* Cell = GridActor->GetGridCell(Row, Col);
+			if (Cell)
+				Cell->bOccupied = false;
+		}
+	}
+	
+	if (MoneyComponent)
+		MoneyComponent->AddResource(Object->GetBuildData()->DestroyMoney);
+}
+
+void UBuildSubsystem::PlaceRoom()
+{
+	if (!CurrentBuildRoomData || !GridActor)
+		return;
+
+	int SizeX = CurrentBuildRoomData->GridRowsX;
+	int SizeY = CurrentBuildRoomData->GridColumnsY;
+
+	GetRoomRotatedSize(SizeX, SizeY);
+	
+	// Check can place
+	for (FGridCell* Cell : SelectedRoomCells)
+	{
+		if (!Cell)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("PlaceRoom: SelectedRoomCells contient nullptr !"));
+			return;
+		}
+
+		if (Cell->RoomId != -1)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("PlaceRoom: SelectedRoomCells contient Room id != -1!"));
+			return;
+		}
+	}
+	
+	GridActor->CreateRoom(CurrentBuildRoomData, SelectedRoomCells);
+
+	if (MoneyComponent)
+		MoneyComponent->RemoveResource(CurrentBuildRoomData->MoneyCost);
+
+	GridActor->DeselectSelectedCells();
+	
+	SelectedRoomCells.Empty();
+}
+
+void UBuildSubsystem::TryRotateBuildLeft()
+{
+	RotationIndex = (RotationIndex + 1) % 4;
+	UpdateRotation();
+}
+
+void UBuildSubsystem::TryRotateBuildRight()
+{
+	RotationIndex = (RotationIndex + 3) % 4; 
+	UpdateRotation();
+}
+
+void UBuildSubsystem::ResetBuildRotation()
+{
+	RotationIndex = 0;
+	CurrentBuildRotation = FRotator(0, 0, 0);
+}
+
+void UBuildSubsystem::UpdateRotation()
+{
+	CurrentBuildRotation = FRotator(0.f, RotationIndex * 90.f, 0.f);
+
+	if(CurrentGhost)
+		CurrentGhost->SetActorRotation(CurrentBuildRotation);
+}
+
+void UBuildSubsystem::GetObjectRotatedSize(int& OutX, int& OutY) const
+{
+	OutX = CurrentBuildData->GridRowsX;
+	OutY = CurrentBuildData->GridColumnsY;
+
+	if (RotationIndex % 2 == 1) // 90 ou 270
+	{
+		Swap(OutX, OutY);
+	}
+}
+
+void UBuildSubsystem::GetRoomRotatedSize(int& OutX, int& OutY) const
+{
+	OutX = CurrentBuildRoomData->GridRowsX;
+	OutY = CurrentBuildRoomData->GridColumnsY;
+
+	if (RotationIndex % 2 == 1) // 90 ou 270
+	{
+		Swap(OutX, OutY);
+	}
+}
 
 void UBuildSubsystem::UpdateGhost() const
 {
-	if(!CurrentGhost)
+	if(!CurrentGhost || !GridActor)
+		return;
+
+	if (CurrentGhost->IsHidden())
 		return;
 
 	FVector HitLocation;
 	if(!GetCursorHit(HitLocation))
+	{
+		return;
+	}
+
+	int HitRow, HitCol;
+	if (!GridActor->GetCellAtLocation(HitLocation, HitRow, HitCol))
+	{
+		GridActor->DeselectSelectedCells();
+		return;
+	}
+
+	if (!CurrentBuildData)
 		return;
 
-	FVector MeshExtent = CurrentGhost->GetMeshExtent(); 
-	FVector GhostLocation = HitLocation + FVector(0.f, 0.f, MeshExtent.Z); // pivot not in the center anymore 
+	int SizeX = CurrentBuildData->GridRowsX;
+	int SizeY = CurrentBuildData->GridColumnsY;
 	
-	FVector Snapped = GhostLocation;
-	Snapped.X = FMath::RoundToFloat(Snapped.X / SnapSize) * SnapSize;
-	Snapped.Y = FMath::RoundToFloat(Snapped.Y / SnapSize) * SnapSize;
+	GetObjectRotatedSize(SizeX, SizeY);
 
-	CurrentGhost->SetActorLocation(Snapped);
+	int StartRow = HitRow - (SizeX - 1) / 2;
+	int StartCol = HitCol - (SizeY - 1) / 2;
+
+	StartRow = FMath::Clamp(StartRow, 0, GridActor->GetRows() - SizeX);
+	StartCol = FMath::Clamp(StartCol, 0, GridActor->GetColumns() - SizeY);
 	
-	bool bValid = CanPlace(Snapped, CurrentGhost->GetMeshExtent());
-	CurrentGhost->SetValid(bValid);
+	GridActor->DeselectSelectedCells();
+	for (int Row = StartRow; Row < StartRow + SizeX; ++Row)
+	{
+		for (int Col = StartCol; Col < StartCol + SizeY; ++Col)
+		{
+			FGridCell* Cell = GridActor->GetGridCell(Row, Col);
+			if (Cell)
+				GridActor->SelectObjectCell(Row, Col, CurrentBuildData->RoomType);
+		}
+	}
+	
+	FVector2D TopLeft;
+	GridActor->GetGridLocation(false, StartRow, StartCol, TopLeft);
+	
+	FVector SnappedLocation(
+		TopLeft.X + (SizeX * GridActor->GetCellSize()) / 2.0f,
+		TopLeft.Y + (SizeY * GridActor->GetCellSize()) / 2.0f,
+		GridActor->GetActorLocation().Z
+	);
+
+	CurrentGhost->SetActorLocation(SnappedLocation);
 }
 
-bool UBuildSubsystem::CanPlace(const FVector& Location, const FVector& Extent) const
+void UBuildSubsystem::UpdateRoomSelection()
 {
-	FCollisionShape BoxShape = FCollisionShape::MakeBox(Extent);
-	FCollisionQueryParams Params;
-	Params.bTraceComplex = true;
-	
-	FCollisionObjectQueryParams ObjectQuery;
-	ObjectQuery.AddObjectTypesToQuery(ECC_GameTraceChannel1); // Build
+	if(!GridActor)
+		return;
 
-	bool bBlocked = GetWorld()->OverlapAnyTestByObjectType(
-		Location,
-		FQuat::Identity,
-		ObjectQuery,
-		BoxShape,
-		Params
-	);
-	
-	return !bBlocked;
+	FVector HitLocation;
+	if(!GetCursorHit(HitLocation))
+	{
+		return;
+	}
+
+	int HitRow, HitCol;
+	if (!GridActor->GetCellAtLocation(HitLocation, HitRow, HitCol))
+	{
+		GridActor->DeselectSelectedCells();
+		return;
+	}
+
+	if (!CurrentBuildRoomData)
+		return;
+
+	int SizeX = CurrentBuildRoomData->GridRowsX;
+	int SizeY = CurrentBuildRoomData->GridColumnsY;
+
+	GetRoomRotatedSize(SizeX, SizeY);
+
+	int StartRow = HitRow - (SizeX - 1) / 2;
+	int StartCol = HitCol - (SizeY - 1) / 2;
+
+	StartRow = FMath::Clamp(StartRow, 0, GridActor->GetRows() - SizeX);
+	StartCol = FMath::Clamp(StartCol, 0, GridActor->GetColumns() - SizeY);
+
+	SelectedRoomCells.Empty(); // todo: voir pour pas recreer liste a chaque tick...
+	GridActor->DeselectSelectedCells();
+	for (int Row = StartRow; Row < StartRow + SizeX; ++Row)
+	{
+		for (int Col = StartCol; Col < StartCol + SizeY; ++Col)
+		{
+			FGridCell* Cell = GridActor->GetGridCell(Row, Col);
+			if (Cell)
+			{
+				GridActor->SelectRoomCell(Row, Col);
+				SelectedRoomCells.Add(Cell);
+			}
+		}
+	}
+}
+
+void UBuildSubsystem::LeftClicked()
+{
+	if (bIsSelectingRoom)
+	{
+		PlaceRoom();
+	}
+	else
+	{
+		PlaceObject();
+	}
 }
 
 bool UBuildSubsystem::GetCursorHit(FVector& OutHit) const

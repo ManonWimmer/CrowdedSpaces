@@ -1,20 +1,17 @@
 ﻿#include "Grid/GridActor.h"
 
+#include "Grid/GridRoom.h"
+
 
 AGridActor::AGridActor()
 {
-	LinesProceduralMesh = CreateDefaultSubobject<UProceduralMeshComponent>("LinesProceduralMesh");
-	CellsProceduralMesh = CreateDefaultSubobject<UProceduralMeshComponent>("CellsProceduralMesh");
-
 	RootComponent = CreateDefaultSubobject<USceneComponent>("Root");
+	
+	LinesProceduralMesh = CreateDefaultSubobject<UProceduralMeshComponent>("LinesProceduralMesh");
 	LinesProceduralMesh->SetupAttachment(RootComponent);
-	CellsProceduralMesh->SetupAttachment(RootComponent);
 
-	// ----- TEST INSTANCED MESH ----- //
-	CellsISM = CreateDefaultSubobject<UInstancedStaticMeshComponent>("CellsISM");
-	CellsISM->SetupAttachment(RootComponent);
-	CellsISM->SetMobility(EComponentMobility::Movable);
-	// ----- TEST INSTANCED MESH ----- //
+	WallISM = CreateDefaultSubobject<UInstancedStaticMeshComponent>("WallISM");
+	WallISM->SetupAttachment(RootComponent);
 	
 	PrimaryActorTick.bCanEverTick = false;
 }
@@ -23,10 +20,8 @@ void AGridActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
+	#pragma region Create Lines
 	LinesProceduralMesh->ClearAllMeshSections();
-	CellsProceduralMesh->ClearAllMeshSections();
-	
-	TObjectPtr<UMaterialInstanceDynamic> CellMaterialInstance = CreateMaterialInstance(CellColor, CellOpacity);
 	
 	TArray<FVector> LineVertices;
 	TArray<int> LineTriangles;
@@ -74,234 +69,92 @@ void AGridActor::OnConstruction(const FTransform& Transform)
 		false         
 	);
 
-	TObjectPtr<UMaterialInstanceDynamic> LinesMaterialInstance = CreateMaterialInstance(LineColor, LineOpacity);
+	LinesMaterialInstance = CreateMaterialInstance(LineColor, LineOpacity);
 	LinesProceduralMesh->SetMaterial(0, LinesMaterialInstance);
-
-	// Draw cells
-	TArray<FVector> CellsVertices;
-	TArray<int> CellsTriangles;
-	float HalfCell = CellSize / 2;
-	DrawLine(FVector(0, HalfCell, 0), FVector(CellSize, HalfCell, 0), CellSize, CellsVertices, CellsTriangles);
-	
-	CellsProceduralMesh->SetVisibility(false);
-
-	// Create cells mesh & material
-	TArray<FVector> CellsNormals;         
-	TArray<FVector2D> CellsUV0;           
-	TArray<FColor> CellsVertexColors;     
-	TArray<FProcMeshTangent> CellsTangents;
-
-	for (int i = 0; i < CellsVertices.Num(); i++)
-	{
-		CellsNormals.Add(FVector::UpVector); 
-		CellsUV0.Add(FVector2D(0,0)); 
-	}
-	
-	CellsProceduralMesh->CreateMeshSection(
-		0,           
-		CellsVertices,
-		CellsTriangles,
-		CellsNormals,
-		CellsUV0,
-		CellsVertexColors,
-		CellsTangents,
-		false         
-	);
-	
-	TObjectPtr<UMaterialInstanceDynamic> CellsMaterialInstance = CreateMaterialInstance(CellColor, CellOpacity);
-	CellsProceduralMesh->SetMaterial(0, CellsMaterialInstance);
+	#pragma endregion
 }
 
 void AGridActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ----- TEST POOL COMPONENTS ----- //
-	/*
-	for (int i = 0; i < Rows; i++)
-	{
-		for (int j = 0; j < Columns; j++)
-		{
-			UProceduralMeshComponent* OtherCellProceduralMesh = NewObject<UProceduralMeshComponent>(this);
-			OtherCellProceduralMesh->RegisterComponent();
-			OtherCellProceduralMesh->AttachToComponent(
-				RootComponent,
-				FAttachmentTransformRules::KeepRelativeTransform
-			);
-
-			FVector CellLocation(
-                        i * CellSize,
-                        j * CellSize,
-                        0
-                    );
-            
-                    OtherCellProceduralMesh->SetRelativeLocation(CellLocation);
-
-			OtherCellProceduralMesh->SetVisibility(true);
-			
-			TArray<FVector> OtherCellVertices;
-			TArray<int> OtherCellTriangles;
-			float HalfCell = CellSize / 2;
-			DrawLine(FVector(0, HalfCell, 0), FVector(CellSize, HalfCell, 0), CellSize, OtherCellVertices, OtherCellTriangles);
-			TArray<FVector> OtherCellNormals;         
-			TArray<FVector2D> OtherCellUV0;           
-			TArray<FColor> OtherCellVertexColors;     
-			TArray<FProcMeshTangent> OtherCellTangents;
-
-			for (int x = 0; x < OtherCellVertices.Num(); x++)
-			{
-				OtherCellNormals.Add(FVector::UpVector); 
-				OtherCellUV0.Add(FVector2D(0,0)); 
-			}
+	#pragma region Create Grid Cells
+	Cells.Reserve(Rows * Columns);
 	
-			OtherCellProceduralMesh->CreateMeshSection(
-				0,           
-				OtherCellVertices,
-				OtherCellTriangles,
-				OtherCellNormals,
-				OtherCellUV0,
-				OtherCellVertexColors,
-				OtherCellTangents,
-				false         
-			);
-
-			FLinearColor RandomColor = FLinearColor::MakeRandomColor();
-
-			TObjectPtr<UMaterialInstanceDynamic> CellsMaterialInstance =
-				CreateMaterialInstance(RandomColor, CellOpacity);
-			OtherCellProceduralMesh->SetMaterial(0, CellsMaterialInstance);
-		}
-	}
-	*/
-	// ----- TEST POOL COMPONENTS ----- //
-
-	// ----- TEST INSTANCED MESH ----- //
-	/*
-	if (!CellMesh) return; 
-
-	CellsISM->SetStaticMesh(CellMesh);
-
-	// 3 floats pour RGB
-	CellsISM->NumCustomDataFloats = 3;
-	CellsISM->ClearInstances();
-
-	const float MeshSize = 100.f; // plane UE par défaut = 100 cm
-	const float Scale = CellSize / MeshSize;
-
 	for (int Row = 0; Row < Rows; Row++)
 	{
 		for (int Column = 0; Column < Columns; Column++)
 		{
-			FVector Location(Column * CellSize + CellSize / 2, Row * CellSize + CellSize / 2, 0.f);
+			TObjectPtr<UProceduralMeshComponent> NewCellProceduralMesh = NewObject<UProceduralMeshComponent>(this);
+			NewCellProceduralMesh->RegisterComponent();
+			NewCellProceduralMesh->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 
-			FTransform InstanceTransform;
-			InstanceTransform.SetLocation(Location);
-			InstanceTransform.SetScale3D(FVector(Scale));
+			FVector NewCellLocation(Row * CellSize,Column * CellSize,0);
+			NewCellProceduralMesh->SetRelativeLocation(NewCellLocation);
 
-			int32 InstanceIndex = CellsISM->AddInstance(InstanceTransform);
+			NewCellProceduralMesh->SetVisibility(false);
+			
+			TArray<FVector> NewCellVertices;
+			TArray<int> NewCellTriangles;
+			float HalfCell = CellSize / 2 - LineThickness / 2;
+			
+			DrawLine(FVector(0, HalfCell, 0), FVector(CellSize, HalfCell, 0), CellSize, NewCellVertices, NewCellTriangles);
 
-			FLinearColor Color = FLinearColor::MakeRandomColor();
+			TArray<FVector> NewCellNormals;         
+			TArray<FVector2D> NewCellUV0;           
+			TArray<FColor> NewCellVertexColors;     
+			TArray<FProcMeshTangent> NewCellTangents;
 
-			CellsISM->SetCustomDataValue(InstanceIndex, 0, Color.R);
-			CellsISM->SetCustomDataValue(InstanceIndex, 1, Color.G);
-			CellsISM->SetCustomDataValue(InstanceIndex, 2, Color.B);
+			for (int x = 0; x < NewCellVertices.Num(); x++)
+			{
+				NewCellNormals.Add(FVector::UpVector); 
+				NewCellUV0.Add(FVector2D(0,0)); 
+			}
+	
+			NewCellProceduralMesh->CreateMeshSection(
+				0,           
+				NewCellVertices,
+				NewCellTriangles,
+				NewCellNormals,
+				NewCellUV0,
+				NewCellVertexColors,
+				NewCellTangents,
+				false         
+			);
+
+			const FLinearColor RandomColor = FLinearColor::MakeRandomColor(); // For tests
+
+			TObjectPtr<UMaterialInstanceDynamic> NewCellMaterialInstance = CreateMaterialInstance(RandomColor, CellOpacity);
+			NewCellProceduralMesh->SetMaterial(0, NewCellMaterialInstance);
+			
+			FIntPoint Key(Row, Column);
+
+			Cells.Emplace(
+				Key,
+				FGridCell(Row, Column, false, EGridCellType::None, EGridRoomType::Any,
+				NewCellProceduralMesh, NewCellMaterialInstance));
 		}
 	}
-	*/
-	// ----- TEST INSTANCED MESH ----- //
-
-	// ----- TEST 1 PROCEDURAL FOR ALL CELLS ----- //
-	 CellsProceduralMesh->ClearAllMeshSections();
-
-    TArray<FVector> Vertices;
-    TArray<int32> Triangles;
-    TArray<FVector> Normals;
-    TArray<FVector2D> UV0;
-    TArray<FColor> VertexColors;
-    TArray<FProcMeshTangent> Tangents;
-
-    int32 VertexIndex = 0;
-
-    for (int Row = 0; Row < Rows; Row++)
-    {
-        for (int Col = 0; Col < Columns; Col++)
-        {
-            FVector BaseLocation(Col * CellSize, Row * CellSize, 0.f);
-
-            // 4 vertices du quad
-            Vertices.Add(BaseLocation); // Bottom Left
-            Vertices.Add(BaseLocation + FVector(CellSize, 0, 0)); // Bottom Right
-            Vertices.Add(BaseLocation + FVector(0, CellSize, 0)); // Top Left
-            Vertices.Add(BaseLocation + FVector(CellSize, CellSize, 0)); // Top Right
-
-            // 2 triangles
-            Triangles.Add(VertexIndex + 0);
-            Triangles.Add(VertexIndex + 2);
-            Triangles.Add(VertexIndex + 1);
-
-            Triangles.Add(VertexIndex + 2);
-            Triangles.Add(VertexIndex + 3);
-            Triangles.Add(VertexIndex + 1);
-
-            // Normals
-            Normals.Add(FVector::UpVector);
-            Normals.Add(FVector::UpVector);
-            Normals.Add(FVector::UpVector);
-            Normals.Add(FVector::UpVector);
-
-            // UV
-            UV0.Add(FVector2D(0, 0));
-            UV0.Add(FVector2D(1, 0));
-            UV0.Add(FVector2D(0, 1));
-            UV0.Add(FVector2D(1, 1));
-
-            // Vertex colors (random)
-            FLinearColor RandomColor = FLinearColor::MakeRandomColor();
-        	FColor VertexColor = RandomColor.ToFColor(true);
-        	VertexColors.Add(VertexColor);
-        	VertexColors.Add(VertexColor);
-        	VertexColors.Add(VertexColor);
-        	VertexColors.Add(VertexColor);
-
-            // Tangents
-            Tangents.Add(FProcMeshTangent(1, 0, 0));
-            Tangents.Add(FProcMeshTangent(1, 0, 0));
-            Tangents.Add(FProcMeshTangent(1, 0, 0));
-            Tangents.Add(FProcMeshTangent(1, 0, 0));
-
-            VertexIndex += 4;
-        }
-    }
-
-    CellsProceduralMesh->CreateMeshSection(
-        0,
-        Vertices,
-        Triangles,
-        Normals,
-        UV0,
-        VertexColors,
-        Tangents,
-        false
-    );
-	
-    CellsProceduralMesh->SetVisibility(true);
-	// ----- TEST 1 PROCEDURAL FOR ALL CELLS ----- //
+	#pragma endregion 
 }
 
-bool AGridActor::CheckIsValidCell(int Row, int Column)
+bool AGridActor::CheckIsValidCell(const int Row, const int Column) const
 {
 	return (Row >= 0 && Row < Rows && Column >= 0 && Column < Columns);
 }
 
-bool AGridActor::GetCellAtLocation(FVector Location, int& OutRow, int& OutColumn)
+bool AGridActor::GetCellAtLocation(const FVector Location, int& OutRow, int& OutColumn) const
 {
-	OutRow = FMath::FloorToInt(Rows * ((Location.X - GetActorLocation().X) / LineWidth()));
-	OutColumn = FMath::FloorToInt(Columns * ((Location.Y - GetActorLocation().Y) / LineHeight()));
-
+	float LocalX = Location.X - GetActorLocation().X;
+	float LocalY = Location.Y - GetActorLocation().Y;
+	
+	OutColumn = FMath::FloorToInt(LocalY / CellSize); 
+	OutRow = FMath::FloorToInt(LocalX / CellSize);
+	
 	return CheckIsValidCell(OutRow, OutColumn);
 }
 
-bool AGridActor::GetGridLocation(bool bIsCenter, int Row, int Column, FVector2D& OutGridLocation)
+bool AGridActor::GetGridLocation(const bool bIsCenter, const int Row, const int Column, FVector2D& OutGridLocation) const
 {
 	if (!CheckIsValidCell(Row, Column))
 		return false;
@@ -318,25 +171,268 @@ bool AGridActor::GetGridLocation(bool bIsCenter, int Row, int Column, FVector2D&
 	return true;
 }
 
-void AGridActor::SelectCell(int Row, int Column)
+void AGridActor::SelectObjectCell(const int Row, const int Column, EGridRoomType RoomType)
 {
-	FVector2D GridLocation;
-	if (!GetGridLocation(false, Row, Column, GridLocation))
-	{
-		CellsProceduralMesh->SetVisibility(false);
+	FGridCell* NewSelectedCell = GetGridCell(Row, Column);
+	if (!NewSelectedCell)
 		return;
+	
+	NewSelectedCell->CellProceduralMesh->SetVisibility(true);
+
+	if (RoomType == EGridRoomType::Any)
+	{
+		if (NewSelectedCell->bOccupied)
+			NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Red);
+		else
+			NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Green);
+	}
+	else
+	{
+		if (NewSelectedCell->bOccupied || NewSelectedCell->RoomType != RoomType)
+			NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Red);
+		else
+			NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Green);
+	}
+	
+	SelectedCells.Add(NewSelectedCell);
+}
+
+void AGridActor::SelectRoomCell(const int Row, const int Column)
+{
+	FGridCell* NewSelectedCell = GetGridCell(Row, Column);
+	if (!NewSelectedCell)
+		return;
+	
+	NewSelectedCell->CellProceduralMesh->SetVisibility(true);
+
+	if (NewSelectedCell->RoomId != -1)
+		NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Red);
+	else
+		NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Green); 
+	
+	SelectedCells.Add(NewSelectedCell);
+}
+
+void AGridActor::ShowPlacedRooms(bool bShow)
+{
+	for (TTuple<int, FGridRoom> Room : Rooms)
+	{
+		for (FGridCell* Cell : Room.Value.Cells)
+		{
+			if (bShow)
+			{
+				Cell->CellProceduralMesh->SetVisibility(true);
+				Cell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), Room.Value.GridColor);
+			}
+			else
+			{
+				Cell->CellProceduralMesh->SetVisibility(false);
+			}
+		}
+	}
+}
+
+int AGridActor::CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> CellsToAssign)
+{
+	FGridRoom NewRoom;
+	NewRoom.RoomId = NextRoomId++;
+	NewRoom.RoomType = BuildData->RoomType;
+	NewRoom.GridColor = BuildData->GridColor;
+
+	for (FGridCell* Cell : CellsToAssign)
+	{
+		Cell->RoomId = NewRoom.RoomId;
+		Cell->RoomType = NewRoom.RoomType;
+
+		NewRoom.Cells.Add(Cell);
 	}
 
-	CellsProceduralMesh->SetVisibility(true);
-	CellsProceduralMesh->SetWorldLocation(FVector(GridLocation.X, GridLocation.Y, GetActorLocation().Z));
+	Rooms.Add(NewRoom.RoomId, NewRoom);
+
+	ShowPlacedRooms(true);
+	
+	RebuildWalls();
+	
+	return NewRoom.RoomId;
 }
 
-void AGridActor::DeselectCell()
+bool AGridActor::CheckIfCellInPlacedRoom(const FGridCell* Cell, FLinearColor& OutGridColor)
 {
-	CellsProceduralMesh->SetVisibility(false);
+	if (Cell->RoomId != -1)
+	{
+		const FGridRoom* Room = Rooms.Find(Cell->RoomId);
+		if (Room)
+		{
+			OutGridColor = Room->GridColor;
+			return true;
+		}
+	}
+
+	return false;
 }
 
-void AGridActor::DrawLine(FVector Start, FVector End, float Thickness, TArray<FVector>& Vertices, TArray<int>& Triangles)
+void AGridActor::RebuildWalls()
+{
+	WallISM->ClearInstances();
+	CreatedWallsPositions.Empty();
+
+	float Half = CellSize * 0.5f;
+
+	for (auto& Pair : Rooms)
+	{
+		FGridRoom& Room = Pair.Value;
+
+		// Get room borders
+		int MinRow = INT_MAX, MaxRow = INT_MIN;
+		int MinCol = INT_MAX, MaxCol = INT_MIN;
+
+		for (FGridCell* Cell : Room.Cells)
+		{
+			if (!Cell) continue;
+			if (Cell->Row < MinRow) MinRow = Cell->Row;
+			if (Cell->Row > MaxRow) MaxRow = Cell->Row;
+			if (Cell->Column < MinCol) MinCol = Cell->Column;
+			if (Cell->Column > MaxCol) MaxCol = Cell->Column;
+		}
+
+		// Get doors at center of each side
+		TSet<FIntPoint> DoorCells;
+		DoorCells.Add(FIntPoint(MinRow, (MinCol + MaxCol) / 2)); // North
+		DoorCells.Add(FIntPoint(MaxRow, (MinCol + MaxCol) / 2)); // South
+		DoorCells.Add(FIntPoint((MinRow + MaxRow) / 2, MinCol)); // West
+		DoorCells.Add(FIntPoint((MinRow + MaxRow) / 2, MaxCol)); // East
+		
+		for (FGridCell* Cell : Room.Cells)
+		{
+			if (!Cell) continue;
+
+			int Row = Cell->Row;
+			int Col = Cell->Column;
+			
+			TryAddWall(Cell, Row - 1, Col, EGridWallDirection::North, Half, DoorCells);
+			TryAddWall(Cell, Row + 1, Col, EGridWallDirection::South, Half, DoorCells);
+			TryAddWall(Cell, Row, Col - 1, EGridWallDirection::West, Half, DoorCells);
+			TryAddWall(Cell, Row, Col + 1, EGridWallDirection::East, Half, DoorCells);
+		}
+	}
+}
+
+void AGridActor::TryAddWall(FGridCell* Cell, int NeighborRow, int NeighborCol, EGridWallDirection Dir, float Half, const TSet<FIntPoint>& DoorCells)
+{
+	FGridCell* Neighbor = GetGridCell(NeighborRow, NeighborCol);
+
+	// Si voisin même salle : pas de mur
+	if (Neighbor && Neighbor->RoomType == Cell->RoomType)
+		return;
+
+	FVector2D CellPos;
+	if (!GetGridLocation(true, Cell->Row, Cell->Column, CellPos))
+		return;
+
+	FVector SpawnLoc(CellPos.X - GetActorLocation().X,
+					 CellPos.Y - GetActorLocation().Y,
+					 0);
+
+	FRotator Rot = FRotator::ZeroRotator;
+
+	switch (Dir)
+	{
+	case EGridWallDirection::North: SpawnLoc.X -= Half; break;
+	case EGridWallDirection::South: SpawnLoc.X += Half; break;
+	case EGridWallDirection::West:  SpawnLoc.Y -= Half; Rot = FRotator(0, 90, 0); break;
+	case EGridWallDirection::East:  SpawnLoc.Y += Half; Rot = FRotator(0, 90, 0); break;
+	}
+
+	if (CreatedWallsPositions.Contains(SpawnLoc))
+		return;
+
+	// Passage auto si cellule = porte
+	bool bCreatePassage = DoorCells.Contains(FIntPoint(Cell->Row, Cell->Column));
+
+	float PassageHeight = 180.f;
+	float WallHeight = 220.f;
+
+	if (bCreatePassage)
+	{
+		// Passage
+		FVector TopLoc = SpawnLoc + FVector(0, 0, PassageHeight + (WallHeight - PassageHeight) / 2);
+		FVector TopScale(1.f, 1.f, (WallHeight - PassageHeight) / WallHeight);
+		WallISM->AddInstance(FTransform(Rot, TopLoc, TopScale));
+	}
+	else
+	{
+		// Mur
+		WallISM->AddInstance(FTransform(Rot, SpawnLoc));
+	}
+
+	CreatedWallsPositions.Add(SpawnLoc);
+}
+
+bool AGridActor::GetRoomAtWorldLocation(const FVector& WorldLoc, FGridRoom*& OutRoom)
+{
+	int Row, Col;
+
+	if (!GetCellAtLocation(WorldLoc, Row, Col))
+		return false;
+
+	FGridCell* Cell = GetGridCell(Row, Col);
+	if (!Cell || Cell->RoomId == -1)
+		return false;
+
+	OutRoom = Rooms.Find(Cell->RoomId);
+
+	return OutRoom != nullptr;
+}
+
+void AGridActor::ShowGrid(bool bShow)
+{
+	LinesProceduralMesh->SetVisibility(bShow);
+
+	for (auto& Pair : Cells)
+	{
+		FGridCell* Cell = &Pair.Value;
+		if (!Cell)
+			continue;
+
+		Cell->CellProceduralMesh->SetVisibility(false);
+	}
+}
+
+void AGridActor::DeselectSelectedCells()
+{
+	for (FGridCell* Cell : SelectedCells)
+	{
+		if (Cell)
+		{
+			FLinearColor OutGridColor = FLinearColor::White;
+			if (bIsShowingRooms && CheckIfCellInPlacedRoom(Cell, OutGridColor))
+			{
+				Cell->CellProceduralMesh->SetVisibility(true);
+				Cell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), OutGridColor);
+			}
+			else
+			{
+				Cell->CellProceduralMesh->SetVisibility(false); 
+			}
+		}
+	}
+
+	SelectedCells.Empty();
+}
+
+FGridCell* AGridActor::GetGridCell(int Row, int Column)
+{
+	return Cells.Find(FIntPoint(Row, Column));
+}
+
+void AGridActor::DeselectCell(int Row, int Column)
+{
+	FGridCell* Cell = GetGridCell(Row, Column);
+	if (Cell)
+		Cell->CellProceduralMesh->SetVisibility(false);
+}
+
+void AGridActor::DrawLine(const FVector& Start, const FVector& End, const float Thickness, TArray<FVector>& Vertices, TArray<int>& Triangles)
 {
 	float HalfThickness = Thickness / 2;
 
@@ -345,10 +441,10 @@ void AGridActor::DrawLine(FVector Start, FVector End, float Thickness, TArray<FV
 	Direction = FVector::CrossProduct(Direction, FVector(0,0,1));
 
 	int StartIndex = Vertices.Num();
-	Vertices.Add(Start + (Direction * HalfThickness)); // Top left corner
-	Vertices.Add(End + (Direction * HalfThickness)); // Top right corner
-	Vertices.Add(Start - (Direction * HalfThickness)); // Bottom left corner
-	Vertices.Add(End - (Direction * HalfThickness)); // Bottom right corner
+	Vertices.Add(Start + (Direction * HalfThickness));	// Top left corner
+	Vertices.Add(End + (Direction * HalfThickness));	// Top right corner
+	Vertices.Add(Start - (Direction * HalfThickness));	// Bottom left corner
+	Vertices.Add(End - (Direction * HalfThickness));	// Bottom right corner
 
 	Triangles.Add(StartIndex + 0);
 	Triangles.Add(StartIndex + 2);
@@ -369,7 +465,7 @@ float AGridActor::LineHeight() const
 	return Columns * CellSize;
 }
 
-TObjectPtr<UMaterialInstanceDynamic> AGridActor::CreateMaterialInstance(FLinearColor Color, float Opacity)
+TObjectPtr<UMaterialInstanceDynamic> AGridActor::CreateMaterialInstance(const FLinearColor Color, const float Opacity)
 {
 	if (!BaseMaterial)
 	{
@@ -377,16 +473,15 @@ TObjectPtr<UMaterialInstanceDynamic> AGridActor::CreateMaterialInstance(FLinearC
 		return nullptr;
 	}
 
-	UMaterialInstanceDynamic* DynamicMat =
-	   UMaterialInstanceDynamic::Create(BaseMaterial, this);
+	TObjectPtr<UMaterialInstanceDynamic> DynamicMaterial = UMaterialInstanceDynamic::Create(BaseMaterial, this);
 
-	if (DynamicMat)
+	if (DynamicMaterial)
 	{
-		DynamicMat->SetVectorParameterValue(TEXT("Color"), Color);
-		DynamicMat->SetScalarParameterValue(TEXT("Opacity"), Opacity);
+		DynamicMaterial->SetVectorParameterValue(TEXT("Color"), Color);
+		DynamicMaterial->SetScalarParameterValue(TEXT("Opacity"), Opacity);
 	}
 
-	return DynamicMat;
+	return DynamicMaterial;
 }
 
 

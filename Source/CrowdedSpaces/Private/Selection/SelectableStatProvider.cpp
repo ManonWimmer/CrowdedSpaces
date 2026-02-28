@@ -1,2 +1,0 @@
-﻿#include "Selection/SelectableStatProvider.h"
-

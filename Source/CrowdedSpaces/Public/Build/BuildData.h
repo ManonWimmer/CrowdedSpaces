@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "Build/BuildableObject.h"
+#include "Grid/GridRoomType.h"
 #include "BuildData.generated.h"
 
 UCLASS(BlueprintType)
@@ -25,4 +26,16 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int MoneyCost;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int DestroyMoney;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int GridRowsX = 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int GridColumnsY = 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	EGridRoomType RoomType = EGridRoomType::Any;
 };

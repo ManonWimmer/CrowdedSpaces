@@ -7,7 +7,7 @@
 #include "Selection/Selectable.h"
 #include "BuildableGenerator.generated.h"
 
-class UMoneyComponent;
+class UResourceComponent;
 
 UCLASS()
 class CROWDEDSPACES_API ABuildableGenerator : public ABuildableObject, public ISelectable
@@ -17,15 +17,14 @@ class CROWDEDSPACES_API ABuildableGenerator : public ABuildableObject, public IS
 public:
 	ABuildableGenerator();
 
-	void SetNPCWorking(bool bWorking);
+	virtual bool StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask) override;
+	virtual bool StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask) override;
 	
 	// Selectable
 	virtual void OnSelected() override;
 	virtual void OnDeselected() override;
-	
-	virtual FString GetDisplayName() const override;
-	virtual TObjectPtr<AActor> GetSelectableActor() override;
 
+	UFUNCTION(BlueprintCallable, Category = "Upgrade")
 	UProductionComponent* GetProductionComponent() const { return ProductionComponent; }
 
 	UFUNCTION(BlueprintCallable, Category = "Upgrade")
@@ -38,7 +37,7 @@ public:
 	FUpgradeStruct GetNextUpgrade();
 
 	UFUNCTION(BlueprintCallable, Category = "Upgrade")
-	UMoneyComponent* GetPlayerMoneyComponent() { return PlayerMoneyComponent; }
+	UResourceComponent* GetPlayerMoneyComponent() const { return PlayerMoneyComponent; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -63,9 +62,5 @@ private:
 	FUpgradeStruct NextUpgrade;
 
 	UPROPERTY()
-	UMoneyComponent* PlayerMoneyComponent;
-
-	// Work
-	UPROPERTY()
-	bool bHasNPCWorking = false;
+	UResourceComponent* PlayerMoneyComponent;
 };

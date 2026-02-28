@@ -1,12 +1,18 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "BuildModeType.h"
+#include "BuildRoomData.h"
 #include "Subsystems/WorldSubsystem.h"
+#include "Grid/GridRoomType.h"
+#include "Grid/GridCell.h"
 #include "Build/GhostObject.h"
 #include "Build/BuildData.h"
 #include "UI/GameHUD.h"
-#include "Resources/MoneyComponent.h"
 #include "BuildSubsystem.generated.h"
+
+class AGridActor;
+class UResourceComponent;
 
 UCLASS()
 class CROWDEDSPACES_API UBuildSubsystem : public UTickableWorldSubsystem
@@ -22,24 +28,63 @@ public:
 	
 	virtual void Tick(float DeltaTime) override;
 	virtual bool IsTickable() const override;
+
+	UFUNCTION(BlueprintCallable)
+	void OnBuildModeSelected(EBuildModeType BuildMode);
 	
 	UFUNCTION(BlueprintCallable)
 	void StartBuilding(UBuildData* BuildData);
 
 	UFUNCTION(BlueprintCallable)
+	void StartRoomBuilding(UBuildRoomData* BuildRoomData);
+
+	UFUNCTION(BlueprintCallable)
 	void StopBuilding();
 
 	UFUNCTION()
-	void PlaceObject();
+	void PlaceObject() const;
+
+	UFUNCTION()
+	void RemoveObject(ABuildableObject* Object) const;
+	
+	UFUNCTION()
+	void LeftClicked();
+
+	UFUNCTION(BlueprintCallable)
+	void PlaceRoom();
 
 	UFUNCTION()
 	void SetBuildData(const TArray<UBuildData*>& NewBuildData) { BuildDataObjects = NewBuildData; }
+
+	UFUNCTION()
+	void SetBuildRoomData(const TArray<UBuildRoomData*>& NewBuildRoomData) { BuildDataRooms = NewBuildRoomData; }
 
 	UFUNCTION()
 	void SetSnapSize(const float NewSnapSize) { SnapSize = NewSnapSize; }
 
 	UFUNCTION(BlueprintCallable)
 	TArray<UBuildData*> GetBuildDataObjects() { return BuildDataObjects;}
+
+	UFUNCTION(BlueprintCallable)
+	TArray<UBuildRoomData*> GetBuildDataRooms() { return BuildDataRooms;}
+
+	UFUNCTION()
+	void TryRotateBuildLeft();
+
+	UFUNCTION()
+	void TryRotateBuildRight();
+
+	UFUNCTION()
+	void ResetBuildRotation();
+
+	UFUNCTION()
+	void UpdateRotation();
+
+	UFUNCTION()
+	void GetObjectRotatedSize(int& OutX, int& OutY) const;
+
+	UFUNCTION()
+	void GetRoomRotatedSize(int& OutX, int& OutY) const;
 
 private:
 	UPROPERTY()
@@ -49,7 +94,13 @@ private:
 	TObjectPtr<UBuildData> CurrentBuildData = nullptr;
 
 	UPROPERTY()
+	TObjectPtr<UBuildRoomData> CurrentBuildRoomData = nullptr;
+
+	UPROPERTY()
 	TArray<TObjectPtr<UBuildData>> BuildDataObjects; // Send by game state
+
+	UPROPERTY()
+	TArray<TObjectPtr<UBuildRoomData>> BuildDataRooms; // Send by game state
 
 	UPROPERTY()
 	float SnapSize = 100.f; // Send by game state
@@ -58,7 +109,7 @@ private:
 	void UpdateGhost() const;
 
 	UFUNCTION()
-	bool CanPlace(const FVector& Location, const FVector& Extent) const;
+	void UpdateRoomSelection();
 
 	UFUNCTION()
 	bool GetCursorHit(FVector& OutHit) const;
@@ -67,10 +118,22 @@ private:
 	TObjectPtr<AGameHUD> GameHUD;
 
 	UPROPERTY()
-	TObjectPtr<UMoneyComponent> MoneyComponent;
+	TObjectPtr<UResourceComponent> MoneyComponent;
 
 	UPROPERTY()
 	bool bTickEnabled = false;
 	
 	static constexpr float CursorLineTraceDistance = 10000.f;
+
+	UPROPERTY()
+	TObjectPtr<AGridActor> GridActor;
+
+	// Room
+	EGridRoomType CurrentRoomType = EGridRoomType::Any;
+	TArray<FGridCell*> SelectedRoomCells;
+	bool bIsSelectingRoom = false;
+
+	// Rotate
+	int32 RotationIndex = 0;
+	FRotator CurrentBuildRotation = FRotator(0, 0, 0);
 };

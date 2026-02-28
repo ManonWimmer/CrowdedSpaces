@@ -1,7 +1,7 @@
 ﻿#include "AI/BTDecorators/BTDecorator_IsTired.h"
 
 #include "AIController.h"
-#include "Resources/EnergyComponent.h"
+#include "Resources/ResourceComponent.h"
 
 UBTDecorator_IsTired::UBTDecorator_IsTired(FObjectInitializer const& ObjectInitializer)
 {
@@ -21,11 +21,19 @@ bool UBTDecorator_IsTired::CalculateRawConditionValue(UBehaviorTreeComponent& Ow
 	if (!Pawn)
 		return false;
 
-	TObjectPtr<UEnergyComponent> EnergyComp = Pawn->FindComponentByClass<UEnergyComponent>();
-	if (!EnergyComp)
-		return false;
+	TObjectPtr<UResourceComponent> EnergyComp = nullptr;
+	TArray<UResourceComponent*> ResourceComps;
+	Pawn->GetComponents(ResourceComps);
+	for (UResourceComponent* Comp : ResourceComps)
+	{
+		if (Comp && Comp->GetType() == EResourceType::Energy)
+		{
+			EnergyComp = Comp;
+			break;
+		}
+	}
 	
-	return EnergyComp->GetEnergy() <= TiredUnderEnergy;
+	return EnergyComp->GetResource() <= TiredUnderEnergy;
 }
 
 void UBTDecorator_IsTired::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)

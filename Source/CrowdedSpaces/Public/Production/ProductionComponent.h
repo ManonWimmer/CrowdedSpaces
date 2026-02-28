@@ -3,14 +3,15 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "ProductionType.h"
-#include "Resources/MoneyComponent.h"
-#include "Resources/ElectricityComponent.h"
-#include "Resources/OxygenComponent.h"
-#include "Resources/FoodComponent.h"
+#include "Resources/ResourceComponent.h"
 #include "ProductionComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIsActiveChanged, bool, Value);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnProductionIntervalChanged, float, Value);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnResourcePerIntervalChanged, float, Value);
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class CROWDEDSPACES_API UProductionComponent : public UActorComponent, public ISelectableStatProvider
+class CROWDEDSPACES_API UProductionComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -19,23 +20,25 @@ public:
 
 public:
 	virtual void BeginPlay() override;
-	
-	// Selectable
-	UPROPERTY(BlueprintAssignable)
-	FOnStatChanged OnStatChanged;
-	
-	virtual TArray<TPair<FString, FString>> GetCurrentValues() const override;
-	virtual FOnStatChanged& GetOnStatChanged() override { return OnStatChanged; }
 
 	// Production
 	UPROPERTY(EditAnywhere, Category="Production")
 	EProductionType ProductionType = EProductionType::Money;
+
+	UFUNCTION(BlueprintCallable, Category = "Production")
+	EProductionType GetProductionType() const { return ProductionType; }
 	
 	UPROPERTY(EditAnywhere, Category="Production")
 	float ProductionInterval = 1.0f;
 
+	UFUNCTION(BlueprintCallable, Category = "Production")
+	float GetProductionInterval() const { return ProductionInterval; }
+
 	UPROPERTY(EditAnywhere, Category="Production")
 	int32 ResourcePerInterval = 10;
+
+	UFUNCTION(BlueprintCallable, Category = "Production")
+	float GetResourcePerInterval() const { return ResourcePerInterval; }
 
 	UFUNCTION()
 	void GenerateProduction() const;
@@ -52,21 +55,30 @@ public:
 	UFUNCTION()
 	void RestartProduction();
 
+	UPROPERTY(BlueprintAssignable)
+	FOnIsActiveChanged OnIsActiveChanged;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnProductionIntervalChanged OnProductionIntervalChanged;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnResourcePerIntervalChanged OnResourcePerIntervalChanged;
+
 private:
 	UPROPERTY()
 	FTimerHandle ProductionTimerHandle;
 
 	UPROPERTY()
-	TObjectPtr<UMoneyComponent> PlayerMoneyComponent;
+	TObjectPtr<UResourceComponent> PlayerMoneyComponent;
 
 	UPROPERTY()
-	TObjectPtr<UElectricityComponent> PlayerElectricityComponent;
+	TObjectPtr<UResourceComponent> PlayerElectricityComponent;
 
 	UPROPERTY()
-	TObjectPtr<UOxygenComponent> PlayerOxygenComponent;
+	TObjectPtr<UResourceComponent> PlayerOxygenComponent;
 
 	UPROPERTY()
-	TObjectPtr<UFoodComponent> PlayerFoodComponent;
+	TObjectPtr<UResourceComponent> PlayerFoodComponent;
 
 	bool bHasStartedProduction = false;
 };

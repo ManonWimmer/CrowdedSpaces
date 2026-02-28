@@ -13,21 +13,24 @@ class CROWDEDSPACES_API UBuildableRegistrySubsystem : public UWorldSubsystem
 	GENERATED_BODY()
 
 public:
+	// All
+	TArray<TWeakObjectPtr<ABuildableObject>> BuildableObjects;
+	
 	// Generators
 	TArray<TWeakObjectPtr<ABuildableGenerator>> Generators;
 	
-	void RegisterGenerator(ABuildableGenerator* Generator) { Generators.Add(Generator); } // On Begin Play
-	void UnregisterGenerator(ABuildableGenerator* Generator) { Generators.Remove(Generator); } // On Destroyed
+	void RegisterGenerator(ABuildableGenerator* Generator);
+	void UnregisterGenerator(ABuildableGenerator* Generator); 
 	
 	// Beds
 	TArray<TWeakObjectPtr<ABuildableBed>> Beds;
 	
-	void RegisterBed(ABuildableBed* Bed) { Beds.Add(Bed); } // On Begin Play
-	void UnregisterBed(ABuildableBed* Bed) { Beds.Remove(Bed); } // On Destroyed
+	void RegisterBed(ABuildableBed* Bed);
+	void UnregisterBed(ABuildableBed* Bed);
 
 	// Foods
 	TArray<TWeakObjectPtr<ABuildableFood>> Foods;
 	
-	void RegisterFood(ABuildableFood* Food) { Foods.Add(Food); } // On Begin Play
-	void UnregisterFood(ABuildableFood* Food) { Foods.Remove(Food); } // On Destroyed
+	void RegisterFood(ABuildableFood* Food);
+	void UnregisterFood(ABuildableFood* Food);
 };

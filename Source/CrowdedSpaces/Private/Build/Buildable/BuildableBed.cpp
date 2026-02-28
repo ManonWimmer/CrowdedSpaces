@@ -4,38 +4,67 @@
 
 ABuildableBed::ABuildableBed()
 {
+	SelectionType = ESelectionType::Bed;
+	ObjectType = EObjectType::Bed;
+	NPCAction = ENPCActionWidget::Sleep;
 }
 
 void ABuildableBed::BeginPlay()
 {
 	Super::BeginPlay();
 
-	TObjectPtr<UBuildableRegistrySubsystem> BRS = GetWorld()->GetSubsystem<UBuildableRegistrySubsystem>();
 	if (!BRS)
 		return;
 
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Register bed");
-
+	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "BeginPlay avec BRS bed");
+	
 	BRS->RegisterBed(this);
 }
 
 void ABuildableBed::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-
-	TObjectPtr<UBuildableRegistrySubsystem> BRS = GetWorld()->GetSubsystem<UBuildableRegistrySubsystem>();
+	
 	if (!BRS)
 		return;
 
 	BRS->UnregisterBed(this);
 }
 
-void ABuildableBed::SetAvailable(bool NewAvailable)
+bool ABuildableBed::StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
-	bIsAvailable = NewAvailable;
-	FString Result = bIsAvailable ? TEXT("True") : TEXT("False");
-	OnStatChanged.Broadcast("Is Available", Result);
+	CurrentTasks.Add(UseObjectTask);
+
+	if (!UsingNPC.IsValid())
+		return false;
+	
+	UResourceComponent* EnergyComp = UsingNPC->GetEnergyComponent();
+	if (!EnergyComp)
+		return false;
+	
+	EnergyComp->SetIsInRegen(true);
+	
+	EnergyComp->OnResourceFull.AddDynamic(UseObjectTask, &UBTTask_UseBuildableObject::OnStopAction);
+
+	return true;
+}
+
+bool ABuildableBed::StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
+{
+	CurrentTasks.Remove(UseObjectTask);
+	
+	if (!UsingNPC.IsValid())
+		return false;
+	
+	UResourceComponent* EnergyComp = UsingNPC->GetEnergyComponent();
+	if (!EnergyComp)
+		return false;
+
+	EnergyComp->SetIsInRegen(false);
+
+	EnergyComp->OnResourceFull.RemoveDynamic(UseObjectTask, &UBTTask_UseBuildableObject::OnStopAction);
+	
+	return true;
 }
 
 #pragma region Selectable
@@ -46,23 +75,5 @@ void ABuildableBed::OnSelected()
 void ABuildableBed::OnDeselected()
 {
 }
-
-FString ABuildableBed::GetDisplayName() const
-{
-	return "Bed";
-}
-
-TObjectPtr<AActor> ABuildableBed::GetSelectableActor()
-{
-	return this;
-}
-
-TArray<FStat> ABuildableBed::GetCurrentValues() const
-{
-	TArray<TPair<FString, FString>> Values;
-	FString Result = bIsAvailable ? TEXT("True") : TEXT("False");
-	Values.Emplace(FString("Is Available"), Result);
-	return Values;
-}
-#pragma endregion Selectable
+#pragma endregion
 

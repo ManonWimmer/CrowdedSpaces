@@ -54,7 +54,7 @@ void UMoralEvent_ExpelNPC::ClickOnChoice(EMoralEventType Choice)
 			if (!CamPC)
 				break;
 
-			TObjectPtr<UMoneyComponent> MoneyComponent = nullptr;
+			TObjectPtr<UResourceComponent> MoneyComponent = nullptr;
 		
 			if (TObjectPtr<ACrowdedPlayerState> PS = PC->GetPlayerState<ACrowdedPlayerState>())
 			{
@@ -64,7 +64,7 @@ void UMoralEvent_ExpelNPC::ClickOnChoice(EMoralEventType Choice)
 			if (!MoneyComponent)
 				break;
 
-			MoneyComponent->AddMoney(MoneyForExpel);
+			MoneyComponent->AddResource(MoneyForExpel);
 		
 			break;
 		}

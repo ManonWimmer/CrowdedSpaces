@@ -14,6 +14,7 @@ void ACrowdedGameState::BeginPlay()
 		return;
 		
 	BuildSubsystem->SetBuildData(BuildDataObjects);
+	BuildSubsystem->SetBuildRoomData(BuildDataRooms);
 	BuildSubsystem->SetSnapSize(SnapSize);
 
 	// Get time subsystem & send data

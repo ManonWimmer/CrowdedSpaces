@@ -3,13 +3,12 @@
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
 #include "MoralEvent/MoralEvent.h"
+#include "Selection/SelectionType.h"
 #include "WidgetStartupConfig.h"
+#include "Grid/GridRoom.h"
 #include "GameHUD.generated.h"
 
-enum class ESelectionType : uint8;
 class UCustomWidget;
-class USelectionWidget;
-class UGeneratorSelectionWidget;
 
 UCLASS()
 class CROWDEDSPACES_API AGameHUD : public AHUD
@@ -24,7 +23,7 @@ public:
 	TObjectPtr<T> GetOrCreateWidget(TSubclassOf<UCustomWidget> WidgetClass);
 
 	UFUNCTION()
-	void ShowWidget(TSubclassOf<UCustomWidget> WidgetClass, bool bShow, ESlateVisibility VisibilityOnShow);
+	UCustomWidget* ShowWidget(TSubclassOf<UCustomWidget> WidgetClass, bool bShow, ESlateVisibility VisibilityOnShow);
 
 	UPROPERTY(EditAnywhere, Category="Widgets")
 	TArray<FWidgetStartupConfig> StartupWidgetsConfig;
@@ -41,11 +40,14 @@ public:
 	void ShowPlayerResourcesWidget(bool bShow);
 
 	// Selection
-	UFUNCTION(BlueprintCallable, Category="Widgets")
-	void ShowSelectionWidget(bool bShow);
+	void ShowSelectionWidget(AActor* SelectableActor, bool bShow, ESelectionType SelectionType);
 	
-	UFUNCTION()
-	USelectionWidget* GetSelectionWidget() { return GetOrCreateWidget<USelectionWidget>(SelectionWidgetBP); }
+	void ShowSelectionWidget(FGridRoom& Room, bool bShow, ESelectionType SelectionType);
+
+	UCustomWidget* GetWidgetFromSelectionType(ESelectionType Type);
+
+	UFUNCTION(BlueprintCallable, Category="Widgets")
+	void HideCurrentSelectionWidget();
 	
 	// Moral Event
 	UFUNCTION(BlueprintCallable, Category="Widgets")
@@ -72,7 +74,25 @@ private:
 
 	// Selection
 	UPROPERTY(EditAnywhere, Category="Widgets")
-	TSubclassOf<UCustomWidget> SelectionWidgetBP;
+	TSubclassOf<UCustomWidget> RoomSelectionWidgetBP;
+
+	UPROPERTY(EditAnywhere, Category="Widgets")
+	TSubclassOf<UCustomWidget> GeneratorSelectionWidgetBP;
+
+	UPROPERTY(EditAnywhere, Category="Widgets")
+	TSubclassOf<UCustomWidget> NPCSelectionWidgetBP;
+
+	UPROPERTY(EditAnywhere, Category="Widgets")
+	TSubclassOf<UCustomWidget> FoodSelectionWidgetBP;
+
+	UPROPERTY(EditAnywhere, Category="Widgets")
+	TSubclassOf<UCustomWidget> BedSelectionWidgetBP;
+
+	UPROPERTY(EditAnywhere, Category="Widgets")
+	AActor* CurrentlySelectedActor = nullptr;
+
+	UPROPERTY(EditAnywhere, Category="Widgets")
+	TSubclassOf<UCustomWidget> CurrentlyShownSelectionWidgetBP = nullptr;
 	
 	// Moral Event
 	UPROPERTY(EditAnywhere, Category="Widgets")
@@ -92,5 +112,7 @@ private:
 	int CursorOverUI = 0;
 
 	bool bUIClickThisFrame = false;
+
+	const FGridRoom* CurrentlySelectedRoom = nullptr;
 };
 

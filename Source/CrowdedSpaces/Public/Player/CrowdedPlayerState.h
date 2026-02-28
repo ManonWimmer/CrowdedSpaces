@@ -1,10 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Resources/MoneyComponent.h"
-#include "Resources/ElectricityComponent.h"
-#include "Resources/OxygenComponent.h"
-#include "Resources/FoodComponent.h"
+#include "Resources/ResourceComponent.h"
 #include "GameFramework/PlayerState.h"
 #include "CrowdedPlayerState.generated.h"
 
@@ -17,27 +14,27 @@ public:
 	ACrowdedPlayerState();
 
 	UFUNCTION(BlueprintCallable)
-	UMoneyComponent* GetMoneyComponent() const { return MoneyComponent; }
+	UResourceComponent* GetMoneyComponent() const { return MoneyComponent; }
 	
 	UFUNCTION(BlueprintCallable)
-	UElectricityComponent* GetElectricityComponent() const { return ElectricityComponent; }
+	UResourceComponent* GetElectricityComponent() const { return ElectricityComponent; }
 
 	UFUNCTION(BlueprintCallable)
-	UOxygenComponent* GetOxygenComponent() const { return OxygenComponent; }
+	UResourceComponent* GetOxygenComponent() const { return OxygenComponent; }
 
 	UFUNCTION(BlueprintCallable)
-	UFoodComponent* GetFoodComponent() const { return FoodComponent; }
+	UResourceComponent* GetFoodComponent() const { return FoodComponent; }
 
 private:
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UMoneyComponent> MoneyComponent;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UResourceComponent> MoneyComponent;
 
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UElectricityComponent> ElectricityComponent;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UResourceComponent> ElectricityComponent;
 
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UOxygenComponent> OxygenComponent;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UResourceComponent> OxygenComponent;
 
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UFoodComponent> FoodComponent;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UResourceComponent> FoodComponent;
 };

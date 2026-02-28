@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 
 UENUM(BlueprintType)
-enum class ENPCAction : uint8
+enum class ENPCActionWidget : uint8
 {
 	Idle			UMETA(DisplayName="Idle"),
 	Work			UMETA(DisplayName="Work"),

@@ -1,4 +1,6 @@
 ﻿#include "Player/CrowdedPlayerController.h"
+
+#include "EngineUtils.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "Game/CrowdedGameMode.h"
@@ -25,7 +27,7 @@ void ACrowdedPlayerController::SetupInputComponent()
 	EIC->BindAction(PlayerInputsData->MoveRightAction, ETriggerEvent::Triggered, this, &ACrowdedPlayerController::MoveRightInput);
 	EIC->BindAction(PlayerInputsData->MoveRightAction, ETriggerEvent::Completed, this, &ACrowdedPlayerController::StopMoveRightInput);
 
-	// Rotate
+	// Camera rotate
 	EIC->BindAction(PlayerInputsData->RotateAction, ETriggerEvent::Started, this, &ACrowdedPlayerController::RotateInput);
 	EIC->BindAction(PlayerInputsData->RotateAction, ETriggerEvent::Triggered, this, &ACrowdedPlayerController::RotateInput);
 	EIC->BindAction(PlayerInputsData->RotateAction, ETriggerEvent::Completed, this, &ACrowdedPlayerController::StopRotateInput);
@@ -36,6 +38,10 @@ void ACrowdedPlayerController::SetupInputComponent()
 	// Left click
 	EIC->BindAction(PlayerInputsData->LeftClickAction, ETriggerEvent::Started, this, &ACrowdedPlayerController::LeftClickInput);
 
+	// Build rotate
+	EIC->BindAction(PlayerInputsData->LeftRotateBuildAction, ETriggerEvent::Started, this, &ACrowdedPlayerController::LeftRotateBuildInput);
+	EIC->BindAction(PlayerInputsData->RightRotateBuildAction, ETriggerEvent::Started, this, &ACrowdedPlayerController::RightRotateBuildInput);
+	
 	// Add IMC
 	TObjectPtr<ULocalPlayer> LP = GetLocalPlayer();
 	if (!LP)
@@ -47,9 +53,12 @@ void ACrowdedPlayerController::SetupInputComponent()
 	
 	InputSubsystem->AddMappingContext(CameraIMC, 0);
 
-	// ----- TEMPORAIRE TEST GRID PROTO ----- //
-	GridActor = Cast<AGridActor>(UGameplayStatics::GetActorOfClass(GetWorld(), AGridActor::StaticClass()));
-	// ----- TEMPORAIRE TEST GRID PROTO ----- //
+	// Grid actor (selection room)
+	for (TActorIterator<AGridActor> It(GetWorld()); It; ++It)
+	{
+		GridActor = *It;
+		break;
+	}
 }
 
 void ACrowdedPlayerController::BeginPlay()
@@ -89,47 +98,63 @@ void ACrowdedPlayerController::LeftClickInput(const FInputActionValue& Value)
 	if (!GameHUD)
 		return;
 	
-	// Handle click selection
+	HandleSelection();
+}
+
+void ACrowdedPlayerController::LeftRotateBuildInput(const FInputActionValue& Value)
+{
+	TObjectPtr<ACrowdedGameMode> GameMode = Cast<ACrowdedGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (!GameMode)
+		return;
+	
+	if (GameMode->GetGameMode() != EGameModeState::Building)
+		return;
+
+	OnLeftRotateBuild.Broadcast();
+}
+
+void ACrowdedPlayerController::RightRotateBuildInput(const FInputActionValue& Value)
+{
+	TObjectPtr<ACrowdedGameMode> GameMode = Cast<ACrowdedGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (!GameMode)
+		return;
+	
+	if (GameMode->GetGameMode() != EGameModeState::Building)
+		return;
+
+	OnRightRotateBuild.Broadcast();
+}
+
+void ACrowdedPlayerController::HandleSelection() const
+{
 	FHitResult Hit;
 	bool bHit = GetHitResultUnderCursor(ECC_Visibility, false, Hit);
 	
-	// ----- TEMPORAIRE TEST GRID PROTO ----- //
+	if (!GameHUD)
+		return;
+
+	AActor* HitActor = Hit.GetActor();
+
+	// 1. Selectable actor (NPC, generator)
+	if (HitActor && HitActor->Implements<USelectable>())
+	{
+		ISelectable* Selectable = Cast<ISelectable>(HitActor);
+		GameHUD->ShowSelectionWidget(HitActor, true, Selectable->GetSelectionType());
+		return;
+	}
+
+	// 2. Room
 	if (GridActor)
 	{
-		FVector MouseLocation = Hit.Location;
+		FGridRoom* Room;
 
-		int OutRow = 0;
-		int OutColumn = 0;
-		if (GridActor->GetCellAtLocation(MouseLocation ,OutRow, OutColumn))
+		if (GridActor->GetRoomAtWorldLocation(Hit.Location, Room))
 		{
-			GridActor->SelectCell(OutRow, OutColumn);
-		}
-		else
-		{
-			GridActor->DeselectCell();
+			GameHUD->ShowSelectionWidget(*Room, true, ESelectionType::Room);
+			return;
 		}
 	}
-	// ----- TEMPORAIRE TEST GRID PROTO ----- //
-	
-	if (SelectedObject)
-	{
-		SelectedObject->OnDeselected();
-		SelectedObject = nullptr;
-		GameHUD->ShowSelectionWidget(false);
-		GameHUD->GetSelectionWidget()->Unbind();
-	}
 
-	if (Hit.GetActor() && Hit.GetActor()->Implements<USelectable>())
-	{
-		SelectedObject = Cast<ISelectable>(Hit.GetActor());
-		SelectedObject->OnSelected();
-
-		GameHUD->ShowSelectionWidget(true);
-
-		if (GameHUD->GetSelectionWidget())
-		{
-			// Bind automatique à toutes les stats du composant
-			GameHUD->GetSelectionWidget()->BindToSelectable(Hit.GetActor(), SelectedObject->GetDisplayName(), SelectedObject->SelectionType);
-		}
-	}
+	// 3. Nothing
+	GameHUD->ShowSelectionWidget(nullptr, false, ESelectionType::Default);
 }

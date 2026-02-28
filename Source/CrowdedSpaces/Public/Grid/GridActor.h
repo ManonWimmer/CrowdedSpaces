@@ -1,8 +1,12 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "GridCell.h"
+#include "Grid/GridRoom.h"
+#include "Grid/GridWallDirection.h"
 #include "GameFramework/Actor.h"
 #include "ProceduralMeshComponent.h"
+#include "Build/BuildRoomData.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "GridActor.generated.h"
 
@@ -20,33 +24,58 @@ protected:
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Grid")
-	bool CheckIsValidCell(int Row, int Column);
+	bool CheckIsValidCell(int Row, int Column) const;
 
 	UFUNCTION(BlueprintCallable, Category = "Grid")
-	bool GetCellAtLocation(FVector Location, int& OutRow, int& OutColumn);
+	bool GetCellAtLocation(FVector Location, int& OutRow, int& OutColumn) const;
 	
 	UFUNCTION(BlueprintCallable, Category = "Grid")
-	bool GetGridLocation(bool bIsCenter, int Row, int Column, FVector2D& OutGridLocation);
+	bool GetGridLocation(bool bIsCenter, int Row, int Column, FVector2D& OutGridLocation) const;
 
 	UFUNCTION(BlueprintCallable, Category = "Grid")
-	void SelectCell(int Row, int Column);
+	void SelectObjectCell(const int Row, const int Column, EGridRoomType RoomType);
 	
 	UFUNCTION(BlueprintCallable, Category = "Grid")
-	void DeselectCell();
+	void DeselectSelectedCells();
 
+	UFUNCTION(BlueprintCallable, Category = "Grid")
+	void SetIsShowingRooms(bool bShow) { bIsShowingRooms = bShow; }
+	
+	FGridCell* GetGridCell(int Row, int Column);
+	
+	int GetCellSize() const { return CellSize;}
+	int GetRows() const { return Rows;}
+	int GetColumns() const { return Columns;}
+	
+	void DeselectCell(int Row, int Column);
+	void SelectRoomCell(int Row, int Column);
+	
+	void ShowPlacedRooms(bool bShow);
+	int CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> CellsToAssign);
+	bool CheckIfCellInPlacedRoom(const FGridCell* Cell, FLinearColor& OutGridColor);
+	
+	void RebuildWalls();
+	void TryAddWall(FGridCell* Cell, int NeighborRow, int NeighborCol, EGridWallDirection Dir, float Half, const TSet<FIntPoint>& DoorCells);
+
+	bool GetRoomAtWorldLocation(const FVector& WorldLoc, FGridRoom*& OutRoom);
+
+	UFUNCTION(BlueprintCallable, Category = "Grid")
+	void ShowGrid(bool bShow);
+	
 private:
-	void DrawLine(FVector Start, FVector End, float Thickness, TArray<FVector>& Vertices, TArray<int>& Triangles);
+	void DrawLine(const FVector& Start, const FVector& End, float Thickness, TArray<FVector>& Vertices, TArray<int>& Triangles);
 	float LineWidth() const; 
 	float LineHeight() const;
+	
 	TObjectPtr<UMaterialInstanceDynamic> CreateMaterialInstance(FLinearColor Color, float Opacity);
 	
 	UPROPERTY(EditAnywhere, Category = "Grid")
+	
 	TObjectPtr<UProceduralMeshComponent> LinesProceduralMesh;
+	UPROPERTY()
+	TObjectPtr<UMaterialInstanceDynamic> LinesMaterialInstance = nullptr;
 
-	UPROPERTY(EditAnywhere, Category = "Grid")
-	TObjectPtr<UProceduralMeshComponent> CellsProceduralMesh;
-
-	UPROPERTY(EditAnywhere, Category="Materials")
+	UPROPERTY(EditAnywhere, Category="Grid")
 	TObjectPtr<UMaterialInterface> BaseMaterial;
 
 	UPROPERTY(EditAnywhere, Category = "Grid")
@@ -72,26 +101,19 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Grid")
 	float CellOpacity = 0.25f;
+	
+	TMap<FIntPoint, FGridCell> Cells;
+	TArray<FGridCell*> SelectedCells;
 
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UStaticMesh> CellMesh; // Plane
+	int NextRoomId = 0;
 
 	UPROPERTY()
-	TObjectPtr<UInstancedStaticMeshComponent> CellsISM;
+	TMap<int, FGridRoom> Rooms; // id - room
 
-	// ----- TEST CREATE IN TICK ----- //
-	TArray<FVector> PendingVertices;
-	TArray<int32> PendingTriangles;
-	TArray<FVector> PendingNormals;
-	TArray<FVector2D> PendingUV0;
-	TArray<FColor> PendingVertexColors;
-	TArray<FProcMeshTangent> PendingTangents;
+	bool bIsShowingRooms = false;
 
-	int32 PendingVertexIndex = 0;
-	int32 CurrentRow = 0;
-	int32 CurrentCol = 0;
-	int32 CellsPerTick = 5; 
-
-	bool bGeneratingCells = false;
-	// ----- TEST CREATE IN TICK ----- //
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UInstancedStaticMeshComponent> WallISM;
+	
+	TSet<FVector> CreatedWallsPositions;
 };

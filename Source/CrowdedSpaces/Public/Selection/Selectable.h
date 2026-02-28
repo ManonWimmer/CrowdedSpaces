@@ -20,9 +20,8 @@ public:
 	// Sélection / désélection
 	virtual void OnSelected() = 0;
 	virtual void OnDeselected() = 0;
-	
-	virtual FString GetDisplayName() const = 0;
-	virtual TObjectPtr<AActor> GetSelectableActor() = 0;
 
 	ESelectionType SelectionType = ESelectionType::Default;
+
+	ESelectionType GetSelectionType() const { return SelectionType; }
 };

@@ -4,13 +4,15 @@
 
 ABuildableFood::ABuildableFood()
 {
+	SelectionType = ESelectionType::Food;
+	ObjectType = EObjectType::Food;
+	NPCAction = ENPCActionWidget::Eat;
 }
 
 void ABuildableFood::BeginPlay()
 {
 	Super::BeginPlay();
-
-	UBuildableRegistrySubsystem* BRS = GetWorld()->GetSubsystem<UBuildableRegistrySubsystem>();
+	
 	if (!BRS)
 		return;
 
@@ -23,19 +25,47 @@ void ABuildableFood::BeginPlay()
 void ABuildableFood::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-
-	UBuildableRegistrySubsystem* BRS = GetWorld()->GetSubsystem<UBuildableRegistrySubsystem>();
+	
 	if (!BRS)
 		return;
 	
 	BRS->UnregisterFood(this);
 }
 
-void ABuildableFood::SetAvailable(bool NewAvailable)
+bool ABuildableFood::StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
-	bIsAvailable = NewAvailable;
-	FString Result = bIsAvailable ? TEXT("True") : TEXT("False");
-	OnStatChanged.Broadcast("Is Available", Result);
+	CurrentTasks.Add(UseObjectTask);
+	
+	if (!UsingNPC.IsValid())
+		return false;
+	
+	UResourceComponent* FoodComp = UsingNPC->GetFoodComponent();
+	if (!FoodComp)
+		return false;
+	
+	FoodComp->SetIsInRegen(true);
+	
+	FoodComp->OnResourceFull.AddDynamic(UseObjectTask, &UBTTask_UseBuildableObject::OnStopAction);
+
+	return true;
+}
+
+bool ABuildableFood::StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
+{
+	CurrentTasks.Remove(UseObjectTask);
+	
+	if (!UsingNPC.IsValid())
+		return false;
+	
+	UResourceComponent* FoodComp = UsingNPC->GetFoodComponent();
+	if (!FoodComp)
+		return false;
+
+	FoodComp->SetIsInRegen(false);
+
+	FoodComp->OnResourceFull.RemoveDynamic(UseObjectTask, &UBTTask_UseBuildableObject::OnStopAction);
+	
+	return true;
 }
 
 #pragma region Selectable
@@ -46,23 +76,6 @@ void ABuildableFood::OnSelected()
 void ABuildableFood::OnDeselected()
 {
 }
+#pragma endregion
 
-FString ABuildableFood::GetDisplayName() const
-{
-	return "Food";
-}
-
-TObjectPtr<AActor> ABuildableFood::GetSelectableActor()
-{
-	return this;
-}
-
-TArray<FStat> ABuildableFood::GetCurrentValues() const
-{
-	TArray<TPair<FString, FString>> Values;
-	FString Result = bIsAvailable ? TEXT("True") : TEXT("False");
-	Values.Emplace(FString("Is Available"), Result);
-	return Values;
-}
-#pragma endregion Selectable
 

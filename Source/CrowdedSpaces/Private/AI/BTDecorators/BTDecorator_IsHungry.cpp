@@ -1,7 +1,7 @@
 ﻿#include "AI/BTDecorators/BTDecorator_IsHungry.h"
-
 #include "AIController.h"
-#include "Resources/FoodComponent.h"
+
+#include "Resources/ResourceComponent.h"
 
 UBTDecorator_IsHungry::UBTDecorator_IsHungry(FObjectInitializer const& ObjectInitializer)
 {
@@ -21,11 +21,19 @@ bool UBTDecorator_IsHungry::CalculateRawConditionValue(UBehaviorTreeComponent& O
 	if (!Pawn)
 		return false;
 
-	TObjectPtr<UFoodComponent> FoodComp = Pawn->FindComponentByClass<UFoodComponent>();
-	if (!FoodComp)
-		return false;
+	TObjectPtr<UResourceComponent> FoodComp = nullptr;
+	TArray<UResourceComponent*> ResourceComps;
+	Pawn->GetComponents(ResourceComps);
+	for (UResourceComponent* Comp : ResourceComps)
+	{
+		if (Comp && Comp->GetType() == EResourceType::Food)
+		{
+			FoodComp = Comp;
+			break;
+		}
+	}
 	
-	return FoodComp->GetFood() <= HungryUnderFood;
+	return FoodComp->GetResource() <= HungryUnderFood;
 }
 
 void UBTDecorator_IsHungry::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)

@@ -3,13 +3,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "InputMappingContext.h"
-
-// ----- TEMPORAIRE TEST GRID PROTO ----- //
 #include "Grid/GridActor.h"
-// ----- TEMPORAIRE TEST GRID PROTO ----- //
-
 #include "Player/PlayerActionsData.h"
-#include "Selection/Selectable.h"
 #include "UI/GameHUD.h"
 #include "CrowdedPlayerController.generated.h"
 
@@ -19,6 +14,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraRotate, float, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraZoom, float, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftClickBuild);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftClickGame);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftRotateBuild);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRightRotateBuild);
 
 UCLASS()
 class CROWDEDSPACES_API ACrowdedPlayerController : public APlayerController
@@ -50,6 +47,12 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnLeftClickGame OnLeftClickGame;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnLeftRotateBuild OnLeftRotateBuild;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnRightRotateBuild OnRightRotateBuild;
 	
 protected:
 	virtual void SetupInputComponent() override;
@@ -70,14 +73,18 @@ private:
 
 	void LeftClickInput(const FInputActionValue& Value);
 
-	// Selectable
-	ISelectable* SelectedObject = nullptr;
+	void LeftRotateBuildInput(const FInputActionValue& Value);
+	void RightRotateBuildInput(const FInputActionValue& Value);
+
+	// Selection
+	void HandleSelection() const;
+
+	UPROPERTY()
+	AGridActor* GridActor = nullptr;
+	
+	UPROPERTY()
+	AActor* SelectedObject = nullptr;
 
 	UPROPERTY()
 	TObjectPtr<AGameHUD> GameHUD = nullptr;
-
-	// ----- TEMPORAIRE TEST GRID PROTO ----- //
-	UPROPERTY()
-	TObjectPtr<AGridActor> GridActor = nullptr;
-	// ----- TEMPORAIRE TEST GRID PROTO ----- //
 };

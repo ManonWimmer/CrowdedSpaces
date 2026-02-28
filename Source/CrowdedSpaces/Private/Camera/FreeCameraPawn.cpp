@@ -1,7 +1,6 @@
 ﻿#include "CrowdedSpaces/Public/Camera/FreeCameraPawn.h"
 #include "Camera/CameraComponent.h"
 #include "Player/CrowdedPlayerController.h"
-#include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -15,7 +14,7 @@ AFreeCameraPawn::AFreeCameraPawn()
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(RootComponent);
 	SpringArm->bDoCollisionTest = false;
-	SpringArm->TargetArmLength = 1500.f;
+	SpringArm->TargetArmLength = DefaultZoom;
 	SpringArm->SetRelativeRotation(FRotator(-55.f, 0.f, 0.f)); // 3/4 Angle
 
 	// Camera
@@ -88,7 +87,7 @@ void AFreeCameraPawn::OnMoveRight(float Value)
 
 void AFreeCameraPawn::OnRotate(float Value)
 {
-	CurrentYawInput = Value * RotationSpeed;
+	CurrentYawInput = -Value * RotationSpeed;
 }
 
 void AFreeCameraPawn::OnZoom(float Value)

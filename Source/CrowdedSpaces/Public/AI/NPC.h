@@ -3,16 +3,16 @@
 #include "CoreMinimal.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "GameFramework/Character.h"
-#include "Resources/FoodComponent.h"
+#include "Resources/ResourceComponent.h"
 #include "Components/WidgetComponent.h"
-#include "Resources/OxygenComponent.h"
-#include "Resources/EnergyComponent.h"
 #include "Selection/Selectable.h"
 #include "NPCAction.h"
 #include "NPC.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentActionChanged, ENPCActionWidget, Value); 
+
 UCLASS()
-class CROWDEDSPACES_API ANPC : public ACharacter, public ISelectable, public ISelectableStatProvider
+class CROWDEDSPACES_API ANPC : public ACharacter, public ISelectable
 {
 	GENERATED_BODY()
 
@@ -22,16 +22,31 @@ public:
 	UBehaviorTree* GetBehaviorTree() const { return BehaviorTree; }
 
 	UFUNCTION(BlueprintCallable, Category="AI")
-	UFoodComponent* GetFoodComponent() const { return FoodComponent; }
+	UResourceComponent* GetFoodComponent() const { return FoodComponent; }
 
 	UFUNCTION(BlueprintCallable, Category="AI")
-	UEnergyComponent* GetEnergyComponent() const { return EnergyComponent; }
+	UResourceComponent* GetEnergyComponent() const { return EnergyComponent; }
 
 	UFUNCTION(BlueprintCallable, Category="AI")
-	void SetCurrentAction(ENPCAction NewAction);
+	UResourceComponent* GetOxygenComponent() const { return OxygenComponent; }
+
+	UFUNCTION(BlueprintCallable, Category="AI")
+	void SetCurrentAction(ENPCActionWidget NewAction);
+
+	UFUNCTION(BlueprintCallable)
+	ENPCActionWidget GetCurrentAction() const { return CurrentAction; }
+
+	UPROPERTY(BlueprintAssignable)
+	FOnCurrentActionChanged OnCurrentActionChanged;
+
+	UFUNCTION()
+	void Die();
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	virtual void Tick(float DeltaSeconds) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AI")
 	TObjectPtr<UBehaviorTree> BehaviorTree;
@@ -39,7 +54,7 @@ protected:
 private:
 	// Food
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<UFoodComponent> FoodComponent;
+	TObjectPtr<UResourceComponent> FoodComponent;
 	
 	UPROPERTY(EditAnywhere, Category="Food")
 	float RemoveFoodInterval = 1.0f;
@@ -49,7 +64,7 @@ private:
 
 	// Oxygen
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<UOxygenComponent> OxygenComponent;
+	TObjectPtr<UResourceComponent> OxygenComponent;
 
 	UFUNCTION()
 	void RemoveFood() const;
@@ -60,25 +75,19 @@ private:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UWidgetComponent> FoodBarWidget;
 
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UWidgetComponent> NPCActionWidget;
+
 	// Energy
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<UEnergyComponent> EnergyComponent;
+	TObjectPtr<UResourceComponent> EnergyComponent;
 
 	// Action
 	UPROPERTY()
-	ENPCAction CurrentAction = ENPCAction::Idle;
+	ENPCActionWidget CurrentAction = ENPCActionWidget::Idle;
 	
 	// Selectable
 public:
 	virtual void OnSelected() override;
 	virtual void OnDeselected() override;
-
-	virtual FString GetDisplayName() const override;
-	virtual TObjectPtr<AActor> GetSelectableActor() override;
-
-	UPROPERTY(BlueprintAssignable)
-	FOnStatChanged OnStatChanged; // Current action changed
-	
-	virtual TArray<FStat> GetCurrentValues() const override;
-	virtual FOnStatChanged& GetOnStatChanged() override { return OnStatChanged; }
 };

@@ -8,7 +8,10 @@
 ABuildableGenerator::ABuildableGenerator()
 {
 	ProductionComponent = CreateDefaultSubobject<UProductionComponent>("ProductionComponent");
+	
 	SelectionType = ESelectionType::Generator;
+	ObjectType = EObjectType::Generator;
+	NPCAction = ENPCActionWidget::Work;
 }
 
 void ABuildableGenerator::BeginPlay()
@@ -16,28 +19,16 @@ void ABuildableGenerator::BeginPlay()
 	Super::BeginPlay();
 
 	// Register generator
-	UBuildableRegistrySubsystem* BRS = GetWorld()->GetSubsystem<UBuildableRegistrySubsystem>();
 	if (!BRS)
 		return;
-		
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Register generator");
 
 	BRS->RegisterGenerator(this);
 
 	// Get player money component
-	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	if (!PC)
-		return;
-
-	ACrowdedPlayerController* CamPC = Cast<ACrowdedPlayerController>(PC);
-	if (!CamPC)
+	if (!CrowdedPlayerState)
 		return;
 	
-	if (ACrowdedPlayerState* PS = PC->GetPlayerState<ACrowdedPlayerState>())
-	{
-		PlayerMoneyComponent = PS->GetMoneyComponent();
-	}
+	PlayerMoneyComponent = CrowdedPlayerState->GetMoneyComponent();
 
 	// Assign start production values
 	if (!ProductionComponent)
@@ -64,25 +55,28 @@ void ABuildableGenerator::BeginPlay()
 void ABuildableGenerator::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-
-	UBuildableRegistrySubsystem* BRS = GetWorld()->GetSubsystem<UBuildableRegistrySubsystem>();
+	
 	if (!BRS)
 		return;
 
 	BRS->UnregisterGenerator(this);
 }
 
-#pragma region Work
-void ABuildableGenerator::SetNPCWorking(bool bWorking)
+bool ABuildableGenerator::StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
-	bHasNPCWorking = bWorking;
-
-	if (bHasNPCWorking)
-		ProductionComponent->ResumeOrStartProduction();
-	else
-		ProductionComponent->PauseProduction();
+	CurrentTasks.Add(UseObjectTask);
+	
+	ProductionComponent->StartProduction();
+	return true; 
 }
-#pragma endregion Work
+
+bool ABuildableGenerator::StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
+{
+	CurrentTasks.Remove(UseObjectTask);
+	
+	ProductionComponent->PauseProduction();
+	return true; 
+}
 
 #pragma region Upgrade
 void ABuildableGenerator::OnNextUpgrade()
@@ -94,11 +88,11 @@ void ABuildableGenerator::OnNextUpgrade()
 	ProductionComponent->ProductionInterval = ProductionUpgradeData->UpgradesInOrder[CurrentUpgrade].UpgradeProductionInterval;
 	ProductionComponent->ResourcePerInterval = ProductionUpgradeData->UpgradesInOrder[CurrentUpgrade].UpgradeResourcePerInterval;
 	
-	ProductionComponent->OnStatChanged.Broadcast("Production Interval", FString::SanitizeFloat(ProductionComponent->ProductionInterval));
-	ProductionComponent->OnStatChanged.Broadcast("Resource Per Interval", FString::SanitizeFloat(ProductionComponent->ResourcePerInterval));
+	ProductionComponent->OnProductionIntervalChanged.Broadcast(ProductionComponent->ProductionInterval);
+	ProductionComponent->OnResourcePerIntervalChanged.Broadcast(ProductionComponent->ResourcePerInterval);
 	
 	// Cost
-	PlayerMoneyComponent->RemoveMoney(ProductionUpgradeData->UpgradesInOrder[CurrentUpgrade].UpgradeCost);
+	PlayerMoneyComponent->RemoveResource(ProductionUpgradeData->UpgradesInOrder[CurrentUpgrade].UpgradeCost);
 
 	// Check next upgrade
 	CurrentUpgrade++; 
@@ -132,16 +126,6 @@ void ABuildableGenerator::OnSelected()
 
 void ABuildableGenerator::OnDeselected()
 {
-}
-
-FString ABuildableGenerator::GetDisplayName() const
-{
-	return "Generator";
-}
-
-TObjectPtr<AActor> ABuildableGenerator::GetSelectableActor()
-{
-	return this;
 }
 #pragma endregion Selectable
 
