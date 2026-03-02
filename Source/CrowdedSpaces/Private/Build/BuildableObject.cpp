@@ -4,7 +4,7 @@
 #include "Build/BuildSubsystem.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/CrowdedPlayerController.h"
-#include "Player/CrowdedPlayerState.h"
+#include "Game/CrowdedGameState.h"
 #include "UI/GameHUD.h"
 
 ABuildableObject::ABuildableObject()
@@ -27,16 +27,20 @@ void ABuildableObject::BeginPlay()
 	CrowdedPlayerController = Cast<ACrowdedPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 	if (!CrowdedPlayerController)
 		return;
+
+	const UWorld* World = GetWorld();
+	if (!World)
+		return;
 	
-	CrowdedPlayerState = CrowdedPlayerController->GetPlayerState<ACrowdedPlayerState>();
-	if (!CrowdedPlayerState)
+	const TObjectPtr<ACrowdedGameState> GameState = World->GetGameState<ACrowdedGameState>();
+	if (!GameState)
 		return;
 
 	GameHUD = Cast<AGameHUD>(CrowdedPlayerController->GetHUD());
 	if (!GameHUD)
 		return;
 
-	BRS = GetWorld()->GetSubsystem<UBuildableRegistrySubsystem>();
+	BRS = World->GetSubsystem<UBuildableRegistrySubsystem>();
 	if (!BRS)
 		return;
 }

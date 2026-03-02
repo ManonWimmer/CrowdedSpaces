@@ -1,9 +1,8 @@
 ﻿#include "Build/Buildable/BuildableGenerator.h"
 
 #include "Build/BuildableRegistrySubsystem.h"
-#include "Kismet/GameplayStatics.h"
+#include "Game/CrowdedGameState.h"
 #include "Player/CrowdedPlayerController.h"
-#include "Player/CrowdedPlayerState.h"
 
 ABuildableGenerator::ABuildableGenerator()
 {
@@ -25,10 +24,10 @@ void ABuildableGenerator::BeginPlay()
 	BRS->RegisterGenerator(this);
 
 	// Get player money component
-	if (!CrowdedPlayerState)
+	if (!CrowdedGameState)
 		return;
 	
-	PlayerMoneyComponent = CrowdedPlayerState->GetResourceComponent<EResourceType::Money>();
+	PlayerMoneyComponent = CrowdedGameState->GetResourceComponent<EResourceType::Money>();
 
 	// Assign start production values
 	if (!ProductionComponent)

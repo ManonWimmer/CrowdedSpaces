@@ -4,6 +4,25 @@
 #include "MoralEvent/MoralEventSubsystem.h"
 #include "Time/TimeSubsystem.h"
 
+ACrowdedGameState::ACrowdedGameState()
+{
+	// Resources
+	const TObjectPtr<UResourceComponent> MoneyComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("MoneyComponent"));
+	MoneyComponent->SetType(EResourceType::Money);
+	MoneyComponent->SetCanLoseAndRegenResource(false);
+	ResourceMap.Add(EResourceType::Money, MoneyComponent);
+
+	const TObjectPtr<UResourceComponent> ElectricityComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("ElectricityComponent"));
+	ElectricityComponent->SetType(EResourceType::Electricity);
+	ElectricityComponent->SetCanLoseAndRegenResource(false);
+	ResourceMap.Add(EResourceType::Electricity, ElectricityComponent);
+
+	const TObjectPtr<UResourceComponent> FoodComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("FoodComponent"));
+	FoodComponent->SetType(EResourceType::Food);
+	FoodComponent->SetCanLoseAndRegenResource(false);
+	ResourceMap.Add(EResourceType::Food, FoodComponent);
+}
+
 void ACrowdedGameState::BeginPlay()
 {
 	Super::BeginPlay();
@@ -30,4 +49,22 @@ void ACrowdedGameState::BeginPlay()
 		return;
 
 	MoralEventSubsystem->SetPossibleEvents(PossibleMoralEvents);
+}
+
+UResourceComponent* ACrowdedGameState::GetResourceComponentByType(EResourceType Type) const
+{
+	if (const TObjectPtr<UResourceComponent>* Found = ResourceMap.Find(Type))
+	{
+		return Found->Get();
+	}
+
+	return nullptr;
+}
+
+int ACrowdedGameState::GetResourceByType(EResourceType Type) const
+{
+	if (!GetResourceComponentByType(Type))
+		return 0;
+	else
+		return GetResourceComponentByType(Type)->GetResource();
 }

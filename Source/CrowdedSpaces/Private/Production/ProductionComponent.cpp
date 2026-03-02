@@ -1,8 +1,7 @@
 ﻿#include "Production/ProductionComponent.h"
 
-#include "Kismet/GameplayStatics.h"
+#include "Game/CrowdedGameState.h"
 #include "Player/CrowdedPlayerController.h"
-#include "Player/CrowdedPlayerState.h"
 
 UProductionComponent::UProductionComponent(): PlayerMoneyComponent(nullptr), PlayerElectricityComponent(nullptr), PlayerFoodComponent(nullptr)
 {
@@ -12,22 +11,18 @@ void UProductionComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	TObjectPtr<APlayerController> PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	if (!PC)
+	UWorld* World = GetWorld();
+	if (!World)
 		return;
 
-	TObjectPtr<ACrowdedPlayerController> CamPC = Cast<ACrowdedPlayerController>(PC);
-	if (!CamPC)
-		return;
-
-	TObjectPtr<ACrowdedPlayerState> PS = PC->GetPlayerState<ACrowdedPlayerState>();
-	if (!PS)
+	TObjectPtr<ACrowdedGameState> GameState = World->GetGameState<ACrowdedGameState>();
+	if (!GameState)
 		return;
 	
 	// Get player components
-	PlayerMoneyComponent = PS->GetResourceComponent<EResourceType::Money>();
-	PlayerElectricityComponent = PS->GetResourceComponent<EResourceType::Electricity>();
-	PlayerFoodComponent = PS->GetResourceComponent<EResourceType::Food>();
+	PlayerMoneyComponent = GameState->GetResourceComponent<EResourceType::Money>();
+	PlayerElectricityComponent = GameState->GetResourceComponent<EResourceType::Electricity>();
+	PlayerFoodComponent = GameState->GetResourceComponent<EResourceType::Food>();
 }
 
 void UProductionComponent::GenerateProduction() const

@@ -25,11 +25,11 @@ struct FGridCell
 	Row(InRow),
 	Column(InColumn),
 	bOccupied(InOccupied),
-	CellProceduralMesh(InMesh),
-	DynamicMaterial(InMaterial),
 	CellType(EGridCellType::None),
 	RoomType(EGridRoomType::None),
-	RoomId(-1)
+	RoomId(-1),
+	CellProceduralMesh(InMesh),
+	DynamicMaterial(InMaterial)
 	{}
 	
 	int Row;

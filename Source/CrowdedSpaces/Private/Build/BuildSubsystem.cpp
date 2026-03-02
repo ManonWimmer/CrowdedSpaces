@@ -3,6 +3,7 @@
 #include "EngineUtils.h"
 #include "Grid/GridActor.h"
 #include "Game/CrowdedGameMode.h"
+#include "Game/CrowdedGameState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/CrowdedPlayerController.h"
 #include "Resources/ResourceComponent.h"
@@ -15,6 +16,10 @@ void UBuildSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	// Game Mode
 	TObjectPtr<ACrowdedGameMode> GameMode = Cast<ACrowdedGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 	if (!GameMode)
+		return;
+
+	UWorld* World = GetWorld();
+	if (!World)
 		return;
 	
 	GameMode->OnGameModeChanged.AddDynamic(this, &UBuildSubsystem::OnGameModeChanged);
@@ -33,10 +38,11 @@ void UBuildSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	CamPC->OnRightRotateBuild.AddDynamic(this, &UBuildSubsystem::TryRotateBuildRight);
 
 	// Money component
-	if (const TObjectPtr<ACrowdedPlayerState> PS = PC->GetPlayerState<ACrowdedPlayerState>())
-	{
-		MoneyComponent = PS->GetResourceComponent<EResourceType::Money>();
-	}
+	const TObjectPtr<ACrowdedGameState> GameState = World->GetGameState<ACrowdedGameState>();
+	if (!GameState)
+		return;
+
+	MoneyComponent = GameState->GetResourceComponent<EResourceType::Money>();
 
 	// HUD
 	GameHUD = Cast<AGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
