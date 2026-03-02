@@ -135,8 +135,7 @@ void AGridActor::BeginPlay()
 
 			Cells.Emplace(
 				Key,
-				FGridCell(Row, Column, false, EGridCellType::None, EGridRoomType::None,
-				NewCellProceduralMesh, NewCellMaterialInstance));
+				FGridCell(Row, Column, false, NewCellProceduralMesh, NewCellMaterialInstance));
 		}
 	}
 	#pragma endregion 

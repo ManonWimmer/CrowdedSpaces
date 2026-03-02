@@ -18,19 +18,18 @@ struct FGridCell
 		int InRow,
 		int InColumn,
 		bool InOccupied,
-		EGridCellType InCellType,
-		EGridRoomType InRoomType,
 		TObjectPtr<UProceduralMeshComponent> InMesh,
 		TObjectPtr<UMaterialInstanceDynamic> InMaterial
 	)
-		: Row(InRow),
-		  Column(InColumn),
-		  bOccupied(InOccupied),
-		  CellType(InCellType),
-		  RoomType(InRoomType),
-		  RoomId(-1),
-		  CellProceduralMesh(InMesh),
-		  DynamicMaterial(InMaterial)
+		:
+	Row(InRow),
+	Column(InColumn),
+	bOccupied(InOccupied),
+	CellProceduralMesh(InMesh),
+	DynamicMaterial(InMaterial),
+	CellType(EGridCellType::None),
+	RoomType(EGridRoomType::None),
+	RoomId(-1)
 	{}
 	
 	int Row;
