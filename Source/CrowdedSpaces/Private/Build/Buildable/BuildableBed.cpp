@@ -38,7 +38,7 @@ bool ABuildableBed::StartUsingImplementation(UBTTask_UseBuildableObject* UseObje
 	if (!UsingNPC.IsValid())
 		return false;
 	
-	UResourceComponent* EnergyComp = UsingNPC->GetEnergyComponent();
+	UResourceComponent* EnergyComp = UsingNPC->GetResourceComponent<EResourceType::Energy>();
 	if (!EnergyComp)
 		return false;
 	
@@ -46,6 +46,12 @@ bool ABuildableBed::StartUsingImplementation(UBTTask_UseBuildableObject* UseObje
 	
 	EnergyComp->OnResourceFull.AddDynamic(UseObjectTask, &UBTTask_UseBuildableObject::OnStopAction);
 
+	UResourceComponent* FoodComp = UsingNPC->GetResourceComponent<EResourceType::Food>();
+	if (!FoodComp)
+		return false;
+	
+	FoodComp->ToggleResourceTimer();  // todo: plus tard petit multiplicateur?
+	
 	return true;
 }
 
@@ -56,13 +62,19 @@ bool ABuildableBed::StopUsingImplementation(UBTTask_UseBuildableObject* UseObjec
 	if (!UsingNPC.IsValid())
 		return false;
 	
-	UResourceComponent* EnergyComp = UsingNPC->GetEnergyComponent();
+	UResourceComponent* EnergyComp = UsingNPC->GetResourceComponent<EResourceType::Energy>();
 	if (!EnergyComp)
 		return false;
 
 	EnergyComp->SetIsInRegen(false);
 
 	EnergyComp->OnResourceFull.RemoveDynamic(UseObjectTask, &UBTTask_UseBuildableObject::OnStopAction);
+
+	UResourceComponent* FoodComp = UsingNPC->GetResourceComponent<EResourceType::Food>();
+	if (!FoodComp)
+		return false;
+	
+	FoodComp->ToggleResourceTimer(); // todo: plus tard petit multiplicateur?
 	
 	return true;
 }

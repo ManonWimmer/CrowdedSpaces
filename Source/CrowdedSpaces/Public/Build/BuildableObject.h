@@ -9,10 +9,11 @@
 
 class UBuildableRegistrySubsystem;
 class AGameHUD;
-class ACrowdedPlayerState;
+class ACrowdedGameState;
 class ACrowdedPlayerController;
 class UBuildData;
 class UBuildSubsystem;
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNPCUsingChanged, bool, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNPCComingChanged, bool, Value);
 
@@ -109,7 +110,7 @@ protected:
 	TObjectPtr<ACrowdedPlayerController> CrowdedPlayerController;
 
 	UPROPERTY()
-	TObjectPtr<ACrowdedPlayerState> CrowdedPlayerState;
+	TObjectPtr<ACrowdedGameState> CrowdedGameState;
 
 	UPROPERTY()
 	TObjectPtr<AGameHUD> GameHUD;

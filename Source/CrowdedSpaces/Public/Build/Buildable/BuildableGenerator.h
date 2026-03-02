@@ -28,6 +28,9 @@ public:
 	UProductionComponent* GetProductionComponent() const { return ProductionComponent; }
 
 	UFUNCTION(BlueprintCallable, Category = "Upgrade")
+	EProductionType GetProductionType() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Upgrade")
 	void OnNextUpgrade();
 
 	UFUNCTION(BlueprintCallable, Category = "Upgrade")

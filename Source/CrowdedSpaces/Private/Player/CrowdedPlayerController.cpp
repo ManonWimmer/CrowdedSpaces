@@ -103,7 +103,7 @@ void ACrowdedPlayerController::LeftClickInput(const FInputActionValue& Value)
 
 void ACrowdedPlayerController::LeftRotateBuildInput(const FInputActionValue& Value)
 {
-	TObjectPtr<ACrowdedGameMode> GameMode = Cast<ACrowdedGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	const TObjectPtr<ACrowdedGameMode> GameMode = Cast<ACrowdedGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 	if (!GameMode)
 		return;
 	
@@ -115,7 +115,7 @@ void ACrowdedPlayerController::LeftRotateBuildInput(const FInputActionValue& Val
 
 void ACrowdedPlayerController::RightRotateBuildInput(const FInputActionValue& Value)
 {
-	TObjectPtr<ACrowdedGameMode> GameMode = Cast<ACrowdedGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	const TObjectPtr<ACrowdedGameMode> GameMode = Cast<ACrowdedGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 	if (!GameMode)
 		return;
 	
@@ -138,7 +138,10 @@ void ACrowdedPlayerController::HandleSelection() const
 	// 1. Selectable actor (NPC, generator)
 	if (HitActor && HitActor->Implements<USelectable>())
 	{
-		ISelectable* Selectable = Cast<ISelectable>(HitActor);
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Cyan, "Select actor");
+
+		const ISelectable* Selectable = Cast<ISelectable>(HitActor);
 		GameHUD->ShowSelectionWidget(HitActor, true, Selectable->GetSelectionType());
 		return;
 	}
@@ -150,11 +153,17 @@ void ACrowdedPlayerController::HandleSelection() const
 
 		if (GridActor->GetRoomAtWorldLocation(Hit.Location, Room))
 		{
+			if (GEngine)
+				GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Cyan, "Select room");
+			
 			GameHUD->ShowSelectionWidget(*Room, true, ESelectionType::Room);
 			return;
 		}
 	}
 
 	// 3. Nothing
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Cyan, "Select nothing");
+	
 	GameHUD->ShowSelectionWidget(nullptr, false, ESelectionType::Default);
 }

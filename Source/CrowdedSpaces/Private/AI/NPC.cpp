@@ -1,7 +1,11 @@
 ﻿#include "AI/NPC.h"
 
+#include "AI/NPCController.h"
+#include "BehaviorTree/BlackboardComponent.h"
+#include "Build/BuildableObject.h"
 #include "Camera/FreeCameraPawn.h"
 #include "Camera/CameraComponent.h"
+#include "Game/CrowdedGameMode.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "UI/Widgets/FoodBarWidget.h"
 #include "UI/Widgets/NPCActionWidget.h"
@@ -12,6 +16,7 @@ ANPC::ANPC()
 	FoodComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("FoodComponent"));
 	FoodComponent->SetType(EResourceType::Food);
 	FoodComponent->SetCanLoseAndRegenResource(true);
+	ResourceMap.Add(EResourceType::Food, FoodComponent);
 	
 	FoodBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("FoodBarWidget"));
 	FoodBarWidget->SetupAttachment(GetMesh());
@@ -19,21 +24,35 @@ ANPC::ANPC()
 	NPCActionWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("NPCActionWidget"));
 	NPCActionWidget->SetupAttachment(GetMesh());
 
-	// Oxygen
-	OxygenComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("OxygenComponent"));
-	OxygenComponent->SetType(EResourceType::Oxygen);
-	OxygenComponent->SetCanLoseAndRegenResource(false);
-
 	// Energy
 	EnergyComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("EnergyComponent"));
 	EnergyComponent->SetType(EResourceType::Energy);
 	EnergyComponent->SetCanLoseAndRegenResource(true);
+	ResourceMap.Add(EResourceType::Energy, EnergyComponent);
 
 	// Selectable
 	SelectionType = ESelectionType::NPC;
 }
 
-void ANPC::SetCurrentAction(ENPCActionWidget NewAction)
+UResourceComponent* ANPC::GetResourceComponentByType(const EResourceType Type) const
+{
+	if (const TObjectPtr<UResourceComponent>* Found = ResourceMap.Find(Type))
+	{
+		return Found->Get();
+	}
+
+	return nullptr;
+}
+
+int ANPC::GetResourceByType(const EResourceType Type) const
+{
+	if (!GetResourceComponentByType(Type))
+		return 0;
+	else
+		return GetResourceComponentByType(Type)->GetResource();
+}
+
+void ANPC::SetCurrentAction(const ENPCActionWidget NewAction)
 {
 	CurrentAction = NewAction;
 	FString ActionString = StaticEnum<ENPCActionWidget>()->GetDisplayNameTextByValue(static_cast<int64>(CurrentAction)).ToString();
@@ -47,8 +66,55 @@ void ANPC::Die()
 
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Npc died.");
+
+	ACrowdedGameMode* GameMode = GetWorld()->GetAuthGameMode<ACrowdedGameMode>();
+	if (!GameMode)
+		return;
+
+	GameMode->UnregisterNPC(this);
 	
 	Destroy();
+}
+
+void ANPC::SetWorkOnGeneratorType(const EProductionType NewType)
+{
+	if (WorkOnGeneratorType == NewType)
+		return;
+	
+	WorkOnGeneratorType = NewType;
+
+	// Cancel use generator task in cas was working on genrator with diferent type
+	if (ANPCController* ControllerNPC = Cast<ANPCController>(GetController()))
+	{
+		if (UBlackboardComponent* BB = ControllerNPC->GetBlackboardComponent())
+		{
+			TObjectPtr<ABuildableObject> TargetObject = Cast<ABuildableObject>(BB->GetValueAsObject("TargetObject"));
+			
+			if (TargetObject && TargetObject->GetObjectType() == EObjectType::Generator)
+			{
+				if (UBehaviorTreeComponent* BTComp = Cast<UBehaviorTreeComponent>(ControllerNPC->GetBrainComponent()))
+					BTComp->RestartTree();
+			}
+		}
+	}
+}
+
+int ANPC::GetProductionMultiplierForType(const EProductionType Type) const
+{
+	switch (Type)
+	{
+		case EProductionType::Money:
+			return MoneyProductionMultiplier;
+			
+		case EProductionType::Food:
+			return FoodProductionMultiplier;
+			
+		case EProductionType::Electricity:
+			return ElectricityProductionMultiplier;
+			
+		default:
+			return 1;
+	}
 }
 
 void ANPC::BeginPlay()
@@ -88,6 +154,17 @@ void ANPC::BeginPlay()
 	// Die
 	FoodComponent->OnNoMoreResource.AddDynamic(this, &ANPC::Die);
 	EnergyComponent->OnNoMoreResource.AddDynamic(this, &ANPC::Die);
+
+	ACrowdedGameMode* GameMode = GetWorld()->GetAuthGameMode<ACrowdedGameMode>();
+	if (!GameMode)
+		return;
+
+	GameMode->RegisterNPC(this);
+
+	// Multipliers
+	FoodProductionMultiplier = FMath::RandRange(1, 5);
+	ElectricityProductionMultiplier = FMath::RandRange(1, 5);
+	MoneyProductionMultiplier = FMath::RandRange(1, 5);
 }
 
 void ANPC::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -98,7 +175,7 @@ void ANPC::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
-void ANPC::Tick(float DeltaSeconds)
+void ANPC::Tick(const float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 

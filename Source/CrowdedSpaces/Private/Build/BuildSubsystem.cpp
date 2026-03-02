@@ -3,6 +3,7 @@
 #include "EngineUtils.h"
 #include "Grid/GridActor.h"
 #include "Game/CrowdedGameMode.h"
+#include "Game/CrowdedGameState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/CrowdedPlayerController.h"
 #include "Resources/ResourceComponent.h"
@@ -15,6 +16,10 @@ void UBuildSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	// Game Mode
 	TObjectPtr<ACrowdedGameMode> GameMode = Cast<ACrowdedGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 	if (!GameMode)
+		return;
+
+	UWorld* World = GetWorld();
+	if (!World)
 		return;
 	
 	GameMode->OnGameModeChanged.AddDynamic(this, &UBuildSubsystem::OnGameModeChanged);
@@ -33,10 +38,11 @@ void UBuildSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	CamPC->OnRightRotateBuild.AddDynamic(this, &UBuildSubsystem::TryRotateBuildRight);
 
 	// Money component
-	if (TObjectPtr<ACrowdedPlayerState> PS = PC->GetPlayerState<ACrowdedPlayerState>())
-	{
-		MoneyComponent = PS->GetMoneyComponent();
-	}
+	const TObjectPtr<ACrowdedGameState> GameState = World->GetGameState<ACrowdedGameState>();
+	if (!GameState)
+		return;
+
+	MoneyComponent = GameState->GetResourceComponent<EResourceType::Money>();
 
 	// HUD
 	GameHUD = Cast<AGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
@@ -222,7 +228,7 @@ void UBuildSubsystem::PlaceObject() const
 	{
 		for (int Col = StartCol; Col < StartCol + SizeY; ++Col)
 		{
-			FGridCell* Cell = GridActor->GetGridCell(Row, Col);
+			const FGridCell* Cell = GridActor->GetGridCell(Row, Col);
 			if (CurrentBuildData->RoomType == EGridRoomType::Any)
 			{
 				if (!Cell || Cell->bOccupied)
@@ -314,7 +320,7 @@ void UBuildSubsystem::PlaceRoom()
 	GetRoomRotatedSize(SizeX, SizeY);
 	
 	// Check can place
-	for (FGridCell* Cell : SelectedRoomCells)
+	for (const FGridCell* Cell : SelectedRoomCells)
 	{
 		if (!Cell)
 		{
@@ -322,9 +328,9 @@ void UBuildSubsystem::PlaceRoom()
 			return;
 		}
 
-		if (Cell->RoomId != -1)
+		if (Cell->RoomType != EGridRoomType::None)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("PlaceRoom: SelectedRoomCells contient Room id != -1!"));
+			UE_LOG(LogTemp, Warning, TEXT("PlaceRoom: SelectedRoomCells contient une room non set"));
 			return;
 		}
 	}

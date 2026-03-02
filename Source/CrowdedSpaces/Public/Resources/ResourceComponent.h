@@ -22,7 +22,7 @@ public:
 	void SetType(EResourceType NewType);
 
 	UFUNCTION(BlueprintCallable)
-	EResourceType GetType() { return ResourceType;}
+	EResourceType GetType() const { return ResourceType;}
 	
 	// Change value
 	UFUNCTION(BlueprintCallable)
@@ -49,6 +49,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void StartResourceTimer();
 
+	UFUNCTION(BlueprintCallable)
+	void ToggleResourceTimer();
+	
 	UFUNCTION(BlueprintCallable)
 	void StopResourceTimer();
 

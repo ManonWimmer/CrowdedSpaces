@@ -1,11 +1,9 @@
 ﻿#include "Production/ProductionComponent.h"
 
-#include "Kismet/GameplayStatics.h"
+#include "Game/CrowdedGameState.h"
 #include "Player/CrowdedPlayerController.h"
-#include "Player/CrowdedPlayerState.h"
 
-UProductionComponent::UProductionComponent(): PlayerMoneyComponent(nullptr), PlayerElectricityComponent(nullptr),
-											  PlayerOxygenComponent(nullptr), PlayerFoodComponent(nullptr)
+UProductionComponent::UProductionComponent(): PlayerMoneyComponent(nullptr), PlayerElectricityComponent(nullptr), PlayerFoodComponent(nullptr)
 {
 }
 
@@ -13,23 +11,18 @@ void UProductionComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	TObjectPtr<APlayerController> PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	if (!PC)
+	UWorld* World = GetWorld();
+	if (!World)
 		return;
 
-	TObjectPtr<ACrowdedPlayerController> CamPC = Cast<ACrowdedPlayerController>(PC);
-	if (!CamPC)
-		return;
-
-	TObjectPtr<ACrowdedPlayerState> PS = PC->GetPlayerState<ACrowdedPlayerState>();
-	if (!PS)
+	TObjectPtr<ACrowdedGameState> GameState = World->GetGameState<ACrowdedGameState>();
+	if (!GameState)
 		return;
 	
 	// Get player components
-	PlayerMoneyComponent = PS->GetMoneyComponent();
-	PlayerElectricityComponent = PS->GetElectricityComponent();
-	PlayerOxygenComponent = PS->GetOxygenComponent();
-	PlayerFoodComponent = PS->GetFoodComponent();
+	PlayerMoneyComponent = GameState->GetResourceComponent<EResourceType::Money>();
+	PlayerElectricityComponent = GameState->GetResourceComponent<EResourceType::Electricity>();
+	PlayerFoodComponent = GameState->GetResourceComponent<EResourceType::Food>();
 }
 
 void UProductionComponent::GenerateProduction() const
@@ -40,7 +33,7 @@ void UProductionComponent::GenerateProduction() const
 		case EProductionType::Money:
 			if (PlayerMoneyComponent)
 			{
-				PlayerMoneyComponent->AddResource(ResourcePerInterval);
+				PlayerMoneyComponent->AddResource(ResourcePerInterval * ProductionMultiplier);
 			}
 			break;
 
@@ -48,15 +41,7 @@ void UProductionComponent::GenerateProduction() const
 		case EProductionType::Electricity:
 			if (PlayerElectricityComponent)
 			{
-				PlayerElectricityComponent->AddResource(ResourcePerInterval);
-			}
-			break;
-
-		// Oxygen
-		case EProductionType::Oxygen:
-			if (PlayerOxygenComponent)
-			{
-				PlayerOxygenComponent->AddResource(ResourcePerInterval);
+				PlayerElectricityComponent->AddResource(ResourcePerInterval * ProductionMultiplier);
 			}
 			break;
 
@@ -64,7 +49,7 @@ void UProductionComponent::GenerateProduction() const
 		case EProductionType::Food:
 			if (PlayerFoodComponent)
 			{
-				PlayerFoodComponent->AddResource(ResourcePerInterval);
+				PlayerFoodComponent->AddResource(ResourcePerInterval * ProductionMultiplier);
 			}
 			break;
 		

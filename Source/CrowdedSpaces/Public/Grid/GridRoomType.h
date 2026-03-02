@@ -6,6 +6,7 @@
 UENUM(BlueprintType)
 enum class EGridRoomType : uint8
 {
+	None			UMETA(DisplayName="None"),
 	Any				UMETA(DisplayName="Any"),
 	Diner			UMETA(DisplayName="Diner"),
 	Generator		UMETA(DisplayName="Generator")

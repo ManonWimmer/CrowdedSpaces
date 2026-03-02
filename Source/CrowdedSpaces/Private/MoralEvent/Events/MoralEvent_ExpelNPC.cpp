@@ -1,6 +1,7 @@
 #include "MoralEvent/Events/MoralEvent_ExpelNPC.h"
 
 #include "EngineUtils.h"
+#include "Game/CrowdedGameState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/CrowdedPlayerController.h"
 #include "Player/CrowdedPlayerState.h"
@@ -45,20 +46,12 @@ void UMoralEvent_ExpelNPC::ClickOnChoice(EMoralEventType Choice)
 			TObjectPtr<ANPC> RandomNPC = FoundNPCs[RandomIndex];
 				
 			RandomNPC->Destroy();
-				
-			TObjectPtr<APlayerController> PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-			if (!PC)
-				break;
-
-			TObjectPtr<ACrowdedPlayerController> CamPC = Cast<ACrowdedPlayerController>(PC);
-			if (!CamPC)
-				break;
 
 			TObjectPtr<UResourceComponent> MoneyComponent = nullptr;
 		
-			if (TObjectPtr<ACrowdedPlayerState> PS = PC->GetPlayerState<ACrowdedPlayerState>())
+			if (TObjectPtr<ACrowdedGameState> GameState = World->GetGameState<ACrowdedGameState>())
 			{
-				MoneyComponent = PS->GetMoneyComponent();
+				MoneyComponent = GameState->GetResourceComponent<EResourceType::Money>();
 			}
 
 			if (!MoneyComponent)

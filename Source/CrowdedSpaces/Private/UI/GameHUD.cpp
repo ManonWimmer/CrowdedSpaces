@@ -50,7 +50,7 @@ void AGameHUD::ShowPlayerResourcesWidget(bool bShow)
 #pragma endregion Player Resources
 
 #pragma region Selection
-void AGameHUD::ShowSelectionWidget(AActor* SelectableActor, bool bShow, ESelectionType SelectionType)
+void AGameHUD::ShowSelectionWidget(AActor* SelectableActor, const bool bShow, const ESelectionType SelectionType)
 {
 	if (!bShow || !SelectableActor)
 	{
@@ -77,7 +77,7 @@ void AGameHUD::ShowSelectionWidget(AActor* SelectableActor, bool bShow, ESelecti
 	CurrentlySelectedActor = SelectableActor;
 }
 
-void AGameHUD::ShowSelectionWidget(FGridRoom& Room, bool bShow, ESelectionType SelectionType)
+void AGameHUD::ShowSelectionWidget(const FGridRoom& Room, const bool bShow, const ESelectionType SelectionType)
 {
 	if (!bShow)
 	{
@@ -91,6 +91,8 @@ void AGameHUD::ShowSelectionWidget(FGridRoom& Room, bool bShow, ESelectionType S
 		HideCurrentSelectionWidget();
 		return;
 	}
+
+	HideCurrentSelectionWidget();
 
 	UCustomWidget* Widget = GetWidgetFromSelectionType(SelectionType);
 	if (!Widget)
@@ -121,7 +123,7 @@ void AGameHUD::HideCurrentSelectionWidget()
 	CurrentlySelectedRoom = nullptr;
 }
 
-UCustomWidget* AGameHUD::GetWidgetFromSelectionType(ESelectionType Type)
+UCustomWidget* AGameHUD::GetWidgetFromSelectionType(const ESelectionType Type)
 {
 	switch (Type)
 	{
