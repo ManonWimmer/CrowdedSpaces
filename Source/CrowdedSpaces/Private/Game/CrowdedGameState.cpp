@@ -1,5 +1,6 @@
 ﻿#include "Game/CrowdedGameState.h"
 
+#include "AI/NameGeneratorSubsystem.h"
 #include "Build/BuildSubsystem.h"
 #include "MoralEvent/MoralEventSubsystem.h"
 #include "Time/TimeSubsystem.h"
@@ -27,8 +28,15 @@ void ACrowdedGameState::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Get name generator subsystem & send data
+	const TObjectPtr<UNameGeneratorSubsystem> NameGeneratorSubsystem = GetWorld()->GetSubsystem<UNameGeneratorSubsystem>();
+	if (!NameGeneratorSubsystem)
+		return;
+
+	NameGeneratorSubsystem->SetNameData(NameData);
+
 	// Get build subsystem & send data
-	TObjectPtr<UBuildSubsystem> BuildSubsystem = GetWorld()->GetSubsystem<UBuildSubsystem>();
+	const TObjectPtr<UBuildSubsystem> BuildSubsystem = GetWorld()->GetSubsystem<UBuildSubsystem>();
 	if (!BuildSubsystem)
 		return;
 		
@@ -37,14 +45,14 @@ void ACrowdedGameState::BeginPlay()
 	BuildSubsystem->SetSnapSize(SnapSize);
 
 	// Get time subsystem & send data
-	TObjectPtr<UTimeSubsystem> TimeSubsystem = GetWorld()->GetSubsystem<UTimeSubsystem>();
+	const TObjectPtr<UTimeSubsystem> TimeSubsystem = GetWorld()->GetSubsystem<UTimeSubsystem>();
 	if (!TimeSubsystem)
 		return;
 
 	TimeSubsystem->SetTimeData(TimeData);
 
 	// Get moral event subsystem & send data
-	TObjectPtr<UMoralEventSubsystem> MoralEventSubsystem = GetWorld()->GetSubsystem<UMoralEventSubsystem>();
+	const TObjectPtr<UMoralEventSubsystem> MoralEventSubsystem = GetWorld()->GetSubsystem<UMoralEventSubsystem>();
 	if (!MoralEventSubsystem)
 		return;
 

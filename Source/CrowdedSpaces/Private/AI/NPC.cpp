@@ -1,5 +1,6 @@
 ﻿#include "AI/NPC.h"
 
+#include "AI/NameGeneratorSubsystem.h"
 #include "AI/NPCController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Build/BuildableObject.h"
@@ -117,6 +118,32 @@ int ANPC::GetProductionMultiplierForType(const EProductionType Type) const
 	}
 }
 
+void ANPC::TryGenerateName()
+{
+	if (const UNameGeneratorSubsystem* NameSystem =
+	   GetWorld()->GetSubsystem<UNameGeneratorSubsystem>())
+	{
+		if (NameSystem->IsInitialized())
+		{
+			NPCName = NameSystem->GenerateName();
+
+			if (GEngine)
+				GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Green, NPCName);
+
+			return;
+		}
+	}
+
+	// Retry dans 0.5s
+	GetWorld()->GetTimerManager().SetTimer(
+		NameRetryTimer,
+		this,
+		&ANPC::TryGenerateName,
+		0.5f,
+		false
+	);
+}
+
 void ANPC::BeginPlay()
 {
 	Super::BeginPlay();
@@ -165,6 +192,11 @@ void ANPC::BeginPlay()
 	FoodProductionMultiplier = FMath::RandRange(1, 5);
 	ElectricityProductionMultiplier = FMath::RandRange(1, 5);
 	MoneyProductionMultiplier = FMath::RandRange(1, 5);
+
+	// Random name
+	TryGenerateName();
+
+	// Random color
 }
 
 void ANPC::EndPlay(const EEndPlayReason::Type EndPlayReason)

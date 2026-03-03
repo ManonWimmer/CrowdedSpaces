@@ -58,6 +58,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category="AI")
 	int GetProductionMultiplierForType(EProductionType Type) const;
 
+	// Name
+	UFUNCTION(BlueprintCallable, Category="AI")
+	FString GetNPCName() const { return NPCName; }
+
+	FTimerHandle NameRetryTimer;
+
+	void TryGenerateName();
+	
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -114,6 +122,9 @@ private:
 
 	UPROPERTY()
 	int MoneyProductionMultiplier = 1;
+
+	UPROPERTY()
+	FString NPCName = "";
 	
 	// Selectable
 public:

@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "AI/NameList.h"
 #include "GameFramework/GameStateBase.h"
 #include "Build/BuildData.h"
 #include "Build/BuildRoomData.h"
@@ -49,6 +50,10 @@ public:
 
 	template <EResourceType Type>
 	int GetResource() const;
+
+	// NPC Name
+	UPROPERTY(EditAnywhere, Category = "NPC")
+	UNameList* NameData;
 
 private:
 	UPROPERTY()
