@@ -19,8 +19,8 @@ void UMoralEvent_ExpelNPC::ClickOnChoice(EMoralEventType Choice)
 		{
 			if (GEngine)
 				GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Yellow, "Decided to do expel npc.");
-				
-			TObjectPtr<UWorld> World = GetWorld();
+
+			const TObjectPtr<UWorld> World = GetWorld();
 			if (!World)
 				break;
 
@@ -41,15 +41,15 @@ void UMoralEvent_ExpelNPC::ClickOnChoice(EMoralEventType Choice)
 					GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Found 0 NPC in world.");
 				break;
 			}
+
+			const int32 RandomIndex = FMath::RandRange(0, FoundNPCs.Num() - 1);
+			const TObjectPtr<ANPC> RandomNPC = FoundNPCs[RandomIndex];
 				
-			int32 RandomIndex = FMath::RandRange(0, FoundNPCs.Num() - 1);
-			TObjectPtr<ANPC> RandomNPC = FoundNPCs[RandomIndex];
-				
-			RandomNPC->Destroy();
+			RandomNPC->Die();
 
 			TObjectPtr<UResourceComponent> MoneyComponent = nullptr;
 		
-			if (TObjectPtr<ACrowdedGameState> GameState = World->GetGameState<ACrowdedGameState>())
+			if (const TObjectPtr<ACrowdedGameState> GameState = World->GetGameState<ACrowdedGameState>())
 			{
 				MoneyComponent = GameState->GetResourceComponent<EResourceType::Money>();
 			}
