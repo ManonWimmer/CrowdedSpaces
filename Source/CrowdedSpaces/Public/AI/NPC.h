@@ -65,6 +65,8 @@ public:
 	FTimerHandle NameRetryTimer;
 
 	void TryGenerateName();
+
+	FLinearColor GetRandomColor();
 	
 protected:
 	virtual void BeginPlay() override;
@@ -125,6 +127,12 @@ private:
 
 	UPROPERTY()
 	FString NPCName = "";
+
+	UPROPERTY()
+	UMaterialInstanceDynamic* BodyMaterialInstance;
+
+	UPROPERTY()
+	UMaterialInstanceDynamic* OtherMaterialInstance;
 	
 	// Selectable
 public:

@@ -144,6 +144,21 @@ void ANPC::TryGenerateName()
 	);
 }
 
+FLinearColor ANPC::GetRandomColor()
+{
+	const float Hue = FMath::FRandRange(0.f, 1.f);
+	const float Saturation = FMath::FRandRange(0.6f, 0.85f);
+	const float Value = FMath::FRandRange(0.7f, 0.95f);
+
+	const FLinearColor Color = FLinearColor::MakeFromHSV8(
+		Hue * 255,
+		Saturation * 255,
+		Value * 255
+	);
+
+	return Color;
+}
+
 void ANPC::BeginPlay()
 {
 	Super::BeginPlay();
@@ -197,6 +212,24 @@ void ANPC::BeginPlay()
 	TryGenerateName();
 
 	// Random color
+	UPrimitiveComponent* MeshComp = GetMesh();
+
+	if (!MeshComp) return;
+
+	BodyMaterialInstance = MeshComp->CreateAndSetMaterialInstanceDynamic(0);
+	OtherMaterialInstance = MeshComp->CreateAndSetMaterialInstanceDynamic(1);
+
+	const FLinearColor RandomColor = GetRandomColor();
+	
+	if (BodyMaterialInstance)
+	{
+		BodyMaterialInstance->SetVectorParameterValue(TEXT("BaseColor"), RandomColor);
+	}
+
+	if (OtherMaterialInstance)
+	{
+		OtherMaterialInstance->SetVectorParameterValue(TEXT("BaseColor"), RandomColor);
+	}
 }
 
 void ANPC::EndPlay(const EEndPlayReason::Type EndPlayReason)
