@@ -12,17 +12,10 @@ void UMoralEventSubsystem::StartNewEvent(TSubclassOf<UMoralEvent> NewEvent)
 	GameHUD->UpdateMoralEventWidget(CurrentEvent);
 }
 
-void UMoralEventSubsystem::HandleRandomMoralEvent()
+void UMoralEventSubsystem::HandleCurrentDayMoralEvent(const TSubclassOf<UMoralEvent> MoralEvent)
 {
-	if (PossibleEvents.Num() == 0)
-		return;
-
-	// Get random event in possible events
-	int32 RandomIndex = FMath::RandRange(0, PossibleEvents.Num() - 1);
-	TSubclassOf<UMoralEvent> RandomEvent = PossibleEvents[RandomIndex];
-
 	// Start event
-	StartNewEvent(RandomEvent);
+	StartNewEvent(MoralEvent);
 }
 
 void UMoralEventSubsystem::OnChoiceSelected(EMoralEventType Choice)

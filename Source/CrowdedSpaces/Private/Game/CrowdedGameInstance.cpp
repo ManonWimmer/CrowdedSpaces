@@ -28,7 +28,7 @@ void UCrowdedGameInstance::OnPostWorldInitialization(UWorld* World, const UWorld
 	// On start moral event
 	TimeSubsystem->OnMoralEventTime.AddDynamic(
 		MoralSubsystem,
-		&UMoralEventSubsystem::HandleRandomMoralEvent
+		&UMoralEventSubsystem::HandleCurrentDayMoralEvent
 	);
 
 	TimeSubsystem->OnMoralEventTime.AddDynamic(

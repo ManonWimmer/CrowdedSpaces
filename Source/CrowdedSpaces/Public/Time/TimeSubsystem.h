@@ -3,12 +3,13 @@
 #include "CoreMinimal.h"
 #include "TimeData.h"
 #include "TimeSpeedType.h"
+#include "MoralEvent/MoralEvent.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "TimeSubsystem.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTimeChanged, float, NewMinutes);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDayChanged, int, NewDay);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnMoralEventTime);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMoralEventTime, TSubclassOf<UMoralEvent>, MoralEvent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTimeSpeedChanged, ETimeSpeedType, NewTimeSpeed);
 
 UCLASS()
@@ -34,10 +35,10 @@ public:
 	FOnTimeSpeedChanged OnTimeSpeedChanged;
 
 	UFUNCTION(BlueprintCallable, Category = "Time")
-	float GetCurrentMinutes() { return CurrentMinutes; }
+	float GetCurrentMinutes() const { return CurrentMinutes; }
 
 	UFUNCTION(BlueprintCallable, Category = "Time")
-	int GetCurrentDay() { return CurrentDay; }
+	int GetCurrentDay() const { return CurrentDay; }
 
 	UFUNCTION(BlueprintCallable, Category = "Time")
 	UTimeData* GetTimeData() const { return TimeData; }
@@ -48,9 +49,11 @@ public:
 	// Game speed
 	UFUNCTION(BlueprintCallable, Category = "Time")
 	void SetTimeSpeed(ETimeSpeedType NewTimeSpeed);
-
+	
 	UFUNCTION(BlueprintCallable, Category = "Time")
-	void SetTimePaused();
+	void SetTimePaused(const TSubclassOf<UMoralEvent> MoralEvent = nullptr);
+
+	void GetRandomMoralEventForDay(int Day) const;
 
 	UFUNCTION(BlueprintCallable, Category = "Time")
 	void SetTimeNormal();
