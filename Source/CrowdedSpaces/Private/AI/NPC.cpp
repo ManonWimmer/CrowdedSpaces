@@ -10,6 +10,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "UI/Widgets/FoodBarWidget.h"
 #include "UI/Widgets/NPCActionWidget.h"
+#include "UI/Widgets/Selection/NPCNameWidget.h"
 
 ANPC::ANPC()
 {
@@ -19,8 +20,8 @@ ANPC::ANPC()
 	FoodComponent->SetCanLoseAndRegenResource(true);
 	ResourceMap.Add(EResourceType::Food, FoodComponent);
 	
-	FoodBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("FoodBarWidget"));
-	FoodBarWidget->SetupAttachment(GetMesh());
+	NPCNameWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("NPCNameWidget"));
+	NPCNameWidget->SetupAttachment(GetMesh());
 
 	NPCActionWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("NPCActionWidget"));
 	NPCActionWidget->SetupAttachment(GetMesh());
@@ -126,10 +127,22 @@ void ANPC::TryGenerateName()
 		if (NameSystem->IsInitialized())
 		{
 			NPCName = NameSystem->GenerateName();
+			
+			// Setup npc name widget
+			if (!NPCNameWidget)
+				return;
 
-			if (GEngine)
-				GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Green, NPCName);
+			const TObjectPtr<UUserWidget> NPCNameUserWidget = NPCNameWidget->GetUserWidgetObject();
+			if (!NPCNameUserWidget)
+				return;
 
+			const TObjectPtr<UNPCNameWidget> NPCNameWidgetPtr = Cast<UNPCNameWidget>(NPCNameUserWidget);
+			if (!NPCNameWidgetPtr)
+				return;
+	
+			NPCNameWidgetPtr->OwningActor = this;
+			NPCNameWidgetPtr->Init();
+			
 			return;
 		}
 	}
@@ -162,37 +175,7 @@ FLinearColor ANPC::GetRandomColor()
 void ANPC::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// Cast food bar widget class to food bar widget -> set owning actor
-	if (!FoodBarWidget)
-		return;
-
-	TObjectPtr<UUserWidget> FoodBarUserWidget = FoodBarWidget->GetUserWidgetObject();
-	if (!FoodBarUserWidget)
-		return;
-
-	TObjectPtr<UFoodBarWidget> FoodBarWidgetPtr = Cast<UFoodBarWidget>(FoodBarUserWidget);
-	if (!FoodBarWidgetPtr)
-		return;
 	
-	FoodBarWidgetPtr->OwningActor = this;
-	FoodBarWidgetPtr->Init();
-
-	// Same for npc action widget
-	if (!NPCActionWidget)
-		return;
-
-	TObjectPtr<UUserWidget> NPCActionUserWidget = NPCActionWidget->GetUserWidgetObject();
-	if (!NPCActionUserWidget)
-		return;
-
-	TObjectPtr<UNPCActionWidget> NPCActionWidgetPtr = Cast<UNPCActionWidget>(NPCActionUserWidget);
-	if (!NPCActionWidgetPtr)
-		return;
-	
-	NPCActionWidgetPtr->OwningActor = this;
-	NPCActionWidgetPtr->Init();
-
 	// Die
 	FoodComponent->OnNoMoreResource.AddDynamic(this, &ANPC::Die);
 	EnergyComponent->OnNoMoreResource.AddDynamic(this, &ANPC::Die);
@@ -230,6 +213,21 @@ void ANPC::BeginPlay()
 	{
 		OtherMaterialInstance->SetVectorParameterValue(TEXT("BaseColor"), RandomColor);
 	}
+	
+	// Setup npc action widget
+	if (!NPCActionWidget)
+		return;
+
+	const TObjectPtr<UUserWidget> NPCActionUserWidget = NPCActionWidget->GetUserWidgetObject();
+	if (!NPCActionUserWidget)
+		return;
+
+	const TObjectPtr<UNPCActionWidget> NPCActionWidgetPtr = Cast<UNPCActionWidget>(NPCActionUserWidget);
+	if (!NPCActionWidgetPtr)
+		return;
+	
+	NPCActionWidgetPtr->OwningActor = this;
+	NPCActionWidgetPtr->Init();
 }
 
 void ANPC::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -245,7 +243,7 @@ void ANPC::Tick(const float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	// Widgets world look at camera
-	if (!FoodBarWidget || !NPCActionWidget) return;
+	if (!NPCNameWidget || !NPCActionWidget) return;
 
 	const APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	if (!PC) return;
@@ -257,16 +255,16 @@ void ANPC::Tick(const float DeltaSeconds)
 	if (!Cam) return;
 
 	const FVector CameraLocation = Cam->GetComponentLocation();
-	const FVector FoodBarWidgetLocation = FoodBarWidget->GetComponentLocation();
+	const FVector NPCNameWidgetLocation = NPCNameWidget->GetComponentLocation();
 	const FVector NPCActionWidgetLocation = NPCActionWidget->GetComponentLocation();
 
-	const FRotator LookAtFoodBar = UKismetMathLibrary::FindLookAtRotation(FoodBarWidgetLocation, CameraLocation);
+	const FRotator LookAtNPCName = UKismetMathLibrary::FindLookAtRotation(NPCNameWidgetLocation, CameraLocation);
 	const FRotator LookAtNPCAction = UKismetMathLibrary::FindLookAtRotation(NPCActionWidgetLocation, CameraLocation);
 	
-	const FRotator YawOnlyFoodBar(0.f, LookAtFoodBar.Yaw, 0.f);
-	const FRotator YawOnlyNPCAction(0.f, LookAtFoodBar.Yaw, 0.f);
+	const FRotator YawOnlyNPCName(0.f, LookAtNPCName.Yaw, 0.f);
+	const FRotator YawOnlyNPCAction(0.f, LookAtNPCAction.Yaw, 0.f);
 
-	FoodBarWidget->SetWorldRotation(YawOnlyFoodBar);
+	NPCNameWidget->SetWorldRotation(YawOnlyNPCName);
 	NPCActionWidget->SetWorldRotation(YawOnlyNPCAction);
 }
 

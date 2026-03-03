@@ -98,7 +98,7 @@ private:
 	FTimerHandle RemoveFoodTimerHandle;
 
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<UWidgetComponent> FoodBarWidget;
+	TObjectPtr<UWidgetComponent> NPCNameWidget;
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UWidgetComponent> NPCActionWidget;
