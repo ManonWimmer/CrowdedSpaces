@@ -216,6 +216,8 @@ void UBuildSubsystem::StopBuilding()
 	GridActor->SetIsShowingRooms(true);
 	ResetBuildRotation();
 
+	GridActor->DeselectSelectedCells();
+
 	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Stop building");
 }
 
