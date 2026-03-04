@@ -160,6 +160,19 @@ void UBuildSubsystem::StartBuilding(UBuildData* BuildData)
 	TObjectPtr<UStaticMesh> GhostMesh = DefaultBuildable->GetMeshComponent()->GetStaticMesh();
 	CurrentGhost->SetMesh(GhostMesh);
 
+	// Get materials
+	TArray<UMaterialInterface*> Materials;
+	if (DefaultBuildable->GetMeshComponent())
+	{
+		const int32 NumMaterials = DefaultBuildable->GetMeshComponent()->GetNumMaterials();
+		for (int32 i = 0; i < NumMaterials; ++i)
+		{
+			Materials.Add(DefaultBuildable->GetMeshComponent()->GetMaterial(i));
+		}
+	}
+
+	CurrentGhost->SetMaterials(Materials);
+
 	// Scale
 	CurrentGhost->SetActorScale3D(DefaultBuildable->GetMeshComponent()->GetRelativeScale3D());
 
@@ -244,10 +257,13 @@ void UBuildSubsystem::PlaceObject() const
 			
 		}
 	}
-	
-	TObjectPtr<ABuildableObject> Placed = GetWorld()->SpawnActor<ABuildableObject>(
+
+	FVector SpawnLocation = CurrentGhost->GetActorLocation();
+	SpawnLocation -= MeshOffset;
+
+	const TObjectPtr<ABuildableObject> Placed = GetWorld()->SpawnActor<ABuildableObject>(
 		CurrentBuildData->BuildClass,
-		CurrentGhost->GetActorLocation(),
+		SpawnLocation,
 		CurrentBuildRotation
 	);
 

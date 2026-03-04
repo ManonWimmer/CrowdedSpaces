@@ -28,3 +28,13 @@ FVector AGhostObject::GetMeshOffset() const
 {
 	return MeshComp ? MeshComp->GetRelativeLocation() : FVector::ZeroVector;
 }
+
+void AGhostObject::SetMaterials(TArray<UMaterialInterface*>& Materials) const
+{
+	if (!MeshComp) return;
+
+	for (int32 i = 0; i < Materials.Num(); ++i)
+	{
+		MeshComp->SetMaterial(i, Materials[i]);
+	}
+}
