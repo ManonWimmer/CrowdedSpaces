@@ -61,7 +61,7 @@ void UResourceComponent::AddResource(int Amount)
 		OnResourceChanged.Broadcast(Resource);
 	}
 
-	if (Resource >= MaxResource)
+	if (Resource >= MaxResource && MaxResource != -1)
 	{
 		OnResourceFull.Broadcast();
 	}
