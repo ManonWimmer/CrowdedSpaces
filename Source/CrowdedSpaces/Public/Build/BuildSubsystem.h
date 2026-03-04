@@ -136,4 +136,6 @@ private:
 	// Rotate
 	int32 RotationIndex = 0;
 	FRotator CurrentBuildRotation = FRotator(0, 0, 0);
+
+	FVector MeshOffset;
 };

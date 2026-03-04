@@ -161,7 +161,9 @@ void UBuildSubsystem::StartBuilding(UBuildData* BuildData)
 	CurrentGhost->SetMesh(GhostMesh);
 
 	// Scale
-	CurrentGhost->SetActorScale3D(DefaultBuildable->GetActorScale3D());
+	CurrentGhost->SetActorScale3D(DefaultBuildable->GetMeshComponent()->GetRelativeScale3D());
+
+	MeshOffset = DefaultBuildable->GetMeshComponent()->GetRelativeLocation();
 
 	ResetBuildRotation();
 
@@ -256,7 +258,7 @@ void UBuildSubsystem::PlaceObject() const
 
 	// Default scale
 	TObjectPtr<ABuildableObject> DefaultBuildable = CurrentBuildData->BuildClass->GetDefaultObject<ABuildableObject>();
-	Placed->SetActorScale3D(DefaultBuildable->GetActorScale3D());
+	Placed->GetMeshComponent()->SetRelativeScale3D(DefaultBuildable->GetMeshComponent()->GetRelativeScale3D());
 
 	// Set cells occupied
 	for (int Row = StartRow; Row < StartRow + SizeX; ++Row)
@@ -447,6 +449,13 @@ void UBuildSubsystem::UpdateGhost() const
 		TopLeft.Y + (SizeY * GridActor->GetCellSize()) / 2.0f,
 		GridActor->GetActorLocation().Z
 	);
+
+	if (MeshOffset != FVector::ZeroVector)
+	{
+		SnappedLocation += MeshOffset;
+	}
+
+	CurrentGhost->SetActorLocation(SnappedLocation);
 
 	CurrentGhost->SetActorLocation(SnappedLocation);
 }

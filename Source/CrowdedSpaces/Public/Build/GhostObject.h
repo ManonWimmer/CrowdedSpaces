@@ -13,11 +13,13 @@ public:
 	AGhostObject();
 
 	void SetMesh(UStaticMesh* InMesh) const;
-	
+
+	FVector GetMeshOffset() const;
+
 private:
 	UPROPERTY()
 	TObjectPtr<USceneComponent> RootComp;
 
 	UPROPERTY()
-	TObjectPtr<UStaticMeshComponent> Mesh;
+	TObjectPtr<UStaticMeshComponent> MeshComp;
 };
