@@ -58,6 +58,15 @@ public:
 private:
 	UPROPERTY()
 	TMap<EResourceType, TObjectPtr<UResourceComponent>> ResourceMap;
+
+	UPROPERTY(EditAnywhere, Category = "Components")
+	TObjectPtr<UResourceComponent> MoneyComponent = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = "Components")
+	TObjectPtr<UResourceComponent> ElectricityComponent = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = "Components")
+	TObjectPtr<UResourceComponent> FoodComponent = nullptr;
 };
 
 template <EResourceType Type>

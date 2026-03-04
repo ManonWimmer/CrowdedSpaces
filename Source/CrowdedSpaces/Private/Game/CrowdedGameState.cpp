@@ -8,17 +8,17 @@
 ACrowdedGameState::ACrowdedGameState()
 {
 	// Resources
-	const TObjectPtr<UResourceComponent> MoneyComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("MoneyComponent"));
+	MoneyComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("MoneyComponent"));
 	MoneyComponent->SetType(EResourceType::Money);
 	MoneyComponent->SetCanLoseAndRegenResource(false);
 	ResourceMap.Add(EResourceType::Money, MoneyComponent);
 
-	const TObjectPtr<UResourceComponent> ElectricityComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("ElectricityComponent"));
+	ElectricityComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("ElectricityComponent"));
 	ElectricityComponent->SetType(EResourceType::Electricity);
 	ElectricityComponent->SetCanLoseAndRegenResource(false);
 	ResourceMap.Add(EResourceType::Electricity, ElectricityComponent);
 
-	const TObjectPtr<UResourceComponent> FoodComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("FoodComponent"));
+	FoodComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("FoodComponent"));
 	FoodComponent->SetType(EResourceType::Food);
 	FoodComponent->SetCanLoseAndRegenResource(false);
 	ResourceMap.Add(EResourceType::Food, FoodComponent);

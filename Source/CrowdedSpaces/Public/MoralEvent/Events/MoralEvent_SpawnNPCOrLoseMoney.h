@@ -3,10 +3,10 @@
 #include "CoreMinimal.h"
 #include "AI/NPC.h"
 #include "MoralEvent/MoralEvent.h"
-#include "MoralEvent_ExpelNPC.generated.h"
+#include "MoralEvent_SpawnNPCOrLoseMoney.generated.h"
 
 UCLASS(Blueprintable)
-class CROWDEDSPACES_API UMoralEvent_ExpelNPC : public UMoralEvent
+class CROWDEDSPACES_API UMoralEvent_SpawnNPCOrLoseMoney : public UMoralEvent
 {
 	GENERATED_BODY()
 
@@ -17,5 +17,8 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere)
-	float MoneyForExpel = 1000;
+	TSubclassOf<ANPC> NPCClass;
+
+	UPROPERTY(EditAnywhere)
+	int MoneyToLose;
 };

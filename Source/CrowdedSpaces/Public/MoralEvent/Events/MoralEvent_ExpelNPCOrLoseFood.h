@@ -1,11 +1,12 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
+#include "AI/NPC.h"
 #include "MoralEvent/MoralEvent.h"
-#include "MoralEvent_SpawnNPC.generated.h"
+#include "MoralEvent_ExpelNPCOrLoseFood.generated.h"
 
-UCLASS()
-class CROWDEDSPACES_API UMoralEvent_SpawnNPC : public UMoralEvent
+UCLASS(Blueprintable)
+class CROWDEDSPACES_API UMoralEvent_ExpelNPCOrLoseFood : public UMoralEvent
 {
 	GENERATED_BODY()
 
@@ -16,5 +17,5 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<ANPC> NPCClass;
+	float FoodToLose = 100;
 };
