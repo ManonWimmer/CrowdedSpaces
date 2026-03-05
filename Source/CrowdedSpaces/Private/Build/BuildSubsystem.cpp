@@ -179,8 +179,6 @@ void UBuildSubsystem::StartBuilding(UBuildData* BuildData)
 	MeshOffset = DefaultBuildable->GetMeshComponent()->GetRelativeLocation();
 
 	ResetBuildRotation();
-
-	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Start object building");
 }
 
 void UBuildSubsystem::StartRoomBuilding(UBuildRoomData* BuildRoomData)
@@ -198,8 +196,6 @@ void UBuildSubsystem::StartRoomBuilding(UBuildRoomData* BuildRoomData)
 	}
 
 	ResetBuildRotation();
-	
-	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Start room building");
 }
 
 void UBuildSubsystem::StopBuilding()
@@ -217,8 +213,6 @@ void UBuildSubsystem::StopBuilding()
 	ResetBuildRotation();
 
 	GridActor->DeselectSelectedCells();
-
-	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Stop building");
 }
 
 void UBuildSubsystem::PlaceObject() const

@@ -15,8 +15,6 @@ void ABuildableBed::BeginPlay()
 
 	if (!BRS)
 		return;
-
-	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "BeginPlay avec BRS bed");
 	
 	BRS->RegisterBed(this);
 }

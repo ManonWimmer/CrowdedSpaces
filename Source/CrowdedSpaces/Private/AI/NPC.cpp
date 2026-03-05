@@ -65,10 +65,7 @@ void ANPC::SetCurrentAction(const ENPCActionWidget NewAction)
 void ANPC::Die()
 {
 	// todo: animation ?
-
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, "Npc died.");
-
+	
 	ACrowdedGameMode* GameMode = GetWorld()->GetAuthGameMode<ACrowdedGameMode>();
 	if (!GameMode)
 		return;
