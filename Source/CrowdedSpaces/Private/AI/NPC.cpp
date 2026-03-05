@@ -34,6 +34,9 @@ ANPC::ANPC()
 
 	// Selectable
 	SelectionType = ESelectionType::NPC;
+
+	AIControllerClass = ANPCController::StaticClass();
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }
 
 UResourceComponent* ANPC::GetResourceComponentByType(const EResourceType Type) const
