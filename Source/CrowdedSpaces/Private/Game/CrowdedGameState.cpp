@@ -28,18 +28,31 @@ void ACrowdedGameState::BeginPlay()
 {
 	Super::BeginPlay();
 
+	TryInitSubsystems();
+}
+
+void ACrowdedGameState::TryInitSubsystems()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Trying to init subsystems..."));
+	
 	// Get name generator subsystem & send data
 	const TObjectPtr<UNameGeneratorSubsystem> NameGeneratorSubsystem = GetWorld()->GetSubsystem<UNameGeneratorSubsystem>();
 	if (!NameGeneratorSubsystem)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Name generator subsystem not found"));
 		return;
+	}
 
 	NameGeneratorSubsystem->SetNameData(NameData);
 
 	// Get build subsystem & send data
 	const TObjectPtr<UBuildSubsystem> BuildSubsystem = GetWorld()->GetSubsystem<UBuildSubsystem>();
 	if (!BuildSubsystem)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Build subsystem not found"));
 		return;
-		
+	}
+
 	BuildSubsystem->SetBuildData(BuildDataObjects);
 	BuildSubsystem->SetBuildRoomData(BuildDataRooms);
 	BuildSubsystem->SetSnapSize(SnapSize);
@@ -47,16 +60,26 @@ void ACrowdedGameState::BeginPlay()
 	// Get time subsystem & send data
 	const TObjectPtr<UTimeSubsystem> TimeSubsystem = GetWorld()->GetSubsystem<UTimeSubsystem>();
 	if (!TimeSubsystem)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Time subsystem not found"));
 		return;
+	}
 
 	TimeSubsystem->SetTimeData(TimeData);
 
 	// Get moral event subsystem & send data
 	const TObjectPtr<UMoralEventSubsystem> MoralEventSubsystem = GetWorld()->GetSubsystem<UMoralEventSubsystem>();
 	if (!MoralEventSubsystem)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Moral event subsystem not found"));
 		return;
+	}
 
 	MoralEventSubsystem->SetPossibleEvents(PossibleMoralEvents);
+
+	UE_LOG(LogTemp, Warning, TEXT("All subsystem found!"));
+	
+	OnGameDataReady.Broadcast();
 }
 
 UResourceComponent* ACrowdedGameState::GetResourceComponentByType(EResourceType Type) const

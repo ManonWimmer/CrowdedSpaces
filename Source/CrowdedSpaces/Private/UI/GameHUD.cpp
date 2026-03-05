@@ -1,5 +1,6 @@
 ﻿#include "UI/GameHUD.h"
 #include "Blueprint/UserWidget.h"
+#include "Game/CrowdedGameState.h"
 #include "UI/Widgets/MoralEventWidget.h"
 #include "UI/CustomWidget.h"
 #include "UI/Widgets/SelectionWidget.h"
@@ -12,9 +13,19 @@ void AGameHUD::BeginPlay()
 	PlayerController = GetOwningPlayerController();
 	if (!PlayerController)
 		return;
-	
-	// Create widgets
+
 	CreateStartupWidgets();
+
+	// After game data ready to fix no build object etc on build
+	ACrowdedGameState* GameState = GetWorld()->GetGameState<ACrowdedGameState>();
+
+	if (GameState)
+	{
+		GameState->OnGameDataReady.AddDynamic(
+			this,
+			&AGameHUD::CreateStartupWidgets
+		);
+	}
 }
 
 void AGameHUD::CreateStartupWidgets()

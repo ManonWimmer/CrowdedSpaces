@@ -10,6 +10,8 @@
 #include "Resources/ResourceComponent.h"
 #include "CrowdedGameState.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGameDataReady);
+
 UCLASS()
 class CROWDEDSPACES_API ACrowdedGameState : public AGameStateBase
 {
@@ -19,23 +21,28 @@ public:
 	ACrowdedGameState();
 	
 	virtual void BeginPlay() override;
+	
+	void TryInitSubsystems();
+	
+	UPROPERTY(BlueprintAssignable)
+	FOnGameDataReady OnGameDataReady;
 
 	// Build
-	UPROPERTY(EditAnywhere, Category = "Build")
+	UPROPERTY(EditAnywhere, Category = "Build", meta=(AllowPrivateAccess=true))
 	TArray<TObjectPtr<UBuildData>> BuildDataObjects;
 
-	UPROPERTY(EditAnywhere, Category = "Build")
+	UPROPERTY(EditAnywhere, Category = "Build", meta=(AllowPrivateAccess=true))
 	TArray<TObjectPtr<UBuildRoomData>> BuildDataRooms;
 
 	UPROPERTY(EditAnywhere, Category = "Build")
 	float SnapSize = 100.f;
 
 	// Time
-	UPROPERTY(EditAnywhere, Category = "Time")
+	UPROPERTY(EditAnywhere, Category = "Time", meta=(AllowPrivateAccess=true))
 	TObjectPtr<UTimeData> TimeData;
 
 	// Moral Events
-	UPROPERTY(EditAnywhere, Category = "MoralEvent")
+	UPROPERTY(EditAnywhere, Category = "MoralEvent", meta=(AllowPrivateAccess=true))
 	TArray<TSubclassOf<UMoralEvent>> PossibleMoralEvents;
 
 	// Resources
@@ -52,7 +59,7 @@ public:
 	int GetResource() const;
 
 	// NPC Name
-	UPROPERTY(EditAnywhere, Category = "NPC")
+	UPROPERTY(EditAnywhere, Category = "NPC", meta=(AllowPrivateAccess=true))
 	UNameList* NameData;
 
 private:
