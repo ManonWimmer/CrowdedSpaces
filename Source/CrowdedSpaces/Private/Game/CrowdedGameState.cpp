@@ -78,7 +78,8 @@ void ACrowdedGameState::TryInitSubsystems()
 	MoralEventSubsystem->SetPossibleEvents(PossibleMoralEvents);
 
 	UE_LOG(LogTemp, Warning, TEXT("All subsystem found!"));
-	
+
+	bHasInitSubsystems = true;
 	OnGameDataReady.Broadcast();
 }
 

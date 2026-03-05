@@ -62,6 +62,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "NPC", meta=(AllowPrivateAccess=true))
 	UNameList* NameData;
 
+	UPROPERTY()
+	bool bHasInitSubsystems = false;
+
 private:
 	UPROPERTY()
 	TMap<EResourceType, TObjectPtr<UResourceComponent>> ResourceMap;

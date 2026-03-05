@@ -13,17 +13,21 @@ void AGameHUD::BeginPlay()
 	PlayerController = GetOwningPlayerController();
 	if (!PlayerController)
 		return;
-
-	CreateStartupWidgets();
-
+	
 	// After game data ready to fix no build object etc on build
 	ACrowdedGameState* GameState = GetWorld()->GetGameState<ACrowdedGameState>();
+	if (!GameState)
+		return;
 
-	if (GameState)
+	if (GameState->bHasInitSubsystems)
+	{
+		CreateStartupWidgets();
+	}
+	else
 	{
 		GameState->OnGameDataReady.AddDynamic(
-			this,
-			&AGameHUD::CreateStartupWidgets
+		this,
+		&AGameHUD::CreateStartupWidgets
 		);
 	}
 }
