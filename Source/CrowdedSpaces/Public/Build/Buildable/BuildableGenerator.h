@@ -40,7 +40,7 @@ public:
 	FUpgradeStruct GetNextUpgrade();
 
 	UFUNCTION(BlueprintCallable, Category = "Upgrade")
-	UResourceComponent* GetPlayerMoneyComponent() const { return PlayerMoneyComponent; }
+	UResourceComponent* GetPlayerMoneyComponent() const;
 
 protected:
 	virtual void BeginPlay() override;
@@ -65,5 +65,5 @@ private:
 	FUpgradeStruct NextUpgrade;
 
 	UPROPERTY()
-	UResourceComponent* PlayerMoneyComponent;
+	UResourceComponent* PlayerMoneyComponent = nullptr;
 };

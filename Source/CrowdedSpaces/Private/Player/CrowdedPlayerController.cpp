@@ -138,9 +138,6 @@ void ACrowdedPlayerController::HandleSelection() const
 	// 1. Selectable actor (NPC, generator)
 	if (HitActor && HitActor->Implements<USelectable>())
 	{
-		if (GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Cyan, "Select actor");
-
 		const ISelectable* Selectable = Cast<ISelectable>(HitActor);
 		GameHUD->ShowSelectionWidget(HitActor, true, Selectable->GetSelectionType());
 		return;
@@ -153,17 +150,11 @@ void ACrowdedPlayerController::HandleSelection() const
 
 		if (GridActor->GetRoomAtWorldLocation(Hit.Location, Room))
 		{
-			if (GEngine)
-				GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Cyan, "Select room");
-			
 			GameHUD->ShowSelectionWidget(*Room, true, ESelectionType::Room);
 			return;
 		}
 	}
 
 	// 3. Nothing
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Cyan, "Select nothing");
-	
 	GameHUD->ShowSelectionWidget(nullptr, false, ESelectionType::Default);
 }
