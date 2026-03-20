@@ -18,7 +18,7 @@ public:
 	void StartNewEvent(TSubclassOf<UMoralEvent> NewEvent);
 
 	UFUNCTION(BlueprintCallable, Category="MoralEvent")
-	void HandleRandomMoralEvent();
+	void HandleCurrentDayMoralEvent(const TSubclassOf<UMoralEvent> MoralEvent);
 
 	UFUNCTION(BlueprintCallable, Category="MoralEvent")
 	void OnChoiceSelected(EMoralEventType Choice);

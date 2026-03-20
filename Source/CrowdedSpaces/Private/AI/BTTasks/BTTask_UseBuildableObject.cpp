@@ -55,18 +55,12 @@ void UBTTask_UseBuildableObject::OnStopAction()
 	NPC = Cast<ANPC>(Controller->GetPawn());
 	if (!NPC)
 		return;
-
-	if(GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "On stop action");
-
+	
 	FinishLatentTask(*OwnerCompPtr, EBTNodeResult::Succeeded);
 }
 
 void UBTTask_UseBuildableObject::OnTargetDestroyed() const
 {
-	if(GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, "use task on target destroyed");
-	
 	OwnerCompPtr->GetBlackboardComponent()->SetValueAsObject(TargetObjectKey.SelectedKeyName, nullptr);
 	FinishLatentTask(*OwnerCompPtr, EBTNodeResult::Failed);
 }
@@ -90,7 +84,4 @@ void UBTTask_UseBuildableObject::OnTaskFinished(UBehaviorTreeComponent& OwnerCom
 	TargetObject->StopUsing(NPC);
 
 	Blackboard->SetValueAsObject(TargetObjectKey.SelectedKeyName, nullptr);
-	
-	if(GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, "Use target object stop action");
 }

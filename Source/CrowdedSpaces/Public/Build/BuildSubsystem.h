@@ -63,10 +63,10 @@ public:
 	void SetSnapSize(const float NewSnapSize) { SnapSize = NewSnapSize; }
 
 	UFUNCTION(BlueprintCallable)
-	TArray<UBuildData*> GetBuildDataObjects() { return BuildDataObjects;}
+	const TArray<UBuildData*>& GetBuildDataObjects() const  { return BuildDataObjects;}
 
 	UFUNCTION(BlueprintCallable)
-	TArray<UBuildRoomData*> GetBuildDataRooms() { return BuildDataRooms;}
+	const TArray<UBuildRoomData*>& GetBuildDataRooms() const { return BuildDataRooms;}
 
 	UFUNCTION()
 	void TryRotateBuildLeft();
@@ -136,4 +136,6 @@ private:
 	// Rotate
 	int32 RotationIndex = 0;
 	FRotator CurrentBuildRotation = FRotator(0, 0, 0);
+
+	FVector MeshOffset;
 };

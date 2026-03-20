@@ -52,9 +52,6 @@ void ACrowdedGameMode::CheckEndGame(int NewDay)
 
 void ACrowdedGameMode::EndGame(bool bSurvived) const
 {
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "EndGame");
-
 	UCrowdedGameInstance* GameInstance = GetGameInstance<UCrowdedGameInstance>();
 	if (!GameInstance)
 		return;

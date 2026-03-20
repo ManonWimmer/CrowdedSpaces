@@ -1,11 +1,10 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "AI/NPC.h"
 #include "MoralEvent/MoralEvent.h"
 #include "MoralEvent_SpawnNPC.generated.h"
 
-UCLASS(Blueprintable)
+UCLASS()
 class CROWDEDSPACES_API UMoralEvent_SpawnNPC : public UMoralEvent
 {
 	GENERATED_BODY()

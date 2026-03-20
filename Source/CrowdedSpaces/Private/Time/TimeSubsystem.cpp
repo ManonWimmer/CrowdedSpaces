@@ -16,7 +16,7 @@ void UTimeSubsystem::Tick(float DeltaTime)
 	TotalMinutes += CurrentSpeedMultiplier * DeltaTime;
 
 	// Current day
-	int NewDay = (TotalMinutes / 1440) + 1;
+	const int NewDay = (TotalMinutes / 1440) + 1;
 	if (NewDay != CurrentDay)
 	{
 		CurrentDay = NewDay;
@@ -30,11 +30,8 @@ void UTimeSubsystem::Tick(float DeltaTime)
 	if (CurrentMinutes > TimeData->MoralEventHour * 60 && LastDayMoralEvent != CurrentDay)
 	{
 		LastDayMoralEvent = CurrentDay;
-
-		OnMoralEventTime.Broadcast();
-
-		if (GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Moral");
+		
+		GetRandomMoralEventForDay(CurrentDay);
 	}
 }
 
@@ -49,7 +46,7 @@ void UTimeSubsystem::SetTimeData(UTimeData* NewTimeData)
 	GetCurrentSpeedValues();
 }
 
-void UTimeSubsystem::SetTimeSpeed(ETimeSpeedType NewTimeSpeed)
+void UTimeSubsystem::SetTimeSpeed(const ETimeSpeedType NewTimeSpeed)
 {
 	if (CurrentTimeSpeed == NewTimeSpeed)
 		return;
@@ -60,9 +57,49 @@ void UTimeSubsystem::SetTimeSpeed(ETimeSpeedType NewTimeSpeed)
 	OnTimeSpeedChanged.Broadcast(CurrentTimeSpeed);
 }
 
-void UTimeSubsystem::SetTimePaused()
+void UTimeSubsystem::SetTimePaused(const TSubclassOf<UMoralEvent> MoralEvent)
 {
 	SetTimeSpeed(ETimeSpeedType::Paused);
+}
+
+void UTimeSubsystem::GetRandomMoralEventForDay(int Day) const
+{
+	for (const auto& [Day, MoralEventsDaysProbabilities] : TimeData->MoralEventDaysProbabilities)
+	{
+		if (Day == CurrentDay)
+		{
+			const TArray<FMoralEventProbabilitiesDataStruct>& Events = MoralEventsDaysProbabilities;
+
+			if (Events.Num() == 0)
+				return;
+				
+			float TotalProbability = 0.f;
+			for (const auto& [MoralEvent, Probability] : Events)
+			{
+				TotalProbability += Probability;
+			}
+
+			if (TotalProbability <= 0.f)
+				return;
+				
+			const float RandomValue = FMath::FRandRange(0.f, TotalProbability);
+
+			float CumulativeProbability = 0.f;
+
+			for (const auto& [MoralEvent, Probability] : Events)
+			{
+				CumulativeProbability += Probability;
+
+				if (RandomValue <= CumulativeProbability)
+				{
+					OnMoralEventTime.Broadcast(MoralEvent);
+					return;
+				}
+			}
+
+			return;
+		}
+	}
 }
 
 void UTimeSubsystem::SetTimeNormal()
@@ -72,12 +109,12 @@ void UTimeSubsystem::SetTimeNormal()
 
 void UTimeSubsystem::GetCurrentSpeedValues()
 {
-	for (FTimeDataStruct SpeedData : TimeData->TimeData)
+	for (const auto& [TimeSpeedType, GameSpeedMultiplier, GameTimeDilation] : TimeData->TimeData)
 	{
-		if (SpeedData.TimeSpeedType == CurrentTimeSpeed)
+		if (TimeSpeedType == CurrentTimeSpeed)
 		{
-			CurrentSpeedMultiplier = SpeedData.GameSpeedMultiplier;
-			CurrentSpeedTimeDilation = SpeedData.GameTimeDilation;
+			CurrentSpeedMultiplier = GameSpeedMultiplier;
+			CurrentSpeedTimeDilation = GameTimeDilation;
 			return;
 		}
 	}

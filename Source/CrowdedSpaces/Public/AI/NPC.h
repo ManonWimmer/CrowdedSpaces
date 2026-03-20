@@ -58,6 +58,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category="AI")
 	int GetProductionMultiplierForType(EProductionType Type) const;
 
+	// Name
+	UFUNCTION(BlueprintCallable, Category="AI")
+	FString GetNPCName() const { return NPCName; }
+
+	FTimerHandle NameRetryTimer;
+
+	void TryGenerateName();
+
+	FLinearColor GetRandomColor();
+	
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -88,7 +98,7 @@ private:
 	FTimerHandle RemoveFoodTimerHandle;
 
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<UWidgetComponent> FoodBarWidget;
+	TObjectPtr<UWidgetComponent> NPCNameWidget;
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UWidgetComponent> NPCActionWidget;
@@ -114,6 +124,15 @@ private:
 
 	UPROPERTY()
 	int MoneyProductionMultiplier = 1;
+
+	UPROPERTY()
+	FString NPCName = "";
+
+	UPROPERTY()
+	UMaterialInstanceDynamic* BodyMaterialInstance;
+
+	UPROPERTY()
+	UMaterialInstanceDynamic* OtherMaterialInstance;
 	
 	// Selectable
 public:

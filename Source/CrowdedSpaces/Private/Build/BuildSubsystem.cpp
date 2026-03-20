@@ -160,12 +160,25 @@ void UBuildSubsystem::StartBuilding(UBuildData* BuildData)
 	TObjectPtr<UStaticMesh> GhostMesh = DefaultBuildable->GetMeshComponent()->GetStaticMesh();
 	CurrentGhost->SetMesh(GhostMesh);
 
+	// Get materials
+	TArray<UMaterialInterface*> Materials;
+	if (DefaultBuildable->GetMeshComponent())
+	{
+		const int32 NumMaterials = DefaultBuildable->GetMeshComponent()->GetNumMaterials();
+		for (int32 i = 0; i < NumMaterials; ++i)
+		{
+			Materials.Add(DefaultBuildable->GetMeshComponent()->GetMaterial(i));
+		}
+	}
+
+	CurrentGhost->SetMaterials(Materials);
+
 	// Scale
-	CurrentGhost->SetActorScale3D(DefaultBuildable->GetActorScale3D());
+	CurrentGhost->SetActorScale3D(DefaultBuildable->GetMeshComponent()->GetRelativeScale3D());
+
+	MeshOffset = DefaultBuildable->GetMeshComponent()->GetRelativeLocation();
 
 	ResetBuildRotation();
-
-	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Start object building");
 }
 
 void UBuildSubsystem::StartRoomBuilding(UBuildRoomData* BuildRoomData)
@@ -183,8 +196,6 @@ void UBuildSubsystem::StartRoomBuilding(UBuildRoomData* BuildRoomData)
 	}
 
 	ResetBuildRotation();
-	
-	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Start room building");
 }
 
 void UBuildSubsystem::StopBuilding()
@@ -201,7 +212,7 @@ void UBuildSubsystem::StopBuilding()
 	GridActor->SetIsShowingRooms(true);
 	ResetBuildRotation();
 
-	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Stop building");
+	GridActor->DeselectSelectedCells();
 }
 
 void UBuildSubsystem::PlaceObject() const
@@ -242,10 +253,13 @@ void UBuildSubsystem::PlaceObject() const
 			
 		}
 	}
-	
-	TObjectPtr<ABuildableObject> Placed = GetWorld()->SpawnActor<ABuildableObject>(
+
+	FVector SpawnLocation = CurrentGhost->GetActorLocation();
+	SpawnLocation -= MeshOffset;
+
+	const TObjectPtr<ABuildableObject> Placed = GetWorld()->SpawnActor<ABuildableObject>(
 		CurrentBuildData->BuildClass,
-		CurrentGhost->GetActorLocation(),
+		SpawnLocation,
 		CurrentBuildRotation
 	);
 
@@ -256,7 +270,7 @@ void UBuildSubsystem::PlaceObject() const
 
 	// Default scale
 	TObjectPtr<ABuildableObject> DefaultBuildable = CurrentBuildData->BuildClass->GetDefaultObject<ABuildableObject>();
-	Placed->SetActorScale3D(DefaultBuildable->GetActorScale3D());
+	Placed->GetMeshComponent()->SetRelativeScale3D(DefaultBuildable->GetMeshComponent()->GetRelativeScale3D());
 
 	// Set cells occupied
 	for (int Row = StartRow; Row < StartRow + SizeX; ++Row)
@@ -447,6 +461,13 @@ void UBuildSubsystem::UpdateGhost() const
 		TopLeft.Y + (SizeY * GridActor->GetCellSize()) / 2.0f,
 		GridActor->GetActorLocation().Z
 	);
+
+	if (MeshOffset != FVector::ZeroVector)
+	{
+		SnappedLocation += MeshOffset;
+	}
+
+	CurrentGhost->SetActorLocation(SnappedLocation);
 
 	CurrentGhost->SetActorLocation(SnappedLocation);
 }

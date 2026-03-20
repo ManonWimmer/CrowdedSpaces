@@ -1,5 +1,6 @@
 ﻿#include "Game/CrowdedGameState.h"
 
+#include "AI/NameGeneratorSubsystem.h"
 #include "Build/BuildSubsystem.h"
 #include "MoralEvent/MoralEventSubsystem.h"
 #include "Time/TimeSubsystem.h"
@@ -7,17 +8,17 @@
 ACrowdedGameState::ACrowdedGameState()
 {
 	// Resources
-	const TObjectPtr<UResourceComponent> MoneyComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("MoneyComponent"));
+	MoneyComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("MoneyComponent"));
 	MoneyComponent->SetType(EResourceType::Money);
 	MoneyComponent->SetCanLoseAndRegenResource(false);
 	ResourceMap.Add(EResourceType::Money, MoneyComponent);
 
-	const TObjectPtr<UResourceComponent> ElectricityComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("ElectricityComponent"));
+	ElectricityComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("ElectricityComponent"));
 	ElectricityComponent->SetType(EResourceType::Electricity);
 	ElectricityComponent->SetCanLoseAndRegenResource(false);
 	ResourceMap.Add(EResourceType::Electricity, ElectricityComponent);
 
-	const TObjectPtr<UResourceComponent> FoodComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("FoodComponent"));
+	FoodComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("FoodComponent"));
 	FoodComponent->SetType(EResourceType::Food);
 	FoodComponent->SetCanLoseAndRegenResource(false);
 	ResourceMap.Add(EResourceType::Food, FoodComponent);
@@ -27,28 +28,59 @@ void ACrowdedGameState::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Get build subsystem & send data
-	TObjectPtr<UBuildSubsystem> BuildSubsystem = GetWorld()->GetSubsystem<UBuildSubsystem>();
-	if (!BuildSubsystem)
+	TryInitSubsystems();
+}
+
+void ACrowdedGameState::TryInitSubsystems()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Trying to init subsystems..."));
+	
+	// Get name generator subsystem & send data
+	const TObjectPtr<UNameGeneratorSubsystem> NameGeneratorSubsystem = GetWorld()->GetSubsystem<UNameGeneratorSubsystem>();
+	if (!NameGeneratorSubsystem)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Name generator subsystem not found"));
 		return;
-		
+	}
+
+	NameGeneratorSubsystem->SetNameData(NameData);
+
+	// Get build subsystem & send data
+	const TObjectPtr<UBuildSubsystem> BuildSubsystem = GetWorld()->GetSubsystem<UBuildSubsystem>();
+	if (!BuildSubsystem)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Build subsystem not found"));
+		return;
+	}
+
 	BuildSubsystem->SetBuildData(BuildDataObjects);
 	BuildSubsystem->SetBuildRoomData(BuildDataRooms);
 	BuildSubsystem->SetSnapSize(SnapSize);
 
 	// Get time subsystem & send data
-	TObjectPtr<UTimeSubsystem> TimeSubsystem = GetWorld()->GetSubsystem<UTimeSubsystem>();
+	const TObjectPtr<UTimeSubsystem> TimeSubsystem = GetWorld()->GetSubsystem<UTimeSubsystem>();
 	if (!TimeSubsystem)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Time subsystem not found"));
 		return;
+	}
 
 	TimeSubsystem->SetTimeData(TimeData);
 
 	// Get moral event subsystem & send data
-	TObjectPtr<UMoralEventSubsystem> MoralEventSubsystem = GetWorld()->GetSubsystem<UMoralEventSubsystem>();
+	const TObjectPtr<UMoralEventSubsystem> MoralEventSubsystem = GetWorld()->GetSubsystem<UMoralEventSubsystem>();
 	if (!MoralEventSubsystem)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Moral event subsystem not found"));
 		return;
+	}
 
 	MoralEventSubsystem->SetPossibleEvents(PossibleMoralEvents);
+
+	UE_LOG(LogTemp, Warning, TEXT("All subsystem found!"));
+
+	bHasInitSubsystems = true;
+	OnGameDataReady.Broadcast();
 }
 
 UResourceComponent* ACrowdedGameState::GetResourceComponentByType(EResourceType Type) const

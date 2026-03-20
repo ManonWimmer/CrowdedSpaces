@@ -9,8 +9,9 @@
 
 ABuildableObject::ABuildableObject()
 {
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-	RootComponent = MeshComp;
+	MeshComp->SetupAttachment(RootComponent);
 	MeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	MeshComp->SetCollisionObjectType(ECC_GameTraceChannel1); // Build
 	MeshComp->SetCollisionResponseToAllChannels(ECR_Block);

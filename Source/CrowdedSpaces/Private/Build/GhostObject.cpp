@@ -5,21 +5,36 @@ AGhostObject::AGhostObject()
 	RootComp = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	RootComponent = RootComp;
 
-	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-	Mesh->SetupAttachment(RootComp);
+	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	MeshComp->SetupAttachment(RootComp);
 	
-	Mesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly); 
-	Mesh->SetCollisionObjectType(ECC_WorldDynamic);
-	Mesh->SetCollisionResponseToAllChannels(ECR_Ignore); 
-	Mesh->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
+	MeshComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly); 
+	MeshComp->SetCollisionObjectType(ECC_WorldDynamic);
+	MeshComp->SetCollisionResponseToAllChannels(ECR_Ignore); 
+	MeshComp->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
 
-	Mesh->SetRenderCustomDepth(true);
+	MeshComp->SetRenderCustomDepth(true);
 }
 
 void AGhostObject::SetMesh(UStaticMesh* InMesh) const
 {
-	if (InMesh && Mesh)
+	if (InMesh && MeshComp)
 	{
-		Mesh->SetStaticMesh(InMesh);
+		MeshComp->SetStaticMesh(InMesh);
+	}
+}
+
+FVector AGhostObject::GetMeshOffset() const
+{
+	return MeshComp ? MeshComp->GetRelativeLocation() : FVector::ZeroVector;
+}
+
+void AGhostObject::SetMaterials(TArray<UMaterialInterface*>& Materials) const
+{
+	if (!MeshComp) return;
+
+	for (int32 i = 0; i < Materials.Num(); ++i)
+	{
+		MeshComp->SetMaterial(i, Materials[i]);
 	}
 }
