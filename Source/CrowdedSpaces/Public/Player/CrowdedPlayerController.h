@@ -10,10 +10,16 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraMoveForward, float, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraMoveRight, float, Value);
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraRotate, float, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraZoom, float, Value);
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftClickBuild);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftClickGame);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRightClickBuild);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRightClickGame);
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftRotateBuild);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRightRotateBuild);
 
@@ -26,7 +32,7 @@ class CROWDEDSPACES_API ACrowdedPlayerController : public APlayerController
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Input")
-	UInputMappingContext* CameraIMC;
+	UInputMappingContext* CameraIMC = nullptr;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UPlayerActionsData> PlayerInputsData;
@@ -49,6 +55,12 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnLeftClickGame OnLeftClickGame;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnLeftClickBuild OnRightClickBuild;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnLeftClickBuild OnRightClickGame;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnLeftRotateBuild OnLeftRotateBuild;
@@ -74,6 +86,7 @@ private:
 	void ZoomInput(const FInputActionValue& Value) { OnCameraZoom.Broadcast(Value.Get<float>()); }
 
 	void LeftClickInput(const FInputActionValue& Value);
+	void RightClickInput(const FInputActionValue& Value);
 
 	void LeftRotateBuildInput(const FInputActionValue& Value);
 	void RightRotateBuildInput(const FInputActionValue& Value);

@@ -34,6 +34,8 @@ void UBuildSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 		return;
 
 	CamPC->OnLeftClickBuild.AddDynamic(this, &UBuildSubsystem::LeftClicked);
+	CamPC->OnRightClickBuild.AddDynamic(this, &UBuildSubsystem::RightClicked);
+	
 	CamPC->OnLeftRotateBuild.AddDynamic(this, &UBuildSubsystem::TryRotateBuildLeft);
 	CamPC->OnRightRotateBuild.AddDynamic(this, &UBuildSubsystem::TryRotateBuildRight);
 
@@ -530,6 +532,13 @@ void UBuildSubsystem::LeftClicked()
 	{
 		PlaceObject();
 	}
+}
+
+void UBuildSubsystem::RightClicked()
+{
+	StopBuilding();
+
+	OnDeselected.Broadcast();
 }
 
 bool UBuildSubsystem::GetCursorHit(FVector& OutHit) const

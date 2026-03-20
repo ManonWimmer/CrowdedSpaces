@@ -40,19 +40,20 @@ void ACrowdedPlayerController::SetupInputComponent()
 	// Zoom
 	EIC->BindAction(PlayerInputsData->ZoomAction, ETriggerEvent::Started, this, &ACrowdedPlayerController::ZoomInput);
 
-	// Left click
+	// Left & right click
 	EIC->BindAction(PlayerInputsData->LeftClickAction, ETriggerEvent::Started, this, &ACrowdedPlayerController::LeftClickInput);
+	EIC->BindAction(PlayerInputsData->RightClickAction, ETriggerEvent::Started, this, &ACrowdedPlayerController::RightClickInput);
 
 	// Build rotate
 	EIC->BindAction(PlayerInputsData->LeftRotateBuildAction, ETriggerEvent::Started, this, &ACrowdedPlayerController::LeftRotateBuildInput);
 	EIC->BindAction(PlayerInputsData->RightRotateBuildAction, ETriggerEvent::Started, this, &ACrowdedPlayerController::RightRotateBuildInput);
 	
 	// Add IMC
-	TObjectPtr<ULocalPlayer> LP = GetLocalPlayer();
-	if (!LP)
+	TObjectPtr<ULocalPlayer> LocalPlayer = GetLocalPlayer();
+	if (!LocalPlayer)
 		return;
 
-	TObjectPtr<UEnhancedInputLocalPlayerSubsystem> InputSubsystem = LP->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+	TObjectPtr<UEnhancedInputLocalPlayerSubsystem> InputSubsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
 	if (!InputSubsystem)
 		return;
 	
@@ -84,9 +85,6 @@ void ACrowdedPlayerController::BeginPlay()
 
 void ACrowdedPlayerController::LeftClickInput(const FInputActionValue& Value)
 {
-	//if (GEngine)
-		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, "Left click event");
-	
 	TObjectPtr<ACrowdedGameMode> GameMode = Cast<ACrowdedGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 	if (!GameMode)
 		return;
@@ -104,6 +102,22 @@ void ACrowdedPlayerController::LeftClickInput(const FInputActionValue& Value)
 		return;
 	
 	HandleSelection();
+}
+
+void ACrowdedPlayerController::RightClickInput(const FInputActionValue& Value)
+{
+	const TObjectPtr<ACrowdedGameMode> GameMode = Cast<ACrowdedGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (!GameMode)
+		return;
+	
+	if (GameMode->GetGameMode() == EGameModeState::Building)
+	{
+		OnRightClickBuild.Broadcast();
+	}
+	else if (GameMode->GetGameMode() == EGameModeState::Game)
+	{
+		OnRightClickGame.Broadcast();	
+	}
 }
 
 void ACrowdedPlayerController::LeftRotateBuildInput(const FInputActionValue& Value)

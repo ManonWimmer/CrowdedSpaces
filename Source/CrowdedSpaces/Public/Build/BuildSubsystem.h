@@ -14,6 +14,8 @@
 class AGridActor;
 class UResourceComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeselected);
+
 UCLASS()
 class CROWDEDSPACES_API UBuildSubsystem : public UTickableWorldSubsystem
 {
@@ -50,6 +52,9 @@ public:
 	UFUNCTION()
 	void LeftClicked();
 
+	UFUNCTION()
+	void RightClicked();
+
 	UFUNCTION(BlueprintCallable)
 	void PlaceRoom();
 
@@ -85,6 +90,9 @@ public:
 
 	UFUNCTION()
 	void GetRoomRotatedSize(int& OutX, int& OutY) const;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnDeselected OnDeselected; // To deselect ui
 
 private:
 	UPROPERTY()
