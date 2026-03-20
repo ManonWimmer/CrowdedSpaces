@@ -21,13 +21,13 @@ protected:
 
 private:
 	UFUNCTION(BlueprintCallable, Category = "DebugWidget")
-	void AddMoney(const int Amount);
+	void AddMoney(const int Amount) const;
 
 	UFUNCTION(BlueprintCallable, Category = "DebugWidget")
-	void AddElectricity(const int Amount);
+	void AddElectricity(const int Amount) const;
 
 	UFUNCTION(BlueprintCallable, Category = "DebugWidget")
-	void AddFood(const int Amount);
+	void AddFood(const int Amount) const;
 
 	UPROPERTY()
 	TObjectPtr<UResourceComponent> MoneyComponent;
@@ -37,4 +37,7 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UResourceComponent> FoodComponent;
+
+	UFUNCTION(BlueprintCallable, Category = "DebugWidget")
+	void SpawnNPC();
 };

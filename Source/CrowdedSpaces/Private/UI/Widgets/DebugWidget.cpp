@@ -1,5 +1,7 @@
 ﻿#include "UI/Widgets/DebugWidget.h"
 
+#include "AI/NPCFunctionLibrary.h"
+#include "AI/NPC.h"
 #include "Game/CrowdedGameState.h"
 
 void UDebugWidget::NativeConstruct()
@@ -34,7 +36,7 @@ void UDebugWidget::Unsetup_Implementation()
 	Super::Unsetup_Implementation();
 }
 
-void UDebugWidget::AddMoney(const int Amount)
+void UDebugWidget::AddMoney(const int Amount) const
 {
 	if (!MoneyComponent)
 		return;
@@ -42,7 +44,7 @@ void UDebugWidget::AddMoney(const int Amount)
 	MoneyComponent->AddResource(Amount);
 }
 
-void UDebugWidget::AddElectricity(const int Amount)
+void UDebugWidget::AddElectricity(const int Amount) const
 {
 	if (!ElectricityComponent)
 		return;
@@ -50,12 +52,17 @@ void UDebugWidget::AddElectricity(const int Amount)
 	ElectricityComponent->AddResource(Amount);
 }
 
-void UDebugWidget::AddFood(const int Amount)
+void UDebugWidget::AddFood(const int Amount) const
 {
 	if (!FoodComponent)
 		return;
 
 	FoodComponent->AddResource(Amount);
+}
+
+void UDebugWidget::SpawnNPC()
+{
+	ANPC* SpawnedNPC = UNPCFunctionLibrary::SpawnGlobalNPC(this);
 }
 
 void UDebugWidget::Init_Implementation()
