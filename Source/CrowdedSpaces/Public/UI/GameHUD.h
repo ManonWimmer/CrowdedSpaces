@@ -23,6 +23,9 @@ public:
 	TObjectPtr<T> GetOrCreateWidget(TSubclassOf<UCustomWidget> WidgetClass);
 
 	UFUNCTION()
+	void CreateNewWidget(TSubclassOf<UCustomWidget> WidgetClass, ESlateVisibility InitialVisibility);
+
+	UFUNCTION()
 	UCustomWidget* ShowWidget(TSubclassOf<UCustomWidget> WidgetClass, bool bShow, ESlateVisibility VisibilityOnShow);
 
 	UPROPERTY(EditAnywhere, Category="Widgets")

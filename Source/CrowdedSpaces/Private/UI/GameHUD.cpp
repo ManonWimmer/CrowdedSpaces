@@ -36,18 +36,30 @@ void AGameHUD::CreateStartupWidgets()
 {
 	for (const auto& [WidgetClass, InitialVisibility] : StartupWidgetsConfig)
 	{
-		if (!WidgetClass) continue;
-
-		TObjectPtr<UCustomWidget> Widget = CreateWidget<UCustomWidget>(PlayerController, WidgetClass);
-
-		if (!Widget) continue;
-
-		Widget->AddToViewport();
-		Widget->SetVisibility(InitialVisibility);
-		Widget->Init();
-
-		WidgetInstances.Add(WidgetClass, Widget);
+		CreateNewWidget(WidgetClass, InitialVisibility);
 	}
+
+	// Create debug if not in shipping
+	#if !UE_BUILD_SHIPPING
+		CreateNewWidget(DebugWidgetBP, ESlateVisibility::Visible);
+	#endif
+}
+
+void AGameHUD::CreateNewWidget(const TSubclassOf<UCustomWidget> WidgetClass, const ESlateVisibility InitialVisibility)
+{
+	if (!WidgetClass)
+		return;
+
+	const TObjectPtr<UCustomWidget> Widget = CreateWidget<UCustomWidget>(PlayerController, WidgetClass);
+
+	if (!Widget)
+		return;
+
+	Widget->AddToViewport();
+	Widget->SetVisibility(InitialVisibility);
+	Widget->Init();
+
+	WidgetInstances.Add(WidgetClass, Widget);
 }
 
 #pragma region Build
