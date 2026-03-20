@@ -46,17 +46,6 @@ void UMoralEvent::SetupChoices()
 	EventDescription = EventDescription.Replace(TEXT("{npc}"), *NPCName);
 }
 
-AActor* UMoralEvent::SpawnNPC(const TSubclassOf<ANPC> NPCClass) const
-{
-	const FVector Location(0.0f, 0.0f, 140.0f);
-	const FRotator Rotation(0.0f, 0.0f, 0.0f);
-
-	FActorSpawnParameters SpawnInfo;
-	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-
-	return GetWorld()->SpawnActor<ANPC>(NPCClass, Location, Rotation, SpawnInfo);
-}
-
 void UMoralEvent::KillSelectedNPC() const
 {
 	if (!SelectedNPC)

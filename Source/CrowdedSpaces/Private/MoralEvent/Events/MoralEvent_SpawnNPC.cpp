@@ -1,5 +1,7 @@
 ﻿#include "MoralEvent/Events/MoralEvent_SpawnNPC.h"
 
+#include "AI/NPCFunctionLibrary.h"
+
 void UMoralEvent_SpawnNPC::ClickOnChoice(EMoralEventType Choice)
 {
 	Super::ClickOnChoice(Choice);
@@ -7,7 +9,7 @@ void UMoralEvent_SpawnNPC::ClickOnChoice(EMoralEventType Choice)
 	if (Choice != EMoralEventType::Accept)
 		return;
 	
-	AActor* NPC = SpawnNPC(NPCClass);
+	ANPC* SpawnedNPC = UNPCFunctionLibrary::SpawnGlobalNPC(this);
 }
 
 void UMoralEvent_SpawnNPC::SetupChoices()

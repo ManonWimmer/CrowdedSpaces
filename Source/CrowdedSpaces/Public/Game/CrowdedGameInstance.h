@@ -4,6 +4,8 @@
 #include "Engine/GameInstance.h"
 #include "CrowdedGameInstance.generated.h"
 
+class ANPC;
+
 UCLASS()
 class CROWDEDSPACES_API UCrowdedGameInstance : public UGameInstance
 {
@@ -25,4 +27,7 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	bool bNPCsCanLoseEnergy = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="NPC")
+	TSubclassOf<ANPC> GlobalNPCClass;
 };
