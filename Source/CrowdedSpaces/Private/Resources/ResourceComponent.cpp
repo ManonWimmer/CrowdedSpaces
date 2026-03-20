@@ -1,5 +1,6 @@
 ﻿#include "Resources/ResourceComponent.h"
 
+#include "Game/CrowdedGameInstance.h"
 #include "Resources/ResourceDefaultsData.h"
 
 UResourceComponent::UResourceComponent()
@@ -42,12 +43,28 @@ void UResourceComponent::SetType(EResourceType NewType)
 void UResourceComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+
+	const UWorld* World = GetWorld();
+	if (!World)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("World is null!"));
+		return;
+	}
+	
+	GameInstance = World->GetGameInstance<UCrowdedGameInstance>();
+
+	if (!GameInstance)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GameInstance is null!"));
+		return;
+	}
 	
 	if (CanLoseAndRegenResource)
 		StartResourceTimer();
 }
 
-void UResourceComponent::AddResource(int Amount)
+void UResourceComponent::AddResource(const int Amount)
 {
 	const int32 OldResource = Resource;
 
@@ -67,8 +84,13 @@ void UResourceComponent::AddResource(int Amount)
 	}
 }
 
-void UResourceComponent::RemoveResource(int Amount)
+void UResourceComponent::RemoveResource(const int Amount)
 {
+	// Check game instance can lose food/energy
+	if ((ResourceType == EResourceType::Food && !GameInstance->bNPCsCanLoseFood) ||
+		(ResourceType == EResourceType::Energy && !GameInstance->bNPCsCanLoseEnergy))
+		return;
+	
 	if (MaxResource != -1)
 		Resource = FMath::Clamp(Resource - Amount, 0, MaxResource);
 	else
@@ -110,7 +132,6 @@ void UResourceComponent::ToggleResourceTimer()
 		return;
 
 	FTimerManager& TimerManager = GetWorld()->GetTimerManager();
-	
 
 	if (TimerManager.IsTimerActive(ResourceTimerHandle))
 	{

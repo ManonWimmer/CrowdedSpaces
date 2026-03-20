@@ -42,3 +42,8 @@ void UCrowdedGameInstance::OnPostWorldInitialization(UWorld* World, const UWorld
 		&UTimeSubsystem::SetTimeNormal
 	);
 }
+
+void UCrowdedGameInstance::ResetGameSettings()
+{
+	bNPCsCanLoseFood = true;
+}

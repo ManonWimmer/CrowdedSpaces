@@ -5,6 +5,7 @@
 #include "Resources/ResourceType.h"
 #include "ResourceComponent.generated.h"
 
+class UCrowdedGameInstance;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnResourceFull); 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnResourceChanged, int32, Value); 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIsInRegenChanged, bool, Value);
@@ -109,6 +110,9 @@ private:
 	// Type
 	UPROPERTY(EditAnywhere)
 	EResourceType ResourceType = EResourceType::Money;
+
+	UPROPERTY()
+	TObjectPtr<UCrowdedGameInstance> GameInstance = nullptr;
 
 protected:
 	virtual void BeginPlay() override;

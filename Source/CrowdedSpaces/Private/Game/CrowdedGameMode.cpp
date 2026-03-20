@@ -19,6 +19,13 @@ void ACrowdedGameMode::BeginPlay()
 		return;
 	
 	TimeSubsystem->OnDayChanged.AddDynamic(this, &ACrowdedGameMode::CheckEndGame);
+
+	// Reset game instance
+	UCrowdedGameInstance* GameInstance = GetGameInstance<UCrowdedGameInstance>();
+	if (!GameInstance)
+		return;
+
+	GameInstance->ResetGameSettings();
 }
 
 void ACrowdedGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)

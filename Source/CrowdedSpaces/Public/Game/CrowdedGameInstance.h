@@ -14,6 +14,15 @@ class CROWDEDSPACES_API UCrowdedGameInstance : public UGameInstance
 	void OnPostWorldInitialization(UWorld* World, const UWorld::InitializationValues IVS);
 
 public:
+	UFUNCTION()
+	void ResetGameSettings(); // Called by game mode begin play
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bLastGameSurvived = false;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool bNPCsCanLoseFood = true;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool bNPCsCanLoseEnergy = true;
 };

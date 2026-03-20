@@ -41,7 +41,7 @@ void AGameHUD::CreateStartupWidgets()
 
 	// Create debug if not in shipping
 	#if !UE_BUILD_SHIPPING
-		CreateNewWidget(DebugWidgetBP, ESlateVisibility::Visible);
+		CreateNewWidget(DebugWidgetBP, ESlateVisibility::SelfHitTestInvisible);
 	#endif
 }
 
