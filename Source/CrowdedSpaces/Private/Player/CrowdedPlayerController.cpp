@@ -5,6 +5,7 @@
 #include "EnhancedInputComponent.h"
 #include "Game/CrowdedGameMode.h"
 #include "Kismet/GameplayStatics.h"
+#include "Time/TimeSubsystem.h"
 #include "UI/Widgets/SelectionWidget.h"
 
 ACrowdedPlayerController::ACrowdedPlayerController(): CameraIMC(nullptr)
@@ -47,6 +48,12 @@ void ACrowdedPlayerController::SetupInputComponent()
 	// Build rotate
 	EIC->BindAction(PlayerInputsData->LeftRotateBuildAction, ETriggerEvent::Started, this, &ACrowdedPlayerController::LeftRotateBuildInput);
 	EIC->BindAction(PlayerInputsData->RightRotateBuildAction, ETriggerEvent::Started, this, &ACrowdedPlayerController::RightRotateBuildInput);
+
+	// Time
+	EIC->BindAction(PlayerInputsData->Time0Action, ETriggerEvent::Started, this, &ACrowdedPlayerController::Time0Input);
+	EIC->BindAction(PlayerInputsData->Time1Action, ETriggerEvent::Started, this, &ACrowdedPlayerController::Time1Input);
+	EIC->BindAction(PlayerInputsData->Time2Action, ETriggerEvent::Started, this, &ACrowdedPlayerController::Time2Input);
+	EIC->BindAction(PlayerInputsData->Time3Action, ETriggerEvent::Started, this, &ACrowdedPlayerController::Time3Input);
 	
 	// Add IMC
 	TObjectPtr<ULocalPlayer> LocalPlayer = GetLocalPlayer();
@@ -81,6 +88,20 @@ void ACrowdedPlayerController::BeginPlay()
 
 	// Get HUD
 	GameHUD = Cast<AGameHUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
+
+	// Time
+	UWorld* World = GetWorld();
+	if (!World)
+		return;
+	
+	UTimeSubsystem* TimeSubsystem = World->GetSubsystem<UTimeSubsystem>();
+	if (!TimeSubsystem)
+		return;
+
+	OnTime0.AddDynamic(TimeSubsystem, &UTimeSubsystem::OnTime0);
+	OnTime1.AddDynamic(TimeSubsystem, &UTimeSubsystem::OnTime1);
+	OnTime2.AddDynamic(TimeSubsystem, &UTimeSubsystem::OnTime2);
+	OnTime3.AddDynamic(TimeSubsystem, &UTimeSubsystem::OnTime3);
 }
 
 void ACrowdedPlayerController::LeftClickInput(const FInputActionValue& Value)

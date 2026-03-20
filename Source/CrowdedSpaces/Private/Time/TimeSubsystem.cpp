@@ -1,6 +1,7 @@
 ﻿#include "Time/TimeSubsystem.h"
 
 #include "Kismet/GameplayStatics.h"
+#include "Player/CrowdedPlayerController.h"
 #include "Time/TimeSpeedType.h"
 
 TStatId UTimeSubsystem::GetStatId() const
@@ -38,6 +39,28 @@ void UTimeSubsystem::Tick(float DeltaTime)
 bool UTimeSubsystem::IsTickable() const
 {
 	return true;
+}
+
+void UTimeSubsystem::OnTime0()
+{
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Time0");
+	SetTimeSpeed(ETimeSpeedType::Paused);
+}
+
+void UTimeSubsystem::OnTime1()
+{
+	SetTimeSpeed(ETimeSpeedType::Normal);
+}
+
+void UTimeSubsystem::OnTime2()
+{
+	SetTimeSpeed(ETimeSpeedType::High);
+}
+
+void UTimeSubsystem::OnTime3()
+{
+	SetTimeSpeed(ETimeSpeedType::Ultra);
 }
 
 void UTimeSubsystem::SetTimeData(UTimeData* NewTimeData)

@@ -23,6 +23,11 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRightClickGame);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftRotateBuild);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRightRotateBuild);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTime0);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTime1);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTime2);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTime3);
+
 UCLASS()
 class CROWDEDSPACES_API ACrowdedPlayerController : public APlayerController
 {
@@ -37,36 +42,53 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UPlayerActionsData> PlayerInputsData;
 
-	// Delegates
+	// Camera move
 	UPROPERTY(BlueprintAssignable)
 	FOnCameraMoveForward OnCameraMoveForward;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnCameraMoveRight OnCameraMoveRight;
 
+	// Camera rotate & zoom
 	UPROPERTY(BlueprintAssignable)
 	FOnCameraRotate OnCameraRotate;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnCameraZoom OnCameraZoom;
 
+	// Left click
 	UPROPERTY(BlueprintAssignable)
 	FOnLeftClickBuild OnLeftClickBuild;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnLeftClickGame OnLeftClickGame;
 
+	// Right click
 	UPROPERTY(BlueprintAssignable)
 	FOnLeftClickBuild OnRightClickBuild;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnLeftClickBuild OnRightClickGame;
 
+	// Rotate
 	UPROPERTY(BlueprintAssignable)
 	FOnLeftRotateBuild OnLeftRotateBuild;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnRightRotateBuild OnRightRotateBuild;
+
+	// Time
+	UPROPERTY(BlueprintAssignable)
+	FOnTime0 OnTime0;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnTime1 OnTime1;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnTime2 OnTime2;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnTime3 OnTime3;
 	
 protected:
 	virtual void SetupInputComponent() override;
@@ -90,6 +112,11 @@ private:
 
 	void LeftRotateBuildInput(const FInputActionValue& Value);
 	void RightRotateBuildInput(const FInputActionValue& Value);
+
+	void Time0Input(const FInputActionValue& Value) { OnTime0.Broadcast(); }
+	void Time1Input(const FInputActionValue& Value) { OnTime1.Broadcast(); }
+	void Time2Input(const FInputActionValue& Value) { OnTime2.Broadcast(); }
+	void Time3Input(const FInputActionValue& Value) { OnTime3.Broadcast(); }
 
 	// Selection
 	void HandleSelection() const;
