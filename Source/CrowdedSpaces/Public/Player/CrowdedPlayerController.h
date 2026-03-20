@@ -22,6 +22,8 @@ class CROWDEDSPACES_API ACrowdedPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
+	ACrowdedPlayerController();
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Input")
 	UInputMappingContext* CameraIMC;

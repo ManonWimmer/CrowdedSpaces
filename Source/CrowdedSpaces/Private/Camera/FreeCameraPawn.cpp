@@ -24,7 +24,9 @@ AFreeCameraPawn::AFreeCameraPawn()
 	// Default zoom
 	TargetZoom = SpringArm->TargetArmLength;
 
-	AutoPossessPlayer = EAutoReceiveInput::Player0; 
+	AutoPossessPlayer = EAutoReceiveInput::Player0;
+
+	PrimaryActorTick.bTickEvenWhenPaused = true;
 }
 
 void AFreeCameraPawn::BeginPlay()
@@ -37,9 +39,7 @@ void AFreeCameraPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	float RealDeltaTime = DeltaTime;
-	if (UGameplayStatics::GetGlobalTimeDilation(GetWorld()) >= 1)
-		RealDeltaTime = GetWorld()->GetDeltaSeconds() / UGameplayStatics::GetGlobalTimeDilation(GetWorld());
+	float RealDeltaTime = FApp::GetDeltaTime();
 	
 	ApplyMovement(RealDeltaTime);
 	ApplyRotation(RealDeltaTime);

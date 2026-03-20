@@ -7,6 +7,11 @@
 #include "Kismet/GameplayStatics.h"
 #include "UI/Widgets/SelectionWidget.h"
 
+ACrowdedPlayerController::ACrowdedPlayerController(): CameraIMC(nullptr)
+{
+	bShouldPerformFullTickWhenPaused = true;
+}
+
 void ACrowdedPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
