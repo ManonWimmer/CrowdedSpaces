@@ -61,9 +61,22 @@ FVector ABuildableObject::GetExtent() const
     return FVector::ZeroVector;
 }
 
+void ABuildableObject::SetHasEnoughElectricity(bool bEnoughElectricity)
+{
+	bHasEnoughElectricity = bEnoughElectricity;
+
+	if (!bHasEnoughElectricity)
+	{
+		if (bHasNPCUsing && ComingNPC.IsValid())
+		{
+			StopUsing(ComingNPC.Get());
+		}
+	}
+}
+
 bool ABuildableObject::TryReserve(ANPC* NPC)
 {
-	if (ComingNPC.IsValid() && ComingNPC != NPC)
+	if (ComingNPC.IsValid() && ComingNPC != NPC && !CanBeUsed())
 		return false;
 
 	ComingNPC = NPC;
@@ -124,6 +137,11 @@ bool ABuildableObject::StartUsingImplementation(UBTTask_UseBuildableObject* UseO
 bool ABuildableObject::StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
 	return true;
+}
+
+void ABuildableObject::SetBuildData(UBuildData* NewData)
+{
+	BuildData = NewData;
 }
 
 void ABuildableObject::DestroyObject()

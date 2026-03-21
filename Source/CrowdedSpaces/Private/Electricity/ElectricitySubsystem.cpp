@@ -59,15 +59,11 @@ void UElectricitySubsystem::OnTimeChanged(const float NewTime)
 			if (ElectricityComponent->HasEnoughResource(ObjectLoseElectricity))
 			{
 				ElectricityComponent->RemoveResource(ObjectLoseElectricity);
-				// remettre can work
-				if (GEngine)
-					GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Blue, "can work");
+				Object->SetHasEnoughElectricity(true);
 			}
 			else
 			{
-				// cant work
-				if (GEngine)
-					GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Blue, "cant work");
+				Object->SetHasEnoughElectricity(false);
 			}
 		}
 	}
