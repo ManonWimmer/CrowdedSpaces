@@ -27,6 +27,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTime0);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTime1);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTime2);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTime3);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTogglePause);
 
 UCLASS()
 class CROWDEDSPACES_API ACrowdedPlayerController : public APlayerController
@@ -89,6 +90,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnTime3 OnTime3;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnTogglePause OnTogglePause;
 	
 protected:
 	virtual void SetupInputComponent() override;
@@ -117,6 +121,7 @@ private:
 	void Time1Input(const FInputActionValue& Value) { OnTime1.Broadcast(); }
 	void Time2Input(const FInputActionValue& Value) { OnTime2.Broadcast(); }
 	void Time3Input(const FInputActionValue& Value) { OnTime3.Broadcast(); }
+	void TogglePauseInput(const FInputActionValue& Value) { OnTogglePause.Broadcast(); }
 
 	// Selection
 	void HandleSelection() const;

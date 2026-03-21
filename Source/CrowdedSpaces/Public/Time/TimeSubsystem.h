@@ -34,10 +34,13 @@ public:
 
 	UFUNCTION()
 	void OnTime3();
+
+	UFUNCTION()
+	void OnTogglePause();
 	
 	UFUNCTION()
 	void HandleGameModeChanged(EGameModeState NewGameMode);
-
+	
 	UPROPERTY(BlueprintAssignable, Category = "Time")
 	FOnTimeChanged OnTimeChanged;
 

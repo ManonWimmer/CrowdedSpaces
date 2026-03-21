@@ -54,6 +54,7 @@ void ACrowdedPlayerController::SetupInputComponent()
 	EIC->BindAction(PlayerInputsData->Time1Action, ETriggerEvent::Started, this, &ACrowdedPlayerController::Time1Input);
 	EIC->BindAction(PlayerInputsData->Time2Action, ETriggerEvent::Started, this, &ACrowdedPlayerController::Time2Input);
 	EIC->BindAction(PlayerInputsData->Time3Action, ETriggerEvent::Started, this, &ACrowdedPlayerController::Time3Input);
+	EIC->BindAction(PlayerInputsData->TogglePauseAction, ETriggerEvent::Started, this, &ACrowdedPlayerController::TogglePauseInput);
 	
 	// Add IMC
 	TObjectPtr<ULocalPlayer> LocalPlayer = GetLocalPlayer();
@@ -102,6 +103,7 @@ void ACrowdedPlayerController::BeginPlay()
 	OnTime1.AddDynamic(TimeSubsystem, &UTimeSubsystem::OnTime1);
 	OnTime2.AddDynamic(TimeSubsystem, &UTimeSubsystem::OnTime2);
 	OnTime3.AddDynamic(TimeSubsystem, &UTimeSubsystem::OnTime3);
+	OnTogglePause.AddDynamic(TimeSubsystem, &UTimeSubsystem::OnTogglePause);
 }
 
 void ACrowdedPlayerController::LeftClickInput(const FInputActionValue& Value)

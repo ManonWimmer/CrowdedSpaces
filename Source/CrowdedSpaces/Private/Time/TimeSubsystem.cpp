@@ -61,6 +61,18 @@ void UTimeSubsystem::OnTime3()
 	TrySetTimeSpeed(ETimeSpeedType::Ultra);
 }
 
+void UTimeSubsystem::OnTogglePause()
+{
+	if (CurrentTimeSpeed == ETimeSpeedType::Paused)
+	{
+		TrySetTimeSpeed(ETimeSpeedType::Normal);
+	}
+	else
+	{
+		TrySetTimeSpeed(ETimeSpeedType::Paused);
+	}
+}
+
 void UTimeSubsystem::HandleGameModeChanged(EGameModeState NewGameMode)
 {
 	if (NewGameMode == EGameModeState::Building)
