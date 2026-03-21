@@ -38,4 +38,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	EGridRoomType RoomType = EGridRoomType::Any;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int LoseElectricityPerHour = 10;
 };
