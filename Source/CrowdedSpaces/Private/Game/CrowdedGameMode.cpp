@@ -19,12 +19,13 @@ void ACrowdedGameMode::BeginPlay()
 		return;
 	
 	TimeSubsystem->OnDayChanged.AddDynamic(this, &ACrowdedGameMode::CheckEndGame);
+	OnGameModeChanged.AddDynamic(TimeSubsystem, &UTimeSubsystem::HandleGameModeChanged);
 
 	// Reset game instance
 	UCrowdedGameInstance* GameInstance = GetGameInstance<UCrowdedGameInstance>();
 	if (!GameInstance)
 		return;
-
+	
 	GameInstance->ResetGameSettings();
 }
 

@@ -4,6 +4,7 @@
 #include "Engine/GameInstance.h"
 #include "CrowdedGameInstance.generated.h"
 
+class UTimeSubsystem;
 class ANPC;
 
 UCLASS()
@@ -18,7 +19,7 @@ class CROWDEDSPACES_API UCrowdedGameInstance : public UGameInstance
 public:
 	UFUNCTION()
 	void ResetGameSettings(); // Called by game mode begin play
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bLastGameSurvived = false;
 
@@ -30,4 +31,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="NPC")
 	TSubclassOf<ANPC> GlobalNPCClass;
+
+private:
+	TObjectPtr<UTimeSubsystem> TimeSubsystem = nullptr;
 };

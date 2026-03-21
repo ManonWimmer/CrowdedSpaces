@@ -43,30 +43,49 @@ bool UTimeSubsystem::IsTickable() const
 
 void UTimeSubsystem::OnTime0()
 {
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Time0");
-	SetTimeSpeed(ETimeSpeedType::Paused);
+	TrySetTimeSpeed(ETimeSpeedType::Paused);
 }
 
 void UTimeSubsystem::OnTime1()
 {
-	SetTimeSpeed(ETimeSpeedType::Normal);
+	TrySetTimeSpeed(ETimeSpeedType::Normal);
 }
 
 void UTimeSubsystem::OnTime2()
 {
-	SetTimeSpeed(ETimeSpeedType::High);
+	TrySetTimeSpeed(ETimeSpeedType::High);
 }
 
 void UTimeSubsystem::OnTime3()
 {
-	SetTimeSpeed(ETimeSpeedType::Ultra);
+	TrySetTimeSpeed(ETimeSpeedType::Ultra);
+}
+
+void UTimeSubsystem::HandleGameModeChanged(EGameModeState NewGameMode)
+{
+	if (NewGameMode == EGameModeState::Building)
+	{
+		SetTimePaused();
+	}
+	else if (NewGameMode == EGameModeState::Game)
+	{
+		SetTimeUnpaused();
+	}
 }
 
 void UTimeSubsystem::SetTimeData(UTimeData* NewTimeData)
 {
 	TimeData = NewTimeData;
 	GetCurrentSpeedValues();
+}
+
+bool UTimeSubsystem::TrySetTimeSpeed(ETimeSpeedType NewTimeSpeed)
+{
+	if (!bCanChangeTime)
+		return false;
+
+	SetTimeSpeed(NewTimeSpeed);
+	return true;
 }
 
 void UTimeSubsystem::SetTimeSpeed(const ETimeSpeedType NewTimeSpeed)
@@ -80,9 +99,21 @@ void UTimeSubsystem::SetTimeSpeed(const ETimeSpeedType NewTimeSpeed)
 	OnTimeSpeedChanged.Broadcast(CurrentTimeSpeed);
 }
 
-void UTimeSubsystem::SetTimePaused(const TSubclassOf<UMoralEvent> MoralEvent)
+void UTimeSubsystem::SetTimePausedWithEvent(const TSubclassOf<UMoralEvent> MoralEvent)
+{
+	SetTimePaused();
+}
+
+void UTimeSubsystem::SetTimePaused()
 {
 	SetTimeSpeed(ETimeSpeedType::Paused);
+	bCanChangeTime = false;
+}
+
+void UTimeSubsystem::SetTimeUnpaused()
+{
+	SetTimeSpeed(ETimeSpeedType::Normal);
+	bCanChangeTime = true;
 }
 
 void UTimeSubsystem::GetRandomMoralEventForDay(int Day) const
@@ -123,11 +154,6 @@ void UTimeSubsystem::GetRandomMoralEventForDay(int Day) const
 			return;
 		}
 	}
-}
-
-void UTimeSubsystem::SetTimeNormal()
-{
-	SetTimeSpeed(ETimeSpeedType::Normal);
 }
 
 void UTimeSubsystem::GetCurrentSpeedValues()

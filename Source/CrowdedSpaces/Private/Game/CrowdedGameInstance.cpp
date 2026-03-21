@@ -1,5 +1,6 @@
 ﻿#include "Game/CrowdedGameInstance.h"
 
+#include "Game/CrowdedGameMode.h"
 #include "MoralEvent/MoralEventSubsystem.h"
 #include "Time/TimeSubsystem.h"
 
@@ -15,7 +16,7 @@ void UCrowdedGameInstance::OnPostWorldInitialization(UWorld* World, const UWorld
 	if (!World)
 		return;
 
-	const TObjectPtr<UTimeSubsystem> TimeSubsystem = World->GetSubsystem<UTimeSubsystem>();
+	TimeSubsystem = World->GetSubsystem<UTimeSubsystem>();
 	if (!TimeSubsystem)
 		return;
 
@@ -33,13 +34,13 @@ void UCrowdedGameInstance::OnPostWorldInitialization(UWorld* World, const UWorld
 
 	TimeSubsystem->OnMoralEventTime.AddDynamic(
 		TimeSubsystem,
-		&UTimeSubsystem::SetTimePaused
+		&UTimeSubsystem::SetTimePausedWithEvent
 	);
 
 	// On end moral event
 	MoralSubsystem->OnMoralEventEnded.AddDynamic(
 		TimeSubsystem,
-		&UTimeSubsystem::SetTimeNormal
+		&UTimeSubsystem::SetTimeUnpaused
 	);
 }
 

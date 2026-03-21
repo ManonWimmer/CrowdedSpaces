@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "TimeData.h"
 #include "TimeSpeedType.h"
+#include "Game/GameModeState.h"
 #include "MoralEvent/MoralEvent.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "TimeSubsystem.generated.h"
@@ -34,6 +35,9 @@ public:
 	UFUNCTION()
 	void OnTime3();
 	
+	UFUNCTION()
+	void HandleGameModeChanged(EGameModeState NewGameMode);
+
 	UPROPERTY(BlueprintAssignable, Category = "Time")
 	FOnTimeChanged OnTimeChanged;
 
@@ -60,15 +64,21 @@ public:
 
 	// Game speed
 	UFUNCTION(BlueprintCallable, Category = "Time")
-	void SetTimeSpeed(ETimeSpeedType NewTimeSpeed);
+	bool TrySetTimeSpeed(ETimeSpeedType NewTimeSpeed);
 	
 	UFUNCTION(BlueprintCallable, Category = "Time")
-	void SetTimePaused(const TSubclassOf<UMoralEvent> MoralEvent = nullptr);
+	void SetTimeSpeed(ETimeSpeedType NewTimeSpeed);
+	
+	UFUNCTION()
+	void SetTimePaused();
+
+	UFUNCTION()
+	void SetTimePausedWithEvent(const TSubclassOf<UMoralEvent> MoralEvent = nullptr);
 
 	void GetRandomMoralEventForDay(int Day) const;
 
 	UFUNCTION(BlueprintCallable, Category = "Time")
-	void SetTimeNormal();
+	void SetTimeUnpaused();
 	
 	UFUNCTION()
 	void GetCurrentSpeedValues();
@@ -97,4 +107,7 @@ private:
 	
 	UPROPERTY()
 	TObjectPtr<UTimeData> TimeData = nullptr; // Get from game state
+
+	UPROPERTY()
+	bool bCanChangeTime = true;
 };
