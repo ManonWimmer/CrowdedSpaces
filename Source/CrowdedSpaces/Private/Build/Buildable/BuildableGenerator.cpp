@@ -24,7 +24,7 @@ void ABuildableGenerator::BeginPlay()
 	BRS->RegisterGenerator(this);
 
 	// Get player money component
-	PlayerMoneyComponent = CrowdedGameState->GetResourceComponent<EResourceType::Money>();
+	PlayerMoneyComponent = GameState->GetResourceComponent<EResourceType::Money>();
 
 	// Assign start production values
 	if (!ProductionComponent)
@@ -60,8 +60,8 @@ void ABuildableGenerator::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 bool ABuildableGenerator::StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
-	CurrentTasks.Add(UseObjectTask);
-
+	CurrentTask = UseObjectTask;
+	
 	ProductionComponent->SetProductionMultiplier(UsingNPC->GetProductionMultiplierForType(ProductionComponent->GetProductionType()));
 	ProductionComponent->StartProduction();
 	return true; 
@@ -69,8 +69,8 @@ bool ABuildableGenerator::StartUsingImplementation(UBTTask_UseBuildableObject* U
 
 bool ABuildableGenerator::StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
-	CurrentTasks.Remove(UseObjectTask);
-
+	CurrentTask = nullptr;
+	
 	ProductionComponent->SetProductionMultiplier(1);
 	ProductionComponent->PauseProduction();
 	return true; 

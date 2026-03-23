@@ -79,15 +79,17 @@ void ABuildableObject::SetHasEnoughElectricity(bool bEnoughElectricity)
 			UE_LOG(LogTemp,Display,TEXT("Stop using npc"));
 
 			//StopUsingImplementation(CurrentTask);
-			StopUsing(UsingNPC.Get());
+			//StopUsing(UsingNPC.Get());
+			if (CurrentTask)
+			{
+				UE_LOG(LogTemp,Display,TEXT("force stop task"));
+				CurrentTask->ForceStopTask();
+			}
+			else
+			{
+				UE_LOG(LogTemp,Display,TEXT("no current task"));
+			}
 		}
-		else
-		{
-			UE_LOG(LogTemp,Display,TEXT("No npc"));
-			if (GEngine)
-				GEngine->AddOnScreenDebugMessage(-1,5,FColor::Yellow,"No NPC Using");
-		}
-			
 	}
 }
 
@@ -168,12 +170,9 @@ void ABuildableObject::DestroyObject()
 
 	BuildSubsystem->RemoveObject(this);
 
-	for (UBTTask_UseBuildableObject* Task : CurrentTasks)
+	if (CurrentTask)
 	{
-		if (Task)
-		{
-			Task->OnTargetDestroyed();
-		}
+		CurrentTask->OnTargetDestroyed();
 	}
 
 	GameHUD->HideCurrentSelectionWidget();

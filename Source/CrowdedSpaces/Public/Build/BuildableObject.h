@@ -131,5 +131,5 @@ protected:
 	TObjectPtr<UBuildableRegistrySubsystem> BRS;
 	
 	UPROPERTY()
-	TArray<UBTTask_UseBuildableObject*> CurrentTasks;
+	UBTTask_UseBuildableObject* CurrentTask;
 };

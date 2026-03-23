@@ -49,6 +49,9 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBe
 		if (Object->HasNPCUsing())
 			continue;
 
+		if (!Object->CanBeUsed())
+			continue;
+
 		if (Object->IsReservedByOther(NPC))
 			continue;
 
