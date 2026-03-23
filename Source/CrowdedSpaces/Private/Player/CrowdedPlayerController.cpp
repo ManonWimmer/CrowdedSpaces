@@ -34,10 +34,14 @@ void ACrowdedPlayerController::SetupInputComponent()
 	EIC->BindAction(PlayerInputsData->MoveRightAction, ETriggerEvent::Completed, this, &ACrowdedPlayerController::StopMoveRightInput);
 
 	// Camera rotate
-	EIC->BindAction(PlayerInputsData->RotateAction, ETriggerEvent::Started, this, &ACrowdedPlayerController::RotateInput);
-	EIC->BindAction(PlayerInputsData->RotateAction, ETriggerEvent::Triggered, this, &ACrowdedPlayerController::RotateInput);
-	EIC->BindAction(PlayerInputsData->RotateAction, ETriggerEvent::Completed, this, &ACrowdedPlayerController::StopRotateInput);
+	EIC->BindAction(PlayerInputsData->RotateKeyAction, ETriggerEvent::Started, this, &ACrowdedPlayerController::RotateInput);
+	EIC->BindAction(PlayerInputsData->RotateKeyAction, ETriggerEvent::Triggered, this, &ACrowdedPlayerController::RotateInput);
+	EIC->BindAction(PlayerInputsData->RotateKeyAction, ETriggerEvent::Completed, this, &ACrowdedPlayerController::StopRotateInput);
 
+	EIC->BindAction(PlayerInputsData->MouseMoveAction, ETriggerEvent::Triggered, this, &ACrowdedPlayerController::MouseMoveInput);
+	EIC->BindAction(PlayerInputsData->RotateMouseWheelClickAction, ETriggerEvent::Started, this, &ACrowdedPlayerController::StartMouseWheelRotate);
+	EIC->BindAction(PlayerInputsData->RotateMouseWheelClickAction, ETriggerEvent::Completed, this, &ACrowdedPlayerController::StopMouseWheelRotate);
+	
 	// Zoom
 	EIC->BindAction(PlayerInputsData->ZoomAction, ETriggerEvent::Started, this, &ACrowdedPlayerController::ZoomInput);
 
@@ -104,6 +108,16 @@ void ACrowdedPlayerController::BeginPlay()
 	OnTime2.AddDynamic(TimeSubsystem, &UTimeSubsystem::OnTime2);
 	OnTime3.AddDynamic(TimeSubsystem, &UTimeSubsystem::OnTime3);
 	OnTogglePause.AddDynamic(TimeSubsystem, &UTimeSubsystem::OnTogglePause);
+}
+
+void ACrowdedPlayerController::MouseMoveInput(const FInputActionValue& Value)
+{
+	if (!bIsRotatingCameraWithMouseWheel)
+		return;
+
+	FVector2D MouseDelta = Value.Get<FVector2D>();
+
+	OnCameraMouseWheelClickRotate.Broadcast(MouseDelta);
 }
 
 void ACrowdedPlayerController::LeftClickInput(const FInputActionValue& Value)

@@ -18,7 +18,13 @@ public:
 	TObjectPtr<UInputAction> MoveRightAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UInputAction> RotateAction;
+	TObjectPtr<UInputAction> RotateKeyAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UInputAction> RotateMouseWheelClickAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UInputAction> MouseMoveAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UInputAction> ZoomAction;

@@ -73,7 +73,8 @@ private:
 	FVector CurrentVelocity = FVector::ZeroVector;
 	float TargetZoom = 0.f;
 	float CurrentYawInput = 0.f;
-
+	float MouseYawInput = 0.f;
+	
 	// Bind controller delegates
 	void BindControllerEvents();
 	
@@ -86,11 +87,15 @@ private:
 	
 	UFUNCTION()
 	void OnRotate(float Value);
+
+	UFUNCTION()
+	void OnMouseWheelRotate(FVector2D MouseDelta);
 	
 	UFUNCTION()
 	void OnZoom(float Value);
 
 	// Movement / Rotation
 	void ApplyMovement(float DeltaTime);
-	void ApplyRotation(float DeltaTime);	
+	void ApplyRotation(float DeltaTime);
+	
 };

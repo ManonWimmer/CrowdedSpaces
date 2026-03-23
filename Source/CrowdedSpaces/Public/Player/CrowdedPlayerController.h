@@ -12,6 +12,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraMoveForward, float, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraMoveRight, float, Value);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraRotate, float, Value);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraMouseWheelClickRotate, FVector2D, Value);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMouseMove, FVector2D, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraZoom, float, Value);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftClickBuild);
@@ -55,6 +57,12 @@ public:
 	FOnCameraRotate OnCameraRotate;
 
 	UPROPERTY(BlueprintAssignable)
+	FOnCameraMouseWheelClickRotate OnCameraMouseWheelClickRotate;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnMouseMove OnMouseMove;
+
+	UPROPERTY(BlueprintAssignable)
 	FOnCameraZoom OnCameraZoom;
 
 	// Left click
@@ -71,7 +79,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnLeftClickBuild OnRightClickGame;
 
-	// Rotate
+	// Rotate build
 	UPROPERTY(BlueprintAssignable)
 	FOnLeftRotateBuild OnLeftRotateBuild;
 
@@ -108,6 +116,10 @@ private:
 	
 	void RotateInput(const FInputActionValue& Value) { OnCameraRotate.Broadcast(Value.Get<float>()); }
 	void StopRotateInput(const FInputActionValue& Value) { OnCameraRotate.Broadcast(0.f); }
+
+	void MouseMoveInput(const FInputActionValue& Value);
+	void StartMouseWheelRotate(const FInputActionValue& Value) { bIsRotatingCameraWithMouseWheel = true; }
+	void StopMouseWheelRotate(const FInputActionValue& Value) { bIsRotatingCameraWithMouseWheel = false; }
 	
 	void ZoomInput(const FInputActionValue& Value) { OnCameraZoom.Broadcast(Value.Get<float>()); }
 
@@ -134,4 +146,7 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<AGameHUD> GameHUD = nullptr;
+
+	UPROPERTY()
+	bool bIsRotatingCameraWithMouseWheel = false;
 };
