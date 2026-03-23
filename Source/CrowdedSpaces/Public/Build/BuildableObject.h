@@ -82,14 +82,17 @@ public:
 	void DestroyObject();
 	
 protected:
+	UPROPERTY()
+	TObjectPtr<ACrowdedGameState> GameState = nullptr;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UStaticMeshComponent> MeshComp;
 
 	UPROPERTY()
-	TWeakObjectPtr<ANPC> ComingNPC;
+	TWeakObjectPtr<ANPC> ComingNPC = nullptr;
 
 	UPROPERTY()
-	TWeakObjectPtr<ANPC> UsingNPC;
+	TWeakObjectPtr<ANPC> UsingNPC = nullptr;
 
 	UPROPERTY()
 	bool bCanBeUsed = true;

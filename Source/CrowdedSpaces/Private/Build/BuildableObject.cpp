@@ -33,7 +33,7 @@ void ABuildableObject::BeginPlay()
 	if (!World)
 		return;
 	
-	const TObjectPtr<ACrowdedGameState> GameState = World->GetGameState<ACrowdedGameState>();
+	GameState = World->GetGameState<ACrowdedGameState>();
 	if (!GameState)
 		return;
 
@@ -67,10 +67,27 @@ void ABuildableObject::SetHasEnoughElectricity(bool bEnoughElectricity)
 
 	if (!bHasEnoughElectricity)
 	{
-		if (bHasNPCUsing && ComingNPC.IsValid())
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1,5,FColor::Yellow,"Has not enough electricity");
+
+		UE_LOG(LogTemp,Display,TEXT("Has not enough electricity"));
+		
+		if (bHasNPCUsing && UsingNPC.IsValid())
 		{
-			StopUsing(ComingNPC.Get());
+			if (GEngine)
+				GEngine->AddOnScreenDebugMessage(-1,5,FColor::Yellow,"NPC Using has been disabled!");
+			UE_LOG(LogTemp,Display,TEXT("Stop using npc"));
+
+			//StopUsingImplementation(CurrentTask);
+			StopUsing(UsingNPC.Get());
 		}
+		else
+		{
+			UE_LOG(LogTemp,Display,TEXT("No npc"));
+			if (GEngine)
+				GEngine->AddOnScreenDebugMessage(-1,5,FColor::Yellow,"No NPC Using");
+		}
+			
 	}
 }
 

@@ -24,7 +24,7 @@ void ABuildableGenerator::BeginPlay()
 	BRS->RegisterGenerator(this);
 
 	// Get player money component
-	PlayerMoneyComponent = GetPlayerMoneyComponent();
+	PlayerMoneyComponent = CrowdedGameState->GetResourceComponent<EResourceType::Money>();
 
 	// Assign start production values
 	if (!ProductionComponent)
@@ -123,13 +123,7 @@ FUpgradeStruct ABuildableGenerator::GetNextUpgrade()
 
 UResourceComponent* ABuildableGenerator::GetPlayerMoneyComponent() const
 {
-	if (PlayerMoneyComponent)
-		return PlayerMoneyComponent;
-	
-	if (!CrowdedGameState)
-		return nullptr;
-	
-	return CrowdedGameState->GetResourceComponent<EResourceType::Money>();
+	return PlayerMoneyComponent;
 }
 #pragma endregion Upgrade
 
