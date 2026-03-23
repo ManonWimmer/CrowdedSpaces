@@ -64,9 +64,9 @@ void UResourceComponent::BeginPlay()
 		StartResourceTimer();
 }
 
-void UResourceComponent::AddResource(const int Amount)
+void UResourceComponent::AddResource(const float Amount)
 {
-	const int32 OldResource = Resource;
+	const float OldResource = Resource;
 
 	if (MaxResource != -1)
 		Resource = FMath::Clamp(Resource + Amount, 0, MaxResource);
@@ -84,7 +84,7 @@ void UResourceComponent::AddResource(const int Amount)
 	}
 }
 
-void UResourceComponent::RemoveResource(const int Amount)
+void UResourceComponent::RemoveResource(const float Amount)
 {
 	// Check game instance can lose food/energy
 	if ((ResourceType == EResourceType::Food && !GameInstance->bNPCsCanLoseFood) ||
@@ -102,7 +102,7 @@ void UResourceComponent::RemoveResource(const int Amount)
 	OnResourceChanged.Broadcast(Resource);
 }
 
-bool UResourceComponent::HasEnoughResource(int Amount)
+bool UResourceComponent::HasEnoughResource(float Amount)
 {
 	return Resource >= Amount;
 }

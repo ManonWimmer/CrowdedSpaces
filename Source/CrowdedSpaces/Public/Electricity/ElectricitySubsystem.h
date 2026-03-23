@@ -22,7 +22,7 @@ public:
 
 private:
 	UPROPERTY()
-	int LastHour = 0;
+	float LastTime = 0.f;
 
 	UPROPERTY()
 	TObjectPtr<ACrowdedGameState> GameState = nullptr;

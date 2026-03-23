@@ -67,27 +67,11 @@ void ABuildableObject::SetHasEnoughElectricity(bool bEnoughElectricity)
 
 	if (!bHasEnoughElectricity)
 	{
-		if (GEngine)
-			GEngine->AddOnScreenDebugMessage(-1,5,FColor::Yellow,"Has not enough electricity");
-
-		UE_LOG(LogTemp,Display,TEXT("Has not enough electricity"));
-		
 		if (bHasNPCUsing && UsingNPC.IsValid())
 		{
-			if (GEngine)
-				GEngine->AddOnScreenDebugMessage(-1,5,FColor::Yellow,"NPC Using has been disabled!");
-			UE_LOG(LogTemp,Display,TEXT("Stop using npc"));
-
-			//StopUsingImplementation(CurrentTask);
-			//StopUsing(UsingNPC.Get());
 			if (CurrentTask)
 			{
-				UE_LOG(LogTemp,Display,TEXT("force stop task"));
 				CurrentTask->ForceStopTask();
-			}
-			else
-			{
-				UE_LOG(LogTemp,Display,TEXT("no current task"));
 			}
 		}
 	}

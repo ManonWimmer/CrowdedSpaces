@@ -27,21 +27,21 @@ public:
 	
 	// Change value
 	UFUNCTION(BlueprintCallable)
-	void AddResource(int Amount);
+	void AddResource(float  Amount);
 
 	UFUNCTION(BlueprintCallable)
-	void RemoveResource(int Amount);
+	void RemoveResource(float  Amount);
 
 	// Get value
 	UFUNCTION(BlueprintCallable)
-	int GetResource() const { return Resource; }
+	float  GetResource() const { return Resource; }
 
 	UFUNCTION(BlueprintCallable)
-	int GetMaxResource() const { return MaxResource; }
+	float  GetMaxResource() const { return MaxResource; }
 
 	// Check value
 	UFUNCTION(BlueprintCallable)
-	bool HasEnoughResource(int Amount);
+	bool HasEnoughResource(float  Amount);
 	
 	UFUNCTION(BlueprintCallable)
 	bool HasMaxResource();
@@ -82,10 +82,10 @@ public:
 private:
 	// Resource
 	UPROPERTY(EditAnywhere)
-	int32 Resource = 0;
+	float Resource = 0;
 
 	UPROPERTY(EditAnywhere)
-	int32 MaxResource = 0;
+	float MaxResource = 0;
 
 	UPROPERTY(EditAnywhere)
 	bool bIsInRegen = false;
@@ -94,10 +94,10 @@ private:
 	bool CanLoseAndRegenResource = false;
 	
 	UPROPERTY(EditAnywhere)
-	int32 ResourceLossPerTick = 1;
+	float ResourceLossPerTick = 1;
 
 	UPROPERTY(EditAnywhere)
-	int32 ResourceRegenPerTick = 2;
+	float ResourceRegenPerTick = 2;
 
 	// Timer
 	UPROPERTY(EditAnywhere)

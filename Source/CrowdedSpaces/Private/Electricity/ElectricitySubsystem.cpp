@@ -22,49 +22,40 @@ TStatId UElectricitySubsystem::GetStatId() const
 
 void UElectricitySubsystem::OnTimeChanged(const float NewTime)
 {
-	int CurrentHour = NewTime / 60;
-	if (CurrentHour != LastHour)
+	float DeltaTime = NewTime - LastTime;
+	LastTime = NewTime;
+
+	if (DeltaTime <= 0.f)
+		return;
+	
+	UWorld* World = GetWorld();
+	if (!World)
+		return;
+	
+	TObjectPtr<UBuildableRegistrySubsystem> BRS = World->GetSubsystem<UBuildableRegistrySubsystem>();
+	if (!BRS)
+		return;
+	
+	// Objects
+	for (TWeakObjectPtr<ABuildableObject> Object : BRS->BuildableObjects) 
 	{
-		if (GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Blue, "New hour");
+		if (!Object.IsValid())
+			continue;
 
-		LastHour = CurrentHour;
+		int LosePerHour = Object->GetBuildData()->LoseElectricityPerHour;
+		if (LosePerHour <= 0)
+			continue;
 		
-		UWorld* World = GetWorld();
-		if (!World)
+		float ConsumptionThisFrame = (LosePerHour / 60.f) * DeltaTime;
+
+		if (ElectricityComponent->HasEnoughResource(ConsumptionThisFrame))
 		{
-			if (GEngine)
-				GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "no world");
-			return;
+			ElectricityComponent->RemoveResource(ConsumptionThisFrame);
+			Object->SetHasEnoughElectricity(true);
 		}
-		
-		TObjectPtr<UBuildableRegistrySubsystem> BRS = World->GetSubsystem<UBuildableRegistrySubsystem>();
-		if (!BRS)
+		else
 		{
-			if (GEngine)
-				GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "no brs");
-			return;
-		}
-		
-		// Objects
-		for (TWeakObjectPtr<ABuildableObject> Object : BRS->BuildableObjects) 
-		{
-			if (!Object.IsValid())
-				continue;
-
-			int ObjectLoseElectricity = Object->GetBuildData()->LoseElectricityPerHour;
-			if (ObjectLoseElectricity == 0)
-				continue;
-
-			if (ElectricityComponent->HasEnoughResource(ObjectLoseElectricity))
-			{
-				ElectricityComponent->RemoveResource(ObjectLoseElectricity);
-				Object->SetHasEnoughElectricity(true);
-			}
-			else
-			{
-				Object->SetHasEnoughElectricity(false);
-			}
+			Object->SetHasEnoughElectricity(false);
 		}
 	}
 	
