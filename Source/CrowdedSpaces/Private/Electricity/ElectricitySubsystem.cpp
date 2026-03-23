@@ -58,5 +58,4 @@ void UElectricitySubsystem::OnTimeChanged(const float NewTime)
 			Object->SetHasEnoughElectricity(false);
 		}
 	}
-	
 }
