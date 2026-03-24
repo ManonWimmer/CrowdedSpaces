@@ -101,8 +101,8 @@ public:
 	UFUNCTION()
 	void GetRoomRotatedSize(int& OutX, int& OutY) const;
 
-	UFUNCTION()
-	TMap<int, FGridRoom> GetRooms() const;
+	UFUNCTION(BlueprintCallable)
+	TMap<int, FGridRoom>& GetRooms();
 
 	UPROPERTY(BlueprintAssignable)
 	FOnDeselected OnDeselected; // To deselect ui

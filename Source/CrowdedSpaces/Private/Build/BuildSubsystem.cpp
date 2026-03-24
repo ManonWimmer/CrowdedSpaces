@@ -410,11 +410,8 @@ void UBuildSubsystem::GetRoomRotatedSize(int& OutX, int& OutY) const
 	}
 }
 
-TMap<int, FGridRoom> UBuildSubsystem::GetRooms() const
+TMap<int, FGridRoom>& UBuildSubsystem::GetRooms()
 {
-	if (!GridActor)
-		return TMap<int, FGridRoom>();
-
 	return GridActor->GetRooms();
 }
 

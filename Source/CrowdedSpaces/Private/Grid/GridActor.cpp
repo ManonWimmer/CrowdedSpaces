@@ -6,7 +6,7 @@
 AGridActor::AGridActor()
 {
 	RootComponent = CreateDefaultSubobject<USceneComponent>("Root");
-	
+
 	LinesProceduralMesh = CreateDefaultSubobject<UProceduralMeshComponent>("LinesProceduralMesh");
 	LinesProceduralMesh->SetupAttachment(RootComponent);
 
@@ -16,7 +16,7 @@ AGridActor::AGridActor()
 	WallISM->SetCollisionObjectType(ECC_WorldStatic);
 	WallISM->SetCollisionResponseToAllChannels(ECR_Block);
 	WallISM->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
-	
+
 	PrimaryActorTick.bCanEverTick = false;
 }
 

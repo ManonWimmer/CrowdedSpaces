@@ -36,32 +36,30 @@ void UElectricitySubsystem::OnTimeChanged(const float NewTime)
 	TObjectPtr<UBuildSubsystem> BuildSubsystem = World->GetSubsystem<UBuildSubsystem>();
 	if (!BuildSubsystem)
 		return;
+	
+	TMap<int, FGridRoom>& Rooms = BuildSubsystem->GetRooms();
 
 	// Rooms
-	for (TTuple<int, FGridRoom> Room : BuildSubsystem->GetRooms())
+	for (auto& Pair : Rooms)
 	{
-		float LosePerHour = Room.Value.LoseElectricityPerHour;
+		FGridRoom& Room = Pair.Value;
+		float LosePerHour = Room.LoseElectricityPerHour;
 		if (LosePerHour <= 0)
 			continue;
 
 		float ConsumptionThisFrame = (LosePerHour / 60.f) * DeltaTime;
 
-		if (ElectricityComponent->HasEnoughResource(ConsumptionThisFrame))
+		bool bEnough = ElectricityComponent->HasEnoughResource(ConsumptionThisFrame);
+
+		if (Room.bHasEnoughElectricity != bEnough)
+		{
+			Room.bHasEnoughElectricity = bEnough;
+			OnRoomEnoughElectricityChanged.Broadcast(Room.RoomId);
+		}
+
+		if (bEnough)
 		{
 			ElectricityComponent->RemoveResource(ConsumptionThisFrame);
-			if (!Room.Value.bHasEnoughElectricity)
-			{
-				Room.Value.bHasEnoughElectricity = true;
-				OnRoomEnoughElectricityChanged.Broadcast(Room.Value.RoomId);
-			}
-		}
-		else
-		{
-			if (Room.Value.bHasEnoughElectricity)
-			{
-				Room.Value.bHasEnoughElectricity = false;
-				OnRoomEnoughElectricityChanged.Broadcast(Room.Value.RoomId);
-			}
 		}
 	}
 
@@ -85,17 +83,12 @@ void UElectricitySubsystem::OnTimeChanged(const float NewTime)
 		// Check if active room
 		if (Object->GetBuildData()->RoomId != -1)
 		{
-			// a opti pour pas refaire la boucle à chaque fois, mettre dans une map ? 
-			for (TTuple<int, FGridRoom> Room : BuildSubsystem->GetRooms())
+			if (FGridRoom* RoomPtr = Rooms.Find(Object->GetBuildData()->RoomId))
 			{
-				if (Room.Value.RoomId == Object->GetBuildData()->RoomId)
+				if (!(RoomPtr)->bHasEnoughElectricity)
 				{
-					if (!Room.Value.bHasEnoughElectricity)
-					{
-						Object->SetHasEnoughElectricity(false);
-						bIsObjectRoomActive = false;
-						continue;
-					}
+					Object->SetHasEnoughElectricity(false);
+					continue;
 				}
 			}
 		}

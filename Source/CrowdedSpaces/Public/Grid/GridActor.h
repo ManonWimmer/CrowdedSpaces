@@ -48,7 +48,7 @@ public:
 	int GetColumns() const { return Columns; }
 
 	UFUNCTION(BlueprintCallable, Category = "Grid")
-	TMap<int, FGridRoom> GetRooms() const { return Rooms; }
+	TMap<int, FGridRoom>& GetRooms() { return Rooms; }
 	
 	void DeselectCell(int Row, int Column);
 	void SelectRoomCell(int Row, int Column);
