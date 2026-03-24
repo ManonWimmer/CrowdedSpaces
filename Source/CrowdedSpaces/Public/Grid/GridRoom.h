@@ -25,4 +25,7 @@ struct FGridRoom
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Room")
 	bool bHasEnoughElectricity = true;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Room")
+	bool bIsActivated = true;
 };

@@ -43,6 +43,10 @@ void UElectricitySubsystem::OnTimeChanged(const float NewTime)
 	for (auto& Pair : Rooms)
 	{
 		FGridRoom& Room = Pair.Value;
+		
+		if (!Room.bIsActivated)
+			continue;
+			
 		float LosePerHour = Room.LoseElectricityPerHour;
 		if (LosePerHour <= 0)
 			continue;
@@ -71,6 +75,9 @@ void UElectricitySubsystem::OnTimeChanged(const float NewTime)
 	for (TWeakObjectPtr<ABuildableObject> Object : BRS->BuildableObjects) 
 	{
 		if (!Object.IsValid())
+			continue;
+
+		if (!Object->IsActivated())
 			continue;
 
 		float LosePerHour = Object->GetBuildData()->LoseElectricityPerHour;
@@ -106,4 +113,24 @@ void UElectricitySubsystem::OnTimeChanged(const float NewTime)
 			Object->SetHasEnoughElectricity(false);
 		}
 	}
+}
+
+void UElectricitySubsystem::ChangeRoomActiveState(int RoomId)
+{
+	UWorld* World = GetWorld();
+	if (!World)
+		return;
+	
+	TObjectPtr<UBuildSubsystem> BuildSubsystem = World->GetSubsystem<UBuildSubsystem>();
+	if (!BuildSubsystem)
+		return;
+	
+	TMap<int, FGridRoom>& Rooms = BuildSubsystem->GetRooms();
+	FGridRoom* RoomPtr = Rooms.Find(RoomId);
+	if (!RoomPtr)
+		return;
+
+	RoomPtr->bIsActivated = !RoomPtr->bIsActivated;
+
+	
 }

@@ -43,7 +43,10 @@ public:
 	FOnNPCComingChanged OnNPCComingChanged;
 
 	UFUNCTION(BlueprintCallable, Category = "Object")
-	bool CanBeUsed() const { return bCanBeUsed && bHasEnoughElectricity; }
+	bool CanBeUsed() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Object")
+	void CheckCantBeUsedStopTask() const;
 	
 	UFUNCTION(BlueprintCallable, Category = "Object")
 	bool HasNPCComing() const { return bHasNPCComing; }
@@ -55,7 +58,13 @@ public:
 	bool HasEnoughElectricity() const { return bHasEnoughElectricity; }
 
 	UFUNCTION(BlueprintCallable, Category = "Object")
+	bool IsActivated() const { return bIsActivated; }
+
+	UFUNCTION(BlueprintCallable, Category = "Object")
 	void SetHasEnoughElectricity(bool bEnoughElectricity);
+
+	UFUNCTION(BlueprintCallable, Category = "Object")
+	void SetIsActivated(bool bActivated);
 	
 	bool TryReserve(ANPC* NPC);
 	bool IsReservedByOther(TObjectPtr<ANPC> NPC) const;
@@ -105,6 +114,9 @@ protected:
 
 	UPROPERTY()
 	bool bHasEnoughElectricity = true;
+
+	UPROPERTY()
+	bool bIsActivated = true;
 
 	UPROPERTY()
 	EObjectType ObjectType = EObjectType::Default;

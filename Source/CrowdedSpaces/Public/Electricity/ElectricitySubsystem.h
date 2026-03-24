@@ -23,7 +23,10 @@ public:
 	void OnTimeChanged(float NewTime);
 
 	UPROPERTY(BlueprintAssignable)
-	FOnRoomEnoughElectricityChanged OnRoomEnoughElectricityChanged; 
+	FOnRoomEnoughElectricityChanged OnRoomEnoughElectricityChanged;
+
+	UFUNCTION(BlueprintCallable)
+	void ChangeRoomActiveState(int RoomId);
 
 private:
 	UPROPERTY()

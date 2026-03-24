@@ -61,11 +61,14 @@ FVector ABuildableObject::GetExtent() const
     return FVector::ZeroVector;
 }
 
-void ABuildableObject::SetHasEnoughElectricity(bool bEnoughElectricity)
+bool ABuildableObject::CanBeUsed() const
 {
-	bHasEnoughElectricity = bEnoughElectricity;
+	return bCanBeUsed && bHasEnoughElectricity && bIsActivated;
+}
 
-	if (!bHasEnoughElectricity)
+void ABuildableObject::CheckCantBeUsedStopTask() const
+{
+	if (!CanBeUsed())
 	{
 		if (bHasNPCUsing && UsingNPC.IsValid())
 		{
@@ -75,6 +78,20 @@ void ABuildableObject::SetHasEnoughElectricity(bool bEnoughElectricity)
 			}
 		}
 	}
+}
+
+void ABuildableObject::SetHasEnoughElectricity(const bool bEnoughElectricity)
+{
+	bHasEnoughElectricity = bEnoughElectricity;
+
+	CheckCantBeUsedStopTask();
+}
+
+void ABuildableObject::SetIsActivated(const bool bActivated)
+{
+	bIsActivated = bActivated;
+
+	CheckCantBeUsedStopTask();
 }
 
 bool ABuildableObject::TryReserve(ANPC* NPC)
