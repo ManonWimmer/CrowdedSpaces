@@ -11,6 +11,16 @@
 #include "UI/GameHUD.h"
 #include "BuildSubsystem.generated.h"
 
+USTRUCT()
+struct FTMapArrayObjects
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY()
+	TArray<ABuildableObject*> Entries;
+};
+
 class AGridActor;
 class UResourceComponent;
 
@@ -112,7 +122,7 @@ private:
 
 	UPROPERTY()
 	TArray<TObjectPtr<UBuildRoomData>> BuildDataRooms; // Send by game state
-
+	
 	UPROPERTY()
 	float SnapSize = 100.f; // Send by game state
 

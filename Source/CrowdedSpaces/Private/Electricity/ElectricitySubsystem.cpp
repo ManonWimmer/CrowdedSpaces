@@ -32,33 +32,6 @@ void UElectricitySubsystem::OnTimeChanged(const float NewTime)
 	UWorld* World = GetWorld();
 	if (!World)
 		return;
-	
-	TObjectPtr<UBuildableRegistrySubsystem> BRS = World->GetSubsystem<UBuildableRegistrySubsystem>();
-	if (!BRS)
-		return;
-	
-	// Objects
-	for (TWeakObjectPtr<ABuildableObject> Object : BRS->BuildableObjects) 
-	{
-		if (!Object.IsValid())
-			continue;
-
-		float LosePerHour = Object->GetBuildData()->LoseElectricityPerHour;
-		if (LosePerHour <= 0)
-			continue;
-		
-		float ConsumptionThisFrame = (LosePerHour / 60.f) * DeltaTime;
-
-		if (ElectricityComponent->HasEnoughResource(ConsumptionThisFrame))
-		{
-			ElectricityComponent->RemoveResource(ConsumptionThisFrame);
-			Object->SetHasEnoughElectricity(true);
-		}
-		else
-		{
-			Object->SetHasEnoughElectricity(false);
-		}
-	}
 
 	TObjectPtr<UBuildSubsystem> BuildSubsystem = World->GetSubsystem<UBuildSubsystem>();
 	if (!BuildSubsystem)
@@ -80,9 +53,6 @@ void UElectricitySubsystem::OnTimeChanged(const float NewTime)
 			{
 				Room.Value.bHasEnoughElectricity = true;
 				OnRoomEnoughElectricityChanged.Broadcast(Room.Value.RoomId);
-				
-				// Enable objects in it
-				// Ajouter map id room / liste uobjects dans grid actor ? 
 			}
 		}
 		else
@@ -91,9 +61,56 @@ void UElectricitySubsystem::OnTimeChanged(const float NewTime)
 			{
 				Room.Value.bHasEnoughElectricity = false;
 				OnRoomEnoughElectricityChanged.Broadcast(Room.Value.RoomId);
-				
-				// Disable objects in it
 			}
+		}
+	}
+
+	TObjectPtr<UBuildableRegistrySubsystem> BRS = World->GetSubsystem<UBuildableRegistrySubsystem>();
+	if (!BRS)
+		return;
+	
+	// Objects
+	for (TWeakObjectPtr<ABuildableObject> Object : BRS->BuildableObjects) 
+	{
+		if (!Object.IsValid())
+			continue;
+
+		float LosePerHour = Object->GetBuildData()->LoseElectricityPerHour;
+		if (LosePerHour <= 0)
+			continue;
+		
+		float ConsumptionThisFrame = (LosePerHour / 60.f) * DeltaTime;
+		bool bIsObjectRoomActive = true;
+
+		// Check if active room
+		if (Object->GetBuildData()->RoomId != -1)
+		{
+			// a opti pour pas refaire la boucle à chaque fois, mettre dans une map ? 
+			for (TTuple<int, FGridRoom> Room : BuildSubsystem->GetRooms())
+			{
+				if (Room.Value.RoomId == Object->GetBuildData()->RoomId)
+				{
+					if (!Room.Value.bHasEnoughElectricity)
+					{
+						Object->SetHasEnoughElectricity(false);
+						bIsObjectRoomActive = false;
+						continue;
+					}
+				}
+			}
+		}
+
+		if (!bIsObjectRoomActive)
+			continue;
+		
+		if (ElectricityComponent->HasEnoughResource(ConsumptionThisFrame))
+		{
+			ElectricityComponent->RemoveResource(ConsumptionThisFrame);
+			Object->SetHasEnoughElectricity(true);
+		}
+		else
+		{
+			Object->SetHasEnoughElectricity(false);
 		}
 	}
 }
