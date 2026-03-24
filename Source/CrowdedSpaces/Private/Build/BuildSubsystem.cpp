@@ -245,14 +245,15 @@ void UBuildSubsystem::PlaceObject() const
 			if (CurrentBuildData->RoomType == EGridRoomType::Any)
 			{
 				if (!Cell || Cell->bOccupied)
-					return; 
+					return;
 			}
 			else
 			{
 				if (!Cell || Cell->bOccupied || Cell->RoomType != CurrentBuildData->RoomType)
-					return; 
+					return;
+
+				CurrentBuildData->RoomId = Cell->RoomId;
 			}
-			
 		}
 	}
 

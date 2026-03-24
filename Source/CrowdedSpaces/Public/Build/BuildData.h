@@ -40,5 +40,8 @@ public:
 	EGridRoomType RoomType = EGridRoomType::Any;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int RoomId = -1; // Pour retrouver dans quelle salle il a été posé + pouvoir le desac quand room desac
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float LoseElectricityPerHour = 10;
 };

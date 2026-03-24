@@ -82,6 +82,7 @@ void UElectricitySubsystem::OnTimeChanged(const float NewTime)
 				OnRoomEnoughElectricityChanged.Broadcast(Room.Value.RoomId);
 				
 				// Enable objects in it
+				// Ajouter map id room / liste uobjects dans grid actor ? 
 			}
 		}
 		else
