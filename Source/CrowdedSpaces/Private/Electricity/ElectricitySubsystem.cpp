@@ -85,7 +85,6 @@ void UElectricitySubsystem::OnTimeChanged(const float NewTime)
 			continue;
 		
 		float ConsumptionThisFrame = (LosePerHour / 60.f) * DeltaTime;
-		bool bIsObjectRoomActive = true;
 
 		// Check if active room
 		if (Object->GetBuildData()->RoomId != -1)
@@ -99,9 +98,6 @@ void UElectricitySubsystem::OnTimeChanged(const float NewTime)
 				}
 			}
 		}
-
-		if (!bIsObjectRoomActive)
-			continue;
 		
 		if (ElectricityComponent->HasEnoughResource(ConsumptionThisFrame))
 		{
@@ -132,5 +128,19 @@ void UElectricitySubsystem::ChangeRoomActiveState(int RoomId)
 
 	RoomPtr->bIsActivated = !RoomPtr->bIsActivated;
 
-	
+	// Activate / deactivate room objects
+	TObjectPtr<UBuildableRegistrySubsystem> BRS = World->GetSubsystem<UBuildableRegistrySubsystem>();
+	if (!BRS)
+		return;
+
+	for (TWeakObjectPtr<ABuildableObject> Object : BRS->BuildableObjects)
+	{
+		if (!Object.IsValid())
+			continue;
+
+		if (Object->GetBuildData()->RoomId != RoomId)
+			continue;
+		
+		Object->SetIsActivated(RoomPtr->bIsActivated);
+	}
 }

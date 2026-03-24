@@ -58,7 +58,7 @@ public:
 	bool HasEnoughElectricity() const { return bHasEnoughElectricity; }
 
 	UFUNCTION(BlueprintCallable, Category = "Object")
-	bool IsActivated() const { return bIsActivated; }
+	bool IsActivated() const { return bIsActivated && bHasEnoughElectricity; }
 
 	UFUNCTION(BlueprintCallable, Category = "Object")
 	void SetHasEnoughElectricity(bool bEnoughElectricity);
