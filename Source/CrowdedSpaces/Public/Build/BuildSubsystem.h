@@ -91,12 +91,15 @@ public:
 	UFUNCTION()
 	void GetRoomRotatedSize(int& OutX, int& OutY) const;
 
+	UFUNCTION()
+	TMap<int, FGridRoom> GetRooms() const;
+
 	UPROPERTY(BlueprintAssignable)
 	FOnDeselected OnDeselected; // To deselect ui
 
 private:
 	UPROPERTY()
-	TObjectPtr<AGhostObject> CurrentGhost;
+	TObjectPtr<AGhostObject> CurrentGhost = nullptr;
 
 	UPROPERTY()
 	TObjectPtr<UBuildData> CurrentBuildData = nullptr;
@@ -126,7 +129,7 @@ private:
 	TObjectPtr<AGameHUD> GameHUD;
 
 	UPROPERTY()
-	TObjectPtr<UResourceComponent> MoneyComponent;
+	TObjectPtr<UResourceComponent> MoneyComponent = nullptr;
 
 	UPROPERTY()
 	bool bTickEnabled = false;
@@ -134,7 +137,7 @@ private:
 	static constexpr float CursorLineTraceDistance = 10000.f;
 
 	UPROPERTY()
-	TObjectPtr<AGridActor> GridActor;
+	TObjectPtr<AGridActor> GridActor = nullptr;
 
 	// Room
 	EGridRoomType CurrentRoomType = EGridRoomType::Any;

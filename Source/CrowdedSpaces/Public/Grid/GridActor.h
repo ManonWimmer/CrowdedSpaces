@@ -43,9 +43,12 @@ public:
 	
 	FGridCell* GetGridCell(int Row, int Column);
 	
-	int GetCellSize() const { return CellSize;}
-	int GetRows() const { return Rows;}
-	int GetColumns() const { return Columns;}
+	int GetCellSize() const { return CellSize; }
+	int GetRows() const { return Rows; }
+	int GetColumns() const { return Columns; }
+
+	UFUNCTION(BlueprintCallable, Category = "Grid")
+	TMap<int, FGridRoom> GetRooms() const { return Rooms; }
 	
 	void DeselectCell(int Row, int Column);
 	void SelectRoomCell(int Row, int Column);

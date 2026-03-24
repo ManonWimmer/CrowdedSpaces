@@ -1,6 +1,7 @@
 #include "Electricity/ElectricitySubsystem.h"
 
 #include "Build/BuildableRegistrySubsystem.h"
+#include "Build/BuildSubsystem.h"
 #include "Build/BuildData.h"
 #include "Game/CrowdedGameState.h"
 
@@ -42,7 +43,7 @@ void UElectricitySubsystem::OnTimeChanged(const float NewTime)
 		if (!Object.IsValid())
 			continue;
 
-		int LosePerHour = Object->GetBuildData()->LoseElectricityPerHour;
+		float LosePerHour = Object->GetBuildData()->LoseElectricityPerHour;
 		if (LosePerHour <= 0)
 			continue;
 		
@@ -56,6 +57,42 @@ void UElectricitySubsystem::OnTimeChanged(const float NewTime)
 		else
 		{
 			Object->SetHasEnoughElectricity(false);
+		}
+	}
+
+	TObjectPtr<UBuildSubsystem> BuildSubsystem = World->GetSubsystem<UBuildSubsystem>();
+	if (!BuildSubsystem)
+		return;
+
+	// Rooms
+	for (TTuple<int, FGridRoom> Room : BuildSubsystem->GetRooms())
+	{
+		float LosePerHour = Room.Value.LoseElectricityPerHour;
+		if (LosePerHour <= 0)
+			continue;
+
+		float ConsumptionThisFrame = (LosePerHour / 60.f) * DeltaTime;
+
+		if (ElectricityComponent->HasEnoughResource(ConsumptionThisFrame))
+		{
+			ElectricityComponent->RemoveResource(ConsumptionThisFrame);
+			if (!Room.Value.bHasEnoughElectricity)
+			{
+				Room.Value.bHasEnoughElectricity = true;
+				OnRoomEnoughElectricityChanged.Broadcast(Room.Value.RoomId);
+				
+				// Enable objects in it
+			}
+		}
+		else
+		{
+			if (Room.Value.bHasEnoughElectricity)
+			{
+				Room.Value.bHasEnoughElectricity = false;
+				OnRoomEnoughElectricityChanged.Broadcast(Room.Value.RoomId);
+				
+				// Disable objects in it
+			}
 		}
 	}
 }

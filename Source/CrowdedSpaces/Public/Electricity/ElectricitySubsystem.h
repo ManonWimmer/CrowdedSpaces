@@ -7,6 +7,8 @@
 class UResourceComponent;
 class ACrowdedGameState;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRoomEnoughElectricityChanged, int, RoomId); // pas dans la room directement car c'est une struct
+
 UCLASS()
 class CROWDEDSPACES_API UElectricitySubsystem : public UTickableWorldSubsystem
 {
@@ -19,6 +21,9 @@ protected:
 public:
 	UFUNCTION()
 	void OnTimeChanged(float NewTime);
+
+	UPROPERTY(BlueprintAssignable)
+	FOnRoomEnoughElectricityChanged OnRoomEnoughElectricityChanged; 
 
 private:
 	UPROPERTY()

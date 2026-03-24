@@ -241,12 +241,13 @@ int AGridActor::CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> C
 	NewRoom.RoomId = NextRoomId++;
 	NewRoom.RoomType = BuildData->RoomType;
 	NewRoom.GridColor = BuildData->GridColor;
+	NewRoom.LoseElectricityPerHour = BuildData->LoseElectricityPerHour;
 
 	for (FGridCell* Cell : CellsToAssign)
 	{
 		Cell->RoomId = NewRoom.RoomId;
 		Cell->RoomType = NewRoom.RoomType;
-
+		
 		NewRoom.Cells.Add(Cell);
 	}
 

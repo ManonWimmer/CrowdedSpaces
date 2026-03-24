@@ -38,4 +38,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Room")
 	FLinearColor GridColor = FLinearColor::Yellow;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float LoseElectricityPerHour = 10;
 };
