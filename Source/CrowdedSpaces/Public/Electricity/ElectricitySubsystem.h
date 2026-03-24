@@ -4,6 +4,8 @@
 #include "Subsystems/WorldSubsystem.h"
 #include "ElectricitySubsystem.generated.h"
 
+class UBuildableRegistrySubsystem;
+class UBuildSubsystem;
 class UResourceComponent;
 class ACrowdedGameState;
 
@@ -37,4 +39,10 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UResourceComponent> ElectricityComponent = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UBuildSubsystem> BuildSubsystem = nullptr;
+	
+	UPROPERTY()
+	TObjectPtr<UBuildableRegistrySubsystem> BuildableRegistrySubsystem = nullptr;
 };

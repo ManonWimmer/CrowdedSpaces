@@ -14,6 +14,9 @@ void UElectricitySubsystem::OnWorldBeginPlay(UWorld& InWorld)
 		return;
 
 	ElectricityComponent = GameState->GetResourceComponent<EResourceType::Electricity>();
+	
+	BuildSubsystem = InWorld.GetSubsystem<UBuildSubsystem>();
+	BuildableRegistrySubsystem = InWorld.GetSubsystem<UBuildableRegistrySubsystem>();
 }
 
 TStatId UElectricitySubsystem::GetStatId() const
@@ -27,14 +30,6 @@ void UElectricitySubsystem::OnTimeChanged(const float NewTime)
 	LastTime = NewTime;
 
 	if (DeltaTime <= 0.f)
-		return;
-	
-	UWorld* World = GetWorld();
-	if (!World)
-		return;
-
-	TObjectPtr<UBuildSubsystem> BuildSubsystem = World->GetSubsystem<UBuildSubsystem>();
-	if (!BuildSubsystem)
 		return;
 	
 	TMap<int, FGridRoom>& Rooms = BuildSubsystem->GetRooms();
@@ -66,13 +61,9 @@ void UElectricitySubsystem::OnTimeChanged(const float NewTime)
 			ElectricityComponent->RemoveResource(ConsumptionThisFrame);
 		}
 	}
-
-	TObjectPtr<UBuildableRegistrySubsystem> BRS = World->GetSubsystem<UBuildableRegistrySubsystem>();
-	if (!BRS)
-		return;
 	
 	// Objects
-	for (TWeakObjectPtr<ABuildableObject> Object : BRS->BuildableObjects) 
+	for (TWeakObjectPtr<ABuildableObject> Object : BuildableRegistrySubsystem->BuildableObjects) 
 	{
 		if (!Object.IsValid())
 			continue;
@@ -113,14 +104,6 @@ void UElectricitySubsystem::OnTimeChanged(const float NewTime)
 
 void UElectricitySubsystem::ChangeRoomActiveState(int RoomId)
 {
-	UWorld* World = GetWorld();
-	if (!World)
-		return;
-	
-	TObjectPtr<UBuildSubsystem> BuildSubsystem = World->GetSubsystem<UBuildSubsystem>();
-	if (!BuildSubsystem)
-		return;
-	
 	TMap<int, FGridRoom>& Rooms = BuildSubsystem->GetRooms();
 	FGridRoom* RoomPtr = Rooms.Find(RoomId);
 	if (!RoomPtr)
@@ -129,11 +112,7 @@ void UElectricitySubsystem::ChangeRoomActiveState(int RoomId)
 	RoomPtr->bIsActivated = !RoomPtr->bIsActivated;
 
 	// Activate / deactivate room objects
-	TObjectPtr<UBuildableRegistrySubsystem> BRS = World->GetSubsystem<UBuildableRegistrySubsystem>();
-	if (!BRS)
-		return;
-
-	for (TWeakObjectPtr<ABuildableObject> Object : BRS->BuildableObjects)
+	for (TWeakObjectPtr<ABuildableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
 	{
 		if (!Object.IsValid())
 			continue;
