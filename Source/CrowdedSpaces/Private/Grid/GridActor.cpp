@@ -279,15 +279,15 @@ void AGridActor::DestroyRoom(int RoomId)
 {
 	FGridRoom* RoomToDestroy = Rooms.Find(RoomId);
 	
-	Rooms.Remove(RoomId);
-	
-	// update grid
-	for (FGridCell* Cell : RoomToDestroy->Cells)
+	for (const FGridCell* RoomCell : RoomToDestroy->Cells)
 	{
-		// get cell ref dans la liste des cells 
-		// set room id - 1
-		// set room type none 
+		FGridCell* GridCell = Cells.Find(FIntPoint(RoomCell->Row, RoomCell->Column));
+		GridCell->CellType = EGridCellType::None;
+		GridCell->RoomId = -1;
+		GridCell->RoomType = EGridRoomType::None;
 	}
+
+	Rooms.Remove(RoomId);
 
 	SetIsShowingRooms(true);
 	
@@ -296,6 +296,8 @@ void AGridActor::DestroyRoom(int RoomId)
 	// destroy objects in it (check if lose money in function destroy object)
 	
 	// lose money room
+
+	// close selection ui
 }
 
 void AGridActor::RebuildWalls()
