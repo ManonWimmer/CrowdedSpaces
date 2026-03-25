@@ -56,6 +56,9 @@ public:
 	void ShowPlacedRooms(bool bShow);
 	int CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> CellsToAssign);
 	bool CheckIfCellInPlacedRoom(const FGridCell* Cell, FLinearColor& OutGridColor);
+
+	UFUNCTION(BlueprintCallable, Category = "Room")
+	void DestroyRoom(int RoomId);
 	
 	void RebuildWalls();
 	void TryAddWall(FGridCell* Cell, int NeighborRow, int NeighborCol, EGridWallDirection Dir, float Half, const TSet<FIntPoint>& DoorCells);

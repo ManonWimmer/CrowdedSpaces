@@ -25,10 +25,10 @@ public:
 	TSubclassOf<ABuildableObject> BuildClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int MoneyCost;
+	int MoneyCost = 10;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int DestroyMoney;
+	int DestroyMoney = 10;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int GridRowsX = 1;

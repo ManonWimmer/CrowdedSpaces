@@ -275,6 +275,29 @@ bool AGridActor::CheckIfCellInPlacedRoom(const FGridCell* Cell, FLinearColor& Ou
 	return false;
 }
 
+void AGridActor::DestroyRoom(int RoomId)
+{
+	FGridRoom* RoomToDestroy = Rooms.Find(RoomId);
+	
+	Rooms.Remove(RoomId);
+	
+	// update grid
+	for (FGridCell* Cell : RoomToDestroy->Cells)
+	{
+		// get cell ref dans la liste des cells 
+		// set room id - 1
+		// set room type none 
+	}
+
+	SetIsShowingRooms(true);
+	
+	RebuildWalls();
+	
+	// destroy objects in it (check if lose money in function destroy object)
+	
+	// lose money room
+}
+
 void AGridActor::RebuildWalls()
 {
 	WallISM->ClearInstances();

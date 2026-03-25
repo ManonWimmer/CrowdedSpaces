@@ -103,6 +103,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	TMap<int, FGridRoom>& GetRooms();
+	
+	UFUNCTION(BlueprintCallable)
+	void DestroyRoom(int RoomId);
 
 	UPROPERTY(BlueprintAssignable)
 	FOnDeselected OnDeselected; // To deselect ui

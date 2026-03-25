@@ -415,6 +415,14 @@ TMap<int, FGridRoom>& UBuildSubsystem::GetRooms()
 	return GridActor->GetRooms();
 }
 
+void UBuildSubsystem::DestroyRoom(int RoomId)
+{
+	if (!GridActor)
+		return;
+	
+	GridActor->DestroyRoom(RoomId);
+}
+
 void UBuildSubsystem::UpdateGhost() const
 {
 	if(!CurrentGhost || !GridActor)
