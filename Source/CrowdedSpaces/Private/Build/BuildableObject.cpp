@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Player/CrowdedPlayerController.h"
 #include "Game/CrowdedGameState.h"
+#include "Player/PlayerFunctionLibrary.h"
 #include "UI/GameHUD.h"
 
 ABuildableObject::ABuildableObject()
@@ -168,8 +169,11 @@ void ABuildableObject::DestroyObject()
 {
 	if (!BuildSubsystem)
 		return;
-
+	
 	BuildSubsystem->RemoveObject(this);
+	
+	UResourceComponent* PlayerMoneyComponent = UPlayerFunctionLibrary::GetPlayerResourceComponent(this, EResourceType::Money);
+	PlayerMoneyComponent->AddResource(BuildData->DestroyMoney);
 
 	if (CurrentTask)
 	{

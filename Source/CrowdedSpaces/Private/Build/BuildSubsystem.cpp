@@ -321,9 +321,6 @@ void UBuildSubsystem::RemoveObject(ABuildableObject* Object) const
 				Cell->bOccupied = false;
 		}
 	}
-	
-	if (MoneyComponent)
-		MoneyComponent->AddResource(Object->GetBuildData()->DestroyMoney);
 }
 
 void UBuildSubsystem::PlaceRoom()

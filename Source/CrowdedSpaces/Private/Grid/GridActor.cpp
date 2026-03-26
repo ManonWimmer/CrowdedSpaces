@@ -1,5 +1,7 @@
 ﻿#include "Grid/GridActor.h"
 
+#include "Build/BuildableRegistrySubsystem.h"
+#include "Build/BuildData.h"
 #include "Grid/GridRoom.h"
 #include "Player/PlayerFunctionLibrary.h"
 
@@ -298,11 +300,24 @@ void AGridActor::DestroyRoom(int RoomId)
 	RebuildWalls();
 
 	// destroy objects in it (check if add money in function destroy object)
+	// todo: subsystem a get autre part, soit begin play soit subsystem function library
+	TObjectPtr<UBuildableRegistrySubsystem> BuildableRegistrySubsystem = GetWorld()->GetSubsystem<UBuildableRegistrySubsystem>();
+	for (TWeakObjectPtr<ABuildableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
+	{
+		if (!Object.IsValid())
+			continue;
+
+		if (Object->GetBuildData()->RoomId != RoomId)
+			continue;
+		
+		Object->DestroyObject();
+	}
 	
 	UResourceComponent* PlayerMoneyComponent = UPlayerFunctionLibrary::GetPlayerResourceComponent(this, EResourceType::Money);
 	PlayerMoneyComponent->AddResource(RoomDestroyMoney);
 	
 	// close selection ui
+	// todo: pareil que plus haut
 }
 
 void AGridActor::RebuildWalls()
