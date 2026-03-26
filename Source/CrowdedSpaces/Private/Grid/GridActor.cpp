@@ -308,7 +308,7 @@ void AGridActor::DestroyRoom(int RoomId)
 		if (!Object.IsValid())
 			continue;
 
-		if (Object->GetBuildData()->RoomId != RoomId)
+		if (Object->RoomId != RoomId)
 			continue;
 		
 		Object->DestroyObject();
@@ -338,7 +338,7 @@ float AGridActor::GetRoomDestroyCost(int RoomId)
 		if (!Object.IsValid())
 			continue;
 
-		if (Object->GetBuildData()->RoomId != RoomId)
+		if (Object->RoomId != RoomId)
 			continue;
 
 		GEngine->AddOnScreenDebugMessage(-1,5,FColor::Green,"Objet in room");

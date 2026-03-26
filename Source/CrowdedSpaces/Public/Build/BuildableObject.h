@@ -5,6 +5,7 @@
 #include "AI/NPC.h"
 #include "AI/BTTasks/BTTask_UseBuildableObject.h"
 #include "GameFramework/Actor.h"
+#include "Grid/GridRoomType.h"
 #include "BuildableObject.generated.h"
 
 class UBuildableRegistrySubsystem;
@@ -89,6 +90,15 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Object")
 	void DestroyObject();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int GridRowsX = 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int GridColumnsY = 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int RoomId = -1; 
 	
 protected:
 	UPROPERTY()

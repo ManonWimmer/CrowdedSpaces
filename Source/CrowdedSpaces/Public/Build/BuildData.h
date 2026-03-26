@@ -25,22 +25,13 @@ public:
 	TSubclassOf<ABuildableObject> BuildClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	EGridRoomType RoomType = EGridRoomType::Any;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int MoneyCost = 10;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int DestroyMoney = 10;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int GridRowsX = 1;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int GridColumnsY = 1;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	EGridRoomType RoomType = EGridRoomType::Any;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int RoomId = -1; // Pour retrouver dans quelle salle il a été posé + pouvoir le desac quand room desac
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float LoseElectricityPerHour = 10;

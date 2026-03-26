@@ -78,9 +78,9 @@ void UElectricitySubsystem::OnTimeChanged(const float NewTime)
 		float ConsumptionThisFrame = (LosePerHour / 60.f) * DeltaTime;
 
 		// Check if active room
-		if (Object->GetBuildData()->RoomId != -1)
+		if (Object->RoomId != -1)
 		{
-			if (FGridRoom* RoomPtr = Rooms.Find(Object->GetBuildData()->RoomId))
+			if (FGridRoom* RoomPtr = Rooms.Find(Object->RoomId))
 			{
 				if (!(RoomPtr)->bHasEnoughElectricity)
 				{
@@ -117,7 +117,7 @@ void UElectricitySubsystem::ChangeRoomActiveState(int RoomId)
 		if (!Object.IsValid())
 			continue;
 
-		if (Object->GetBuildData()->RoomId != RoomId)
+		if (Object->RoomId != RoomId)
 			continue;
 		
 		Object->SetIsActivated(RoomPtr->bIsActivated);

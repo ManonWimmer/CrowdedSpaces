@@ -54,7 +54,7 @@ public:
 	void StopBuilding();
 
 	UFUNCTION()
-	void PlaceObject() const;
+	void PlaceObject();
 
 	UFUNCTION()
 	void RemoveObject(ABuildableObject* Object) const;
@@ -133,7 +133,7 @@ private:
 	float SnapSize = 100.f; // Send by game state
 
 	UFUNCTION()
-	void UpdateGhost() const;
+	void UpdateGhost();
 
 	UFUNCTION()
 	void UpdateRoomSelection();
@@ -165,4 +165,19 @@ private:
 	FRotator CurrentBuildRotation = FRotator(0, 0, 0);
 
 	FVector MeshOffset;
+
+	int LastStartRow = 0;
+	int LastStartCol = 0;
+
+	UPROPERTY()
+	int CurrentObjectGridRowsX = 1;
+
+	UPROPERTY()
+	int CurrentObjectGridColumnsY = 1;
+
+	UPROPERTY()
+	EGridRoomType CurrentObjectRoomType = EGridRoomType::Any;
+
+	UPROPERTY()
+	int CurrentObjectRoomId = -1; 
 };

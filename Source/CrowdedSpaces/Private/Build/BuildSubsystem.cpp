@@ -217,17 +217,18 @@ void UBuildSubsystem::StopBuilding()
 	GridActor->DeselectSelectedCells();
 }
 
-void UBuildSubsystem::PlaceObject() const
+void UBuildSubsystem::PlaceObject()
 {
 	if (!CurrentGhost || !CurrentBuildData || !CurrentBuildData->BuildClass || !GridActor)
 		return;
 
-	int SizeX = CurrentBuildData->GridRowsX;
-	int SizeY = CurrentBuildData->GridColumnsY;
+	int SizeX = CurrentObjectGridRowsX;
+	int SizeY = CurrentObjectGridColumnsY;
 	
 	GetObjectRotatedSize(SizeX, SizeY);
 
-	int StartRow = 0, StartCol = 0;
+	int StartRow = LastStartRow;
+	int StartCol = LastStartCol;
 	GridActor->GetCellAtLocation(CurrentGhost->GetActorLocation(), StartRow, StartCol);
 	
 	StartRow -= SizeX / 2;
@@ -236,7 +237,6 @@ void UBuildSubsystem::PlaceObject() const
 	StartRow = FMath::Clamp(StartRow, 0, GridActor->GetRows() - SizeX);
 	StartCol = FMath::Clamp(StartCol, 0, GridActor->GetColumns() - SizeY);
 
-	// Check can place
 	for (int Row = StartRow; Row < StartRow + SizeX; ++Row)
 	{
 		for (int Col = StartCol; Col < StartCol + SizeY; ++Col)
@@ -252,7 +252,7 @@ void UBuildSubsystem::PlaceObject() const
 				if (!Cell || Cell->bOccupied || Cell->RoomType != CurrentBuildData->RoomType)
 					return;
 
-				CurrentBuildData->RoomId = Cell->RoomId;
+				CurrentObjectRoomId = Cell->RoomId;
 			}
 		}
 	}
@@ -267,6 +267,9 @@ void UBuildSubsystem::PlaceObject() const
 	);
 
 	Placed->SetBuildData(CurrentBuildData);
+	Placed->RoomId = CurrentObjectRoomId;
+	Placed->GridRowsX = CurrentObjectGridRowsX;
+	Placed->GridColumnsY = CurrentObjectGridColumnsY;
 
 	if (!Placed)
 		return;
@@ -292,8 +295,8 @@ void UBuildSubsystem::PlaceObject() const
 
 void UBuildSubsystem::RemoveObject(ABuildableObject* Object) const
 {
-	int SizeX = Object->GetBuildData()->GridRowsX;
-	int SizeY = Object->GetBuildData()->GridColumnsY;
+	int SizeX = CurrentObjectGridRowsX;
+	int SizeY = CurrentObjectGridColumnsY;
 
 	// Rotation
 	if (Object->GetActorRotation() == FRotator(0.f, 90.f, 0.f) ||
@@ -387,8 +390,8 @@ void UBuildSubsystem::UpdateRotation()
 
 void UBuildSubsystem::GetObjectRotatedSize(int& OutX, int& OutY) const
 {
-	OutX = CurrentBuildData->GridRowsX;
-	OutY = CurrentBuildData->GridColumnsY;
+	OutX = CurrentObjectGridRowsX;
+	OutY = CurrentObjectGridColumnsY;
 
 	if (RotationIndex % 2 == 1) // 90 ou 270
 	{
@@ -428,7 +431,7 @@ float UBuildSubsystem::GetRoomDestroyCost(const int RoomId)
 	return GridActor->GetRoomDestroyCost(RoomId);
 }
 
-void UBuildSubsystem::UpdateGhost() const
+void UBuildSubsystem::UpdateGhost()
 {
 	if(!CurrentGhost || !GridActor)
 		return;
@@ -452,8 +455,8 @@ void UBuildSubsystem::UpdateGhost() const
 	if (!CurrentBuildData)
 		return;
 
-	int SizeX = CurrentBuildData->GridRowsX;
-	int SizeY = CurrentBuildData->GridColumnsY;
+	int SizeX = CurrentObjectGridRowsX;
+	int SizeY = CurrentObjectGridColumnsY;
 	
 	GetObjectRotatedSize(SizeX, SizeY);
 
@@ -462,6 +465,9 @@ void UBuildSubsystem::UpdateGhost() const
 
 	StartRow = FMath::Clamp(StartRow, 0, GridActor->GetRows() - SizeX);
 	StartCol = FMath::Clamp(StartCol, 0, GridActor->GetColumns() - SizeY);
+
+	LastStartRow = StartRow;
+	LastStartCol = StartCol;
 	
 	GridActor->DeselectSelectedCells();
 	for (int Row = StartRow; Row < StartRow + SizeX; ++Row)
@@ -470,7 +476,7 @@ void UBuildSubsystem::UpdateGhost() const
 		{
 			FGridCell* Cell = GridActor->GetGridCell(Row, Col);
 			if (Cell)
-				GridActor->SelectObjectCell(Row, Col, CurrentBuildData->RoomType);
+				GridActor->SelectObjectCell(Row, Col, CurrentObjectRoomType);
 		}
 	}
 	
