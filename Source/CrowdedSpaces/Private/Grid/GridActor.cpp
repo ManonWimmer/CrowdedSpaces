@@ -1,6 +1,7 @@
 ﻿#include "Grid/GridActor.h"
 
 #include "Grid/GridRoom.h"
+#include "Player/PlayerFunctionLibrary.h"
 
 
 AGridActor::AGridActor()
@@ -242,6 +243,7 @@ int AGridActor::CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> C
 	NewRoom.RoomType = BuildData->RoomType;
 	NewRoom.GridColor = BuildData->GridColor;
 	NewRoom.LoseElectricityPerHour = BuildData->LoseElectricityPerHour;
+	NewRoom.DestroyMoney = BuildData->DestroyMoney;
 
 	for (FGridCell* Cell : CellsToAssign)
 	{
@@ -278,6 +280,7 @@ bool AGridActor::CheckIfCellInPlacedRoom(const FGridCell* Cell, FLinearColor& Ou
 void AGridActor::DestroyRoom(int RoomId)
 {
 	FGridRoom* RoomToDestroy = Rooms.Find(RoomId);
+	float RoomDestroyMoney = RoomToDestroy->DestroyMoney;
 	
 	for (const FGridCell* RoomCell : RoomToDestroy->Cells)
 	{
@@ -293,11 +296,12 @@ void AGridActor::DestroyRoom(int RoomId)
 	DeselectSelectedCells(); // Bizarre que ça deselect pas les rooms tout seul, c'est le set visibility au dessus qui fait (plus tard maybe bugs)
 	
 	RebuildWalls();
-		
-	// destroy objects in it (check if lose money in function destroy object)
-	
-	// lose money room
 
+	// destroy objects in it (check if add money in function destroy object)
+	
+	UResourceComponent* PlayerMoneyComponent = UPlayerFunctionLibrary::GetPlayerResourceComponent(this, EResourceType::Money);
+	PlayerMoneyComponent->AddResource(RoomDestroyMoney);
+	
 	// close selection ui
 }
 
