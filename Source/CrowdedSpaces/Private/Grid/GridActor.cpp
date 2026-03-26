@@ -3,6 +3,8 @@
 #include "Build/BuildableRegistrySubsystem.h"
 #include "Build/BuildData.h"
 #include "Grid/GridRoom.h"
+#include "Kismet/GameplayStatics.h"
+#include "Player/CrowdedPlayerController.h"
 #include "Player/PlayerFunctionLibrary.h"
 
 
@@ -298,8 +300,7 @@ void AGridActor::DestroyRoom(int RoomId)
 	DeselectSelectedCells(); // Bizarre que ça deselect pas les rooms tout seul, c'est le set visibility au dessus qui fait (plus tard maybe bugs)
 	
 	RebuildWalls();
-
-	// destroy objects in it (check if add money in function destroy object)
+	
 	// todo: subsystem a get autre part, soit begin play soit subsystem function library
 	TObjectPtr<UBuildableRegistrySubsystem> BuildableRegistrySubsystem = GetWorld()->GetSubsystem<UBuildableRegistrySubsystem>();
 	for (TWeakObjectPtr<ABuildableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
@@ -316,8 +317,10 @@ void AGridActor::DestroyRoom(int RoomId)
 	UResourceComponent* PlayerMoneyComponent = UPlayerFunctionLibrary::GetPlayerResourceComponent(this, EResourceType::Money);
 	PlayerMoneyComponent->AddResource(RoomDestroyMoney);
 	
-	// close selection ui
 	// todo: pareil que plus haut
+	ACrowdedPlayerController* CrowdedPlayerController = Cast<ACrowdedPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	AGameHUD * GameHUD = Cast<AGameHUD>(CrowdedPlayerController->GetHUD());
+	GameHUD->HideCurrentSelectionWidget();
 }
 
 void AGridActor::RebuildWalls()
