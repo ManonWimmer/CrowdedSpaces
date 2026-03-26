@@ -420,6 +420,14 @@ void UBuildSubsystem::DestroyRoom(int RoomId)
 	GridActor->DestroyRoom(RoomId);
 }
 
+float UBuildSubsystem::GetRoomDestroyCost(const int RoomId)
+{
+	if (!GridActor)
+		return 0;
+	
+	return GridActor->GetRoomDestroyCost(RoomId);
+}
+
 void UBuildSubsystem::UpdateGhost() const
 {
 	if(!CurrentGhost || !GridActor)

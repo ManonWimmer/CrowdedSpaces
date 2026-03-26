@@ -323,6 +323,31 @@ void AGridActor::DestroyRoom(int RoomId)
 	GameHUD->HideCurrentSelectionWidget();
 }
 
+float AGridActor::GetRoomDestroyCost(int RoomId)
+{
+	FGridRoom* Room = Rooms.Find(RoomId);
+	if (!Room)
+		return 0.f;
+	
+	float RoomTotalDestroyCost = Room->DestroyMoney;
+
+	// meme todo ici
+	TObjectPtr<UBuildableRegistrySubsystem> BuildableRegistrySubsystem = GetWorld()->GetSubsystem<UBuildableRegistrySubsystem>();
+	for (TWeakObjectPtr<ABuildableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
+	{
+		if (!Object.IsValid())
+			continue;
+
+		if (Object->GetBuildData()->RoomId != RoomId)
+			continue;
+
+		GEngine->AddOnScreenDebugMessage(-1,5,FColor::Green,"Objet in room");
+		RoomTotalDestroyCost += Object->GetBuildData()->DestroyMoney;
+	}
+	
+	return RoomTotalDestroyCost;
+}
+
 void AGridActor::RebuildWalls()
 {
 	WallISM->ClearInstances();

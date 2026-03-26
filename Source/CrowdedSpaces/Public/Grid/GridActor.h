@@ -59,6 +59,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Room")
 	void DestroyRoom(int RoomId);
+
+	UFUNCTION(BlueprintCallable)
+	float GetRoomDestroyCost(int RoomId);
 	
 	void RebuildWalls();
 	void TryAddWall(FGridCell* Cell, int NeighborRow, int NeighborCol, EGridWallDirection Dir, float Half, const TSet<FIntPoint>& DoorCells);
