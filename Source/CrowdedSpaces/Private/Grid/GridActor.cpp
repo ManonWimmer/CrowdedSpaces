@@ -285,14 +285,15 @@ void AGridActor::DestroyRoom(int RoomId)
 		GridCell->CellType = EGridCellType::None;
 		GridCell->RoomId = -1;
 		GridCell->RoomType = EGridRoomType::None;
+		RoomCell->CellProceduralMesh->SetVisibility(false);
 	}
 
 	Rooms.Remove(RoomId);
-
-	SetIsShowingRooms(true);
+	
+	DeselectSelectedCells(); // Bizarre que ça deselect pas les rooms tout seul, c'est le set visibility au dessus qui fait (plus tard maybe bugs)
 	
 	RebuildWalls();
-	
+		
 	// destroy objects in it (check if lose money in function destroy object)
 	
 	// lose money room
