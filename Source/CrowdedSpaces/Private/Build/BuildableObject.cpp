@@ -45,6 +45,35 @@ void ABuildableObject::BeginPlay()
 	BRS = World->GetSubsystem<UBuildableRegistrySubsystem>();
 	if (!BRS)
 		return;
+
+	// Setup interaction slots
+	InteractionSlots.Empty();
+
+	TArray<USceneComponent*> Components;
+	GetComponents<USceneComponent>(Components);
+
+	UE_LOG(LogTemp, Warning, TEXT("TOTAL components: %d"), Components.Num());
+
+	for (USceneComponent* Comp : Components)
+	{
+		if (!Comp)
+			continue;
+
+		UE_LOG(LogTemp, Warning, TEXT("Comp: %s Tags: %d"),
+		*GetNameSafe(Comp),
+		Comp->ComponentTags.Num());
+
+		if (!Comp->ComponentHasTag(FName("Slot")))
+			continue;
+
+		FInteractionSlot Slot;
+		Slot.Point = Comp;
+
+		InteractionSlots.Add(Slot);
+	}
+	
+	UE_LOG(LogTemp, Warning, TEXT("Slots found: %d"), InteractionSlots.Num());
+	
 }
 
 void ABuildableObject::SetMesh(UStaticMesh* Mesh) const
@@ -119,6 +148,7 @@ void ABuildableObject::Release(ANPC* NPC)
 		return;
 		
 	ComingNPC = nullptr;
+	ReleaseSlot(NPC);
 	
 	bHasNPCComing = false;
 	OnNPCComingChanged.Broadcast(bHasNPCComing);
@@ -145,6 +175,7 @@ void ABuildableObject::StopUsing(ANPC* NPC)
 		return;
 	
 	UsingNPC = nullptr;
+	ReleaseSlot(NPC);
 	
 	bHasNPCUsing = false;
 	OnNPCUsingChanged.Broadcast(bHasNPCUsing);
@@ -183,6 +214,48 @@ void ABuildableObject::DestroyObject()
 	GameHUD->HideCurrentSelectionWidget();
 	
 	Destroy();
+}
+
+FInteractionSlot* ABuildableObject::GetFreeSlot()
+{
+	for (FInteractionSlot& Slot : InteractionSlots)
+	{
+		if (!Slot.bIsOccupied)
+		{
+			Slot.bIsOccupied = true;
+			return &Slot;
+		}
+	}
+
+	return nullptr;
+}
+
+FInteractionSlot* ABuildableObject::ReserveSlot(ANPC* NPC)
+{
+	for (FInteractionSlot& Slot : InteractionSlots)
+	{
+		if (!Slot.bIsOccupied)
+		{
+			Slot.bIsOccupied = true;
+			Slot.OccupyingNPC = NPC;
+			return &Slot;
+		}
+	}
+
+	return nullptr;
+}
+
+void  ABuildableObject::ReleaseSlot(ANPC* NPC)
+{
+	for (FInteractionSlot& Slot : InteractionSlots)
+	{
+		if (Slot.OccupyingNPC == NPC)
+		{
+			Slot.bIsOccupied = false;
+			Slot.OccupyingNPC = nullptr;
+			return;
+		}
+	}
 }
 
 

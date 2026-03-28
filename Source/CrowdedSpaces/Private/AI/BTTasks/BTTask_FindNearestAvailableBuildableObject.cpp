@@ -31,7 +31,7 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBe
 	
 	FVector const Origin = NPC->GetActorLocation();
 	ABuildableObject* NearestAvailableObject = nullptr;
-	float NearestDistance = 0.0f;
+	float NearestDistance = FLT_MAX;
 
 	TObjectPtr<UBuildableRegistrySubsystem> BRS = World->GetSubsystem<UBuildableRegistrySubsystem>();
 	if (!BRS)
@@ -64,21 +64,14 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBe
 		}
 		
 		float Distance = FVector::Distance(Origin, Object->GetActorLocation());
-		if (Distance < SearchRadius / 2)
+		
+		if (Distance > SearchRadius)
+			continue;
+
+		if (!NearestAvailableObject || Distance < NearestDistance)
 		{
-			if (NearestAvailableObject)
-			{
-				if (Distance < NearestDistance)
-				{
-					NearestAvailableObject = Object.Get();
-					NearestDistance = Distance;
-				}
-			}
-			else
-			{
-				NearestAvailableObject = Object.Get();
-				NearestDistance = Distance;
-			}
+			NearestAvailableObject = Object.Get();
+			NearestDistance = Distance;
 		}
 	}
 
@@ -91,8 +84,13 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBe
 
 		if (!NearestAvailableObject->TryReserve(NPC))
 			return EBTNodeResult::Failed;
-		
-		Blackboard->SetValueAsVector(TargetLocationKey.SelectedKeyName, NearestAvailableObject->GetActorLocation());
+
+		// Use interaction slot for npc target location
+		FInteractionSlot* Slot = NearestAvailableObject->ReserveSlot(NPC);
+		if (!Slot)
+			return EBTNodeResult::Failed;
+
+		Blackboard->SetValueAsVector(TargetLocationKey.SelectedKeyName, Slot->Point->GetComponentLocation());
 		Blackboard->SetValueAsObject(TargetObjectKey.SelectedKeyName, NearestAvailableObject);
 		
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);

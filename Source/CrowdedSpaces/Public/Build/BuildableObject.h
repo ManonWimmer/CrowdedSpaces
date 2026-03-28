@@ -8,6 +8,21 @@
 #include "Grid/GridRoomType.h"
 #include "BuildableObject.generated.h"
 
+USTRUCT()
+struct FInteractionSlot
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	USceneComponent* Point = nullptr;
+
+	UPROPERTY()
+	bool bIsOccupied = false;
+
+	UPROPERTY()
+	TWeakObjectPtr<ANPC> OccupyingNPC;
+};
+
 class UBuildableRegistrySubsystem;
 class AGameHUD;
 class ACrowdedGameState;
@@ -90,17 +105,18 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Object")
 	void DestroyObject();
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int GridRowsX = 1;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int GridColumnsY = 1;
+	
+	FInteractionSlot* GetFreeSlot();
+	FInteractionSlot* ReserveSlot(ANPC* NPC);
+	void ReleaseSlot(ANPC* NPC);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int RoomId = -1; 
 	
 protected:
+	UPROPERTY()
+	TArray<FInteractionSlot> InteractionSlots; 
+	
 	UPROPERTY()
 	TObjectPtr<ACrowdedGameState> GameState = nullptr;
 	

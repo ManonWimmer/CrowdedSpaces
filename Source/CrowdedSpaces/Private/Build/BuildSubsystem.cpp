@@ -222,8 +222,8 @@ void UBuildSubsystem::PlaceObject()
 	if (!CurrentGhost || !CurrentBuildData || !CurrentBuildData->BuildClass || !GridActor)
 		return;
 
-	int SizeX = CurrentObjectGridRowsX;
-	int SizeY = CurrentObjectGridColumnsY;
+	int SizeX = CurrentBuildData->GridRowsX;
+	int SizeY = CurrentBuildData->GridColumnsY;
 	
 	GetObjectRotatedSize(SizeX, SizeY);
 
@@ -268,8 +268,6 @@ void UBuildSubsystem::PlaceObject()
 
 	Placed->SetBuildData(CurrentBuildData);
 	Placed->RoomId = CurrentObjectRoomId;
-	Placed->GridRowsX = CurrentObjectGridRowsX;
-	Placed->GridColumnsY = CurrentObjectGridColumnsY;
 
 	if (!Placed)
 		return;
@@ -295,8 +293,8 @@ void UBuildSubsystem::PlaceObject()
 
 void UBuildSubsystem::RemoveObject(ABuildableObject* Object) const
 {
-	int SizeX = CurrentObjectGridRowsX;
-	int SizeY = CurrentObjectGridColumnsY;
+	int SizeX = CurrentBuildData->GridRowsX;
+	int SizeY = CurrentBuildData->GridColumnsY;
 
 	// Rotation
 	if (Object->GetActorRotation() == FRotator(0.f, 90.f, 0.f) ||
@@ -390,8 +388,8 @@ void UBuildSubsystem::UpdateRotation()
 
 void UBuildSubsystem::GetObjectRotatedSize(int& OutX, int& OutY) const
 {
-	OutX = CurrentObjectGridRowsX;
-	OutY = CurrentObjectGridColumnsY;
+	OutX = CurrentBuildData->GridRowsX;
+	OutY = CurrentBuildData->GridColumnsY;
 
 	if (RotationIndex % 2 == 1) // 90 ou 270
 	{
@@ -455,8 +453,8 @@ void UBuildSubsystem::UpdateGhost()
 	if (!CurrentBuildData)
 		return;
 
-	int SizeX = CurrentObjectGridRowsX;
-	int SizeY = CurrentObjectGridColumnsY;
+	int SizeX = CurrentBuildData->GridRowsX;
+	int SizeY = CurrentBuildData->GridColumnsY;
 	
 	GetObjectRotatedSize(SizeX, SizeY);
 
@@ -492,9 +490,8 @@ void UBuildSubsystem::UpdateGhost()
 	if (MeshOffset != FVector::ZeroVector)
 	{
 		SnappedLocation += MeshOffset;
+		//SnappedLocation += CurrentBuildRotation.RotateVector(MeshOffset);
 	}
-
-	CurrentGhost->SetActorLocation(SnappedLocation);
 
 	CurrentGhost->SetActorLocation(SnappedLocation);
 }
