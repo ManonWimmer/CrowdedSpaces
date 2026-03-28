@@ -3,6 +3,7 @@
 #include "AI/NPCController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Build/BuildableRegistrySubsystem.h"
+#include "Build/SlotComponent.h"
 
 UBTTask_FindNearestAvailableBuildableObject::UBTTask_FindNearestAvailableBuildableObject(FObjectInitializer const& ObjectInitializer)
 {
@@ -14,7 +15,6 @@ UBTTask_FindNearestAvailableBuildableObject::UBTTask_FindNearestAvailableBuildab
 
 EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	
 	if (BuildableObjectType == EObjectType::Default)
 		return EBTNodeResult::Failed;
 	
@@ -32,6 +32,7 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBe
 	
 	FVector const Origin = NPC->GetActorLocation();
 	ABuildableObject* NearestAvailableObject = nullptr;
+	USlotComponent* BestSlot = nullptr;
 	float NearestDistance = FLT_MAX;
 
 	TObjectPtr<UBuildableRegistrySubsystem> BRS = World->GetSubsystem<UBuildableRegistrySubsystem>();
@@ -79,56 +80,55 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBe
 				continue;
 		}
 		
-		float Distance = FVector::Distance(Origin, Object->GetActorLocation());
-		
-		if (Distance > SearchRadius)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Out of range"));
+		USlotComponent* Slot = Object->GetNearestFreeSlot(Origin);
+		if (!Slot)
 			continue;
-		}
 
-		UE_LOG(LogTemp, Warning, TEXT("Valid candidate"));
+		const float Distance = FVector::Dist(Origin, Slot->GetComponentLocation());
 
-		if (!NearestAvailableObject || Distance < NearestDistance)
+		if (Distance > SearchRadius)
+			continue;
+
+		if (Distance < NearestDistance)
 		{
-			UE_LOG(LogTemp, Warning, TEXT(">>> NEW NEAREST: %s (%.1f)"),
-			  *Object->GetName(),
-			  Distance);
-			
-			NearestAvailableObject = Object.Get();
 			NearestDistance = Distance;
+			NearestAvailableObject = Object.Get();
+			BestSlot = Slot;
+
+			UE_LOG(LogTemp, Warning, TEXT(">>> NEW BEST: %s | Dist: %.1f"),
+				*Object->GetName(),
+				Distance);
 		}
 	}
 
 	// Success or Failed + set keys
-	if (NearestAvailableObject)
+	if (!NearestAvailableObject || !BestSlot)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("\n===== RESULT ====="));
-        UE_LOG(LogTemp, Warning, TEXT("Selected: %s"), *NearestAvailableObject->GetName());
-		
-		TObjectPtr<UBlackboardComponent> Blackboard = OwnerComp.GetBlackboardComponent();
-		if (!Blackboard)
-			return EBTNodeResult::Failed;
-
-		if (!NearestAvailableObject->TryReserve(NPC))
-			return EBTNodeResult::Failed;
-
-		// Use interaction slot for npc target location
-		FInteractionSlot* Slot = NearestAvailableObject->ReserveSlot(NPC);
-		if (!Slot)
-			return EBTNodeResult::Failed;
-
-		Blackboard->SetValueAsVector(TargetLocationKey.SelectedKeyName, Slot->Point->GetComponentLocation());
-		Blackboard->SetValueAsObject(TargetObjectKey.SelectedKeyName, NearestAvailableObject);
-		
-		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
-		return EBTNodeResult::Succeeded;
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("NO VALID OBJECT FOUND"));
+		UE_LOG(LogTemp, Error, TEXT("NO VALID BUILDABLE FOUND"));
 		return EBTNodeResult::Failed;
 	}
+	
+	TObjectPtr<UBlackboardComponent> Blackboard = OwnerComp.GetBlackboardComponent();
+	if (!Blackboard)
+		return EBTNodeResult::Failed;
+
+	if (!NearestAvailableObject->TryReserve(NPC))
+		return EBTNodeResult::Failed;
+
+	// Reserve slot
+	USlotComponent* ReservedSlot = NearestAvailableObject->ReserveSlot(NPC);
+	if (!ReservedSlot)
+		return EBTNodeResult::Failed;
+
+	UE_LOG(LogTemp, Warning, TEXT("\n===== RESULT ====="));
+	UE_LOG(LogTemp, Warning, TEXT("Selected: %s"), *NearestAvailableObject->GetName());
+
+
+	Blackboard->SetValueAsVector(TargetLocationKey.SelectedKeyName, ReservedSlot->GetComponentLocation());
+	Blackboard->SetValueAsObject(TargetObjectKey.SelectedKeyName, NearestAvailableObject);
+	
+	FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+	return EBTNodeResult::Succeeded;
 }
 
 void UBTTask_FindNearestAvailableBuildableObject::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory,

@@ -8,27 +8,13 @@
 #include "Grid/GridRoomType.h"
 #include "BuildableObject.generated.h"
 
-USTRUCT()
-struct FInteractionSlot
-{
-	GENERATED_BODY()
-
-	UPROPERTY()
-	USceneComponent* Point = nullptr;
-
-	UPROPERTY()
-	bool bIsOccupied = false;
-
-	UPROPERTY()
-	TWeakObjectPtr<ANPC> OccupyingNPC;
-};
-
 class UBuildableRegistrySubsystem;
 class AGameHUD;
 class ACrowdedGameState;
 class ACrowdedPlayerController;
 class UBuildData;
 class UBuildSubsystem;
+class USlotComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNPCUsingChanged, bool, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNPCComingChanged, bool, Value);
@@ -51,6 +37,8 @@ public:
 
 	UFUNCTION()
 	UStaticMeshComponent* GetMeshComponent() const { return MeshComp; }
+
+	USlotComponent* GetNearestFreeSlot(const FVector& Vector);
 
 	UPROPERTY(BlueprintAssignable)
 	FOnNPCUsingChanged OnNPCUsingChanged;
@@ -106,8 +94,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Object")
 	void DestroyObject();
 	
-	FInteractionSlot* GetFreeSlot();
-	FInteractionSlot* ReserveSlot(ANPC* NPC);
+	USlotComponent* GetFreeSlot();
+	USlotComponent* ReserveSlot(ANPC* NPC);
 	void ReleaseSlot(ANPC* NPC);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
@@ -115,7 +103,7 @@ public:
 	
 protected:
 	UPROPERTY()
-	TArray<FInteractionSlot> InteractionSlots; 
+	TArray<USlotComponent*> Slots; 
 	
 	UPROPERTY()
 	TObjectPtr<ACrowdedGameState> GameState = nullptr;

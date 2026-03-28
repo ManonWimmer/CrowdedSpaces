@@ -2,6 +2,7 @@
 
 #include "Build/BuildableRegistrySubsystem.h"
 #include "Build/BuildSubsystem.h"
+#include "Build/SlotComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/CrowdedPlayerController.h"
 #include "Game/CrowdedGameState.h"
@@ -47,32 +48,16 @@ void ABuildableObject::BeginPlay()
 		return;
 
 	// Setup interaction slots
-	InteractionSlots.Empty();
+	Slots.Empty();
 
-	TArray<USceneComponent*> Components;
-	GetComponents<USceneComponent>(Components);
+	GetComponents<USlotComponent>(Slots);
 
-	UE_LOG(LogTemp, Warning, TEXT("TOTAL components: %d"), Components.Num());
-
-	for (USceneComponent* Comp : Components)
+	for (USlotComponent* Slot : Slots)
 	{
-		if (!Comp)
-			continue;
+		if (!Slot) continue;
 
-		UE_LOG(LogTemp, Warning, TEXT("Comp: %s Tags: %d"),
-		*GetNameSafe(Comp),
-		Comp->ComponentTags.Num());
-
-		if (!Comp->ComponentHasTag(FName("Slot")))
-			continue;
-
-		FInteractionSlot Slot;
-		Slot.Point = Comp;
-
-		InteractionSlots.Add(Slot);
+		UE_LOG(LogTemp, Warning, TEXT("Slot found: %s"), *Slot->GetName());
 	}
-	
-	UE_LOG(LogTemp, Warning, TEXT("Slots found: %d"), InteractionSlots.Num());
 	
 }
 
@@ -89,6 +74,28 @@ FVector ABuildableObject::GetExtent() const
     }
 	
     return FVector::ZeroVector;
+}
+
+USlotComponent* ABuildableObject::GetNearestFreeSlot(const FVector& FromLocation)
+{
+	USlotComponent* BestSlot = nullptr;
+	float BestDist = FLT_MAX;
+
+	for (USlotComponent* Slot : Slots)
+	{
+		if (!Slot || !Slot->IsFree())
+			continue;
+
+		float Dist = FVector::Dist(FromLocation, Slot->GetComponentLocation());
+
+		if (Dist < BestDist)
+		{
+			BestDist = Dist;
+			BestSlot = Slot;
+		}
+	}
+
+	return BestSlot;
 }
 
 bool ABuildableObject::CanBeUsed() const
@@ -216,43 +223,38 @@ void ABuildableObject::DestroyObject()
 	Destroy();
 }
 
-FInteractionSlot* ABuildableObject::GetFreeSlot()
+USlotComponent* ABuildableObject::GetFreeSlot()
 {
-	for (FInteractionSlot& Slot : InteractionSlots)
+	for (USlotComponent* Slot : Slots)
 	{
-		if (!Slot.bIsOccupied)
+		if (Slot && Slot->IsFree())
 		{
-			Slot.bIsOccupied = true;
-			return &Slot;
+			return Slot;
 		}
 	}
-
 	return nullptr;
 }
 
-FInteractionSlot* ABuildableObject::ReserveSlot(ANPC* NPC)
+USlotComponent* ABuildableObject::ReserveSlot(ANPC* NPC)
 {
-	for (FInteractionSlot& Slot : InteractionSlots)
+	for (USlotComponent* Slot : Slots)
 	{
-		if (!Slot.bIsOccupied)
+		if (Slot && Slot->IsFree())
 		{
-			Slot.bIsOccupied = true;
-			Slot.OccupyingNPC = NPC;
-			return &Slot;
+			Slot->SetOccupied(true, NPC);
+			return Slot;
 		}
 	}
-
 	return nullptr;
 }
 
 void  ABuildableObject::ReleaseSlot(ANPC* NPC)
 {
-	for (FInteractionSlot& Slot : InteractionSlots)
+	for (USlotComponent* Slot : Slots)
 	{
-		if (Slot.OccupyingNPC == NPC)
+		if (Slot && Slot->OccupyingNPC == NPC)
 		{
-			Slot.bIsOccupied = false;
-			Slot.OccupyingNPC = nullptr;
+			Slot->SetOccupied(false, nullptr);
 			return;
 		}
 	}
