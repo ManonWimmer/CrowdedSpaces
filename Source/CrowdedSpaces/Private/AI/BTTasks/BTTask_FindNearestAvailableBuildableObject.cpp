@@ -14,6 +14,7 @@ UBTTask_FindNearestAvailableBuildableObject::UBTTask_FindNearestAvailableBuildab
 
 EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
+	
 	if (BuildableObjectType == EObjectType::Default)
 		return EBTNodeResult::Failed;
 	
@@ -37,6 +38,15 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBe
 	if (!BRS)
 		return EBTNodeResult::Failed;
 
+	UE_LOG(LogTemp, Warning, TEXT("\n===== SEARCH BUILDABLE ====="));
+	UE_LOG(LogTemp, Warning, TEXT("NPC: %s | Type: %d | Origin: %s"),
+		*GetNameSafe(NPC),
+		(int32)BuildableObjectType,
+		*Origin.ToString());
+
+	UE_LOG(LogTemp, Warning, TEXT("SearchRadius: %.1f"), SearchRadius);
+	UE_LOG(LogTemp, Warning, TEXT("Candidates total: %d"), BRS->BuildableObjects.Num());
+
 	// Get nearest available buildable object
 	for (TWeakObjectPtr<ABuildableObject> Object : BRS->BuildableObjects) 
 	{
@@ -50,10 +60,16 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBe
 			continue;
 
 		if (!Object->CanBeUsed())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("CanBeUsed = false"));
 			continue;
+		}
 
 		if (Object->IsReservedByOther(NPC))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Reserved by other"));
 			continue;
+		}
 
 		// Check same generator type as npc should work on
 		if (BuildableObjectType == EObjectType::Generator)
@@ -66,10 +82,19 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBe
 		float Distance = FVector::Distance(Origin, Object->GetActorLocation());
 		
 		if (Distance > SearchRadius)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Out of range"));
 			continue;
+		}
+
+		UE_LOG(LogTemp, Warning, TEXT("Valid candidate"));
 
 		if (!NearestAvailableObject || Distance < NearestDistance)
 		{
+			UE_LOG(LogTemp, Warning, TEXT(">>> NEW NEAREST: %s (%.1f)"),
+			  *Object->GetName(),
+			  Distance);
+			
 			NearestAvailableObject = Object.Get();
 			NearestDistance = Distance;
 		}
@@ -78,6 +103,9 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBe
 	// Success or Failed + set keys
 	if (NearestAvailableObject)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("\n===== RESULT ====="));
+        UE_LOG(LogTemp, Warning, TEXT("Selected: %s"), *NearestAvailableObject->GetName());
+		
 		TObjectPtr<UBlackboardComponent> Blackboard = OwnerComp.GetBlackboardComponent();
 		if (!Blackboard)
 			return EBTNodeResult::Failed;
@@ -98,6 +126,7 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBe
 	}
 	else
 	{
+		UE_LOG(LogTemp, Error, TEXT("NO VALID OBJECT FOUND"));
 		return EBTNodeResult::Failed;
 	}
 }
