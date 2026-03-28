@@ -15,6 +15,13 @@ UBTTask_FindNearestAvailableBuildableObject::UBTTask_FindNearestAvailableBuildab
 
 EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
+	TObjectPtr<UBlackboardComponent> Blackboard = OwnerComp.GetBlackboardComponent();
+	if (!Blackboard)
+		return EBTNodeResult::Failed;
+	
+	if (Blackboard->GetValueAsObject(TargetObjectKey.SelectedKeyName) != nullptr)
+		return EBTNodeResult::Succeeded;
+	
 	if (BuildableObjectType == EObjectType::Default)
 		return EBTNodeResult::Failed;
 	
@@ -60,9 +67,15 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBe
 		if (Object->HasNPCUsing())
 			continue;
 
-		if (!Object->CanBeUsed())
+		//if (!Object->CanBeUsed())
+		//{
+			//UE_LOG(LogTemp, Warning, TEXT("CanBeUsed = false"));
+			//continue;
+		//}
+
+		if (!Object->IsAvailableForReservation(NPC))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("CanBeUsed = false"));
+			UE_LOG(LogTemp, Warning, TEXT("AvailableForReservation = false"));
 			continue;
 		}
 
@@ -107,10 +120,6 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBe
 		UE_LOG(LogTemp, Error, TEXT("NO VALID BUILDABLE FOUND"));
 		return EBTNodeResult::Failed;
 	}
-	
-	TObjectPtr<UBlackboardComponent> Blackboard = OwnerComp.GetBlackboardComponent();
-	if (!Blackboard)
-		return EBTNodeResult::Failed;
 
 	if (!NearestAvailableObject->TryReserve(NPC))
 		return EBTNodeResult::Failed;
@@ -122,8 +131,7 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBe
 
 	UE_LOG(LogTemp, Warning, TEXT("\n===== RESULT ====="));
 	UE_LOG(LogTemp, Warning, TEXT("Selected: %s"), *NearestAvailableObject->GetName());
-
-
+	
 	Blackboard->SetValueAsVector(TargetLocationKey.SelectedKeyName, ReservedSlot->GetComponentLocation());
 	Blackboard->SetValueAsObject(TargetObjectKey.SelectedKeyName, NearestAvailableObject);
 	

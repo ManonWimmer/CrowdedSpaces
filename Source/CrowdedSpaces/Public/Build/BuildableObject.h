@@ -39,6 +39,7 @@ public:
 	UStaticMeshComponent* GetMeshComponent() const { return MeshComp; }
 
 	USlotComponent* GetNearestFreeSlot(const FVector& Vector);
+	bool IsAvailableForReservation(const ANPC* NPC) const;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnNPCUsingChanged OnNPCUsingChanged;
