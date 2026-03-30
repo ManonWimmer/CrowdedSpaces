@@ -72,6 +72,8 @@ void ACrowdedGameMode::EndGame(bool bSurvived) const
 void ACrowdedGameMode::RegisterNPC(ANPC* NPC)
 {
 	AliveNPCCount++;
+
+	OnNbrAliveNPCChanged.Broadcast();
 }
 
 void ACrowdedGameMode::UnregisterNPC(ANPC* NPC)
@@ -81,6 +83,10 @@ void ACrowdedGameMode::UnregisterNPC(ANPC* NPC)
 	if (AliveNPCCount <= 0)
 	{
 		EndGame(false); 
+	}
+	else
+	{
+		OnNbrAliveNPCChanged.Broadcast();
 	}
 }
 

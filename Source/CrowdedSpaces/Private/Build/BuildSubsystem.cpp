@@ -429,6 +429,18 @@ float UBuildSubsystem::GetRoomDestroyCost(const int RoomId)
 	return GridActor->GetRoomDestroyCost(RoomId);
 }
 
+void UBuildSubsystem::UnlockRoom(const EGridRoomType RoomType)
+{
+	for (const TObjectPtr<UBuildRoomData> RoomData : BuildDataRooms)
+	{
+		if (RoomData->RoomType == RoomType)
+		{
+			RoomData->bIsUnlocked = true;
+			return;
+		}
+	}
+}
+
 void UBuildSubsystem::UpdateGhost()
 {
 	if(!CurrentGhost || !GridActor)

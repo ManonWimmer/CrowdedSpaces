@@ -110,6 +110,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	float GetRoomDestroyCost(int RoomId);
 
+	UFUNCTION(BlueprintCallable)
+	void UnlockRoom(EGridRoomType RoomType);
+
 	UPROPERTY(BlueprintAssignable)
 	FOnDeselected OnDeselected; // To deselect ui
 

@@ -288,6 +288,11 @@ FGridRoom* AGridActor::GetRoomOfSameType(EGridRoomType RoomType, int Row, int Co
 	return nullptr;
 }
 
+FGridRoom* AGridActor::GetRoom(const int RoomId)
+{
+	return Rooms.Find(RoomId);
+}
+
 void AGridActor::CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> CellsToAssign)
 {
 	FGridRoom* NearRoom = GetNearRoomOfSameType(CellsToAssign, BuildData->RoomType);
@@ -338,7 +343,7 @@ bool AGridActor::CheckIfCellInPlacedRoom(const FGridCell* Cell, FLinearColor& Ou
 {
 	if (Cell->RoomType != EGridRoomType::None)
 	{
-		const FGridRoom* Room = Rooms.Find(Cell->RoomId);
+		const FGridRoom* Room = GetRoom(Cell->RoomId);
 		if (Room)
 		{
 			OutGridColor = Room->GridColor;
@@ -351,7 +356,7 @@ bool AGridActor::CheckIfCellInPlacedRoom(const FGridCell* Cell, FLinearColor& Ou
 
 void AGridActor::DestroyRoom(int RoomId)
 {
-	FGridRoom* RoomToDestroy = Rooms.Find(RoomId);
+	FGridRoom* RoomToDestroy = GetRoom(RoomId);
 	float RoomDestroyMoney = RoomToDestroy->DestroyMoney;
 	
 	for (const FGridCell* RoomCell : RoomToDestroy->Cells)
@@ -393,7 +398,7 @@ void AGridActor::DestroyRoom(int RoomId)
 
 float AGridActor::GetRoomDestroyCost(int RoomId)
 {
-	FGridRoom* Room = Rooms.Find(RoomId);
+	FGridRoom* Room = GetRoom(RoomId);
 	if (!Room)
 		return 0.f;
 	
@@ -518,7 +523,7 @@ FGridRoom* AGridActor::GetRoomAtCell(const FGridCell* Cell)
 	if (!Cell || Cell->RoomType == EGridRoomType::None)
 		return nullptr;
 	
-	return Rooms.Find(Cell->RoomId);
+	return GetRoom(Cell->RoomId);
 }
 
 bool AGridActor::GetRoomAtWorldLocation(const FVector& WorldLoc, FGridRoom*& OutRoom)
@@ -532,7 +537,7 @@ bool AGridActor::GetRoomAtWorldLocation(const FVector& WorldLoc, FGridRoom*& Out
 	if (!Cell || Cell->RoomType == EGridRoomType::None)
 		return false;
 
-	OutRoom = Rooms.Find(Cell->RoomId);
+	OutRoom = GetRoom(Cell->RoomId);
 
 	return OutRoom != nullptr;
 }

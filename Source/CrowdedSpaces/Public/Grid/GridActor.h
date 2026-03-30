@@ -69,6 +69,7 @@ public:
 	FGridRoom* GetRoomAtCell(const FGridCell* Cell);
 	bool GetRoomAtWorldLocation(const FVector& WorldLoc, FGridRoom*& OutRoom);
 	FGridRoom* GetRoomOfSameType(EGridRoomType RoomType, int Row, int Col);
+	FGridRoom* GetRoom(int RoomId);
 
 	UFUNCTION(BlueprintCallable, Category = "Grid")
 	void ShowGrid(bool bShow);
