@@ -240,30 +240,85 @@ void AGridActor::ShowPlacedRooms(bool bShow)
 	}
 }
 
-int AGridActor::CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> CellsToAssign)
+FGridRoom* AGridActor::GetNearRoomOfSameType(TArray<FGridCell*> RoomCells, EGridRoomType RoomType)
 {
-	FGridRoom NewRoom;
-	NewRoom.RoomId = NextRoomId++;
-	NewRoom.RoomType = BuildData->RoomType;
-	NewRoom.GridColor = BuildData->GridColor;
-	NewRoom.LoseElectricityPerHour = BuildData->LoseElectricityPerHour;
-	NewRoom.DestroyMoney = BuildData->DestroyMoney;
-
-	for (FGridCell* Cell : CellsToAssign)
+	for (FGridCell* Cell : RoomCells)
 	{
-		Cell->RoomId = NewRoom.RoomId;
-		Cell->RoomType = NewRoom.RoomType;
+		if (!Cell)
+			continue;
+
+		// todo: faire avec que row min/max et col min/max au lieu de toutes les cells
 		
-		NewRoom.Cells.Add(Cell);
+		if (FGridRoom* NeighborRowMinRoom = GetRoomOfSameType(RoomType, Cell->Row - 1, Cell->Column))
+			return NeighborRowMinRoom;
+		if (FGridRoom* NeighborRowMaxRoom = GetRoomOfSameType(RoomType, Cell->Row + 1, Cell->Column))
+			return NeighborRowMaxRoom;
+		if (FGridRoom* NeighborColMinRoom = GetRoomOfSameType(RoomType, Cell->Row, Cell->Column - 1))
+			return NeighborColMinRoom;
+		if (FGridRoom* NeighborColMaxRoom = GetRoomOfSameType(RoomType, Cell->Row, Cell->Column + 1))
+			return NeighborColMaxRoom;
+	}
+	
+	return nullptr;
+}
+
+FGridRoom* AGridActor::GetRoomOfSameType(EGridRoomType RoomType, int Row, int Col)
+{
+	FGridCell* Cell = GetGridCell(Row, Col);
+	if (!Cell)
+		return nullptr;
+	
+	FGridRoom* Room = GetRoomAtCell(Cell);
+	if (Room && Room->RoomType == RoomType)
+		return Room;
+
+	return nullptr;
+}
+
+void AGridActor::CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> CellsToAssign)
+{
+	FGridRoom* NearRoom = GetNearRoomOfSameType(CellsToAssign, BuildData->RoomType);
+	
+	if (NearRoom != nullptr)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Larger room created"));
+		
+		// larger room
+		for (FGridCell* Cell : CellsToAssign)
+		{
+			Cell->RoomId = NearRoom->RoomId;
+			Cell->RoomType = NearRoom->RoomType;
+		
+			NearRoom->Cells.Add(Cell);
+		}
+
+		Rooms[NearRoom->RoomId] = *NearRoom; // update in rooms map instead of add
+	}
+	else
+	{
+		UE_LOG(LogTemp, Display, TEXT("New room created"));
+		
+		// new room
+		FGridRoom NewRoom;
+		NewRoom.RoomType = BuildData->RoomType;
+		NewRoom.GridColor = BuildData->GridColor;
+		NewRoom.LoseElectricityPerHour = BuildData->LoseElectricityPerHour;
+		NewRoom.DestroyMoney = BuildData->DestroyMoney;
+		NewRoom.RoomId = NextRoomId++;
+
+		for (FGridCell* Cell : CellsToAssign)
+		{
+			Cell->RoomId = NewRoom.RoomId;
+			Cell->RoomType = NewRoom.RoomType;
+		
+			NewRoom.Cells.Add(Cell);
+		}
+
+		Rooms.Add(NewRoom.RoomId, NewRoom);
 	}
 
-	Rooms.Add(NewRoom.RoomId, NewRoom);
-
 	ShowPlacedRooms(true);
-	
 	RebuildWalls();
-	
-	return NewRoom.RoomId;
 }
 
 bool AGridActor::CheckIfCellInPlacedRoom(const FGridCell* Cell, FLinearColor& OutGridColor)
@@ -443,6 +498,14 @@ void AGridActor::TryAddWall(FGridCell* Cell, int NeighborRow, int NeighborCol, E
 	}
 
 	CreatedWallsPositions.Add(SpawnLoc);
+}
+
+FGridRoom* AGridActor::GetRoomAtCell(const FGridCell* Cell)
+{
+	if (!Cell || Cell->RoomType == EGridRoomType::None)
+		return nullptr;
+	
+	return Rooms.Find(Cell->RoomId);
 }
 
 bool AGridActor::GetRoomAtWorldLocation(const FVector& WorldLoc, FGridRoom*& OutRoom)

@@ -54,7 +54,8 @@ public:
 	void SelectRoomCell(int Row, int Column);
 	
 	void ShowPlacedRooms(bool bShow);
-	int CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> CellsToAssign);
+	FGridRoom* GetNearRoomOfSameType(TArray<FGridCell*> RoomCells, EGridRoomType RoomType);
+	void CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> CellsToAssign);
 	bool CheckIfCellInPlacedRoom(const FGridCell* Cell, FLinearColor& OutGridColor);
 
 	UFUNCTION(BlueprintCallable, Category = "Room")
@@ -65,8 +66,9 @@ public:
 	
 	void RebuildWalls();
 	void TryAddWall(FGridCell* Cell, int NeighborRow, int NeighborCol, EGridWallDirection Dir, float Half, const TSet<FIntPoint>& DoorCells);
-
+	FGridRoom* GetRoomAtCell(const FGridCell* Cell);
 	bool GetRoomAtWorldLocation(const FVector& WorldLoc, FGridRoom*& OutRoom);
+	FGridRoom* GetRoomOfSameType(EGridRoomType RoomType, int Row, int Col);
 
 	UFUNCTION(BlueprintCallable, Category = "Grid")
 	void ShowGrid(bool bShow);

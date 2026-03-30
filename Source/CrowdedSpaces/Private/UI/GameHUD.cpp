@@ -112,7 +112,7 @@ void AGameHUD::ShowSelectionWidget(const FGridRoom& Room, const bool bShow, cons
 		return;
 	}
 
-	// Toggle ONLY if same room
+	// Toggle ONLY if same room & in game
 	if (CurrentlySelectedRoom == &Room)
 	{
 		HideCurrentSelectionWidget();

@@ -46,14 +46,11 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBe
 	if (!BRS)
 		return EBTNodeResult::Failed;
 
-	UE_LOG(LogTemp, Warning, TEXT("\n===== SEARCH BUILDABLE ====="));
-	UE_LOG(LogTemp, Warning, TEXT("NPC: %s | Type: %d | Origin: %s"),
-		*GetNameSafe(NPC),
-		(int32)BuildableObjectType,
-		*Origin.ToString());
+	//UE_LOG(LogTemp, Warning, TEXT("\n===== SEARCH BUILDABLE ====="));
+	//UE_LOG(LogTemp, Warning, TEXT("NPC: %s | Type: %d | Origin: %s"), *GetNameSafe(NPC), (int32)BuildableObjectType, *Origin.ToString());
 
-	UE_LOG(LogTemp, Warning, TEXT("SearchRadius: %.1f"), SearchRadius);
-	UE_LOG(LogTemp, Warning, TEXT("Candidates total: %d"), BRS->BuildableObjects.Num());
+	//UE_LOG(LogTemp, Warning, TEXT("SearchRadius: %.1f"), SearchRadius);
+	//UE_LOG(LogTemp, Warning, TEXT("Candidates total: %d"), BRS->BuildableObjects.Num());
 
 	// Get nearest available buildable object
 	for (TWeakObjectPtr<ABuildableObject> Object : BRS->BuildableObjects) 
@@ -75,13 +72,13 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBe
 
 		if (!Object->IsAvailableForReservation(NPC))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("AvailableForReservation = false"));
+			//UE_LOG(LogTemp, Warning, TEXT("AvailableForReservation = false"));
 			continue;
 		}
 
 		if (Object->IsReservedByOther(NPC))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Reserved by other"));
+			//UE_LOG(LogTemp, Warning, TEXT("Reserved by other"));
 			continue;
 		}
 
@@ -108,16 +105,14 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBe
 			NearestAvailableObject = Object.Get();
 			BestSlot = Slot;
 
-			UE_LOG(LogTemp, Warning, TEXT(">>> NEW BEST: %s | Dist: %.1f"),
-				*Object->GetName(),
-				Distance);
+			//UE_LOG(LogTemp, Warning, TEXT(">>> NEW BEST: %s | Dist: %.1f"), *Object->GetName(), Distance);
 		}
 	}
 
 	// Success or Failed + set keys
 	if (!NearestAvailableObject || !BestSlot)
 	{
-		UE_LOG(LogTemp, Error, TEXT("NO VALID BUILDABLE FOUND"));
+		//UE_LOG(LogTemp, Error, TEXT("NO VALID BUILDABLE FOUND"));
 		return EBTNodeResult::Failed;
 	}
 
@@ -129,8 +124,8 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBe
 	if (!ReservedSlot)
 		return EBTNodeResult::Failed;
 
-	UE_LOG(LogTemp, Warning, TEXT("\n===== RESULT ====="));
-	UE_LOG(LogTemp, Warning, TEXT("Selected: %s"), *NearestAvailableObject->GetName());
+	//UE_LOG(LogTemp, Warning, TEXT("\n===== RESULT ====="));
+	//UE_LOG(LogTemp, Warning, TEXT("Selected: %s"), *NearestAvailableObject->GetName());
 	
 	Blackboard->SetValueAsVector(TargetLocationKey.SelectedKeyName, ReservedSlot->GetComponentLocation());
 	Blackboard->SetValueAsObject(TargetObjectKey.SelectedKeyName, NearestAvailableObject);
