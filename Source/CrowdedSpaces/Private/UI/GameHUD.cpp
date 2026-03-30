@@ -104,7 +104,7 @@ void AGameHUD::ShowSelectionWidget(AActor* SelectableActor, const bool bShow, co
 	CurrentlySelectedActor = SelectableActor;
 }
 
-void AGameHUD::ShowSelectionWidget(const FGridRoom& Room, const bool bShow, const ESelectionType SelectionType)
+void AGameHUD::ShowSelectionWidget(FGridRoom& Room, const bool bShow, const ESelectionType SelectionType)
 {
 	if (!bShow)
 	{
@@ -114,7 +114,7 @@ void AGameHUD::ShowSelectionWidget(const FGridRoom& Room, const bool bShow, cons
 
 	// Toggle ONLY if same room
 	// todo: pas de toggle si click create room qui aggrandit CurrentlySelectedRoom
-	if (CurrentlySelectedRoom == &Room)
+	if (CurrentlySelectedRoom.Cells == Room.Cells)
 	{
 		HideCurrentSelectionWidget();
 		return;
@@ -132,7 +132,7 @@ void AGameHUD::ShowSelectionWidget(const FGridRoom& Room, const bool bShow, cons
 
 	RoomWidget->SetupRoom(Room);
 
-	CurrentlySelectedRoom = &Room;
+	CurrentlySelectedRoom = Room;
 	CurrentlySelectedActor = nullptr;
 }
 
@@ -148,7 +148,7 @@ void AGameHUD::HideCurrentSelectionWidget()
 
 	CurrentlyShownSelectionWidgetBP = nullptr;
 	CurrentlySelectedActor = nullptr;
-	CurrentlySelectedRoom = nullptr;
+	CurrentlySelectedRoom = *(new FGridRoom());
 }
 
 UCustomWidget* AGameHUD::GetWidgetFromSelectionType(const ESelectionType Type)
