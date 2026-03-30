@@ -242,22 +242,35 @@ void AGridActor::ShowPlacedRooms(bool bShow)
 
 FGridRoom* AGridActor::GetNearRoomOfSameType(TArray<FGridCell*> RoomCells, EGridRoomType RoomType)
 {
+	int MinRow = INT_MAX;
+	int MaxRow = INT_MIN;
+	int MinColumn = INT_MAX;
+	int MaxColumn = INT_MIN;
+	
 	for (FGridCell* Cell : RoomCells)
 	{
 		if (!Cell)
 			continue;
 
-		// todo: faire avec que row min/max et col min/max au lieu de toutes les cells
+		if (Cell->Row < MinRow)
+			MinRow = Cell->Row;
+		else if (Cell->Row > MaxRow)
+			MaxRow = Cell->Row;
 		
-		if (FGridRoom* NeighborRowMinRoom = GetRoomOfSameType(RoomType, Cell->Row - 1, Cell->Column))
-			return NeighborRowMinRoom;
-		if (FGridRoom* NeighborRowMaxRoom = GetRoomOfSameType(RoomType, Cell->Row + 1, Cell->Column))
-			return NeighborRowMaxRoom;
-		if (FGridRoom* NeighborColMinRoom = GetRoomOfSameType(RoomType, Cell->Row, Cell->Column - 1))
-			return NeighborColMinRoom;
-		if (FGridRoom* NeighborColMaxRoom = GetRoomOfSameType(RoomType, Cell->Row, Cell->Column + 1))
-			return NeighborColMaxRoom;
+		if (Cell->Column < MinColumn)
+			MinColumn = Cell->Column;
+		else if (Cell->Column > MaxColumn)
+			MaxColumn = Cell->Column;
 	}
+
+	if (FGridRoom* NeighborRowMinRoom = GetRoomOfSameType(RoomType, MinRow - 1, MinColumn))
+		return NeighborRowMinRoom;
+	if (FGridRoom* NeighborRowMaxRoom = GetRoomOfSameType(RoomType, MaxRow + 1, MaxColumn))
+		return NeighborRowMaxRoom;
+	if (FGridRoom* NeighborColMinRoom = GetRoomOfSameType(RoomType, MinRow, MinColumn - 1))
+		return NeighborColMinRoom;
+	if (FGridRoom* NeighborColMaxRoom = GetRoomOfSameType(RoomType, MinRow, MaxColumn + 1))
+		return NeighborColMaxRoom;
 	
 	return nullptr;
 }

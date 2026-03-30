@@ -112,7 +112,8 @@ void AGameHUD::ShowSelectionWidget(const FGridRoom& Room, const bool bShow, cons
 		return;
 	}
 
-	// Toggle ONLY if same room & in game
+	// Toggle ONLY if same room
+	// todo: pas de toggle si click create room qui aggrandit CurrentlySelectedRoom
 	if (CurrentlySelectedRoom == &Room)
 	{
 		HideCurrentSelectionWidget();
