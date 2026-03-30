@@ -8,6 +8,7 @@
 class UCrowdedGameInstance;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnResourceFull); 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnResourceChanged, int32, Value); 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxResourceChanged, int32, Value); 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIsInRegenChanged, bool, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNoMoreResource); 
 
@@ -27,10 +28,16 @@ public:
 	
 	// Change value
 	UFUNCTION(BlueprintCallable)
-	void AddResource(float  Amount);
+	void AddResource(float Amount);
 
 	UFUNCTION(BlueprintCallable)
-	void RemoveResource(float  Amount);
+	void RemoveResource(float Amount);
+
+	UFUNCTION(BlueprintCallable)
+	void AddMaxResource(float Amount);
+
+	UFUNCTION(BlueprintCallable)
+	void RemoveMaxResource(float Amount);
 
 	// Get value
 	UFUNCTION(BlueprintCallable)
@@ -78,6 +85,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnNoMoreResource OnNoMoreResource;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnMaxResourceChanged OnMaxResourceChanged;
 	
 private:
 	// Resource

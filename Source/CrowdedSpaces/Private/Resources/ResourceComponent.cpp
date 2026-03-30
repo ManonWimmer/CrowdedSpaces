@@ -102,7 +102,22 @@ void UResourceComponent::RemoveResource(const float Amount)
 	OnResourceChanged.Broadcast(Resource);
 }
 
-bool UResourceComponent::HasEnoughResource(float Amount)
+void UResourceComponent::AddMaxResource(const float Amount)
+{
+	MaxResource += Amount;
+	OnMaxResourceChanged.Broadcast(MaxResource);
+}
+
+void UResourceComponent::RemoveMaxResource(const float Amount)
+{
+	MaxResource -= Amount;
+	Resource = FMath::Clamp(Resource + Amount, 0, MaxResource);
+
+	OnMaxResourceChanged.Broadcast(MaxResource);
+	OnResourceChanged.Broadcast(Resource);
+}
+
+bool UResourceComponent::HasEnoughResource(const float Amount)
 {
 	return Resource >= Amount;
 }
