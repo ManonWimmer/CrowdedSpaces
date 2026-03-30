@@ -36,9 +36,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	EGridRoomType RoomType = EGridRoomType::Any;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Room")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FLinearColor GridColor = FLinearColor::Yellow;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float LoseElectricityPerHour = 10;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsUnlocked = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int UnlockWithNPCs = 1;
 };
