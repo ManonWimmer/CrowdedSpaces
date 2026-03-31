@@ -1,6 +1,6 @@
 ﻿#include "UI/Widgets/DebugWidget.h"
 
-#include "AI/NPCFunctionLibrary.h"
+#include "AI/NPCHelpers.h"
 #include "AI/NPC.h"
 #include "Game/CrowdedGameState.h"
 
@@ -62,7 +62,7 @@ void UDebugWidget::AddFood(const int Amount) const
 
 void UDebugWidget::SpawnNPC()
 {
-	ANPC* SpawnedNPC = UNPCFunctionLibrary::SpawnGlobalNPC(this);
+	ANPC* SpawnedNPC = NPCHelpers::SpawnGlobalNPC(this);
 }
 
 void UDebugWidget::Init_Implementation()

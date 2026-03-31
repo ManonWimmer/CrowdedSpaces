@@ -1,6 +1,6 @@
 #include "MoralEvent/Events/MoralEvent_SpawnNPCOrLoseMoney.h"
 
-#include "AI/NPCFunctionLibrary.h"
+#include "AI/NPCHelpers.h"
 
 void UMoralEvent_SpawnNPCOrLoseMoney::ClickOnChoice(EMoralEventType Choice)
 {
@@ -10,7 +10,7 @@ void UMoralEvent_SpawnNPCOrLoseMoney::ClickOnChoice(EMoralEventType Choice)
 	{
 		case EMoralEventType::SpawnNPC:
 			{
-				ANPC* SpawnedNPC = UNPCFunctionLibrary::SpawnGlobalNPC(this);
+				ANPC* SpawnedNPC = NPCHelpers::SpawnGlobalNPC(this);
 				break;
 			}
 	
