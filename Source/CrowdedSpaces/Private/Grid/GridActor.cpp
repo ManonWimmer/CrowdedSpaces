@@ -325,7 +325,7 @@ TTuple<bool, int> AGridActor::CreateRoom(const UBuildRoomData* BuildData, TArray
 		FGridRoom NewRoom;
 		NewRoom.RoomType = BuildData->RoomType;
 		NewRoom.GridColor = BuildData->GridColor;
-		NewRoom.LoseElectricityPerHour = BuildData->LoseElectricityPerHour;
+		NewRoom.LoseElectricityPerHourPerCell = BuildData->LoseElectricityPerHour;
 		NewRoom.DestroyMoney = BuildData->DestroyMoney;
 		NewRoom.RoomId = NextRoomId++;
 

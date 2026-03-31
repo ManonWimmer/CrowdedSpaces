@@ -28,7 +28,10 @@ public:
 	FOnRoomEnoughElectricityChanged OnRoomEnoughElectricityChanged;
 
 	UFUNCTION(BlueprintCallable)
-	void ChangeRoomActiveState(int RoomId);
+	void ChangeRoomActiveState(const int RoomId);
+
+	UFUNCTION(BlueprintCallable)
+	float GetRoomLoseElectricityPerHourPerCell(const int RoomId) const;
 
 private:
 	UPROPERTY()

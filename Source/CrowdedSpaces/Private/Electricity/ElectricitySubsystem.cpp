@@ -35,18 +35,15 @@ void UElectricitySubsystem::OnTimeChanged(const float NewTime)
 	TMap<int, FGridRoom>& Rooms = BuildSubsystem->GetRooms();
 
 	// Rooms
-	for (auto& Pair : Rooms)
+	for (TTuple<int, FGridRoom>& Pair : Rooms)
 	{
+		int RoomId = Pair.Key;
 		FGridRoom& Room = Pair.Value;
 		
 		if (!Room.bIsActivated)
 			continue;
-			
-		float LosePerHour = Room.LoseElectricityPerHour;
-		if (LosePerHour <= 0)
-			continue;
-
-		float ConsumptionThisFrame = (LosePerHour / 60.f) * DeltaTime;
+		
+		float ConsumptionThisFrame = (GetRoomLoseElectricityPerHourPerCell(RoomId) / 60.f) * DeltaTime;
 
 		bool bEnough = ElectricityComponent->HasEnoughResource(ConsumptionThisFrame);
 
@@ -102,7 +99,7 @@ void UElectricitySubsystem::OnTimeChanged(const float NewTime)
 	}
 }
 
-void UElectricitySubsystem::ChangeRoomActiveState(int RoomId)
+void UElectricitySubsystem::ChangeRoomActiveState(const int RoomId)
 {
 	TMap<int, FGridRoom>& Rooms = BuildSubsystem->GetRooms();
 	FGridRoom* RoomPtr = Rooms.Find(RoomId);
@@ -122,4 +119,13 @@ void UElectricitySubsystem::ChangeRoomActiveState(int RoomId)
 		
 		Object->SetIsActivated(RoomPtr->bIsActivated);
 	}
+}
+
+float UElectricitySubsystem::GetRoomLoseElectricityPerHourPerCell(const int RoomId) const
+{
+	FGridRoom* Room = BuildSubsystem->GetRoom(RoomId);
+	if (!Room)
+		return 0;
+
+	return Room->LoseElectricityPerHourPerCell * BuildSubsystem->GetRoomCellsCount(Room->RoomId);
 }

@@ -1,3 +1,5 @@
+#include "AI/NPCHelpers.h"
+
 #include "AI/NPC.h"
 #include "Game/CrowdedGameInstance.h"
 

@@ -441,12 +441,28 @@ void UBuildSubsystem::DestroyRoom(const int RoomId) const
 	}
 }
 
+FGridRoom* UBuildSubsystem::GetRoom(const int RoomId) const
+{
+	if (!GridActor)
+		return 0;
+	
+	return GridActor->GetRoom(RoomId);
+}
+
 float UBuildSubsystem::GetRoomDestroyCost(const int RoomId) const
 {
 	if (!GridActor)
 		return 0;
 	
 	return GridActor->GetRoomDestroyCost(RoomId);
+}
+
+int UBuildSubsystem::GetRoomCellsCount(const int RoomId) const
+{
+	if (!GridActor)
+		return 0;
+	
+	return GridActor->GetRoom(RoomId)->Cells.Num();
 }
 
 void UBuildSubsystem::UnlockRoom(const EGridRoomType RoomType)

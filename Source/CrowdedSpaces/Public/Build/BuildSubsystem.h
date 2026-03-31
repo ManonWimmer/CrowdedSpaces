@@ -107,16 +107,21 @@ public:
 	TMap<int, FGridRoom>& GetRooms();
 	
 	UFUNCTION(BlueprintCallable)
-	void DestroyRoom(int RoomId) const;
+	void DestroyRoom(const int RoomId) const;
+	
+	FGridRoom* GetRoom(const int RoomId) const;
 
 	UFUNCTION(BlueprintCallable)
-	float GetRoomDestroyCost(int RoomId) const;
+	float GetRoomDestroyCost(const int RoomId) const;
 
 	UFUNCTION(BlueprintCallable)
-	void UnlockRoom(EGridRoomType RoomType);
+	int GetRoomCellsCount(const int RoomId) const;
 
 	UFUNCTION(BlueprintCallable)
-	bool IsRoomUnlocked(EGridRoomType RoomType) const;
+	void UnlockRoom(const EGridRoomType RoomType);
+
+	UFUNCTION(BlueprintCallable)
+	bool IsRoomUnlocked(const EGridRoomType RoomType) const;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnDeselected OnDeselected; // To deselect ui
