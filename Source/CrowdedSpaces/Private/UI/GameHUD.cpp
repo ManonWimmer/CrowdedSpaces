@@ -3,7 +3,6 @@
 #include "Game/CrowdedGameState.h"
 #include "UI/Widgets/MoralEventWidget.h"
 #include "UI/CustomWidget.h"
-#include "UI/Widgets/SelectionWidget.h"
 #include "UI/Widgets/Selection/RoomSelectionWidget.h"
 
 void AGameHUD::BeginPlay()
@@ -163,16 +162,20 @@ UCustomWidget* AGameHUD::GetWidgetFromSelectionType(const ESelectionType Type)
 		CurrentlyShownSelectionWidgetBP = GeneratorSelectionWidgetBP;
 		break;
 
-	case ESelectionType::Room:
-		CurrentlyShownSelectionWidgetBP = RoomSelectionWidgetBP;
-		break;
-
 	case ESelectionType::Food:
 		CurrentlyShownSelectionWidgetBP = FoodSelectionWidgetBP;
 		break;
 		
 	case ESelectionType::Bed:
 		CurrentlyShownSelectionWidgetBP = BedSelectionWidgetBP;
+		break;
+
+	case ESelectionType::Room:
+		CurrentlyShownSelectionWidgetBP = RoomSelectionWidgetBP;
+		break;
+
+	case ESelectionType::StorageRoom:
+		CurrentlyShownSelectionWidgetBP = StorageRoomSelectionWidgetBP;
 		break;
 
 	default:

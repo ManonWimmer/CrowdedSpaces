@@ -24,7 +24,7 @@ public:
 	void SetType(EResourceType NewType);
 
 	UFUNCTION(BlueprintCallable)
-	EResourceType GetType() const { return ResourceType;}
+	EResourceType GetType() const { return ResourceType; }
 	
 	// Change value
 	UFUNCTION(BlueprintCallable)

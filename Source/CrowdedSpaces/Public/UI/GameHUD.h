@@ -80,6 +80,9 @@ private:
 	TSubclassOf<UCustomWidget> RoomSelectionWidgetBP;
 
 	UPROPERTY(EditAnywhere, Category="Widgets")
+	TSubclassOf<UCustomWidget> StorageRoomSelectionWidgetBP;
+
+	UPROPERTY(EditAnywhere, Category="Widgets")
 	TSubclassOf<UCustomWidget> GeneratorSelectionWidgetBP;
 
 	UPROPERTY(EditAnywhere, Category="Widgets")

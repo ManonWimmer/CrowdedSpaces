@@ -195,7 +195,7 @@ void ACrowdedPlayerController::HandleSelection() const
 	if (HitActor && HitActor->Implements<USelectable>())
 	{
 		const ISelectable* Selectable = Cast<ISelectable>(HitActor);
-		GameHUD->ShowSelectionWidget(HitActor, true, Selectable->GetSelectionType());
+		GameHUD->ShowSelectionWidget(HitActor, true, Selectable->	GetSelectionType());
 		return;
 	}
 
@@ -206,7 +206,15 @@ void ACrowdedPlayerController::HandleSelection() const
 
 		if (GridActor->GetRoomAtWorldLocation(Hit.Location, Room) && Room)
 		{
-			GameHUD->ShowSelectionWidget(*Room, true, ESelectionType::Room);
+			if (Room->RoomType == EGridRoomType::Storage)
+			{
+				GameHUD->ShowSelectionWidget(*Room, true, ESelectionType::StorageRoom);
+			}
+			else
+			{
+				GameHUD->ShowSelectionWidget(*Room, true, ESelectionType::Room);
+			}
+			
 			return;
 		}
 	}
