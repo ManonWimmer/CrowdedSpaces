@@ -364,7 +364,8 @@ void UBuildSubsystem::PlaceRoom()
 
 	if (IsNewRoomAndRoomId.Key)
 		OnRoomCreated.Broadcast(IsNewRoomAndRoomId.Value, CurrentBuildRoomData->RoomType);
-	// todo: else = on room updated
+	else
+		OnRoomUpdated.Broadcast(IsNewRoomAndRoomId.Value, CurrentBuildRoomData->RoomType);
 }
 
 void UBuildSubsystem::SetBuildRoomData(const TArray<UBuildRoomData*>& NewBuildRoomData)

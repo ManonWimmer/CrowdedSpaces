@@ -4,6 +4,7 @@
 #include "Subsystems/WorldSubsystem.h"
 #include "StorageSubsystem.generated.h"
 
+enum class EGridRoomType : uint8;
 class UBuildSubsystem;
 class UResourceComponent;
 
@@ -45,9 +46,15 @@ public:
 
 	UFUNCTION()
 	void OnRoomCreated(const int RoomId, const EGridRoomType RoomType);
+
+	UFUNCTION()
+	void OnRoomUpdated(const int RoomId, const EGridRoomType RoomType);
 	
 	UFUNCTION()
 	void AddStorageRoom(const int RoomId);
+
+	UFUNCTION()
+	void UpdateStorageRoom(const int RoomId);
 
 	UFUNCTION()
 	void OnRoomDestroyed(const int RoomId);

@@ -27,6 +27,7 @@ class UResourceComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeselected);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRoomDestroyed, int, RoomId);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnRoomCreated, int, RoomId, EGridRoomType, RoomType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnRoomUpdated, int, RoomId, EGridRoomType, RoomType);
 
 UCLASS()
 class CROWDEDSPACES_API UBuildSubsystem : public UTickableWorldSubsystem
@@ -130,7 +131,10 @@ public:
 	FOnRoomDestroyed OnRoomDestroyed;
 
 	UPROPERTY(BlueprintAssignable)
-	FOnRoomCreated OnRoomCreated; 
+	FOnRoomCreated OnRoomCreated;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnRoomUpdated OnRoomUpdated;
 
 private:
 	UPROPERTY()
