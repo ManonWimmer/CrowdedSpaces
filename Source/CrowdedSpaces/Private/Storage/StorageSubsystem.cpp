@@ -76,3 +76,8 @@ void UStorageSubsystem::OnRoomDestroyed(const int RoomId)
 		
 	StorageRooms.Remove(RoomId);
 }
+
+FStorageRoomValues UStorageSubsystem::GetStorageValuesForCreatedRoom(const int RoomId)
+{
+	return StorageRooms[RoomId];
+}

@@ -6,19 +6,19 @@
 
 class UResourceComponent;
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FStorageRoomValues
 {
-	GENERATED_BODY()
+	GENERATED_USTRUCT_BODY()
 
 public:
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float AddMaxMoney = 1000;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float AddMaxFood = 1000;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float AddMaxElectricity = 1000;
 };
 
@@ -44,6 +44,9 @@ public:
 
 	UFUNCTION()
 	void SetStorageData(UStorageData* NewStorageData) {	StorageData = NewStorageData; }
+
+	UFUNCTION(BlueprintCallable)
+	FStorageRoomValues GetStorageValuesForCreatedRoom(const int RoomId);
 
 private:
 	UPROPERTY()
