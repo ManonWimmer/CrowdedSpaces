@@ -3,6 +3,7 @@
 #include "AI/NameGeneratorSubsystem.h"
 #include "Build/BuildSubsystem.h"
 #include "MoralEvent/MoralEventSubsystem.h"
+#include "Storage/StorageSubsystem.h"
 #include "Time/TimeSubsystem.h"
 
 ACrowdedGameState::ACrowdedGameState()
@@ -76,6 +77,16 @@ void ACrowdedGameState::TryInitSubsystems()
 	}
 
 	MoralEventSubsystem->SetPossibleEvents(PossibleMoralEvents);
+
+	// Get storage event subsystem & send data
+	const TObjectPtr<UStorageSubsystem> StorageSubsystem = GetWorld()->GetSubsystem<UStorageSubsystem>();
+	if (!StorageSubsystem)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Storage subsystem not found"));
+		return;
+	}
+
+	StorageSubsystem->SetStorageData(StorageData);
 
 	UE_LOG(LogTemp, Warning, TEXT("All subsystem found!"));
 

@@ -111,7 +111,7 @@ void UResourceComponent::AddMaxResource(const float Amount)
 void UResourceComponent::RemoveMaxResource(const float Amount)
 {
 	MaxResource -= Amount;
-	Resource = FMath::Clamp(Resource + Amount, 0, MaxResource);
+	Resource = FMath::Clamp(Resource, 0, MaxResource);
 
 	OnMaxResourceChanged.Broadcast(MaxResource);
 	OnResourceChanged.Broadcast(Resource);

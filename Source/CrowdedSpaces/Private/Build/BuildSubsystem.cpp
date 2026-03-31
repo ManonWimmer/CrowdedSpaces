@@ -291,7 +291,7 @@ void UBuildSubsystem::PlaceObject()
 		MoneyComponent->RemoveResource(CurrentBuildData->MoneyCost);
 }
 
-void UBuildSubsystem::RemoveObject(ABuildableObject* Object) const
+void UBuildSubsystem::RemoveObject(const ABuildableObject* Object) const
 {
 	int SizeX = CurrentBuildData->GridRowsX;
 	int SizeY = CurrentBuildData->GridColumnsY;
@@ -350,14 +350,21 @@ void UBuildSubsystem::PlaceRoom()
 		}
 	}
 	
-	GridActor->CreateRoom(CurrentBuildRoomData, SelectedRoomCells);
+	TTuple<bool, int> IsNewRoomAndRoomId = GridActor->CreateRoom(CurrentBuildRoomData, SelectedRoomCells);
 
+	UE_LOG(LogTemp, Display, TEXT("Created room, id : %d"), IsNewRoomAndRoomId.Value);
+	UE_LOG(LogTemp, Display, TEXT("Created room, is new : %d"), IsNewRoomAndRoomId.Key);
+	
 	if (MoneyComponent)
 		MoneyComponent->RemoveResource(CurrentBuildRoomData->MoneyCost);
 
 	GridActor->DeselectSelectedCells();
 	
 	SelectedRoomCells.Empty();
+
+	if (IsNewRoomAndRoomId.Key)
+		OnRoomCreated.Broadcast(IsNewRoomAndRoomId.Value, CurrentBuildRoomData->RoomType);
+	// todo: else = on room updated
 }
 
 void UBuildSubsystem::TryRotateBuildLeft()
@@ -413,15 +420,18 @@ TMap<int, FGridRoom>& UBuildSubsystem::GetRooms()
 	return GridActor->GetRooms();
 }
 
-void UBuildSubsystem::DestroyRoom(int RoomId)
+void UBuildSubsystem::DestroyRoom(const int RoomId) const
 {
 	if (!GridActor)
 		return;
 	
-	GridActor->DestroyRoom(RoomId);
+	if (GridActor->DestroyRoom(RoomId))
+	{
+		OnRoomDestroyed.Broadcast(RoomId);
+	}
 }
 
-float UBuildSubsystem::GetRoomDestroyCost(const int RoomId)
+float UBuildSubsystem::GetRoomDestroyCost(const int RoomId) const
 {
 	if (!GridActor)
 		return 0;

@@ -55,11 +55,11 @@ public:
 	
 	void ShowPlacedRooms(bool bShow);
 	FGridRoom* GetNearRoomOfSameType(TArray<FGridCell*> RoomCells, EGridRoomType RoomType);
-	void CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> CellsToAssign);
+	TTuple<bool, int> CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> CellsToAssign);
 	bool CheckIfCellInPlacedRoom(const FGridCell* Cell, FLinearColor& OutGridColor);
 
 	UFUNCTION(BlueprintCallable, Category = "Room")
-	void DestroyRoom(int RoomId);
+	bool DestroyRoom(int RoomId);
 
 	UFUNCTION(BlueprintCallable)
 	float GetRoomDestroyCost(int RoomId);

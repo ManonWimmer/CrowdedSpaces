@@ -293,7 +293,7 @@ FGridRoom* AGridActor::GetRoom(const int RoomId)
 	return Rooms.Find(RoomId);
 }
 
-void AGridActor::CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> CellsToAssign)
+TTuple<bool, int> AGridActor::CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> CellsToAssign) // bool new room, int room id
 {
 	FGridRoom* NearRoom = GetNearRoomOfSameType(CellsToAssign, BuildData->RoomType);
 	
@@ -311,6 +311,11 @@ void AGridActor::CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> 
 		}
 
 		Rooms[NearRoom->RoomId] = *NearRoom; // update in rooms map instead of add
+
+		ShowPlacedRooms(true);
+		RebuildWalls();
+		
+		return MakeTuple(false, NearRoom->RoomId);
 	}
 	else
 	{
@@ -333,10 +338,12 @@ void AGridActor::CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> 
 		}
 
 		Rooms.Add(NewRoom.RoomId, NewRoom);
-	}
 
-	ShowPlacedRooms(true);
-	RebuildWalls();
+		ShowPlacedRooms(true);
+		RebuildWalls();
+		
+		return MakeTuple(true, NewRoom.RoomId);;
+	}
 }
 
 bool AGridActor::CheckIfCellInPlacedRoom(const FGridCell* Cell, FLinearColor& OutGridColor)
@@ -354,9 +361,12 @@ bool AGridActor::CheckIfCellInPlacedRoom(const FGridCell* Cell, FLinearColor& Ou
 	return false;
 }
 
-void AGridActor::DestroyRoom(int RoomId)
+bool AGridActor::DestroyRoom(const int RoomId)
 {
 	FGridRoom* RoomToDestroy = GetRoom(RoomId);
+	if (!RoomToDestroy)
+		return false;
+		
 	float RoomDestroyMoney = RoomToDestroy->DestroyMoney;
 	
 	for (const FGridCell* RoomCell : RoomToDestroy->Cells)
@@ -394,6 +404,8 @@ void AGridActor::DestroyRoom(int RoomId)
 	ACrowdedPlayerController* CrowdedPlayerController = Cast<ACrowdedPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 	AGameHUD * GameHUD = Cast<AGameHUD>(CrowdedPlayerController->GetHUD());
 	GameHUD->HideCurrentSelectionWidget();
+
+	return true;
 }
 
 float AGridActor::GetRoomDestroyCost(int RoomId)

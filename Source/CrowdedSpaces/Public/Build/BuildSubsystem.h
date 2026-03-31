@@ -25,6 +25,8 @@ class AGridActor;
 class UResourceComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeselected);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRoomDestroyed, int, RoomId);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnRoomCreated, int, RoomId, EGridRoomType, RoomType);
 
 UCLASS()
 class CROWDEDSPACES_API UBuildSubsystem : public UTickableWorldSubsystem
@@ -57,7 +59,7 @@ public:
 	void PlaceObject();
 
 	UFUNCTION()
-	void RemoveObject(ABuildableObject* Object) const;
+	void RemoveObject(const ABuildableObject* Object) const;
 	
 	UFUNCTION()
 	void LeftClicked();
@@ -105,16 +107,22 @@ public:
 	TMap<int, FGridRoom>& GetRooms();
 	
 	UFUNCTION(BlueprintCallable)
-	void DestroyRoom(int RoomId);
+	void DestroyRoom(int RoomId) const;
 
 	UFUNCTION(BlueprintCallable)
-	float GetRoomDestroyCost(int RoomId);
+	float GetRoomDestroyCost(int RoomId) const;
 
 	UFUNCTION(BlueprintCallable)
 	void UnlockRoom(EGridRoomType RoomType);
 
 	UPROPERTY(BlueprintAssignable)
 	FOnDeselected OnDeselected; // To deselect ui
+
+	UPROPERTY(BlueprintAssignable)
+	FOnRoomDestroyed OnRoomDestroyed;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnRoomCreated OnRoomCreated; 
 
 private:
 	UPROPERTY()
@@ -127,13 +135,13 @@ private:
 	TObjectPtr<UBuildRoomData> CurrentBuildRoomData = nullptr;
 
 	UPROPERTY()
-	TArray<TObjectPtr<UBuildData>> BuildDataObjects; // Send by game state
+	TArray<TObjectPtr<UBuildData>> BuildDataObjects; // Sent by game state
 
 	UPROPERTY()
-	TArray<TObjectPtr<UBuildRoomData>> BuildDataRooms; // Send by game state
+	TArray<TObjectPtr<UBuildRoomData>> BuildDataRooms; // Sent by game state
 	
 	UPROPERTY()
-	float SnapSize = 100.f; // Send by game state
+	float SnapSize = 100.f; // Sent by game state
 
 	UFUNCTION()
 	void UpdateGhost();
