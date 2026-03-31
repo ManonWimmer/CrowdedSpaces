@@ -11,11 +11,11 @@ class CROWDEDSPACES_API UStorageData : public UDataAsset
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float StorageRoomAddMaxMoney = 1000;
+	float StorageRoomAddMaxMoneyPerCell = 1000;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float StorageRoomAddMaxFood = 1000;
+	float StorageRoomAddMaxFoodPerCell = 1000;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float StorageRoomAddMaxElectricity = 1000;
+	float StorageRoomAddMaxElectricityPerCell = 1000;
 };
