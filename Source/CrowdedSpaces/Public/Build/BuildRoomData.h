@@ -43,7 +43,7 @@ public:
 	float LoseElectricityPerHour = 10;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bIsUnlocked = true;
+	bool bIsUnlockedAtStart = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int UnlockWithNPCs = 1;

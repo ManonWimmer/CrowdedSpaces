@@ -367,6 +367,16 @@ void UBuildSubsystem::PlaceRoom()
 	// todo: else = on room updated
 }
 
+void UBuildSubsystem::SetBuildRoomData(const TArray<UBuildRoomData*>& NewBuildRoomData)
+{
+	BuildDataRooms = NewBuildRoomData;
+	
+	for (const TObjectPtr<UBuildRoomData> Room : BuildDataRooms)
+	{
+		UnlockedRooms.Add(Room->RoomType, Room->bIsUnlockedAtStart);
+	}
+}
+
 void UBuildSubsystem::TryRotateBuildLeft()
 {
 	RotationIndex = (RotationIndex + 1) % 4;
@@ -441,14 +451,12 @@ float UBuildSubsystem::GetRoomDestroyCost(const int RoomId) const
 
 void UBuildSubsystem::UnlockRoom(const EGridRoomType RoomType)
 {
-	for (const TObjectPtr<UBuildRoomData> RoomData : BuildDataRooms)
-	{
-		if (RoomData->RoomType == RoomType)
-		{
-			RoomData->bIsUnlocked = true;
-			return;
-		}
-	}
+	UnlockedRooms[RoomType] = true;
+}
+
+bool UBuildSubsystem::IsRoomUnlocked(const EGridRoomType RoomType) const 
+{
+	return UnlockedRooms[RoomType];
 }
 
 void UBuildSubsystem::UpdateGhost()

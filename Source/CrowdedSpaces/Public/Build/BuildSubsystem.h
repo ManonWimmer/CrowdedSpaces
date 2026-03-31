@@ -74,7 +74,7 @@ public:
 	void SetBuildData(const TArray<UBuildData*>& NewBuildData) { BuildDataObjects = NewBuildData; }
 
 	UFUNCTION()
-	void SetBuildRoomData(const TArray<UBuildRoomData*>& NewBuildRoomData) { BuildDataRooms = NewBuildRoomData; }
+	void SetBuildRoomData(const TArray<UBuildRoomData*>& NewBuildRoomData);
 
 	UFUNCTION()
 	void SetSnapSize(const float NewSnapSize) { SnapSize = NewSnapSize; }
@@ -115,6 +115,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UnlockRoom(EGridRoomType RoomType);
 
+	UFUNCTION(BlueprintCallable)
+	bool IsRoomUnlocked(EGridRoomType RoomType) const;
+
 	UPROPERTY(BlueprintAssignable)
 	FOnDeselected OnDeselected; // To deselect ui
 
@@ -136,6 +139,9 @@ private:
 
 	UPROPERTY()
 	TArray<TObjectPtr<UBuildData>> BuildDataObjects; // Sent by game state
+
+	UPROPERTY()
+	TMap<EGridRoomType, bool> UnlockedRooms;
 
 	UPROPERTY()
 	TArray<TObjectPtr<UBuildRoomData>> BuildDataRooms; // Sent by game state
