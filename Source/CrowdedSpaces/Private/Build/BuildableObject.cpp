@@ -162,6 +162,9 @@ bool ABuildableObject::TryReserve(ANPC* NPC)
 	BO_LOG("RESERVED SUCCESS by NPC: %s", *GetNameSafe(NPC));
 	
 	OnNPCComingChanged.Broadcast(bHasNPCComing);
+
+	NPC->SetCurrentObject(this);
+	
 	return true;
 }
 
@@ -178,9 +181,17 @@ void ABuildableObject::Release(ANPC* NPC)
 	ComingNPC = nullptr;
 	bHasNPCComing = false;
 	
-	ReleaseSlot(NPC);
+	UsingNPC = nullptr;
+	bHasNPCUsing = false;
 	
+	ReleaseSlot(NPC);
+
+	OnNPCUsingChanged.Broadcast(bHasNPCUsing);
 	OnNPCComingChanged.Broadcast(bHasNPCComing);
+
+	BO_LOG("Released by NPC: %s", *GetNameSafe(NPC));
+
+	NPC->SetCurrentObject(nullptr);
 }
 
 void ABuildableObject::StartUsing(ANPC* NPC)
@@ -213,12 +224,6 @@ void ABuildableObject::StopUsing(ANPC* NPC)
 	BO_LOG("StopUsing NPC: %s | Current UsingNPC: %s",
 		*GetNameSafe(NPC),
 		*GetNameSafe(UsingNPC.Get()));
-	
-	if (UsingNPC != NPC)
-	{
-		BO_LOG("STOP USING IGNORED (wrong NPC)");
-		return;
-	}
 	
 	UsingNPC = nullptr;
 	ReleaseSlot(NPC);

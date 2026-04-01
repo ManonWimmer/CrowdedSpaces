@@ -10,6 +10,8 @@
 #include "Production/ProductionType.h"
 #include "NPC.generated.h"
 
+class ABuildableObject;
+class USlotComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentActionChanged, ENPCActionWidget, Value); 
 
 UCLASS()
@@ -61,6 +63,10 @@ public:
 	// Name
 	UFUNCTION(BlueprintCallable, Category="AI")
 	FString GetNPCName() const { return NPCName; }
+
+	// Object
+	UFUNCTION()
+	void SetCurrentObject(ABuildableObject* NewObject);
 
 	FTimerHandle NameRetryTimer;
 
@@ -133,6 +139,10 @@ private:
 
 	UPROPERTY()
 	UMaterialInstanceDynamic* OtherMaterialInstance;
+
+	// Object
+	UPROPERTY()
+	TObjectPtr<ABuildableObject> CurrentObject = nullptr;
 	
 	// Selectable
 public:

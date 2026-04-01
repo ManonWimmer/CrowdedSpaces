@@ -192,10 +192,17 @@ void UResourceComponent::ResourceTick()
 {
 	if (bIsInRegen)
 	{
-		if (PlayerFoodForRegen->HasEnoughResource(ResourceRegenPerTick))
+		if (ResourceType == EResourceType::Food && PlayerFoodForRegen)
+		{
+			if (PlayerFoodForRegen->HasEnoughResource(ResourceRegenPerTick))
+			{
+				AddResource(ResourceRegenPerTick);
+				PlayerFoodForRegen->RemoveResource(ResourceRegenPerTick);
+			}
+		}
+		else
 		{
 			AddResource(ResourceRegenPerTick);
-			PlayerFoodForRegen->RemoveResource(ResourceRegenPerTick);
 		}
 	}
 	else

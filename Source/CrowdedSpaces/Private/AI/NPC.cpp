@@ -4,6 +4,7 @@
 #include "AI/NPCController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Build/BuildableObject.h"
+#include "Build/SlotComponent.h"
 #include "Camera/FreeCameraPawn.h"
 #include "Camera/CameraComponent.h"
 #include "Game/CrowdedGameMode.h"
@@ -11,6 +12,8 @@
 #include "UI/Widgets/FoodBarWidget.h"
 #include "UI/Widgets/NPCActionWidget.h"
 #include "UI/Widgets/Selection/NPCNameWidget.h"
+
+#define BO_LOG(Format, ...) UE_LOG(LogTemp, Warning, TEXT("[BuildableObject:%s] " Format), *GetNameSafe(this), ##__VA_ARGS__)
 
 ANPC::ANPC()
 {
@@ -68,6 +71,8 @@ void ANPC::SetCurrentAction(const ENPCActionWidget NewAction)
 void ANPC::Die()
 {
 	// todo: animation ?
+
+	BO_LOG("Npc death, food : %d, energy : %d", FoodComponent->GetResource(), EnergyComponent->GetResource());
 	
 	ACrowdedGameMode* GameMode = GetWorld()->GetAuthGameMode<ACrowdedGameMode>();
 	if (!GameMode)
@@ -117,6 +122,11 @@ int ANPC::GetProductionMultiplierForType(const EProductionType Type) const
 		default:
 			return 1;
 	}
+}
+
+void ANPC::SetCurrentObject(ABuildableObject* NewObject)
+{
+	CurrentObject = NewObject;
 }
 
 void ANPC::TryGenerateName()
@@ -228,6 +238,10 @@ void ANPC::BeginPlay()
 	
 	NPCActionWidgetPtr->OwningActor = this;
 	NPCActionWidgetPtr->Init();
+
+	// Object
+	if (CurrentObject)
+		CurrentObject->Release(this);
 }
 
 void ANPC::EndPlay(const EEndPlayReason::Type EndPlayReason)
