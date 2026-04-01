@@ -5,13 +5,9 @@
 
 namespace NPCHelpers
 {
-	ANPC* SpawnGlobalNPC(UObject* WorldContextObject)
+	ANPC* SpawnGlobalNPC(UWorld& World)
 	{
-		UWorld* World = WorldContextObject->GetWorld();
-		if (!World)
-			return nullptr;
-
-		UCrowdedGameInstance* GameInstance = World->GetGameInstance<UCrowdedGameInstance>();
+		UCrowdedGameInstance* GameInstance = World.GetGameInstance<UCrowdedGameInstance>();
 		if (!GameInstance)
 			return nullptr;
 
@@ -21,7 +17,7 @@ namespace NPCHelpers
 		FActorSpawnParameters SpawnInfo;
 		SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-		return World->SpawnActor<ANPC>(GameInstance->GlobalNPCClass, Location, Rotation, SpawnInfo);
+		return World.SpawnActor<ANPC>(GameInstance->GlobalNPCClass, Location, Rotation, SpawnInfo);
 	}
 }
 
