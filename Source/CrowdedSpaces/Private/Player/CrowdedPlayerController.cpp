@@ -103,10 +103,7 @@ void ACrowdedPlayerController::BeginPlay()
 	if (!TimeSubsystem)
 		return;
 
-	OnTime0.AddDynamic(TimeSubsystem, &UTimeSubsystem::OnTime0);
-	OnTime1.AddDynamic(TimeSubsystem, &UTimeSubsystem::OnTime1);
-	OnTime2.AddDynamic(TimeSubsystem, &UTimeSubsystem::OnTime2);
-	OnTime3.AddDynamic(TimeSubsystem, &UTimeSubsystem::OnTime3);
+	OnTimeInputChanged.AddDynamic(TimeSubsystem, &UTimeSubsystem::OnTimeInputChanged);
 	OnTogglePause.AddDynamic(TimeSubsystem, &UTimeSubsystem::OnTogglePause);
 }
 
