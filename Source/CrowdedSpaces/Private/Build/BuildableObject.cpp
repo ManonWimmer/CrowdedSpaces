@@ -170,9 +170,6 @@ bool ABuildableObject::IsReservedByOther(TObjectPtr<ANPC> NPC) const
 
 void ABuildableObject::Release(ANPC* NPC)
 {
-	if (ComingNPC != NPC)
-		return;
-		
 	ComingNPC = nullptr;
 	bHasNPCComing = false;
 	
@@ -184,7 +181,7 @@ void ABuildableObject::Release(ANPC* NPC)
 	OnNPCUsingChanged.Broadcast(bHasNPCUsing);
 	OnNPCComingChanged.Broadcast(bHasNPCComing);
 
-	BO_LOG("Released by NPC: %s", *GetNameSafe(NPC));
+	CS_LOG("Released by NPC: %s", *GetNameSafe(NPC));
 
 	NPC->SetCurrentObject(nullptr);
 }
@@ -293,7 +290,7 @@ USlotComponent* ABuildableObject::ReserveSlot(ANPC* NPC)
 	{
 		if (Slot && Slot->IsFree())
 		{
-			Slot->SetOccupied(true, NPC);
+			Slot->Acquire(NPC);
 			
 			CS_LOG("Slot reserved: %s by NPC: %s",
 				*Slot->GetName(),
@@ -301,7 +298,7 @@ USlotComponent* ABuildableObject::ReserveSlot(ANPC* NPC)
 			
 			ComingNPC = NPC;
 			bHasNPCComing = true;
-			BO_LOG("RESERVED SUCCESS by NPC: %s", *GetNameSafe(NPC));
+			CS_LOG("RESERVED SUCCESS by NPC: %s", *GetNameSafe(NPC));
 	
 			OnNPCComingChanged.Broadcast(bHasNPCComing);
 
@@ -325,7 +322,7 @@ void  ABuildableObject::ReleaseSlot(ANPC* NPC)
 		if (Slot && Slot->OccupyingNPC == NPC)
 		{
 			CS_LOG("Slot released: %s", *Slot->GetName());
-			Slot->SetOccupied(false, nullptr);
+			Slot->Release(NPC);
 			return;
 		}
 	}
