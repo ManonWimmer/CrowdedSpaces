@@ -81,8 +81,11 @@ void UElectricitySubsystem::OnTimeChanged(const float NewTime)
 			{
 				if (!(RoomPtr)->bHasEnoughElectricity)
 				{
-					Object->SetHasEnoughElectricity(false);
-					continue;
+					if (Object->GetBuildData()->LoseElectricityPerHour > 0)
+					{
+						Object->SetHasEnoughElectricity(false);
+						continue;
+					}
 				}
 			}
 		}

@@ -156,14 +156,6 @@ bool ABuildableObject::TryReserve(ANPC* NPC)
 		BO_LOG("RESERVE FAILED: already reserved by other NPC");
 		return false;
 	}
-
-	ComingNPC = NPC;
-	bHasNPCComing = true;
-	BO_LOG("RESERVED SUCCESS by NPC: %s", *GetNameSafe(NPC));
-	
-	OnNPCComingChanged.Broadcast(bHasNPCComing);
-
-	NPC->SetCurrentObject(this);
 	
 	return true;
 }
@@ -297,6 +289,14 @@ USlotComponent* ABuildableObject::ReserveSlot(ANPC* NPC)
 			BO_LOG("Slot reserved: %s by NPC: %s",
 				*Slot->GetName(),
 				*GetNameSafe(NPC));
+			
+			ComingNPC = NPC;
+			bHasNPCComing = true;
+			BO_LOG("RESERVED SUCCESS by NPC: %s", *GetNameSafe(NPC));
+	
+			OnNPCComingChanged.Broadcast(bHasNPCComing);
+
+			NPC->SetCurrentObject(this);
 			
 			return Slot;
 		}

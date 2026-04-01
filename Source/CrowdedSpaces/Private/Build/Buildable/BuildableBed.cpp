@@ -48,7 +48,7 @@ bool ABuildableBed::StartUsingImplementation(UBTTask_UseBuildableObject* UseObje
 	if (!FoodComp)
 		return false;
 	
-	FoodComp->ToggleResourceTimer();  // todo: plus tard petit multiplicateur?
+	FoodComp->ToggleResourceTimer(); 
 	
 	return true;
 }
@@ -72,7 +72,7 @@ bool ABuildableBed::StopUsingImplementation(UBTTask_UseBuildableObject* UseObjec
 	if (!FoodComp)
 		return false;
 	
-	FoodComp->ToggleResourceTimer(); // todo: plus tard petit multiplicateur?
+	FoodComp->ToggleResourceTimer(); 
 	
 	return true;
 }

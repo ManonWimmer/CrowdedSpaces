@@ -72,7 +72,7 @@ void ANPC::Die()
 {
 	// todo: animation ?
 
-	BO_LOG("Npc death, food : %d, energy : %d", FoodComponent->GetResource(), EnergyComponent->GetResource());
+	BO_LOG("Npc death, food : %f, energy : %f", FoodComponent->GetResource(), EnergyComponent->GetResource());
 	
 	ACrowdedGameMode* GameMode = GetWorld()->GetAuthGameMode<ACrowdedGameMode>();
 	if (!GameMode)
