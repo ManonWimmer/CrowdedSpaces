@@ -54,7 +54,7 @@ void ABuildableObject::BeginPlay()
 
 	GetComponents<USlotComponent>(Slots);
 
-	for (USlotComponent* Slot : Slots)
+	for (const USlotComponent* Slot : Slots)
 	{
 		if (!Slot) continue;
 
