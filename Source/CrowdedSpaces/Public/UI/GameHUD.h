@@ -23,6 +23,9 @@ public:
 	TObjectPtr<T> GetOrCreateWidget(TSubclassOf<UCustomWidget> WidgetClass);
 
 	UFUNCTION()
+	void CreateNewWidget(TSubclassOf<UCustomWidget> WidgetClass, ESlateVisibility InitialVisibility);
+
+	UFUNCTION()
 	UCustomWidget* ShowWidget(TSubclassOf<UCustomWidget> WidgetClass, bool bShow, ESlateVisibility VisibilityOnShow);
 
 	UPROPERTY(EditAnywhere, Category="Widgets")
@@ -42,7 +45,7 @@ public:
 	// Selection
 	void ShowSelectionWidget(AActor* SelectableActor, bool bShow, ESelectionType SelectionType);
 	
-	void ShowSelectionWidget(const FGridRoom& Room, bool bShow, ESelectionType SelectionType);
+	void ShowSelectionWidget(FGridRoom& Room, bool bShow, ESelectionType SelectionType);
 
 	UCustomWidget* GetWidgetFromSelectionType(ESelectionType Type);
 
@@ -75,6 +78,9 @@ private:
 	// Selection
 	UPROPERTY(EditAnywhere, Category="Widgets")
 	TSubclassOf<UCustomWidget> RoomSelectionWidgetBP;
+
+	UPROPERTY(EditAnywhere, Category="Widgets")
+	TSubclassOf<UCustomWidget> StorageRoomSelectionWidgetBP;
 
 	UPROPERTY(EditAnywhere, Category="Widgets")
 	TSubclassOf<UCustomWidget> GeneratorSelectionWidgetBP;
@@ -113,6 +119,6 @@ private:
 
 	bool bUIClickThisFrame = false;
 
-	const FGridRoom* CurrentlySelectedRoom = nullptr;
+	FGridRoom& CurrentlySelectedRoom = *(new FGridRoom());
 };
 

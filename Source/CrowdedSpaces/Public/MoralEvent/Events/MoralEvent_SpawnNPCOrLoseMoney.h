@@ -17,8 +17,5 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<ANPC> NPCClass;
-
-	UPROPERTY(EditAnywhere)
 	int MoneyToLose;
 };

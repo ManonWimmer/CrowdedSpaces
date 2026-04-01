@@ -24,7 +24,9 @@ AFreeCameraPawn::AFreeCameraPawn()
 	// Default zoom
 	TargetZoom = SpringArm->TargetArmLength;
 
-	AutoPossessPlayer = EAutoReceiveInput::Player0; 
+	AutoPossessPlayer = EAutoReceiveInput::Player0;
+
+	PrimaryActorTick.bTickEvenWhenPaused = true;
 }
 
 void AFreeCameraPawn::BeginPlay()
@@ -37,9 +39,7 @@ void AFreeCameraPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	float RealDeltaTime = DeltaTime;
-	if (UGameplayStatics::GetGlobalTimeDilation(GetWorld()) >= 1)
-		RealDeltaTime = GetWorld()->GetDeltaSeconds() / UGameplayStatics::GetGlobalTimeDilation(GetWorld());
+	float RealDeltaTime = FApp::GetDeltaTime();
 	
 	ApplyMovement(RealDeltaTime);
 	ApplyRotation(RealDeltaTime);
@@ -72,6 +72,7 @@ void AFreeCameraPawn::BindControllerEvents()
 	CrowdedPC->OnCameraMoveForward.AddDynamic(this, &AFreeCameraPawn::OnMoveForward);
 	CrowdedPC->OnCameraMoveRight.AddDynamic(this, &AFreeCameraPawn::OnMoveRight);
 	CrowdedPC->OnCameraRotate.AddDynamic(this, &AFreeCameraPawn::OnRotate);
+	CrowdedPC->OnCameraMouseWheelClickRotate.AddDynamic(this, &AFreeCameraPawn::OnMouseWheelRotate);
 	CrowdedPC->OnCameraZoom.AddDynamic(this, &AFreeCameraPawn::OnZoom);
 }
 
@@ -88,6 +89,11 @@ void AFreeCameraPawn::OnMoveRight(float Value)
 void AFreeCameraPawn::OnRotate(float Value)
 {
 	CurrentYawInput = -Value * RotationSpeed;
+}
+
+void AFreeCameraPawn::OnMouseWheelRotate(FVector2D MouseDelta)
+{
+	MouseYawInput = -MouseDelta.X * RotationSpeed;
 }
 
 void AFreeCameraPawn::OnZoom(float Value)
@@ -127,7 +133,9 @@ void AFreeCameraPawn::ApplyMovement(float DeltaTime)
 
 void AFreeCameraPawn::ApplyRotation(float DeltaTime)
 {
-	float TargetYaw = GetActorRotation().Yaw + CurrentYawInput * DeltaTime;
+	float TotalYawInput = CurrentYawInput + MouseYawInput;
+
+	float TargetYaw = GetActorRotation().Yaw + TotalYawInput * DeltaTime;
 	
 	float SmoothedYaw = FMath::FInterpTo(
 		GetActorRotation().Yaw,
@@ -137,5 +145,7 @@ void AFreeCameraPawn::ApplyRotation(float DeltaTime)
 	);
 
 	SetActorRotation(FRotator(GetActorRotation().Pitch, SmoothedYaw, 0.f));
+	
+	MouseYawInput = 0.f;
 }
 

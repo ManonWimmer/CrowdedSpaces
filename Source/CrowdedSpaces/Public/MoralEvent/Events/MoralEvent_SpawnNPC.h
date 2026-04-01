@@ -13,8 +13,4 @@ public:
 	virtual void ClickOnChoice(EMoralEventType Choice) override;
 
 	virtual void SetupChoices() override;
-
-private:
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<ANPC> NPCClass;
 };

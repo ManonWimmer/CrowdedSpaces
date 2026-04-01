@@ -1,6 +1,7 @@
 ﻿#include "Time/TimeSubsystem.h"
 
 #include "Kismet/GameplayStatics.h"
+#include "Player/CrowdedPlayerController.h"
 #include "Time/TimeSpeedType.h"
 
 TStatId UTimeSubsystem::GetStatId() const
@@ -40,10 +41,64 @@ bool UTimeSubsystem::IsTickable() const
 	return true;
 }
 
+void UTimeSubsystem::OnTimeInputChanged(const int TimeIndex)
+{
+	switch (TimeIndex)
+	{
+		case 0:
+			TrySetTimeSpeed(ETimeSpeedType::Paused);
+			break;
+		case 1:
+			TrySetTimeSpeed(ETimeSpeedType::Normal);
+			break;
+		case 2:
+			TrySetTimeSpeed(ETimeSpeedType::High);
+			break;
+		case 3:
+			TrySetTimeSpeed(ETimeSpeedType::Ultra);
+			break;
+		default:
+			break;
+	}
+}
+
+void UTimeSubsystem::OnTogglePause()
+{
+	if (CurrentTimeSpeed == ETimeSpeedType::Paused)
+	{
+		TrySetTimeSpeed(ETimeSpeedType::Normal);
+	}
+	else
+	{
+		TrySetTimeSpeed(ETimeSpeedType::Paused);
+	}
+}
+
+void UTimeSubsystem::HandleGameModeChanged(EGameModeState NewGameMode)
+{
+	if (NewGameMode == EGameModeState::Building)
+	{
+		SetTimePaused();
+	}
+	else if (NewGameMode == EGameModeState::Game)
+	{
+		SetTimeUnpaused();
+	}
+}
+
 void UTimeSubsystem::SetTimeData(UTimeData* NewTimeData)
 {
 	TimeData = NewTimeData;
 	GetCurrentSpeedValues();
+}
+
+bool UTimeSubsystem::TrySetTimeSpeed(ETimeSpeedType NewTimeSpeed)
+{
+	if (!bCanChangeTime)
+		return false;
+
+	SetTimeSpeed(NewTimeSpeed);
+	return true;
 }
 
 void UTimeSubsystem::SetTimeSpeed(const ETimeSpeedType NewTimeSpeed)
@@ -57,9 +112,21 @@ void UTimeSubsystem::SetTimeSpeed(const ETimeSpeedType NewTimeSpeed)
 	OnTimeSpeedChanged.Broadcast(CurrentTimeSpeed);
 }
 
-void UTimeSubsystem::SetTimePaused(const TSubclassOf<UMoralEvent> MoralEvent)
+void UTimeSubsystem::SetTimePausedWithEvent(const TSubclassOf<UMoralEvent> MoralEvent)
+{
+	SetTimePaused();
+}
+
+void UTimeSubsystem::SetTimePaused()
 {
 	SetTimeSpeed(ETimeSpeedType::Paused);
+	bCanChangeTime = false;
+}
+
+void UTimeSubsystem::SetTimeUnpaused()
+{
+	SetTimeSpeed(ETimeSpeedType::Normal);
+	bCanChangeTime = true;
 }
 
 void UTimeSubsystem::GetRandomMoralEventForDay(int Day) const
@@ -100,11 +167,6 @@ void UTimeSubsystem::GetRandomMoralEventForDay(int Day) const
 			return;
 		}
 	}
-}
-
-void UTimeSubsystem::SetTimeNormal()
-{
-	SetTimeSpeed(ETimeSpeedType::Normal);
 }
 
 void UTimeSubsystem::GetCurrentSpeedValues()

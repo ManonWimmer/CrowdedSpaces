@@ -25,10 +25,7 @@ public:
 	TSubclassOf<ABuildableObject> BuildClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int MoneyCost;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int DestroyMoney;
+	EGridRoomType RoomType = EGridRoomType::Any;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int GridRowsX = 1;
@@ -37,5 +34,11 @@ public:
 	int GridColumnsY = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	EGridRoomType RoomType = EGridRoomType::Any;
+	int MoneyCost = 10;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int DestroyMoney = 10;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float LoseElectricityPerHour = 10;
 };

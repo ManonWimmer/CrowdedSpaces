@@ -10,49 +10,85 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraMoveForward, float, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraMoveRight, float, Value);
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraRotate, float, Value);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraMouseWheelClickRotate, FVector2D, Value);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMouseMove, FVector2D, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraZoom, float, Value);
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftClickBuild);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftClickGame);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRightClickBuild);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRightClickGame);
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftRotateBuild);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRightRotateBuild);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTimeInputChanged, int, TimeIndex);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTogglePause);
 
 UCLASS()
 class CROWDEDSPACES_API ACrowdedPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
+	ACrowdedPlayerController();
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Input")
-	UInputMappingContext* CameraIMC;
+	UInputMappingContext* CameraIMC = nullptr;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UPlayerActionsData> PlayerInputsData;
 
-	// Delegates
+	// Camera move
 	UPROPERTY(BlueprintAssignable)
 	FOnCameraMoveForward OnCameraMoveForward;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnCameraMoveRight OnCameraMoveRight;
 
+	// Camera rotate & zoom
 	UPROPERTY(BlueprintAssignable)
 	FOnCameraRotate OnCameraRotate;
 
 	UPROPERTY(BlueprintAssignable)
+	FOnCameraMouseWheelClickRotate OnCameraMouseWheelClickRotate;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnMouseMove OnMouseMove;
+
+	UPROPERTY(BlueprintAssignable)
 	FOnCameraZoom OnCameraZoom;
 
+	// Left click
 	UPROPERTY(BlueprintAssignable)
 	FOnLeftClickBuild OnLeftClickBuild;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnLeftClickGame OnLeftClickGame;
 
+	// Right click
+	UPROPERTY(BlueprintAssignable)
+	FOnRightClickBuild OnRightClickBuild;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnRightClickBuild OnRightClickGame;
+
+	// Rotate build
 	UPROPERTY(BlueprintAssignable)
 	FOnLeftRotateBuild OnLeftRotateBuild;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnRightRotateBuild OnRightRotateBuild;
+
+	// Time
+	UPROPERTY(BlueprintAssignable)
+	FOnTimeInputChanged OnTimeInputChanged;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnTogglePause OnTogglePause;
 	
 protected:
 	virtual void SetupInputComponent() override;
@@ -68,13 +104,24 @@ private:
 	
 	void RotateInput(const FInputActionValue& Value) { OnCameraRotate.Broadcast(Value.Get<float>()); }
 	void StopRotateInput(const FInputActionValue& Value) { OnCameraRotate.Broadcast(0.f); }
+
+	void MouseMoveInput(const FInputActionValue& Value);
+	void StartMouseWheelRotate(const FInputActionValue& Value) { bIsRotatingCameraWithMouseWheel = true; }
+	void StopMouseWheelRotate(const FInputActionValue& Value) { bIsRotatingCameraWithMouseWheel = false; }
 	
 	void ZoomInput(const FInputActionValue& Value) { OnCameraZoom.Broadcast(Value.Get<float>()); }
 
 	void LeftClickInput(const FInputActionValue& Value);
+	void RightClickInput(const FInputActionValue& Value);
 
 	void LeftRotateBuildInput(const FInputActionValue& Value);
 	void RightRotateBuildInput(const FInputActionValue& Value);
+
+	void Time0Input(const FInputActionValue& Value) { OnTimeInputChanged.Broadcast(0); }
+	void Time1Input(const FInputActionValue& Value) { OnTimeInputChanged.Broadcast(1); }
+	void Time2Input(const FInputActionValue& Value) { OnTimeInputChanged.Broadcast(2); }
+	void Time3Input(const FInputActionValue& Value) { OnTimeInputChanged.Broadcast(3); }
+	void TogglePauseInput(const FInputActionValue& Value) { OnTogglePause.Broadcast(); }
 
 	// Selection
 	void HandleSelection() const;
@@ -87,4 +134,7 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<AGameHUD> GameHUD = nullptr;
+
+	UPROPERTY()
+	bool bIsRotatingCameraWithMouseWheel = false;
 };

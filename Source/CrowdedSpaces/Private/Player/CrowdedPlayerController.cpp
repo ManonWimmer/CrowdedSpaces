@@ -5,7 +5,13 @@
 #include "EnhancedInputComponent.h"
 #include "Game/CrowdedGameMode.h"
 #include "Kismet/GameplayStatics.h"
+#include "Time/TimeSubsystem.h"
 #include "UI/Widgets/SelectionWidget.h"
+
+ACrowdedPlayerController::ACrowdedPlayerController(): CameraIMC(nullptr)
+{
+	bShouldPerformFullTickWhenPaused = true;
+}
 
 void ACrowdedPlayerController::SetupInputComponent()
 {
@@ -28,26 +34,38 @@ void ACrowdedPlayerController::SetupInputComponent()
 	EIC->BindAction(PlayerInputsData->MoveRightAction, ETriggerEvent::Completed, this, &ACrowdedPlayerController::StopMoveRightInput);
 
 	// Camera rotate
-	EIC->BindAction(PlayerInputsData->RotateAction, ETriggerEvent::Started, this, &ACrowdedPlayerController::RotateInput);
-	EIC->BindAction(PlayerInputsData->RotateAction, ETriggerEvent::Triggered, this, &ACrowdedPlayerController::RotateInput);
-	EIC->BindAction(PlayerInputsData->RotateAction, ETriggerEvent::Completed, this, &ACrowdedPlayerController::StopRotateInput);
+	EIC->BindAction(PlayerInputsData->RotateKeyAction, ETriggerEvent::Started, this, &ACrowdedPlayerController::RotateInput);
+	EIC->BindAction(PlayerInputsData->RotateKeyAction, ETriggerEvent::Triggered, this, &ACrowdedPlayerController::RotateInput);
+	EIC->BindAction(PlayerInputsData->RotateKeyAction, ETriggerEvent::Completed, this, &ACrowdedPlayerController::StopRotateInput);
 
+	EIC->BindAction(PlayerInputsData->MouseMoveAction, ETriggerEvent::Triggered, this, &ACrowdedPlayerController::MouseMoveInput);
+	EIC->BindAction(PlayerInputsData->RotateMouseWheelClickAction, ETriggerEvent::Started, this, &ACrowdedPlayerController::StartMouseWheelRotate);
+	EIC->BindAction(PlayerInputsData->RotateMouseWheelClickAction, ETriggerEvent::Completed, this, &ACrowdedPlayerController::StopMouseWheelRotate);
+	
 	// Zoom
 	EIC->BindAction(PlayerInputsData->ZoomAction, ETriggerEvent::Started, this, &ACrowdedPlayerController::ZoomInput);
 
-	// Left click
+	// Left & right click
 	EIC->BindAction(PlayerInputsData->LeftClickAction, ETriggerEvent::Started, this, &ACrowdedPlayerController::LeftClickInput);
+	EIC->BindAction(PlayerInputsData->RightClickAction, ETriggerEvent::Started, this, &ACrowdedPlayerController::RightClickInput);
 
 	// Build rotate
 	EIC->BindAction(PlayerInputsData->LeftRotateBuildAction, ETriggerEvent::Started, this, &ACrowdedPlayerController::LeftRotateBuildInput);
 	EIC->BindAction(PlayerInputsData->RightRotateBuildAction, ETriggerEvent::Started, this, &ACrowdedPlayerController::RightRotateBuildInput);
+
+	// Time
+	EIC->BindAction(PlayerInputsData->Time0Action, ETriggerEvent::Started, this, &ACrowdedPlayerController::Time0Input);
+	EIC->BindAction(PlayerInputsData->Time1Action, ETriggerEvent::Started, this, &ACrowdedPlayerController::Time1Input);
+	EIC->BindAction(PlayerInputsData->Time2Action, ETriggerEvent::Started, this, &ACrowdedPlayerController::Time2Input);
+	EIC->BindAction(PlayerInputsData->Time3Action, ETriggerEvent::Started, this, &ACrowdedPlayerController::Time3Input);
+	EIC->BindAction(PlayerInputsData->TogglePauseAction, ETriggerEvent::Started, this, &ACrowdedPlayerController::TogglePauseInput);
 	
 	// Add IMC
-	TObjectPtr<ULocalPlayer> LP = GetLocalPlayer();
-	if (!LP)
+	TObjectPtr<ULocalPlayer> LocalPlayer = GetLocalPlayer();
+	if (!LocalPlayer)
 		return;
 
-	TObjectPtr<UEnhancedInputLocalPlayerSubsystem> InputSubsystem = LP->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+	TObjectPtr<UEnhancedInputLocalPlayerSubsystem> InputSubsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
 	if (!InputSubsystem)
 		return;
 	
@@ -75,13 +93,32 @@ void ACrowdedPlayerController::BeginPlay()
 
 	// Get HUD
 	GameHUD = Cast<AGameHUD>(UGameplayStatics::GetPlayerController(this, 0)->GetHUD());
+
+	// Time
+	UWorld* World = GetWorld();
+	if (!World)
+		return;
+	
+	UTimeSubsystem* TimeSubsystem = World->GetSubsystem<UTimeSubsystem>();
+	if (!TimeSubsystem)
+		return;
+
+	OnTimeInputChanged.AddDynamic(TimeSubsystem, &UTimeSubsystem::OnTimeInputChanged);
+	OnTogglePause.AddDynamic(TimeSubsystem, &UTimeSubsystem::OnTogglePause);
+}
+
+void ACrowdedPlayerController::MouseMoveInput(const FInputActionValue& Value)
+{
+	if (!bIsRotatingCameraWithMouseWheel)
+		return;
+
+	FVector2D MouseDelta = Value.Get<FVector2D>();
+
+	OnCameraMouseWheelClickRotate.Broadcast(MouseDelta);
 }
 
 void ACrowdedPlayerController::LeftClickInput(const FInputActionValue& Value)
 {
-	//if (GEngine)
-		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Purple, "Left click event");
-	
 	TObjectPtr<ACrowdedGameMode> GameMode = Cast<ACrowdedGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 	if (!GameMode)
 		return;
@@ -99,6 +136,22 @@ void ACrowdedPlayerController::LeftClickInput(const FInputActionValue& Value)
 		return;
 	
 	HandleSelection();
+}
+
+void ACrowdedPlayerController::RightClickInput(const FInputActionValue& Value)
+{
+	const TObjectPtr<ACrowdedGameMode> GameMode = Cast<ACrowdedGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (!GameMode)
+		return;
+	
+	if (GameMode->GetGameMode() == EGameModeState::Building)
+	{
+		OnRightClickBuild.Broadcast();
+	}
+	else if (GameMode->GetGameMode() == EGameModeState::Game)
+	{
+		OnRightClickGame.Broadcast();	
+	}
 }
 
 void ACrowdedPlayerController::LeftRotateBuildInput(const FInputActionValue& Value)
@@ -139,7 +192,7 @@ void ACrowdedPlayerController::HandleSelection() const
 	if (HitActor && HitActor->Implements<USelectable>())
 	{
 		const ISelectable* Selectable = Cast<ISelectable>(HitActor);
-		GameHUD->ShowSelectionWidget(HitActor, true, Selectable->GetSelectionType());
+		GameHUD->ShowSelectionWidget(HitActor, true, Selectable->	GetSelectionType());
 		return;
 	}
 
@@ -148,9 +201,17 @@ void ACrowdedPlayerController::HandleSelection() const
 	{
 		FGridRoom* Room;
 
-		if (GridActor->GetRoomAtWorldLocation(Hit.Location, Room))
+		if (GridActor->GetRoomAtWorldLocation(Hit.Location, Room) && Room)
 		{
-			GameHUD->ShowSelectionWidget(*Room, true, ESelectionType::Room);
+			if (Room->RoomType == EGridRoomType::Storage)
+			{
+				GameHUD->ShowSelectionWidget(*Room, true, ESelectionType::StorageRoom);
+			}
+			else
+			{
+				GameHUD->ShowSelectionWidget(*Room, true, ESelectionType::Room);
+			}
+			
 			return;
 		}
 	}

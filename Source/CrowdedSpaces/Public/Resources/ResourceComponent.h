@@ -5,8 +5,10 @@
 #include "Resources/ResourceType.h"
 #include "ResourceComponent.generated.h"
 
+class UCrowdedGameInstance;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnResourceFull); 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnResourceChanged, int32, Value); 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxResourceChanged, int32, Value); 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIsInRegenChanged, bool, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNoMoreResource); 
 
@@ -22,25 +24,31 @@ public:
 	void SetType(EResourceType NewType);
 
 	UFUNCTION(BlueprintCallable)
-	EResourceType GetType() const { return ResourceType;}
+	EResourceType GetType() const { return ResourceType; }
 	
 	// Change value
 	UFUNCTION(BlueprintCallable)
-	void AddResource(int Amount);
+	void AddResource(float Amount);
 
 	UFUNCTION(BlueprintCallable)
-	void RemoveResource(int Amount);
+	void RemoveResource(float Amount);
+
+	UFUNCTION(BlueprintCallable)
+	void AddMaxResource(float Amount);
+
+	UFUNCTION(BlueprintCallable)
+	void RemoveMaxResource(float Amount);
 
 	// Get value
 	UFUNCTION(BlueprintCallable)
-	int GetResource() const { return Resource; }
+	float  GetResource() const { return Resource; }
 
 	UFUNCTION(BlueprintCallable)
-	int GetMaxResource() const { return MaxResource; }
+	float  GetMaxResource() const { return MaxResource; }
 
 	// Check value
 	UFUNCTION(BlueprintCallable)
-	bool HasEnoughResource(int Amount);
+	bool HasEnoughResource(float  Amount);
 	
 	UFUNCTION(BlueprintCallable)
 	bool HasMaxResource();
@@ -77,14 +85,17 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnNoMoreResource OnNoMoreResource;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnMaxResourceChanged OnMaxResourceChanged;
 	
 private:
 	// Resource
 	UPROPERTY(EditAnywhere)
-	int32 Resource = 0;
+	float Resource = 0;
 
 	UPROPERTY(EditAnywhere)
-	int32 MaxResource = 0;
+	float MaxResource = 0;
 
 	UPROPERTY(EditAnywhere)
 	bool bIsInRegen = false;
@@ -93,10 +104,10 @@ private:
 	bool CanLoseAndRegenResource = false;
 	
 	UPROPERTY(EditAnywhere)
-	int32 ResourceLossPerTick = 1;
+	float ResourceLossPerTick = 1;
 
 	UPROPERTY(EditAnywhere)
-	int32 ResourceRegenPerTick = 2;
+	float ResourceRegenPerTick = 2;
 
 	// Timer
 	UPROPERTY(EditAnywhere)
@@ -109,6 +120,9 @@ private:
 	// Type
 	UPROPERTY(EditAnywhere)
 	EResourceType ResourceType = EResourceType::Money;
+
+	UPROPERTY()
+	TObjectPtr<UCrowdedGameInstance> GameInstance = nullptr;
 
 protected:
 	virtual void BeginPlay() override;

@@ -1,6 +1,7 @@
 ﻿#include "Build/BuildSubsystem.h"
 
 #include "EngineUtils.h"
+#include "Build/GhostObject.h"
 #include "Grid/GridActor.h"
 #include "Game/CrowdedGameMode.h"
 #include "Game/CrowdedGameState.h"
@@ -34,6 +35,8 @@ void UBuildSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 		return;
 
 	CamPC->OnLeftClickBuild.AddDynamic(this, &UBuildSubsystem::LeftClicked);
+	CamPC->OnRightClickBuild.AddDynamic(this, &UBuildSubsystem::RightClicked);
+	
 	CamPC->OnLeftRotateBuild.AddDynamic(this, &UBuildSubsystem::TryRotateBuildLeft);
 	CamPC->OnRightRotateBuild.AddDynamic(this, &UBuildSubsystem::TryRotateBuildRight);
 
@@ -80,8 +83,8 @@ void UBuildSubsystem::OnGameModeChanged(EGameModeState NewMode)
 		if (GridActor)
 		{
 			GridActor->SetIsShowingRooms(true);
-			GridActor->ShowPlacedRooms(true);
 			GridActor->ShowGrid(true);
+			GridActor->ShowPlacedRooms(true);
 		}
 	}
 	else
@@ -215,7 +218,7 @@ void UBuildSubsystem::StopBuilding()
 	GridActor->DeselectSelectedCells();
 }
 
-void UBuildSubsystem::PlaceObject() const
+void UBuildSubsystem::PlaceObject()
 {
 	if (!CurrentGhost || !CurrentBuildData || !CurrentBuildData->BuildClass || !GridActor)
 		return;
@@ -225,7 +228,8 @@ void UBuildSubsystem::PlaceObject() const
 	
 	GetObjectRotatedSize(SizeX, SizeY);
 
-	int StartRow = 0, StartCol = 0;
+	int StartRow = LastStartRow;
+	int StartCol = LastStartCol;
 	GridActor->GetCellAtLocation(CurrentGhost->GetActorLocation(), StartRow, StartCol);
 	
 	StartRow -= SizeX / 2;
@@ -234,7 +238,6 @@ void UBuildSubsystem::PlaceObject() const
 	StartRow = FMath::Clamp(StartRow, 0, GridActor->GetRows() - SizeX);
 	StartCol = FMath::Clamp(StartCol, 0, GridActor->GetColumns() - SizeY);
 
-	// Check can place
 	for (int Row = StartRow; Row < StartRow + SizeX; ++Row)
 	{
 		for (int Col = StartCol; Col < StartCol + SizeY; ++Col)
@@ -243,14 +246,15 @@ void UBuildSubsystem::PlaceObject() const
 			if (CurrentBuildData->RoomType == EGridRoomType::Any)
 			{
 				if (!Cell || Cell->bOccupied)
-					return; 
+					return;
 			}
 			else
 			{
 				if (!Cell || Cell->bOccupied || Cell->RoomType != CurrentBuildData->RoomType)
-					return; 
+					return;
+
+				CurrentObjectRoomId = Cell->RoomId;
 			}
-			
 		}
 	}
 
@@ -264,6 +268,7 @@ void UBuildSubsystem::PlaceObject() const
 	);
 
 	Placed->SetBuildData(CurrentBuildData);
+	Placed->RoomId = CurrentObjectRoomId;
 
 	if (!Placed)
 		return;
@@ -287,7 +292,7 @@ void UBuildSubsystem::PlaceObject() const
 		MoneyComponent->RemoveResource(CurrentBuildData->MoneyCost);
 }
 
-void UBuildSubsystem::RemoveObject(ABuildableObject* Object) const
+void UBuildSubsystem::RemoveObject(const ABuildableObject* Object) const
 {
 	int SizeX = Object->GetBuildData()->GridRowsX;
 	int SizeY = Object->GetBuildData()->GridColumnsY;
@@ -318,9 +323,6 @@ void UBuildSubsystem::RemoveObject(ABuildableObject* Object) const
 				Cell->bOccupied = false;
 		}
 	}
-	
-	if (MoneyComponent)
-		MoneyComponent->AddResource(Object->GetBuildData()->DestroyMoney);
 }
 
 void UBuildSubsystem::PlaceRoom()
@@ -349,14 +351,31 @@ void UBuildSubsystem::PlaceRoom()
 		}
 	}
 	
-	GridActor->CreateRoom(CurrentBuildRoomData, SelectedRoomCells);
+	TTuple<bool, int> IsNewRoomAndRoomId = GridActor->CreateRoom(CurrentBuildRoomData, SelectedRoomCells);
 
+	UE_LOG(LogTemp, Display, TEXT("Created room, id : %d"), IsNewRoomAndRoomId.Value);
+	UE_LOG(LogTemp, Display, TEXT("Created room, is new : %d"), IsNewRoomAndRoomId.Key);
+	
 	if (MoneyComponent)
 		MoneyComponent->RemoveResource(CurrentBuildRoomData->MoneyCost);
 
 	GridActor->DeselectSelectedCells();
 	
 	SelectedRoomCells.Empty();
+
+	if (IsNewRoomAndRoomId.Key)
+		OnRoomCreated.Broadcast(IsNewRoomAndRoomId.Value, CurrentBuildRoomData->RoomType);
+	// todo: else = on room updated
+}
+
+void UBuildSubsystem::SetBuildRoomData(const TArray<UBuildRoomData*>& NewBuildRoomData)
+{
+	BuildDataRooms = NewBuildRoomData;
+	
+	for (const TObjectPtr<UBuildRoomData> Room : BuildDataRooms)
+	{
+		UnlockedRooms.Add(Room->RoomType, Room->bIsUnlockedAtStart);
+	}
 }
 
 void UBuildSubsystem::TryRotateBuildLeft()
@@ -407,7 +426,41 @@ void UBuildSubsystem::GetRoomRotatedSize(int& OutX, int& OutY) const
 	}
 }
 
-void UBuildSubsystem::UpdateGhost() const
+TMap<int, FGridRoom>& UBuildSubsystem::GetRooms()
+{
+	return GridActor->GetRooms();
+}
+
+void UBuildSubsystem::DestroyRoom(const int RoomId) const
+{
+	if (!GridActor)
+		return;
+	
+	if (GridActor->DestroyRoom(RoomId))
+	{
+		OnRoomDestroyed.Broadcast(RoomId);
+	}
+}
+
+float UBuildSubsystem::GetRoomDestroyCost(const int RoomId) const
+{
+	if (!GridActor)
+		return 0;
+	
+	return GridActor->GetRoomDestroyCost(RoomId);
+}
+
+void UBuildSubsystem::UnlockRoom(const EGridRoomType RoomType)
+{
+	UnlockedRooms[RoomType] = true;
+}
+
+bool UBuildSubsystem::IsRoomUnlocked(const EGridRoomType RoomType) const 
+{
+	return UnlockedRooms[RoomType];
+}
+
+void UBuildSubsystem::UpdateGhost()
 {
 	if(!CurrentGhost || !GridActor)
 		return;
@@ -441,6 +494,9 @@ void UBuildSubsystem::UpdateGhost() const
 
 	StartRow = FMath::Clamp(StartRow, 0, GridActor->GetRows() - SizeX);
 	StartCol = FMath::Clamp(StartCol, 0, GridActor->GetColumns() - SizeY);
+
+	LastStartRow = StartRow;
+	LastStartCol = StartCol;
 	
 	GridActor->DeselectSelectedCells();
 	for (int Row = StartRow; Row < StartRow + SizeX; ++Row)
@@ -449,7 +505,7 @@ void UBuildSubsystem::UpdateGhost() const
 		{
 			FGridCell* Cell = GridActor->GetGridCell(Row, Col);
 			if (Cell)
-				GridActor->SelectObjectCell(Row, Col, CurrentBuildData->RoomType);
+				GridActor->SelectObjectCell(Row, Col, CurrentObjectRoomType);
 		}
 	}
 	
@@ -465,9 +521,8 @@ void UBuildSubsystem::UpdateGhost() const
 	if (MeshOffset != FVector::ZeroVector)
 	{
 		SnappedLocation += MeshOffset;
+		//SnappedLocation += CurrentBuildRotation.RotateVector(MeshOffset);
 	}
-
-	CurrentGhost->SetActorLocation(SnappedLocation);
 
 	CurrentGhost->SetActorLocation(SnappedLocation);
 }
@@ -530,6 +585,13 @@ void UBuildSubsystem::LeftClicked()
 	{
 		PlaceObject();
 	}
+}
+
+void UBuildSubsystem::RightClicked()
+{
+	StopBuilding();
+
+	OnDeselected.Broadcast();
 }
 
 bool UBuildSubsystem::GetCursorHit(FVector& OutHit) const

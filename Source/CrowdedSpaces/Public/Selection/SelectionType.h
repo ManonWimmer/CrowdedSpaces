@@ -8,8 +8,11 @@ enum class ESelectionType : uint8
 {
 	Default			UMETA(DisplayName="Default"),
 	NPC				UMETA(DisplayName="NPC"),
+	
 	Generator		UMETA(DisplayName="Generator"),
-	Room			UMETA(DisplayName="Room"),
 	Food			UMETA(DisplayName="Food"),
-	Bed				UMETA(DisplayName="Bed")
+	Bed				UMETA(DisplayName="Bed"),
+	
+	Room			UMETA(DisplayName="Room"),
+	StorageRoom		UMETA(DisplayName="StorageRoom"),
 };

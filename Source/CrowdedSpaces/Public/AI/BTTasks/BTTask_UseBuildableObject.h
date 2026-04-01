@@ -24,6 +24,9 @@ public:
 	UFUNCTION()
 	void OnTargetDestroyed() const;
 
+	UFUNCTION()
+	void ForceStopTask() const;
+	
 private:
 	UPROPERTY(EditAnywhere, Category="Blackboard")
 	FBlackboardKeySelector TargetObjectKey;

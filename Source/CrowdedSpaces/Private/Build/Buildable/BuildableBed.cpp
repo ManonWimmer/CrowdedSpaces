@@ -31,8 +31,8 @@ void ABuildableBed::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 bool ABuildableBed::StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
-	CurrentTasks.Add(UseObjectTask);
-
+	CurrentTask = UseObjectTask;
+	
 	if (!UsingNPC.IsValid())
 		return false;
 	
@@ -55,7 +55,7 @@ bool ABuildableBed::StartUsingImplementation(UBTTask_UseBuildableObject* UseObje
 
 bool ABuildableBed::StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
-	CurrentTasks.Remove(UseObjectTask);
+	CurrentTask = nullptr;
 	
 	if (!UsingNPC.IsValid())
 		return false;

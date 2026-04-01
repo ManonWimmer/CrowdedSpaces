@@ -19,6 +19,14 @@ void ACrowdedGameMode::BeginPlay()
 		return;
 	
 	TimeSubsystem->OnDayChanged.AddDynamic(this, &ACrowdedGameMode::CheckEndGame);
+	OnGameModeChanged.AddDynamic(TimeSubsystem, &UTimeSubsystem::HandleGameModeChanged);
+
+	// Reset game instance
+	UCrowdedGameInstance* GameInstance = GetGameInstance<UCrowdedGameInstance>();
+	if (!GameInstance)
+		return;
+	
+	GameInstance->ResetGameSettings();
 }
 
 void ACrowdedGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -64,6 +72,8 @@ void ACrowdedGameMode::EndGame(bool bSurvived) const
 void ACrowdedGameMode::RegisterNPC(ANPC* NPC)
 {
 	AliveNPCCount++;
+
+	OnNbrAliveNPCChanged.Broadcast();
 }
 
 void ACrowdedGameMode::UnregisterNPC(ANPC* NPC)
@@ -73,6 +83,10 @@ void ACrowdedGameMode::UnregisterNPC(ANPC* NPC)
 	if (AliveNPCCount <= 0)
 	{
 		EndGame(false); 
+	}
+	else
+	{
+		OnNbrAliveNPCChanged.Broadcast();
 	}
 }
 

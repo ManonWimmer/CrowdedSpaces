@@ -1,5 +1,7 @@
 ﻿#include "Game/CrowdedGameInstance.h"
 
+#include "Electricity/ElectricitySubsystem.h"
+#include "Game/CrowdedGameMode.h"
 #include "MoralEvent/MoralEventSubsystem.h"
 #include "Time/TimeSubsystem.h"
 
@@ -15,30 +17,28 @@ void UCrowdedGameInstance::OnPostWorldInitialization(UWorld* World, const UWorld
 	if (!World)
 		return;
 
-	const TObjectPtr<UTimeSubsystem> TimeSubsystem = World->GetSubsystem<UTimeSubsystem>();
+	TimeSubsystem = World->GetSubsystem<UTimeSubsystem>();
 	if (!TimeSubsystem)
 		return;
 
+	// Link time & moral subsystems :
 	const TObjectPtr<UMoralEventSubsystem> MoralSubsystem = World->GetSubsystem<UMoralEventSubsystem>();
 	if (!MoralSubsystem)
 		return;
 
-	// Link time & moral subsystems :
-	
-	// On start moral event
-	TimeSubsystem->OnMoralEventTime.AddDynamic(
-		MoralSubsystem,
-		&UMoralEventSubsystem::HandleCurrentDayMoralEvent
-	);
+	TimeSubsystem->OnMoralEventTime.AddDynamic(MoralSubsystem, &UMoralEventSubsystem::HandleCurrentDayMoralEvent);
+	TimeSubsystem->OnMoralEventTime.AddDynamic(TimeSubsystem, &UTimeSubsystem::SetTimePausedWithEvent);
+	MoralSubsystem->OnMoralEventEnded.AddDynamic(TimeSubsystem, &UTimeSubsystem::SetTimeUnpaused);
 
-	TimeSubsystem->OnMoralEventTime.AddDynamic(
-		TimeSubsystem,
-		&UTimeSubsystem::SetTimePaused
-	);
+	// Link time & electricity subsystem :
+	const TObjectPtr<UElectricitySubsystem> ElectricitySubsystem = World->GetSubsystem<UElectricitySubsystem>();
+	if (!ElectricitySubsystem)
+		return;
 
-	// On end moral event
-	MoralSubsystem->OnMoralEventEnded.AddDynamic(
-		TimeSubsystem,
-		&UTimeSubsystem::SetTimeNormal
-	);
+	TimeSubsystem->OnTimeChanged.AddDynamic(ElectricitySubsystem, &UElectricitySubsystem::OnTimeChanged);
+}
+
+void UCrowdedGameInstance::ResetGameSettings()
+{
+	bNPCsCanLoseFood = true;
 }

@@ -3,7 +3,6 @@
 #include "Game/CrowdedGameState.h"
 #include "UI/Widgets/MoralEventWidget.h"
 #include "UI/CustomWidget.h"
-#include "UI/Widgets/SelectionWidget.h"
 #include "UI/Widgets/Selection/RoomSelectionWidget.h"
 
 void AGameHUD::BeginPlay()
@@ -36,18 +35,30 @@ void AGameHUD::CreateStartupWidgets()
 {
 	for (const auto& [WidgetClass, InitialVisibility] : StartupWidgetsConfig)
 	{
-		if (!WidgetClass) continue;
-
-		TObjectPtr<UCustomWidget> Widget = CreateWidget<UCustomWidget>(PlayerController, WidgetClass);
-
-		if (!Widget) continue;
-
-		Widget->AddToViewport();
-		Widget->SetVisibility(InitialVisibility);
-		Widget->Init();
-
-		WidgetInstances.Add(WidgetClass, Widget);
+		CreateNewWidget(WidgetClass, InitialVisibility);
 	}
+
+	// Create debug if not in shipping
+	#if !UE_BUILD_SHIPPING
+		CreateNewWidget(DebugWidgetBP, ESlateVisibility::SelfHitTestInvisible);
+	#endif
+}
+
+void AGameHUD::CreateNewWidget(const TSubclassOf<UCustomWidget> WidgetClass, const ESlateVisibility InitialVisibility)
+{
+	if (!WidgetClass)
+		return;
+
+	const TObjectPtr<UCustomWidget> Widget = CreateWidget<UCustomWidget>(PlayerController, WidgetClass);
+
+	if (!Widget)
+		return;
+
+	Widget->AddToViewport();
+	Widget->SetVisibility(InitialVisibility);
+	Widget->Init();
+
+	WidgetInstances.Add(WidgetClass, Widget);
 }
 
 #pragma region Build
@@ -92,7 +103,7 @@ void AGameHUD::ShowSelectionWidget(AActor* SelectableActor, const bool bShow, co
 	CurrentlySelectedActor = SelectableActor;
 }
 
-void AGameHUD::ShowSelectionWidget(const FGridRoom& Room, const bool bShow, const ESelectionType SelectionType)
+void AGameHUD::ShowSelectionWidget(FGridRoom& Room, const bool bShow, const ESelectionType SelectionType)
 {
 	if (!bShow)
 	{
@@ -101,7 +112,8 @@ void AGameHUD::ShowSelectionWidget(const FGridRoom& Room, const bool bShow, cons
 	}
 
 	// Toggle ONLY if same room
-	if (CurrentlySelectedRoom == &Room)
+	// todo: pas de toggle si click create room qui aggrandit CurrentlySelectedRoom
+	if (CurrentlySelectedRoom.Cells == Room.Cells)
 	{
 		HideCurrentSelectionWidget();
 		return;
@@ -119,7 +131,7 @@ void AGameHUD::ShowSelectionWidget(const FGridRoom& Room, const bool bShow, cons
 
 	RoomWidget->SetupRoom(Room);
 
-	CurrentlySelectedRoom = &Room;
+	CurrentlySelectedRoom = Room;
 	CurrentlySelectedActor = nullptr;
 }
 
@@ -135,7 +147,7 @@ void AGameHUD::HideCurrentSelectionWidget()
 
 	CurrentlyShownSelectionWidgetBP = nullptr;
 	CurrentlySelectedActor = nullptr;
-	CurrentlySelectedRoom = nullptr;
+	CurrentlySelectedRoom = *(new FGridRoom());
 }
 
 UCustomWidget* AGameHUD::GetWidgetFromSelectionType(const ESelectionType Type)
@@ -150,16 +162,20 @@ UCustomWidget* AGameHUD::GetWidgetFromSelectionType(const ESelectionType Type)
 		CurrentlyShownSelectionWidgetBP = GeneratorSelectionWidgetBP;
 		break;
 
-	case ESelectionType::Room:
-		CurrentlyShownSelectionWidgetBP = RoomSelectionWidgetBP;
-		break;
-
 	case ESelectionType::Food:
 		CurrentlyShownSelectionWidgetBP = FoodSelectionWidgetBP;
 		break;
 		
 	case ESelectionType::Bed:
 		CurrentlyShownSelectionWidgetBP = BedSelectionWidgetBP;
+		break;
+
+	case ESelectionType::Room:
+		CurrentlyShownSelectionWidgetBP = RoomSelectionWidgetBP;
+		break;
+
+	case ESelectionType::StorageRoom:
+		CurrentlyShownSelectionWidgetBP = StorageRoomSelectionWidgetBP;
 		break;
 
 	default:

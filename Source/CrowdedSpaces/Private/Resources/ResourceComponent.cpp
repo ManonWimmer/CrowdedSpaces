@@ -1,5 +1,6 @@
 ﻿#include "Resources/ResourceComponent.h"
 
+#include "Game/CrowdedGameInstance.h"
 #include "Resources/ResourceDefaultsData.h"
 
 UResourceComponent::UResourceComponent()
@@ -42,14 +43,30 @@ void UResourceComponent::SetType(EResourceType NewType)
 void UResourceComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+
+	const UWorld* World = GetWorld();
+	if (!World)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("World is null!"));
+		return;
+	}
+	
+	GameInstance = World->GetGameInstance<UCrowdedGameInstance>();
+
+	if (!GameInstance)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GameInstance is null!"));
+		return;
+	}
 	
 	if (CanLoseAndRegenResource)
 		StartResourceTimer();
 }
 
-void UResourceComponent::AddResource(int Amount)
+void UResourceComponent::AddResource(const float Amount)
 {
-	const int32 OldResource = Resource;
+	const float OldResource = Resource;
 
 	if (MaxResource != -1)
 		Resource = FMath::Clamp(Resource + Amount, 0, MaxResource);
@@ -67,8 +84,13 @@ void UResourceComponent::AddResource(int Amount)
 	}
 }
 
-void UResourceComponent::RemoveResource(int Amount)
+void UResourceComponent::RemoveResource(const float Amount)
 {
+	// Check game instance can lose food/energy
+	if ((ResourceType == EResourceType::Food && !GameInstance->bNPCsCanLoseFood) ||
+		(ResourceType == EResourceType::Energy && !GameInstance->bNPCsCanLoseEnergy))
+		return;
+	
 	if (MaxResource != -1)
 		Resource = FMath::Clamp(Resource - Amount, 0, MaxResource);
 	else
@@ -80,7 +102,22 @@ void UResourceComponent::RemoveResource(int Amount)
 	OnResourceChanged.Broadcast(Resource);
 }
 
-bool UResourceComponent::HasEnoughResource(int Amount)
+void UResourceComponent::AddMaxResource(const float Amount)
+{
+	MaxResource += Amount;
+	OnMaxResourceChanged.Broadcast(MaxResource);
+}
+
+void UResourceComponent::RemoveMaxResource(const float Amount)
+{
+	MaxResource -= Amount;
+	Resource = FMath::Clamp(Resource, 0, MaxResource);
+
+	OnMaxResourceChanged.Broadcast(MaxResource);
+	OnResourceChanged.Broadcast(Resource);
+}
+
+bool UResourceComponent::HasEnoughResource(const float Amount)
 {
 	return Resource >= Amount;
 }
@@ -110,7 +147,6 @@ void UResourceComponent::ToggleResourceTimer()
 		return;
 
 	FTimerManager& TimerManager = GetWorld()->GetTimerManager();
-	
 
 	if (TimerManager.IsTimerActive(ResourceTimerHandle))
 	{

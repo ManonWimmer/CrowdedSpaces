@@ -1,12 +1,17 @@
 ﻿#include "Grid/GridActor.h"
 
+#include "Build/BuildableRegistrySubsystem.h"
+#include "Build/BuildData.h"
 #include "Grid/GridRoom.h"
+#include "Kismet/GameplayStatics.h"
+#include "Player/CrowdedPlayerController.h"
+#include "Player/PlayerHelpers.h"
 
 
 AGridActor::AGridActor()
 {
 	RootComponent = CreateDefaultSubobject<USceneComponent>("Root");
-	
+
 	LinesProceduralMesh = CreateDefaultSubobject<UProceduralMeshComponent>("LinesProceduralMesh");
 	LinesProceduralMesh->SetupAttachment(RootComponent);
 
@@ -16,7 +21,7 @@ AGridActor::AGridActor()
 	WallISM->SetCollisionObjectType(ECC_WorldStatic);
 	WallISM->SetCollisionResponseToAllChannels(ECR_Block);
 	WallISM->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
-	
+
 	PrimaryActorTick.bCanEverTick = false;
 }
 
@@ -235,35 +240,117 @@ void AGridActor::ShowPlacedRooms(bool bShow)
 	}
 }
 
-int AGridActor::CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> CellsToAssign)
+FGridRoom* AGridActor::GetNearRoomOfSameType(TArray<FGridCell*> RoomCells, EGridRoomType RoomType)
 {
-	FGridRoom NewRoom;
-	NewRoom.RoomId = NextRoomId++;
-	NewRoom.RoomType = BuildData->RoomType;
-	NewRoom.GridColor = BuildData->GridColor;
-
-	for (FGridCell* Cell : CellsToAssign)
+	int MinRow = INT_MAX;
+	int MaxRow = INT_MIN;
+	int MinColumn = INT_MAX;
+	int MaxColumn = INT_MIN;
+	
+	for (FGridCell* Cell : RoomCells)
 	{
-		Cell->RoomId = NewRoom.RoomId;
-		Cell->RoomType = NewRoom.RoomType;
+		if (!Cell)
+			continue;
 
-		NewRoom.Cells.Add(Cell);
+		if (Cell->Row < MinRow)
+			MinRow = Cell->Row;
+		else if (Cell->Row > MaxRow)
+			MaxRow = Cell->Row;
+		
+		if (Cell->Column < MinColumn)
+			MinColumn = Cell->Column;
+		else if (Cell->Column > MaxColumn)
+			MaxColumn = Cell->Column;
 	}
 
-	Rooms.Add(NewRoom.RoomId, NewRoom);
+	if (FGridRoom* NeighborRowMinRoom = GetRoomOfSameType(RoomType, MinRow - 1, MinColumn))
+		return NeighborRowMinRoom;
+	if (FGridRoom* NeighborRowMaxRoom = GetRoomOfSameType(RoomType, MaxRow + 1, MaxColumn))
+		return NeighborRowMaxRoom;
+	if (FGridRoom* NeighborColMinRoom = GetRoomOfSameType(RoomType, MinRow, MinColumn - 1))
+		return NeighborColMinRoom;
+	if (FGridRoom* NeighborColMaxRoom = GetRoomOfSameType(RoomType, MinRow, MaxColumn + 1))
+		return NeighborColMaxRoom;
+	
+	return nullptr;
+}
 
-	ShowPlacedRooms(true);
+FGridRoom* AGridActor::GetRoomOfSameType(EGridRoomType RoomType, int Row, int Col)
+{
+	FGridCell* Cell = GetGridCell(Row, Col);
+	if (!Cell)
+		return nullptr;
 	
-	RebuildWalls();
+	FGridRoom* Room = GetRoomAtCell(Cell);
+	if (Room && Room->RoomType == RoomType)
+		return Room;
+
+	return nullptr;
+}
+
+FGridRoom* AGridActor::GetRoom(const int RoomId)
+{
+	return Rooms.Find(RoomId);
+}
+
+TTuple<bool, int> AGridActor::CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> CellsToAssign) // bool new room, int room id
+{
+	FGridRoom* NearRoom = GetNearRoomOfSameType(CellsToAssign, BuildData->RoomType);
 	
-	return NewRoom.RoomId;
+	if (NearRoom != nullptr)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Larger room created"));
+		
+		// larger room
+		for (FGridCell* Cell : CellsToAssign)
+		{
+			Cell->RoomId = NearRoom->RoomId;
+			Cell->RoomType = NearRoom->RoomType;
+		
+			NearRoom->Cells.Add(Cell);
+		}
+
+		Rooms[NearRoom->RoomId] = *NearRoom; // update in rooms map instead of add
+
+		ShowPlacedRooms(true);
+		RebuildWalls();
+		
+		return MakeTuple(false, NearRoom->RoomId);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Display, TEXT("New room created"));
+		
+		// new room
+		FGridRoom NewRoom;
+		NewRoom.RoomType = BuildData->RoomType;
+		NewRoom.GridColor = BuildData->GridColor;
+		NewRoom.LoseElectricityPerHour = BuildData->LoseElectricityPerHour;
+		NewRoom.DestroyMoney = BuildData->DestroyMoney;
+		NewRoom.RoomId = NextRoomId++;
+
+		for (FGridCell* Cell : CellsToAssign)
+		{
+			Cell->RoomId = NewRoom.RoomId;
+			Cell->RoomType = NewRoom.RoomType;
+		
+			NewRoom.Cells.Add(Cell);
+		}
+
+		Rooms.Add(NewRoom.RoomId, NewRoom);
+
+		ShowPlacedRooms(true);
+		RebuildWalls();
+		
+		return MakeTuple(true, NewRoom.RoomId);;
+	}
 }
 
 bool AGridActor::CheckIfCellInPlacedRoom(const FGridCell* Cell, FLinearColor& OutGridColor)
 {
 	if (Cell->RoomType != EGridRoomType::None)
 	{
-		const FGridRoom* Room = Rooms.Find(Cell->RoomId);
+		const FGridRoom* Room = GetRoom(Cell->RoomId);
 		if (Room)
 		{
 			OutGridColor = Room->GridColor;
@@ -272,6 +359,78 @@ bool AGridActor::CheckIfCellInPlacedRoom(const FGridCell* Cell, FLinearColor& Ou
 	}
 
 	return false;
+}
+
+bool AGridActor::DestroyRoom(const int RoomId)
+{
+	FGridRoom* RoomToDestroy = GetRoom(RoomId);
+	if (!RoomToDestroy)
+		return false;
+		
+	float RoomDestroyMoney = RoomToDestroy->DestroyMoney;
+	
+	for (const FGridCell* RoomCell : RoomToDestroy->Cells)
+	{
+		FGridCell* GridCell = Cells.Find(FIntPoint(RoomCell->Row, RoomCell->Column));
+		GridCell->CellType = EGridCellType::None;
+		GridCell->RoomId = -1;
+		GridCell->RoomType = EGridRoomType::None;
+		RoomCell->CellProceduralMesh->SetVisibility(false);
+	}
+
+	Rooms.Remove(RoomId);
+	
+	DeselectSelectedCells(); // Bizarre que ça deselect pas les rooms tout seul, c'est le set visibility au dessus qui fait (plus tard maybe bugs)
+	
+	RebuildWalls();
+	
+	// todo: subsystem a get autre part, soit begin play soit subsystem function library
+	TObjectPtr<UBuildableRegistrySubsystem> BuildableRegistrySubsystem = GetWorld()->GetSubsystem<UBuildableRegistrySubsystem>();
+	for (TWeakObjectPtr<ABuildableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
+	{
+		if (!Object.IsValid())
+			continue;
+
+		if (Object->RoomId != RoomId)
+			continue;
+		
+		Object->DestroyObject();
+	}
+	
+	UResourceComponent* PlayerMoneyComponent = PlayerHelpers::GetPlayerResourceComponent(*GetWorld(), EResourceType::Money);
+	PlayerMoneyComponent->AddResource(RoomDestroyMoney);
+	
+	// todo: pareil que plus haut
+	ACrowdedPlayerController* CrowdedPlayerController = Cast<ACrowdedPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	AGameHUD * GameHUD = Cast<AGameHUD>(CrowdedPlayerController->GetHUD());
+	GameHUD->HideCurrentSelectionWidget();
+
+	return true;
+}
+
+float AGridActor::GetRoomDestroyCost(int RoomId)
+{
+	FGridRoom* Room = GetRoom(RoomId);
+	if (!Room)
+		return 0.f;
+	
+	float RoomTotalDestroyCost = Room->DestroyMoney;
+
+	// meme todo ici
+	TObjectPtr<UBuildableRegistrySubsystem> BuildableRegistrySubsystem = GetWorld()->GetSubsystem<UBuildableRegistrySubsystem>();
+	for (TWeakObjectPtr<ABuildableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
+	{
+		if (!Object.IsValid())
+			continue;
+
+		if (Object->RoomId != RoomId)
+			continue;
+
+		GEngine->AddOnScreenDebugMessage(-1,5,FColor::Green,"Objet in room");
+		RoomTotalDestroyCost += Object->GetBuildData()->DestroyMoney;
+	}
+	
+	return RoomTotalDestroyCost;
 }
 
 void AGridActor::RebuildWalls()
@@ -371,6 +530,14 @@ void AGridActor::TryAddWall(FGridCell* Cell, int NeighborRow, int NeighborCol, E
 	CreatedWallsPositions.Add(SpawnLoc);
 }
 
+FGridRoom* AGridActor::GetRoomAtCell(const FGridCell* Cell)
+{
+	if (!Cell || Cell->RoomType == EGridRoomType::None)
+		return nullptr;
+	
+	return GetRoom(Cell->RoomId);
+}
+
 bool AGridActor::GetRoomAtWorldLocation(const FVector& WorldLoc, FGridRoom*& OutRoom)
 {
 	int Row, Col;
@@ -382,7 +549,7 @@ bool AGridActor::GetRoomAtWorldLocation(const FVector& WorldLoc, FGridRoom*& Out
 	if (!Cell || Cell->RoomType == EGridRoomType::None)
 		return false;
 
-	OutRoom = Rooms.Find(Cell->RoomId);
+	OutRoom = GetRoom(Cell->RoomId);
 
 	return OutRoom != nullptr;
 }

@@ -34,7 +34,7 @@ void ABuildableFood::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 bool ABuildableFood::StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
-	CurrentTasks.Add(UseObjectTask);
+	CurrentTask = UseObjectTask;
 	
 	if (!UsingNPC.IsValid())
 		return false;
@@ -58,7 +58,7 @@ bool ABuildableFood::StartUsingImplementation(UBTTask_UseBuildableObject* UseObj
 
 bool ABuildableFood::StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
-	CurrentTasks.Remove(UseObjectTask);
+	CurrentTask = nullptr;
 	
 	if (!UsingNPC.IsValid())
 		return false;

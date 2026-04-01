@@ -43,21 +43,33 @@ public:
 	
 	FGridCell* GetGridCell(int Row, int Column);
 	
-	int GetCellSize() const { return CellSize;}
-	int GetRows() const { return Rows;}
-	int GetColumns() const { return Columns;}
+	int GetCellSize() const { return CellSize; }
+	int GetRows() const { return Rows; }
+	int GetColumns() const { return Columns; }
+
+	UFUNCTION(BlueprintCallable, Category = "Grid")
+	TMap<int, FGridRoom>& GetRooms() { return Rooms; }
 	
 	void DeselectCell(int Row, int Column);
 	void SelectRoomCell(int Row, int Column);
 	
 	void ShowPlacedRooms(bool bShow);
-	int CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> CellsToAssign);
+	FGridRoom* GetNearRoomOfSameType(TArray<FGridCell*> RoomCells, EGridRoomType RoomType);
+	TTuple<bool, int> CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> CellsToAssign);
 	bool CheckIfCellInPlacedRoom(const FGridCell* Cell, FLinearColor& OutGridColor);
+
+	UFUNCTION(BlueprintCallable, Category = "Room")
+	bool DestroyRoom(int RoomId);
+
+	UFUNCTION(BlueprintCallable)
+	float GetRoomDestroyCost(int RoomId);
 	
 	void RebuildWalls();
 	void TryAddWall(FGridCell* Cell, int NeighborRow, int NeighborCol, EGridWallDirection Dir, float Half, const TSet<FIntPoint>& DoorCells);
-
+	FGridRoom* GetRoomAtCell(const FGridCell* Cell);
 	bool GetRoomAtWorldLocation(const FVector& WorldLoc, FGridRoom*& OutRoom);
+	FGridRoom* GetRoomOfSameType(EGridRoomType RoomType, int Row, int Col);
+	FGridRoom* GetRoom(int RoomId);
 
 	UFUNCTION(BlueprintCallable, Category = "Grid")
 	void ShowGrid(bool bShow);

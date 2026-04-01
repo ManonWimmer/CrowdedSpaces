@@ -2,17 +2,34 @@
 
 #include "CoreMinimal.h"
 #include "BuildModeType.h"
-#include "BuildRoomData.h"
-#include "Subsystems/WorldSubsystem.h"
+#include "Game/GameModeState.h"
 #include "Grid/GridRoomType.h"
-#include "Grid/GridCell.h"
-#include "Build/GhostObject.h"
-#include "Build/BuildData.h"
-#include "UI/GameHUD.h"
 #include "BuildSubsystem.generated.h"
+
+struct FGridCell;
+class AGameHUD;
+class AGhostObject;
+struct FGridRoom;
+class UBuildRoomData;
+class UBuildData;
+class ABuildableObject;
+
+USTRUCT()
+struct FTMapArrayObjects
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY()
+	TArray<ABuildableObject*> Entries;
+};
 
 class AGridActor;
 class UResourceComponent;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeselected);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRoomDestroyed, int, RoomId);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnRoomCreated, int, RoomId, EGridRoomType, RoomType);
 
 UCLASS()
 class CROWDEDSPACES_API UBuildSubsystem : public UTickableWorldSubsystem
@@ -42,13 +59,16 @@ public:
 	void StopBuilding();
 
 	UFUNCTION()
-	void PlaceObject() const;
+	void PlaceObject();
 
 	UFUNCTION()
-	void RemoveObject(ABuildableObject* Object) const;
+	void RemoveObject(const ABuildableObject* Object) const;
 	
 	UFUNCTION()
 	void LeftClicked();
+
+	UFUNCTION()
+	void RightClicked();
 
 	UFUNCTION(BlueprintCallable)
 	void PlaceRoom();
@@ -57,7 +77,7 @@ public:
 	void SetBuildData(const TArray<UBuildData*>& NewBuildData) { BuildDataObjects = NewBuildData; }
 
 	UFUNCTION()
-	void SetBuildRoomData(const TArray<UBuildRoomData*>& NewBuildRoomData) { BuildDataRooms = NewBuildRoomData; }
+	void SetBuildRoomData(const TArray<UBuildRoomData*>& NewBuildRoomData);
 
 	UFUNCTION()
 	void SetSnapSize(const float NewSnapSize) { SnapSize = NewSnapSize; }
@@ -86,27 +106,56 @@ public:
 	UFUNCTION()
 	void GetRoomRotatedSize(int& OutX, int& OutY) const;
 
+	UFUNCTION(BlueprintCallable)
+	TMap<int, FGridRoom>& GetRooms();
+	
+	UFUNCTION(BlueprintCallable)
+	void DestroyRoom(int RoomId) const;
+
+	UFUNCTION(BlueprintCallable)
+	float GetRoomDestroyCost(int RoomId) const;
+
+	UFUNCTION(BlueprintCallable)
+	void UnlockRoom(EGridRoomType RoomType);
+
+	UFUNCTION(BlueprintCallable)
+	bool IsRoomUnlocked(EGridRoomType RoomType) const;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnDeselected OnDeselected; // To deselect ui
+
+	UPROPERTY(BlueprintAssignable)
+	FOnRoomDestroyed OnRoomDestroyed;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnRoomCreated OnRoomCreated;
+
+	static constexpr int InvalidRoomId = -1;
+
 private:
 	UPROPERTY()
-	TObjectPtr<AGhostObject> CurrentGhost;
+	TObjectPtr<AGhostObject> CurrentGhost{nullptr};
 
 	UPROPERTY()
-	TObjectPtr<UBuildData> CurrentBuildData = nullptr;
+	TObjectPtr<UBuildData> CurrentBuildData{nullptr};
 
 	UPROPERTY()
-	TObjectPtr<UBuildRoomData> CurrentBuildRoomData = nullptr;
+	TObjectPtr<UBuildRoomData> CurrentBuildRoomData {nullptr};
 
 	UPROPERTY()
-	TArray<TObjectPtr<UBuildData>> BuildDataObjects; // Send by game state
+	TArray<TObjectPtr<UBuildData>> BuildDataObjects; // Sent by game state
 
 	UPROPERTY()
-	TArray<TObjectPtr<UBuildRoomData>> BuildDataRooms; // Send by game state
+	TMap<EGridRoomType, bool> UnlockedRooms;
 
 	UPROPERTY()
-	float SnapSize = 100.f; // Send by game state
+	TArray<TObjectPtr<UBuildRoomData>> BuildDataRooms; // Sent by game state
+	
+	UPROPERTY()
+	float SnapSize = 100.f; // Sent by game state
 
 	UFUNCTION()
-	void UpdateGhost() const;
+	void UpdateGhost();
 
 	UFUNCTION()
 	void UpdateRoomSelection();
@@ -118,7 +167,7 @@ private:
 	TObjectPtr<AGameHUD> GameHUD;
 
 	UPROPERTY()
-	TObjectPtr<UResourceComponent> MoneyComponent;
+	TObjectPtr<UResourceComponent> MoneyComponent{nullptr};
 
 	UPROPERTY()
 	bool bTickEnabled = false;
@@ -126,7 +175,7 @@ private:
 	static constexpr float CursorLineTraceDistance = 10000.f;
 
 	UPROPERTY()
-	TObjectPtr<AGridActor> GridActor;
+	TObjectPtr<AGridActor> GridActor{nullptr};
 
 	// Room
 	EGridRoomType CurrentRoomType = EGridRoomType::Any;
@@ -138,4 +187,19 @@ private:
 	FRotator CurrentBuildRotation = FRotator(0, 0, 0);
 
 	FVector MeshOffset;
+
+	int LastStartRow = 0;
+	int LastStartCol = 0;
+
+	UPROPERTY()
+	int CurrentObjectGridRowsX = 1;
+
+	UPROPERTY()
+	int CurrentObjectGridColumnsY = 1;
+
+	UPROPERTY()
+	EGridRoomType CurrentObjectRoomType = EGridRoomType::Any;
+
+	UPROPERTY()
+	int CurrentObjectRoomId = InvalidRoomId; 
 };

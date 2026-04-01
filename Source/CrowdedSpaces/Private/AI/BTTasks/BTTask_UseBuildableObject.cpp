@@ -30,6 +30,9 @@ EBTNodeResult::Type UBTTask_UseBuildableObject::ExecuteTask(UBehaviorTreeCompone
 	if (!TargetObject)
 		return EBTNodeResult::Failed;
 
+	if (!TargetObject->CanBeUsed())
+		return EBTNodeResult::Failed;
+
 	StartAction(TargetObject);
 
 	TargetObject->StartUsing(NPC);
@@ -62,7 +65,7 @@ void UBTTask_UseBuildableObject::OnStopAction()
 void UBTTask_UseBuildableObject::OnTargetDestroyed() const
 {
 	OwnerCompPtr->GetBlackboardComponent()->SetValueAsObject(TargetObjectKey.SelectedKeyName, nullptr);
-	FinishLatentTask(*OwnerCompPtr, EBTNodeResult::Failed);
+	ForceStopTask();
 }
 
 void UBTTask_UseBuildableObject::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory,
@@ -84,4 +87,9 @@ void UBTTask_UseBuildableObject::OnTaskFinished(UBehaviorTreeComponent& OwnerCom
 	TargetObject->StopUsing(NPC);
 
 	Blackboard->SetValueAsObject(TargetObjectKey.SelectedKeyName, nullptr);
+}
+
+void UBTTask_UseBuildableObject::ForceStopTask() const
+{
+	FinishLatentTask(*OwnerCompPtr, EBTNodeResult::Failed);
 }

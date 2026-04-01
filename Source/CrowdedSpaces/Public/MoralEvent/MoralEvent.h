@@ -20,8 +20,7 @@ public:
 
 	UFUNCTION()
 	virtual void SetupChoices();
-
-	AActor* SpawnNPC(const TSubclassOf<ANPC> NPCClass) const;
+	
 	void KillSelectedNPC() const;
 
 	void AddPlayerResource(EResourceType ResourceType, int Amount) const;

@@ -7,6 +7,7 @@
 
 class ANPC;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameModeChanged, EGameModeState, NewGameMode);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNbrAliveNPCChanged);
 
 UCLASS()
 class CROWDEDSPACES_API ACrowdedGameMode : public AGameMode
@@ -36,14 +37,20 @@ public:
 	UFUNCTION()
 	void EndGame(bool bSurvived) const;
 
-	UFUNCTION(BlueprintCallable, Category = "GameMode"	)
+	UFUNCTION(BlueprintCallable, Category = "GameMode")
 	int GetMaxDaysToSurvive() const { return MaxDaysToSurvive; }
 
 	void RegisterNPC(ANPC* NPC);
 	void UnregisterNPC(ANPC* NPC);
+
+	UFUNCTION(BlueprintCallable, Category = "GameMode")
+	int GetNbrAliveNPCs() const { return AliveNPCCount; }
 	
 	UPROPERTY(BlueprintAssignable)
 	FOnGameModeChanged OnGameModeChanged;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnNbrAliveNPCChanged OnNbrAliveNPCChanged;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "GameMode")
