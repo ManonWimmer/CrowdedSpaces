@@ -134,13 +134,13 @@ public:
 
 private:
 	UPROPERTY()
-	TObjectPtr<AGhostObject> CurrentGhost = nullptr;
+	TObjectPtr<AGhostObject> CurrentGhost{nullptr};
 
 	UPROPERTY()
-	TObjectPtr<UBuildData> CurrentBuildData = nullptr;
+	TObjectPtr<UBuildData> CurrentBuildData{nullptr};
 
 	UPROPERTY()
-	TObjectPtr<UBuildRoomData> CurrentBuildRoomData = nullptr;
+	TObjectPtr<UBuildRoomData> CurrentBuildRoomData {nullptr};
 
 	UPROPERTY()
 	TArray<TObjectPtr<UBuildData>> BuildDataObjects; // Sent by game state
@@ -167,7 +167,7 @@ private:
 	TObjectPtr<AGameHUD> GameHUD;
 
 	UPROPERTY()
-	TObjectPtr<UResourceComponent> MoneyComponent = nullptr;
+	TObjectPtr<UResourceComponent> MoneyComponent{nullptr};
 
 	UPROPERTY()
 	bool bTickEnabled = false;
@@ -175,7 +175,7 @@ private:
 	static constexpr float CursorLineTraceDistance = 10000.f;
 
 	UPROPERTY()
-	TObjectPtr<AGridActor> GridActor = nullptr;
+	TObjectPtr<AGridActor> GridActor{nullptr};
 
 	// Room
 	EGridRoomType CurrentRoomType = EGridRoomType::Any;
