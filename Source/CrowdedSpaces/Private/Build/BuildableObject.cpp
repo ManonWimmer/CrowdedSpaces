@@ -6,7 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Player/CrowdedPlayerController.h"
 #include "Game/CrowdedGameState.h"
-#include "Player/PlayerFunctionLibrary.h"
+#include "Player/PlayerHelpers.h"
 #include "UI/GameHUD.h"
 
 #define BO_LOG(Format, ...) UE_LOG(LogTemp, Warning, TEXT("[BuildableObject:%s] " Format), *GetNameSafe(this), ##__VA_ARGS__)
@@ -254,7 +254,7 @@ void ABuildableObject::DestroyObject()
 	
 	BuildSubsystem->RemoveObject(this);
 	
-	UResourceComponent* PlayerMoneyComponent = UPlayerFunctionLibrary::GetPlayerResourceComponent(this, EResourceType::Money);
+	UResourceComponent* PlayerMoneyComponent = PlayerHelpers::GetPlayerResourceComponent(*GetWorld(), EResourceType::Money);
 	PlayerMoneyComponent->AddResource(BuildData->DestroyMoney);
 
 	if (CurrentTask)

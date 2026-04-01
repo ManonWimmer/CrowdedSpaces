@@ -5,7 +5,7 @@
 #include "Grid/GridRoom.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/CrowdedPlayerController.h"
-#include "Player/PlayerFunctionLibrary.h"
+#include "Player/PlayerHelpers.h"
 
 
 AGridActor::AGridActor()
@@ -397,7 +397,7 @@ bool AGridActor::DestroyRoom(const int RoomId)
 		Object->DestroyObject();
 	}
 	
-	UResourceComponent* PlayerMoneyComponent = UPlayerFunctionLibrary::GetPlayerResourceComponent(this, EResourceType::Money);
+	UResourceComponent* PlayerMoneyComponent = PlayerHelpers::GetPlayerResourceComponent(*GetWorld(), EResourceType::Money);
 	PlayerMoneyComponent->AddResource(RoomDestroyMoney);
 	
 	// todo: pareil que plus haut

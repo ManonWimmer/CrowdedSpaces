@@ -293,8 +293,8 @@ void UBuildSubsystem::PlaceObject()
 
 void UBuildSubsystem::RemoveObject(const ABuildableObject* Object) const
 {
-	int SizeX = CurrentBuildData->GridRowsX;
-	int SizeY = CurrentBuildData->GridColumnsY;
+	int SizeX = Object->GetBuildData()->GridRowsX;
+	int SizeY = Object->GetBuildData()->GridColumnsY;
 
 	// Rotation
 	if (Object->GetActorRotation() == FRotator(0.f, 90.f, 0.f) ||
