@@ -6,10 +6,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "Player/CrowdedPlayerController.h"
 #include "Game/CrowdedGameState.h"
-#include "Player/PlayerFunctionLibrary.h"
+#include "Player/PlayerHelpers.h"
 #include "UI/GameHUD.h"
-
-#define BO_LOG(Format, ...) UE_LOG(LogTemp, Warning, TEXT("[BuildableObject:%s] " Format), *GetNameSafe(this), ##__VA_ARGS__)
+#include "Debug/CrowdedSpacesLogs.h"
 
 ABuildableObject::ABuildableObject()
 {
@@ -54,7 +53,7 @@ void ABuildableObject::BeginPlay()
 
 	GetComponents<USlotComponent>(Slots);
 
-	for (USlotComponent* Slot : Slots)
+	for (const USlotComponent* Slot : Slots)
 	{
 		if (!Slot) continue;
 
@@ -118,7 +117,7 @@ void ABuildableObject::CheckCantBeUsedStopTask() const
 		{
 			if (CurrentTask)
 			{
-				BO_LOG("Force stopping task for NPC: %s", *GetNameSafe(UsingNPC.Get()));
+				CS_LOG("Force stopping task for NPC: %s", *GetNameSafe(UsingNPC.Get()));
 				CurrentTask->ForceStopTask();
 			}
 		}
@@ -141,21 +140,25 @@ void ABuildableObject::SetIsActivated(const bool bActivated)
 
 bool ABuildableObject::TryReserve(ANPC* NPC)
 {
-	BO_LOG("TryReserve by NPC: %s | Current ComingNPC: %s",
+	CS_LOG("TryReserve by NPC: %s | Current ComingNPC: %s",
 		*GetNameSafe(NPC),
 		*GetNameSafe(ComingNPC.Get()));
 
 	if (bHasNPCUsing)
 	{
-		BO_LOG("RESERVE FAILED: has npc using");
+		CS_LOG("RESERVE FAILED: has npc using");
 		return false;
 	}
 
 	if (ComingNPC.IsValid() && ComingNPC != NPC)
 	{
-		BO_LOG("RESERVE FAILED: already reserved by other NPC");
+		CS_LOG("RESERVE FAILED: already reserved by other NPC");
 		return false;
 	}
+
+	ComingNPC = NPC;
+	bHasNPCComing = true;
+	CS_LOG("RESERVED SUCCESS by NPC: %s", *GetNameSafe(NPC));
 	
 	return true;
 }
@@ -188,14 +191,14 @@ void ABuildableObject::Release(ANPC* NPC)
 
 void ABuildableObject::StartUsing(ANPC* NPC)
 {
-	BO_LOG("StartUsing attempt NPC: %s | ComingNPC: %s | UsingNPC: %s",
+	CS_LOG("StartUsing attempt NPC: %s | ComingNPC: %s | UsingNPC: %s",
 		*GetNameSafe(NPC),
 		*GetNameSafe(ComingNPC.Get()),
 		*GetNameSafe(UsingNPC.Get()));
 	
 	if (ComingNPC != NPC)
 	{
-		BO_LOG("START USING FAILED: ComingNPC mismatch");
+		CS_LOG("START USING FAILED: ComingNPC mismatch");
 		return;
 	}
 	
@@ -205,7 +208,7 @@ void ABuildableObject::StartUsing(ANPC* NPC)
 	bHasNPCComing = false;
 	bHasNPCUsing = true;
 
-	BO_LOG("START USING SUCCESS NPC: %s", *GetNameSafe(NPC));
+	CS_LOG("START USING SUCCESS NPC: %s", *GetNameSafe(NPC));
 	
 	OnNPCComingChanged.Broadcast(bHasNPCComing);
 	OnNPCUsingChanged.Broadcast(bHasNPCUsing);
@@ -213,9 +216,15 @@ void ABuildableObject::StartUsing(ANPC* NPC)
 
 void ABuildableObject::StopUsing(ANPC* NPC)
 {
-	BO_LOG("StopUsing NPC: %s | Current UsingNPC: %s",
+	CS_LOG("StopUsing NPC: %s | Current UsingNPC: %s",
 		*GetNameSafe(NPC),
 		*GetNameSafe(UsingNPC.Get()));
+	
+	if (UsingNPC != NPC)
+	{
+		CS_LOG("STOP USING IGNORED (wrong NPC)");
+		return;
+	}
 	
 	UsingNPC = nullptr;
 	ReleaseSlot(NPC);
@@ -224,7 +233,7 @@ void ABuildableObject::StopUsing(ANPC* NPC)
 	ComingNPC = nullptr;
 	bHasNPCComing = false;
 	
-	BO_LOG("STOP USING SUCCESS");
+	CS_LOG("STOP USING SUCCESS");
 	
 	OnNPCUsingChanged.Broadcast(bHasNPCUsing);
 }
@@ -251,7 +260,7 @@ void ABuildableObject::DestroyObject()
 	
 	BuildSubsystem->RemoveObject(this);
 	
-	UResourceComponent* PlayerMoneyComponent = UPlayerFunctionLibrary::GetPlayerResourceComponent(this, EResourceType::Money);
+	UResourceComponent* PlayerMoneyComponent = PlayerHelpers::GetPlayerResourceComponent(*GetWorld(), EResourceType::Money);
 	PlayerMoneyComponent->AddResource(BuildData->DestroyMoney);
 
 	if (CurrentTask)
@@ -278,7 +287,7 @@ USlotComponent* ABuildableObject::GetFreeSlot()
 
 USlotComponent* ABuildableObject::ReserveSlot(ANPC* NPC)
 {
-	BO_LOG("ReserveSlot  NPC: %s", *GetNameSafe(NPC));
+	CS_LOG("ReserveSlot  NPC: %s", *GetNameSafe(NPC));
 	
 	for (USlotComponent* Slot : Slots)
 	{
@@ -286,7 +295,7 @@ USlotComponent* ABuildableObject::ReserveSlot(ANPC* NPC)
 		{
 			Slot->SetOccupied(true, NPC);
 			
-			BO_LOG("Slot reserved: %s by NPC: %s",
+			CS_LOG("Slot reserved: %s by NPC: %s",
 				*Slot->GetName(),
 				*GetNameSafe(NPC));
 			
@@ -302,26 +311,26 @@ USlotComponent* ABuildableObject::ReserveSlot(ANPC* NPC)
 		}
 	}
 
-	BO_LOG("ReserveSlot FAILED: no free slot");
+	CS_LOG("ReserveSlot FAILED: no free slot");
 	
 	return nullptr;
 }
 
 void  ABuildableObject::ReleaseSlot(ANPC* NPC)
 {
-	BO_LOG("ReleaseSlot NPC: %s", *GetNameSafe(NPC));
+	CS_LOG("ReleaseSlot NPC: %s", *GetNameSafe(NPC));
 	
 	for (USlotComponent* Slot : Slots)
 	{
 		if (Slot && Slot->OccupyingNPC == NPC)
 		{
-			BO_LOG("Slot released: %s", *Slot->GetName());
+			CS_LOG("Slot released: %s", *Slot->GetName());
 			Slot->SetOccupied(false, nullptr);
 			return;
 		}
 	}
 	
-	BO_LOG("WARNING: No slot found for NPC");
+	CS_LOG_WARNING("WARNING: No slot found for NPC");
 }
 
 

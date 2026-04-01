@@ -6,5 +6,5 @@ class ANPC;
 
 namespace NPCHelpers
 {
-	ANPC* SpawnGlobalNPC(UObject* WorldContextObject);
+	ANPC* SpawnGlobalNPC(UWorld& World);
 }

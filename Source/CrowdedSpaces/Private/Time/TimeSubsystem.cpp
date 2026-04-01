@@ -41,24 +41,25 @@ bool UTimeSubsystem::IsTickable() const
 	return true;
 }
 
-void UTimeSubsystem::OnTime0()
+void UTimeSubsystem::OnTimeInputChanged(const int TimeIndex)
 {
-	TrySetTimeSpeed(ETimeSpeedType::Paused);
-}
-
-void UTimeSubsystem::OnTime1()
-{
-	TrySetTimeSpeed(ETimeSpeedType::Normal);
-}
-
-void UTimeSubsystem::OnTime2()
-{
-	TrySetTimeSpeed(ETimeSpeedType::High);
-}
-
-void UTimeSubsystem::OnTime3()
-{
-	TrySetTimeSpeed(ETimeSpeedType::Ultra);
+	switch (TimeIndex)
+	{
+		case 0:
+			TrySetTimeSpeed(ETimeSpeedType::Paused);
+			break;
+		case 1:
+			TrySetTimeSpeed(ETimeSpeedType::Normal);
+			break;
+		case 2:
+			TrySetTimeSpeed(ETimeSpeedType::High);
+			break;
+		case 3:
+			TrySetTimeSpeed(ETimeSpeedType::Ultra);
+			break;
+		default:
+			break;
+	}
 }
 
 void UTimeSubsystem::OnTogglePause()
