@@ -1,6 +1,7 @@
 ﻿#include "Build/BuildSubsystem.h"
 
 #include "EngineUtils.h"
+#include "Build/GhostObject.h"
 #include "Grid/GridActor.h"
 #include "Game/CrowdedGameMode.h"
 #include "Game/CrowdedGameState.h"

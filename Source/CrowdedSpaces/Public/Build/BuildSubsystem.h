@@ -2,14 +2,17 @@
 
 #include "CoreMinimal.h"
 #include "BuildModeType.h"
-#include "BuildRoomData.h"
-#include "Subsystems/WorldSubsystem.h"
+#include "Game/GameModeState.h"
 #include "Grid/GridRoomType.h"
-#include "Grid/GridCell.h"
-#include "Build/GhostObject.h"
-#include "Build/BuildData.h"
-#include "UI/GameHUD.h"
 #include "BuildSubsystem.generated.h"
+
+struct FGridCell;
+class AGameHUD;
+class AGhostObject;
+struct FGridRoom;
+class UBuildRoomData;
+class UBuildData;
+class ABuildableObject;
 
 USTRUCT()
 struct FTMapArrayObjects
@@ -136,6 +139,8 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnRoomUpdated OnRoomUpdated;
 
+	static constexpr int InvalidRoomId = -1;
+
 private:
 	UPROPERTY()
 	TObjectPtr<AGhostObject> CurrentGhost = nullptr;
@@ -205,5 +210,5 @@ private:
 	EGridRoomType CurrentObjectRoomType = EGridRoomType::Any;
 
 	UPROPERTY()
-	int CurrentObjectRoomId = -1; 
+	int CurrentObjectRoomId = InvalidRoomId; 
 };

@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "BuildSubsystem.h"
 #include "Build/ObjectType.h"
 #include "AI/NPC.h"
 #include "AI/BTTasks/BTTask_UseBuildableObject.h"
@@ -100,7 +101,7 @@ public:
 	void ReleaseSlot(ANPC* NPC);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int RoomId = -1; 
+	int RoomId = UBuildSubsystem::InvalidRoomId; 
 	
 protected:
 	UPROPERTY()
