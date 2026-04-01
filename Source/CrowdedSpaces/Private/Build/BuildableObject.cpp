@@ -166,9 +166,6 @@ bool ABuildableObject::IsReservedByOther(TObjectPtr<ANPC> NPC) const
 
 void ABuildableObject::Release(ANPC* NPC)
 {
-	if (ComingNPC != NPC)
-		return;
-		
 	ComingNPC = nullptr;
 	bHasNPCComing = false;
 	
@@ -283,7 +280,7 @@ USlotComponent* ABuildableObject::ReserveSlot(ANPC* NPC)
 	{
 		if (Slot && Slot->IsFree())
 		{
-			Slot->SetOccupied(true, NPC);
+			Slot->Acquire(NPC);
 			
 			CS_LOG("Slot reserved: %s by NPC: %s",
 				*Slot->GetName(),
@@ -315,7 +312,7 @@ void  ABuildableObject::ReleaseSlot(ANPC* NPC)
 		if (Slot && Slot->OccupyingNPC == NPC)
 		{
 			CS_LOG("Slot released: %s", *Slot->GetName());
-			Slot->SetOccupied(false, nullptr);
+			Slot->Release(NPC);
 			return;
 		}
 	}

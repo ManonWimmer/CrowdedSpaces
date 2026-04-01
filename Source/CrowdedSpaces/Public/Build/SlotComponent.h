@@ -28,8 +28,10 @@ public:
 	UMaterialInstanceDynamic* MID;
 
 	bool bOccupied = false;
-
-	void SetOccupied(bool bNewOccupied, ANPC* NPC = nullptr);
+	
+	void Acquire(ANPC* NPC);
+	void Release(ANPC* NPC);
+	
 	bool IsFree() const { return !bIsOccupied; }
 
 private:
