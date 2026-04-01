@@ -190,12 +190,13 @@ void ACrowdedPlayerController::HandleSelection() const
 		return;
 
 	AActor* HitActor = Hit.GetActor();
-
+	
 	// 1. Selectable actor (NPC, generator)
 	if (HitActor && HitActor->Implements<USelectable>())
 	{
 		const ISelectable* Selectable = Cast<ISelectable>(HitActor);
 		GameHUD->ShowSelectionWidget(HitActor, true, Selectable->	GetSelectionType());
+		
 		return;
 	}
 
