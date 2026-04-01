@@ -181,6 +181,11 @@ void UBuildSubsystem::StartBuilding(UBuildData* BuildData)
 	MeshOffset = DefaultBuildable->GetMeshComponent()->GetRelativeLocation();
 
 	ResetBuildRotation();
+
+	if (CurrentGhost)
+	{
+		CurrentGhost->SetActorRotation(CurrentBuildRotation);
+	}
 }
 
 void UBuildSubsystem::StartRoomBuilding(UBuildRoomData* BuildRoomData)
@@ -258,7 +263,7 @@ void UBuildSubsystem::PlaceObject()
 	}
 
 	FVector SpawnLocation = CurrentGhost->GetActorLocation();
-	SpawnLocation -= MeshOffset;
+	SpawnLocation -= CurrentBuildRotation.RotateVector(MeshOffset);;
 
 	const TObjectPtr<ABuildableObject> Placed = GetWorld()->SpawnActor<ABuildableObject>(
 		CurrentBuildData->BuildClass,
@@ -399,7 +404,7 @@ void UBuildSubsystem::ResetBuildRotation()
 void UBuildSubsystem::UpdateRotation()
 {
 	CurrentBuildRotation = FRotator(0.f, RotationIndex * 90.f, 0.f);
-
+	
 	if(CurrentGhost)
 		CurrentGhost->SetActorRotation(CurrentBuildRotation);
 }
@@ -536,8 +541,7 @@ void UBuildSubsystem::UpdateGhost()
 
 	if (MeshOffset != FVector::ZeroVector)
 	{
-		SnappedLocation += MeshOffset;
-		//SnappedLocation += CurrentBuildRotation.RotateVector(MeshOffset);
+		SnappedLocation += CurrentBuildRotation.RotateVector(MeshOffset);
 	}
 
 	CurrentGhost->SetActorLocation(SnappedLocation);
