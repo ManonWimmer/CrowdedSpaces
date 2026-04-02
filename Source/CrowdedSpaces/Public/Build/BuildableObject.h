@@ -17,8 +17,7 @@ class UBuildData;
 class UBuildSubsystem;
 class USlotComponent;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNPCUsingChanged, bool, Value);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNPCComingChanged, bool, Value);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSlotsUpdated);
 
 UCLASS()
 class CROWDEDSPACES_API ABuildableObject : public AActor
@@ -43,11 +42,8 @@ public:
 	bool IsAvailableForReservation(const ANPC* NPC) const;
 
 	UPROPERTY(BlueprintAssignable)
-	FOnNPCUsingChanged OnNPCUsingChanged;
-
-	UPROPERTY(BlueprintAssignable)
-	FOnNPCComingChanged OnNPCComingChanged;
-
+	FOnSlotsUpdated OnSlotsUpdated;
+	
 	UFUNCTION(BlueprintCallable, Category = "Object")
 	bool CanBeUsed() const;
 

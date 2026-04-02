@@ -198,9 +198,7 @@ bool ABuildableObject::TryReserve(const ANPC* NPC)
 void ABuildableObject::Release(ANPC* NPC)
 {
 	ReleaseSlot(NPC);
-
-	//OnNPCUsingChanged.Broadcast(bHasNPCUsing);
-	//OnNPCComingChanged.Broadcast(bHasNPCComing);
+	OnSlotsUpdated.Broadcast();
 
 	CS_LOG("Released by NPC: %s", *GetNameSafe(NPC));
 
@@ -221,6 +219,7 @@ void ABuildableObject::StopUsing(ANPC* NPC)
 		*GetNameSafe(NPC));
 	
 	ReleaseSlot(NPC);
+	OnSlotsUpdated.Broadcast();
 	
 	CS_LOG("STOP USING SUCCESS");
 	
@@ -294,15 +293,14 @@ USlotComponent* ABuildableObject::ReserveSlot(ANPC* NPC)
 		if (Slot && Slot->IsFree())
 		{
 			Slot->Acquire(NPC);
+			OnSlotsUpdated.Broadcast();
 			
 			CS_LOG("Slot reserved: %s by NPC: %s",
 				*Slot->GetName(),
 				*GetNameSafe(NPC));
 			
 			CS_LOG("RESERVED SUCCESS by NPC: %s", *GetNameSafe(NPC));
-	
-			//OnNPCComingChanged.Broadcast(bHasNPCComing);
-
+			
 			NPC->SetCurrentObject(this);
 			UsingNPCs.Add(NPC);
 			
@@ -325,6 +323,7 @@ void  ABuildableObject::ReleaseSlot(ANPC* NPC)
 		{
 			CS_LOG("Slot released: %s", *Slot->GetName());
 			Slot->Release(NPC);
+			OnSlotsUpdated.Broadcast();
 			UsingNPCs.Remove(NPC);
 			return;
 		}
