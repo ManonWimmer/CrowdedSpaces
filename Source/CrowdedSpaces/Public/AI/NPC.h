@@ -47,7 +47,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnCurrentActionChanged OnCurrentActionChanged;
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category="AI")
 	void Die();
 
 	// Work
