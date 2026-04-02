@@ -61,6 +61,12 @@ public:
 	int HasNPCUsing() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Object")
+	int GetSlotsNbr() const;
+	
+	UFUNCTION(BlueprintCallable, Category = "Object")
+	int GetFreeSlotsNbr() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Object")
 	bool HasEnoughElectricity() const { return bHasEnoughElectricity; }
 
 	UFUNCTION(BlueprintCallable, Category = "Object")
@@ -72,9 +78,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Object")
 	void SetIsActivated(bool bActivated);
 	
-	bool TryReserve(ANPC* NPC);
+	bool TryReserve(const ANPC* NPC);
 	void Release(ANPC* NPC);
-	void StartUsing(ANPC* NPC);
+	void StartUsing(const ANPC* NPC);
 	void StopUsing(ANPC* NPC);
 	
 	virtual bool StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask);

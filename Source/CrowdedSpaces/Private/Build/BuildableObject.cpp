@@ -144,6 +144,26 @@ int ABuildableObject::HasNPCUsing() const
 	return 0;
 }
 
+int ABuildableObject::GetSlotsNbr() const
+{
+	return Slots.Num();
+}
+
+int ABuildableObject::GetFreeSlotsNbr() const
+{
+	int FreeSlots = 0;
+	
+	for (const USlotComponent* Slot : Slots)
+	{
+		if (Slot && Slot->IsFree())
+		{
+			FreeSlots++;
+		}
+	}
+	
+	return FreeSlots;
+}
+
 void ABuildableObject::SetHasEnoughElectricity(const bool bEnoughElectricity)
 {
 	bHasEnoughElectricity = bEnoughElectricity;
@@ -158,7 +178,7 @@ void ABuildableObject::SetIsActivated(const bool bActivated)
 	CheckCantBeUsedStopTask();
 }
 
-bool ABuildableObject::TryReserve(ANPC* NPC)
+bool ABuildableObject::TryReserve(const ANPC* NPC)
 {
 	CS_LOG("TryReserve by NPC: %s",
 		*GetNameSafe(NPC));
@@ -187,7 +207,7 @@ void ABuildableObject::Release(ANPC* NPC)
 	NPC->SetCurrentObject(nullptr);
 }
 
-void ABuildableObject::StartUsing(ANPC* NPC)
+void ABuildableObject::StartUsing(const ANPC* NPC)
 {
 	CS_LOG("START USING SUCCESS NPC: %s", *GetNameSafe(NPC));
 	
