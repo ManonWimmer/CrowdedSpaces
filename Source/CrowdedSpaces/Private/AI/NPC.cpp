@@ -129,6 +129,11 @@ void ANPC::SetCurrentObject(ABuildableObject* NewObject)
 	CurrentObject = NewObject;
 }
 
+void ANPC::SetCurrentUseTask(UBTTask_UseBuildableObject* NewTask)
+{
+	CurrentUseTask = NewTask;
+}
+
 void ANPC::TryGenerateName()
 {
 	if (const UNameGeneratorSubsystem* NameSystem =

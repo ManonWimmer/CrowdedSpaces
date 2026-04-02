@@ -101,7 +101,14 @@ USlotComponent* ABuildableObject::GetNearestFreeSlot(const FVector& FromLocation
 
 bool ABuildableObject::IsAvailableForReservation(const ANPC* NPC) const
 {
-	return (!ComingNPC.IsValid() || ComingNPC == NPC)&& !bHasNPCUsing;
+	for (const USlotComponent* Slot : Slots)
+	{
+		if (Slot && Slot->IsFree())
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 bool ABuildableObject::CanBeUsed() const
@@ -113,15 +120,28 @@ void ABuildableObject::CheckCantBeUsedStopTask() const
 {
 	if (!CanBeUsed())
 	{
-		if (bHasNPCUsing && UsingNPC.IsValid())
+		for (TWeakObjectPtr<ANPC> NPC : UsingNPCs)
 		{
-			if (CurrentTask)
+			if (!NPC.IsValid())
+				continue;
+
+			if (const UBTTask_UseBuildableObject* Task = NPC->GetCurrentUseTask())
 			{
-				CS_LOG("Force stopping task for NPC: %s", *GetNameSafe(UsingNPC.Get()));
-				CurrentTask->ForceStopTask();
+				CS_LOG("Force stopping task for NPC: %s", *GetNameSafe(NPC.Get()));
+				Task->ForceStopTask();
 			}
 		}
 	}
+}
+
+int ABuildableObject::HasNPCComing() const
+{
+	return 0;
+}
+
+int ABuildableObject::HasNPCUsing() const
+{
+	return 0;
 }
 
 void ABuildableObject::SetHasEnoughElectricity(const bool bEnoughElectricity)
@@ -140,42 +160,27 @@ void ABuildableObject::SetIsActivated(const bool bActivated)
 
 bool ABuildableObject::TryReserve(ANPC* NPC)
 {
-	CS_LOG("TryReserve by NPC: %s | Current ComingNPC: %s",
-		*GetNameSafe(NPC),
-		*GetNameSafe(ComingNPC.Get()));
+	CS_LOG("TryReserve by NPC: %s",
+		*GetNameSafe(NPC));
 
-	if (bHasNPCUsing)
+	if (GetFreeSlot() != nullptr)
 	{
-		CS_LOG("RESERVE FAILED: has npc using");
-		return false;
+		CS_LOG("RESERVE SUCCESS");
 	}
-
-	if (ComingNPC.IsValid() && ComingNPC != NPC)
+	else
 	{
-		CS_LOG("RESERVE FAILED: already reserved by other NPC");
-		return false;
+		CS_LOG("RESERVE FAILED");
 	}
-
-	return true;
-}
-
-bool ABuildableObject::IsReservedByOther(TObjectPtr<ANPC> NPC) const
-{
-	return ComingNPC.IsValid() && ComingNPC != NPC;
+	
+	return GetFreeSlot() != nullptr;
 }
 
 void ABuildableObject::Release(ANPC* NPC)
 {
-	ComingNPC = nullptr;
-	bHasNPCComing = false;
-	
-	UsingNPC = nullptr;
-	bHasNPCUsing = false;
-	
 	ReleaseSlot(NPC);
 
-	OnNPCUsingChanged.Broadcast(bHasNPCUsing);
-	OnNPCComingChanged.Broadcast(bHasNPCComing);
+	//OnNPCUsingChanged.Broadcast(bHasNPCUsing);
+	//OnNPCComingChanged.Broadcast(bHasNPCComing);
 
 	CS_LOG("Released by NPC: %s", *GetNameSafe(NPC));
 
@@ -184,45 +189,22 @@ void ABuildableObject::Release(ANPC* NPC)
 
 void ABuildableObject::StartUsing(ANPC* NPC)
 {
-	CS_LOG("StartUsing attempt NPC: %s | ComingNPC: %s | UsingNPC: %s",
-		*GetNameSafe(NPC),
-		*GetNameSafe(ComingNPC.Get()),
-		*GetNameSafe(UsingNPC.Get()));
-	
-	if (ComingNPC != NPC)
-	{
-		CS_LOG("START USING FAILED: ComingNPC mismatch");
-		return;
-	}
-	
-	ComingNPC = nullptr;
-	UsingNPC = NPC;
-	
-	bHasNPCComing = false;
-	bHasNPCUsing = true;
-
 	CS_LOG("START USING SUCCESS NPC: %s", *GetNameSafe(NPC));
 	
-	OnNPCComingChanged.Broadcast(bHasNPCComing);
-	OnNPCUsingChanged.Broadcast(bHasNPCUsing);
+	//OnNPCComingChanged.Broadcast(bHasNPCComing);
+	//OnNPCUsingChanged.Broadcast(bHasNPCUsing);
 }
 
 void ABuildableObject::StopUsing(ANPC* NPC)
 {
 	CS_LOG("StopUsing NPC: %s | Current UsingNPC: %s",
-		*GetNameSafe(NPC),
-		*GetNameSafe(UsingNPC.Get()));
+		*GetNameSafe(NPC));
 	
-	UsingNPC = nullptr;
 	ReleaseSlot(NPC);
-
-	bHasNPCUsing = false;
-	ComingNPC = nullptr;
-	bHasNPCComing = false;
 	
 	CS_LOG("STOP USING SUCCESS");
 	
-	OnNPCUsingChanged.Broadcast(bHasNPCUsing);
+	//OnNPCUsingChanged.Broadcast(bHasNPCUsing);
 }
 
 bool ABuildableObject::StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
@@ -249,11 +231,22 @@ void ABuildableObject::DestroyObject()
 	
 	UResourceComponent* PlayerMoneyComponent = PlayerHelpers::GetPlayerResourceComponent(*GetWorld(), EResourceType::Money);
 	PlayerMoneyComponent->AddResource(BuildData->DestroyMoney);
-
-	if (CurrentTask)
+	
+	for (TWeakObjectPtr<ANPC> NPC : UsingNPCs)
 	{
-		CurrentTask->OnTargetDestroyed();
+		if (!NPC.IsValid())
+			continue;
+
+		if (UBTTask_UseBuildableObject* Task = NPC->GetCurrentUseTask())
+		{
+			CS_LOG("DestroyObject: stopping task for NPC: %s", *GetNameSafe(NPC.Get()));
+			Task->OnTargetDestroyed();
+		}
+		
+		NPC->SetCurrentObject(nullptr);
 	}
+	
+	UsingNPCs.Empty();
 
 	GameHUD->HideCurrentSelectionWidget();
 	
@@ -286,13 +279,12 @@ USlotComponent* ABuildableObject::ReserveSlot(ANPC* NPC)
 				*Slot->GetName(),
 				*GetNameSafe(NPC));
 			
-			ComingNPC = NPC;
-			bHasNPCComing = true;
 			CS_LOG("RESERVED SUCCESS by NPC: %s", *GetNameSafe(NPC));
 	
-			OnNPCComingChanged.Broadcast(bHasNPCComing);
+			//OnNPCComingChanged.Broadcast(bHasNPCComing);
 
 			NPC->SetCurrentObject(this);
+			UsingNPCs.Add(NPC);
 			
 			return Slot;
 		}
@@ -313,6 +305,7 @@ void  ABuildableObject::ReleaseSlot(ANPC* NPC)
 		{
 			CS_LOG("Slot released: %s", *Slot->GetName());
 			Slot->Release(NPC);
+			UsingNPCs.Remove(NPC);
 			return;
 		}
 	}

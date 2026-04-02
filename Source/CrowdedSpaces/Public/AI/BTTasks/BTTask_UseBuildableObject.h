@@ -26,7 +26,7 @@ public:
 
 	UFUNCTION()
 	void ForceStopTask() const;
-	
+
 private:
 	UPROPERTY(EditAnywhere, Category="Blackboard")
 	FBlackboardKeySelector TargetObjectKey;

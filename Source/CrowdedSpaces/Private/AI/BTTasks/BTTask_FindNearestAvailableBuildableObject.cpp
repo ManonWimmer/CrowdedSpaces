@@ -76,12 +76,6 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBe
 			continue;
 		}
 
-		if (Object->IsReservedByOther(NPC))
-		{
-			//UE_LOG(LogTemp, Warning, TEXT("Reserved by other"));
-			continue;
-		}
-
 		// Check same generator type as npc should work on
 		if (BuildableObjectType == EObjectType::Generator)
 		{

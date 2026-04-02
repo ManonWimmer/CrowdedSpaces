@@ -10,6 +10,7 @@
 #include "Production/ProductionType.h"
 #include "NPC.generated.h"
 
+class UBTTask_UseBuildableObject;
 class ABuildableObject;
 class USlotComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentActionChanged, ENPCActionWidget, Value); 
@@ -67,6 +68,12 @@ public:
 	// Object
 	UFUNCTION()
 	void SetCurrentObject(ABuildableObject* NewObject);
+	
+	UFUNCTION()
+	void SetCurrentUseTask(UBTTask_UseBuildableObject* NewTask);
+
+	UFUNCTION()
+	UBTTask_UseBuildableObject* GetCurrentUseTask() const { return CurrentUseTask; }
 
 	FTimerHandle NameRetryTimer;
 
@@ -142,7 +149,10 @@ private:
 
 	// Object
 	UPROPERTY()
-	TObjectPtr<ABuildableObject> CurrentObject = nullptr;
+	TObjectPtr<ABuildableObject> CurrentObject{nullptr};
+
+	UPROPERTY()
+	TObjectPtr<UBTTask_UseBuildableObject> CurrentUseTask{nullptr};
 	
 	// Selectable
 public:

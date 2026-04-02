@@ -21,6 +21,8 @@ EBTNodeResult::Type UBTTask_UseBuildableObject::ExecuteTask(UBehaviorTreeCompone
 	NPC = Cast<ANPC>(Controller->GetPawn());
 	if (!NPC)
 		return EBTNodeResult::Failed;
+
+	NPC->SetCurrentUseTask(this);
 	
 	TObjectPtr<UBlackboardComponent> Blackboard = OwnerComp.GetBlackboardComponent();
 	if (!Blackboard)
@@ -72,6 +74,8 @@ void UBTTask_UseBuildableObject::OnTaskFinished(UBehaviorTreeComponent& OwnerCom
                                                 EBTNodeResult::Type TaskResult)
 {
 	Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);
+
+	NPC->SetCurrentUseTask(nullptr);
 	
 	TObjectPtr<UBlackboardComponent> Blackboard = OwnerComp.GetBlackboardComponent();
 	if (!Blackboard)

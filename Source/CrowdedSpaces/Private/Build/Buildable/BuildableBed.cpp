@@ -31,12 +31,9 @@ void ABuildableBed::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 bool ABuildableBed::StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
-	CurrentTask = UseObjectTask;
+	ANPC* NPC = UseObjectTask->GetNPC();
 	
-	if (!UsingNPC.IsValid())
-		return false;
-	
-	UResourceComponent* EnergyComp = UsingNPC->GetResourceComponent<EResourceType::Energy>();
+	UResourceComponent* EnergyComp = NPC->GetResourceComponent<EResourceType::Energy>();
 	if (!EnergyComp)
 		return false;
 	
@@ -44,7 +41,7 @@ bool ABuildableBed::StartUsingImplementation(UBTTask_UseBuildableObject* UseObje
 	
 	EnergyComp->OnResourceFull.AddDynamic(UseObjectTask, &UBTTask_UseBuildableObject::OnStopAction);
 
-	UResourceComponent* FoodComp = UsingNPC->GetResourceComponent<EResourceType::Food>();
+	UResourceComponent* FoodComp = NPC->GetResourceComponent<EResourceType::Food>();
 	if (!FoodComp)
 		return false;
 	
@@ -55,12 +52,9 @@ bool ABuildableBed::StartUsingImplementation(UBTTask_UseBuildableObject* UseObje
 
 bool ABuildableBed::StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
-	CurrentTask = nullptr;
+	ANPC* NPC = UseObjectTask->GetNPC();
 	
-	if (!UsingNPC.IsValid())
-		return false;
-	
-	UResourceComponent* EnergyComp = UsingNPC->GetResourceComponent<EResourceType::Energy>();
+	UResourceComponent* EnergyComp = NPC->GetResourceComponent<EResourceType::Energy>();
 	if (!EnergyComp)
 		return false;
 
@@ -68,7 +62,7 @@ bool ABuildableBed::StopUsingImplementation(UBTTask_UseBuildableObject* UseObjec
 
 	EnergyComp->OnResourceFull.RemoveDynamic(UseObjectTask, &UBTTask_UseBuildableObject::OnStopAction);
 
-	UResourceComponent* FoodComp = UsingNPC->GetResourceComponent<EResourceType::Food>();
+	UResourceComponent* FoodComp = NPC->GetResourceComponent<EResourceType::Food>();
 	if (!FoodComp)
 		return false;
 	

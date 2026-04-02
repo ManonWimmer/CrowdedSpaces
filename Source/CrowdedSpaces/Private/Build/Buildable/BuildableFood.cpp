@@ -34,12 +34,9 @@ void ABuildableFood::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 bool ABuildableFood::StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
-	CurrentTask = UseObjectTask;
+	ANPC* NPC = UseObjectTask->GetNPC();
 	
-	if (!UsingNPC.IsValid())
-		return false;
-	
-	UResourceComponent* FoodComp = UsingNPC->GetResourceComponent<EResourceType::Food>();
+	UResourceComponent* FoodComp = NPC->GetResourceComponent<EResourceType::Food>();
 	if (!FoodComp)
 		return false;
 	
@@ -47,23 +44,20 @@ bool ABuildableFood::StartUsingImplementation(UBTTask_UseBuildableObject* UseObj
 	
 	FoodComp->OnResourceFull.AddDynamic(UseObjectTask, &UBTTask_UseBuildableObject::OnStopAction);
 
-	UResourceComponent* EnergyComp = UsingNPC->GetResourceComponent<EResourceType::Energy>();
+	UResourceComponent* EnergyComp = NPC->GetResourceComponent<EResourceType::Energy>();
 	if (!EnergyComp)
 		return false;
 	
-	EnergyComp->ToggleResourceTimer();  // todo: plus tard petit multiplicateur?
+	EnergyComp->ToggleResourceTimer(); 
 	
 	return true;
 }
 
 bool ABuildableFood::StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
 {
-	CurrentTask = nullptr;
+	ANPC* NPC = UseObjectTask->GetNPC();
 	
-	if (!UsingNPC.IsValid())
-		return false;
-	
-	UResourceComponent* FoodComp = UsingNPC->GetResourceComponent<EResourceType::Food>();
+	UResourceComponent* FoodComp = NPC->GetResourceComponent<EResourceType::Food>();
 	if (!FoodComp)
 		return false;
 
@@ -71,11 +65,11 @@ bool ABuildableFood::StopUsingImplementation(UBTTask_UseBuildableObject* UseObje
 
 	FoodComp->OnResourceFull.RemoveDynamic(UseObjectTask, &UBTTask_UseBuildableObject::OnStopAction);
 
-	UResourceComponent* EnergyComp = UsingNPC->GetResourceComponent<EResourceType::Energy>();
+	UResourceComponent* EnergyComp = NPC->GetResourceComponent<EResourceType::Energy>();
 	if (!EnergyComp)
 		return false;
 	
-	EnergyComp->ToggleResourceTimer();  // todo: plus tard petit multiplicateur?
+	EnergyComp->ToggleResourceTimer();  
 	
 	return true;
 }

@@ -55,10 +55,10 @@ public:
 	void CheckCantBeUsedStopTask() const;
 	
 	UFUNCTION(BlueprintCallable, Category = "Object")
-	bool HasNPCComing() const { return bHasNPCComing; }
+	int HasNPCComing() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Object")
-	bool HasNPCUsing() const { return bHasNPCUsing; }
+	int HasNPCUsing() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Object")
 	bool HasEnoughElectricity() const { return bHasEnoughElectricity; }
@@ -73,7 +73,6 @@ public:
 	void SetIsActivated(bool bActivated);
 	
 	bool TryReserve(ANPC* NPC);
-	bool IsReservedByOther(TObjectPtr<ANPC> NPC) const;
 	void Release(ANPC* NPC);
 	void StartUsing(ANPC* NPC);
 	void StopUsing(ANPC* NPC);
@@ -108,25 +107,13 @@ protected:
 	TArray<USlotComponent*> Slots; 
 	
 	UPROPERTY()
-	TObjectPtr<ACrowdedGameState> GameState = nullptr;
+	TObjectPtr<ACrowdedGameState> GameState{nullptr};
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TObjectPtr<UStaticMeshComponent> MeshComp;
-
-	UPROPERTY()
-	TWeakObjectPtr<ANPC> ComingNPC = nullptr;
-
-	UPROPERTY()
-	TWeakObjectPtr<ANPC> UsingNPC = nullptr;
-
-	UPROPERTY()
-	bool bCanBeUsed = true;
+	TObjectPtr<UStaticMeshComponent> MeshComp{nullptr};
 	
 	UPROPERTY()
-	bool bHasNPCUsing = false;
-
-	UPROPERTY()
-	bool bHasNPCComing = false;
+	bool bCanBeUsed = true;
 
 	UPROPERTY()
 	bool bHasEnoughElectricity = true;
@@ -141,23 +128,23 @@ protected:
 	ENPCActionWidget NPCAction = ENPCActionWidget::Idle;
 
 	UPROPERTY()
-	TObjectPtr<UBuildData> BuildData;
+	TObjectPtr<UBuildData> BuildData{nullptr};
 
 	UPROPERTY()
-	TObjectPtr<UBuildSubsystem> BuildSubsystem;
+	TObjectPtr<UBuildSubsystem> BuildSubsystem{nullptr};
 
 	UPROPERTY()
-	TObjectPtr<ACrowdedPlayerController> CrowdedPlayerController;
+	TObjectPtr<ACrowdedPlayerController> CrowdedPlayerController{nullptr};
 
 	UPROPERTY()
-	TObjectPtr<ACrowdedGameState> CrowdedGameState;
+	TObjectPtr<ACrowdedGameState> CrowdedGameState{nullptr};
 
 	UPROPERTY()
-	TObjectPtr<AGameHUD> GameHUD;
+	TObjectPtr<AGameHUD> GameHUD{nullptr};
 
 	UPROPERTY()
-	TObjectPtr<UBuildableRegistrySubsystem> BRS;
+	TObjectPtr<UBuildableRegistrySubsystem> BRS{nullptr};
 	
 	UPROPERTY()
-	UBTTask_UseBuildableObject* CurrentTask;
+	TArray<TWeakObjectPtr<ANPC>> UsingNPCs;
 };
