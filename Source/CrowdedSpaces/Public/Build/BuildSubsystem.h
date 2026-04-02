@@ -2,17 +2,14 @@
 
 #include "CoreMinimal.h"
 #include "BuildModeType.h"
-#include "Game/GameModeState.h"
+#include "BuildRoomData.h"
+#include "Subsystems/WorldSubsystem.h"
 #include "Grid/GridRoomType.h"
+#include "Grid/GridCell.h"
+#include "Build/GhostObject.h"
+#include "Build/BuildData.h"
+#include "UI/GameHUD.h"
 #include "BuildSubsystem.generated.h"
-
-struct FGridCell;
-class AGameHUD;
-class AGhostObject;
-struct FGridRoom;
-class UBuildRoomData;
-class UBuildData;
-class ABuildableObject;
 
 USTRUCT()
 struct FTMapArrayObjects
@@ -136,19 +133,18 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnRoomCreated OnRoomCreated;
 
-	static constexpr int InvalidRoomId = -1;
 	UPROPERTY(BlueprintAssignable)
 	FOnRoomUpdated OnRoomUpdated;
 
 private:
 	UPROPERTY()
-	TObjectPtr<AGhostObject> CurrentGhost{nullptr};
+	TObjectPtr<AGhostObject> CurrentGhost = nullptr;
 
 	UPROPERTY()
-	TObjectPtr<UBuildData> CurrentBuildData{nullptr};
+	TObjectPtr<UBuildData> CurrentBuildData = nullptr;
 
 	UPROPERTY()
-	TObjectPtr<UBuildRoomData> CurrentBuildRoomData {nullptr};
+	TObjectPtr<UBuildRoomData> CurrentBuildRoomData = nullptr;
 
 	UPROPERTY()
 	TArray<TObjectPtr<UBuildData>> BuildDataObjects; // Sent by game state
@@ -175,7 +171,7 @@ private:
 	TObjectPtr<AGameHUD> GameHUD;
 
 	UPROPERTY()
-	TObjectPtr<UResourceComponent> MoneyComponent{nullptr};
+	TObjectPtr<UResourceComponent> MoneyComponent = nullptr;
 
 	UPROPERTY()
 	bool bTickEnabled = false;
@@ -183,7 +179,7 @@ private:
 	static constexpr float CursorLineTraceDistance = 10000.f;
 
 	UPROPERTY()
-	TObjectPtr<AGridActor> GridActor{nullptr};
+	TObjectPtr<AGridActor> GridActor = nullptr;
 
 	// Room
 	EGridRoomType CurrentRoomType = EGridRoomType::Any;
@@ -209,5 +205,5 @@ private:
 	EGridRoomType CurrentObjectRoomType = EGridRoomType::Any;
 
 	UPROPERTY()
-	int CurrentObjectRoomId = InvalidRoomId; 
+	int CurrentObjectRoomId = -1; 
 };

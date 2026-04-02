@@ -9,7 +9,7 @@ void UMoralEvent_SpawnNPC::ClickOnChoice(EMoralEventType Choice)
 	if (Choice != EMoralEventType::Accept)
 		return;
 	
-	ANPC* SpawnedNPC = NPCHelpers::SpawnGlobalNPC(*GetWorld());
+	ANPC* SpawnedNPC = NPCHelpers::SpawnGlobalNPC(this);
 }
 
 void UMoralEvent_SpawnNPC::SetupChoices()

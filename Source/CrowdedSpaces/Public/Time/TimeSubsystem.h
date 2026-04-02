@@ -22,9 +22,18 @@ public:
 	virtual TStatId GetStatId() const override;
 	virtual void Tick(float DeltaTime) override;
 	virtual bool IsTickable() const override;
-	
+
 	UFUNCTION()
-	void OnTimeInputChanged(const int TimeIndex);
+	void OnTime0();
+
+	UFUNCTION()
+	void OnTime1();
+
+	UFUNCTION()
+	void OnTime2();
+
+	UFUNCTION()
+	void OnTime3();
 
 	UFUNCTION()
 	void OnTogglePause();

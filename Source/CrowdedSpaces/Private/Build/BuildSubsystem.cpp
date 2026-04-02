@@ -1,7 +1,6 @@
 ﻿#include "Build/BuildSubsystem.h"
 
 #include "EngineUtils.h"
-#include "Build/GhostObject.h"
 #include "Grid/GridActor.h"
 #include "Game/CrowdedGameMode.h"
 #include "Game/CrowdedGameState.h"
@@ -299,8 +298,8 @@ void UBuildSubsystem::PlaceObject()
 
 void UBuildSubsystem::RemoveObject(const ABuildableObject* Object) const
 {
-	int SizeX = Object->GetBuildData()->GridRowsX;
-	int SizeY = Object->GetBuildData()->GridColumnsY;
+	int SizeX = CurrentBuildData->GridRowsX;
+	int SizeY = CurrentBuildData->GridColumnsY;
 
 	// Rotation
 	if (Object->GetActorRotation() == FRotator(0.f, 90.f, 0.f) ||

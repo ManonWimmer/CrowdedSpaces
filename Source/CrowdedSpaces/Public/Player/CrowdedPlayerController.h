@@ -25,7 +25,10 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRightClickGame);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftRotateBuild);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRightRotateBuild);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTimeInputChanged, int, TimeIndex);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTime0);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTime1);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTime2);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTime3);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTogglePause);
 
 UCLASS()
@@ -71,10 +74,10 @@ public:
 
 	// Right click
 	UPROPERTY(BlueprintAssignable)
-	FOnRightClickBuild OnRightClickBuild;
+	FOnLeftClickBuild OnRightClickBuild;
 
 	UPROPERTY(BlueprintAssignable)
-	FOnRightClickBuild OnRightClickGame;
+	FOnLeftClickBuild OnRightClickGame;
 
 	// Rotate build
 	UPROPERTY(BlueprintAssignable)
@@ -85,7 +88,16 @@ public:
 
 	// Time
 	UPROPERTY(BlueprintAssignable)
-	FOnTimeInputChanged OnTimeInputChanged;
+	FOnTime0 OnTime0;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnTime1 OnTime1;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnTime2 OnTime2;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnTime3 OnTime3;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnTogglePause OnTogglePause;
@@ -117,10 +129,10 @@ private:
 	void LeftRotateBuildInput(const FInputActionValue& Value);
 	void RightRotateBuildInput(const FInputActionValue& Value);
 
-	void Time0Input(const FInputActionValue& Value) { OnTimeInputChanged.Broadcast(0); }
-	void Time1Input(const FInputActionValue& Value) { OnTimeInputChanged.Broadcast(1); }
-	void Time2Input(const FInputActionValue& Value) { OnTimeInputChanged.Broadcast(2); }
-	void Time3Input(const FInputActionValue& Value) { OnTimeInputChanged.Broadcast(3); }
+	void Time0Input(const FInputActionValue& Value) { OnTime0.Broadcast(); }
+	void Time1Input(const FInputActionValue& Value) { OnTime1.Broadcast(); }
+	void Time2Input(const FInputActionValue& Value) { OnTime2.Broadcast(); }
+	void Time3Input(const FInputActionValue& Value) { OnTime3.Broadcast(); }
 	void TogglePauseInput(const FInputActionValue& Value) { OnTogglePause.Broadcast(); }
 
 	// Selection

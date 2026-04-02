@@ -62,7 +62,7 @@ void UDebugWidget::AddFood(const int Amount) const
 
 void UDebugWidget::SpawnNPC()
 {
-	ANPC* SpawnedNPC = NPCHelpers::SpawnGlobalNPC(*GetWorld());
+	ANPC* SpawnedNPC = NPCHelpers::SpawnGlobalNPC(this);
 }
 
 void UDebugWidget::Init_Implementation()

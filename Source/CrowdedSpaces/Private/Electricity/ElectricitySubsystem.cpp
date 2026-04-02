@@ -4,7 +4,6 @@
 #include "Build/BuildSubsystem.h"
 #include "Build/BuildData.h"
 #include "Game/CrowdedGameState.h"
-#include "Grid/GridRoom.h"
 
 void UElectricitySubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
@@ -76,7 +75,7 @@ void UElectricitySubsystem::OnTimeChanged(const float NewTime)
 		float ConsumptionThisFrame = (LosePerHour / 60.f) * DeltaTime;
 
 		// Check if active room
-		if (Object->RoomId != BuildSubsystem->InvalidRoomId)
+		if (Object->RoomId != -1)
 		{
 			if (FGridRoom* RoomPtr = Rooms.Find(Object->RoomId))
 			{
