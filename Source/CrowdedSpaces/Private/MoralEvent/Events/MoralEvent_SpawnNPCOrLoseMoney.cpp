@@ -10,7 +10,7 @@ void UMoralEvent_SpawnNPCOrLoseMoney::ClickOnChoice(EMoralEventType Choice)
 	{
 		case EMoralEventType::SpawnNPC:
 			{
-				ANPC* SpawnedNPC = NPCHelpers::SpawnGlobalNPC(this);
+				ANPC* SpawnedNPC = NPCHelpers::SpawnGlobalNPC(*GetWorld());
 				break;
 			}
 	
