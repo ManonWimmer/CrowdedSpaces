@@ -210,6 +210,7 @@ void ABuildableObject::StartUsing(ANPC* NPC)
 	CS_LOG("START USING SUCCESS NPC: %s", *GetNameSafe(NPC));
 
 	StartUsingImplementation(NPC);
+	NPC->SetCurrentAction(NPCAction);
 	
 	//OnNPCComingChanged.Broadcast(bHasNPCComing);
 	//OnNPCUsingChanged.Broadcast(bHasNPCUsing);
@@ -219,12 +220,33 @@ void ABuildableObject::StopUsing(ANPC* NPC)
 {
 	CS_LOG("StopUsing NPC: %s | Current UsingNPC: %s",
 		*GetNameSafe(NPC));
-	
+
+	ReleaseSlot(NPC);
 	StopUsingImplementation(NPC);
+	NPC->SetCurrentAction(ENPCActionWidget::Idle);
 	
 	CS_LOG("STOP USING SUCCESS");
 	
 	//OnNPCUsingChanged.Broadcast(bHasNPCUsing);
+}
+
+USlotComponent* ABuildableObject::ReserveSpecificSlot(ANPC* NPC, USlotComponent* Slot)
+{
+	if (!Slot || !Slot->IsFree())
+		return nullptr;
+
+	// sécurité anti multi-slot
+	if (UsingNPCs.Contains(NPC))
+		return nullptr;
+
+	Slot->Acquire(NPC);
+
+	UsingNPCs.Add(NPC);
+	NPC->SetCurrentObject(this);
+
+	OnSlotsUpdated.Broadcast();
+
+	return Slot;
 }
 
 bool ABuildableObject::StartUsingImplementation(ANPC* NPC)
@@ -288,6 +310,11 @@ USlotComponent* ABuildableObject::GetFreeSlot()
 USlotComponent* ABuildableObject::ReserveSlot(ANPC* NPC)
 {
 	CS_LOG("ReserveSlot  NPC: %s", *GetNameSafe(NPC));
+	if (UsingNPCs.Contains(NPC))
+	{
+		CS_LOG_WARNING("NPC already has a slot!");
+		return nullptr;
+	}
 	
 	for (USlotComponent* Slot : Slots)
 	{

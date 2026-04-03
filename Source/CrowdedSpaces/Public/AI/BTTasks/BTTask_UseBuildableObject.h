@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "AI/CustomBTTask.h"
 #include "BehaviorTree/BTTaskNode.h"
 #include "Resources/ResourceType.h"
 #include "BTTask_UseBuildableObject.generated.h"
@@ -9,23 +10,21 @@ class ANPC;
 class ABuildableObject;
 
 UCLASS()
-class UBTTask_UseBuildableObject : public UBTTaskNode
+class UBTTask_UseBuildableObject : public UCustomBTTask
 {
 	GENERATED_BODY()
 
 public:
 
-	UBTTask_UseBuildableObject();
-
+	explicit UBTTask_UseBuildableObject(FObjectInitializer const& ObjectInitializer);
+	
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 	virtual void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 	virtual EBTNodeResult::Type AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+	void StopUsingClean();
 
 protected:
-
-	UPROPERTY()
-	ANPC* NPC = nullptr;
-
+	
 	UPROPERTY()
 	ABuildableObject* CurrentObject = nullptr;
 
@@ -33,6 +32,4 @@ protected:
 	EResourceType ResourceTypeToCheck;
 
 	bool bHasStartedUsing = false;
-
-	void StopUsingSafe();
 };

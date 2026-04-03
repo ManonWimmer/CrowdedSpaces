@@ -78,7 +78,8 @@ public:
 	void Release(ANPC* NPC);
 	void StartUsing(ANPC* NPC);
 	void StopUsing(ANPC* NPC);
-	
+	USlotComponent* ReserveSpecificSlot(ANPC* NPC, USlotComponent* Slot);
+
 	virtual bool StartUsingImplementation(ANPC* NPC);
 	virtual bool StopUsingImplementation(ANPC* NPC);
 
