@@ -35,6 +35,7 @@ public:
 
 	template <EResourceType Type>
 	int GetResource() const;
+	
 
 	// AI
 	UBehaviorTree* GetBehaviorTree() const { return BehaviorTree; }
@@ -68,6 +69,9 @@ public:
 	// Object
 	UFUNCTION()
 	void SetCurrentObject(ABuildableObject* NewObject);
+	
+	UFUNCTION()
+	ABuildableObject* GetCurrentObject() { return CurrentObject; }
 	
 	UFUNCTION()
 	void SetCurrentUseTask(UBTTask_UseBuildableObject* NewTask);

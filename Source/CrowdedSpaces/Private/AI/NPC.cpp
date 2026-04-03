@@ -79,6 +79,10 @@ void ANPC::Die()
 		return;
 
 	GameMode->UnregisterNPC(this);
+
+	// Object
+	if (CurrentObject)
+		CurrentObject->Release(this);
 	
 	Destroy();
 }
@@ -243,10 +247,6 @@ void ANPC::BeginPlay()
 	
 	NPCActionWidgetPtr->OwningActor = this;
 	NPCActionWidgetPtr->Init();
-
-	// Object
-	if (CurrentObject)
-		CurrentObject->Release(this);
 }
 
 void ANPC::EndPlay(const EEndPlayReason::Type EndPlayReason)

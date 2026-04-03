@@ -32,17 +32,13 @@ void ABuildableFood::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	BRS->UnregisterFood(this);
 }
 
-bool ABuildableFood::StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
+bool ABuildableFood::StartUsingImplementation(ANPC* NPC)
 {
-	ANPC* NPC = UseObjectTask->GetNPC();
-	
 	UResourceComponent* FoodComp = NPC->GetResourceComponent<EResourceType::Food>();
 	if (!FoodComp)
 		return false;
 	
 	FoodComp->SetIsInRegen(true);
-	
-	FoodComp->OnResourceFull.AddDynamic(UseObjectTask, &UBTTask_UseBuildableObject::OnStopAction);
 
 	UResourceComponent* EnergyComp = NPC->GetResourceComponent<EResourceType::Energy>();
 	if (!EnergyComp)
@@ -53,18 +49,14 @@ bool ABuildableFood::StartUsingImplementation(UBTTask_UseBuildableObject* UseObj
 	return true;
 }
 
-bool ABuildableFood::StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
+bool ABuildableFood::StopUsingImplementation(ANPC* NPC)
 {
-	ANPC* NPC = UseObjectTask->GetNPC();
-	
 	UResourceComponent* FoodComp = NPC->GetResourceComponent<EResourceType::Food>();
 	if (!FoodComp)
 		return false;
 
 	FoodComp->SetIsInRegen(false);
-
-	FoodComp->OnResourceFull.RemoveDynamic(UseObjectTask, &UBTTask_UseBuildableObject::OnStopAction);
-
+	
 	UResourceComponent* EnergyComp = NPC->GetResourceComponent<EResourceType::Energy>();
 	if (!EnergyComp)
 		return false;

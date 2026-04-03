@@ -110,18 +110,10 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBe
 		return EBTNodeResult::Failed;
 	}
 
-	if (!NearestAvailableObject->TryReserve(NPC))
-		return EBTNodeResult::Failed;
-
-	// Reserve slot
-	USlotComponent* ReservedSlot = NearestAvailableObject->ReserveSlot(NPC);
-	if (!ReservedSlot)
-		return EBTNodeResult::Failed;
-
 	//UE_LOG(LogTemp, Warning, TEXT("\n===== RESULT ====="));
 	//UE_LOG(LogTemp, Warning, TEXT("Selected: %s"), *NearestAvailableObject->GetName());
 	
-	Blackboard->SetValueAsVector(TargetLocationKey.SelectedKeyName, ReservedSlot->GetComponentLocation());
+	Blackboard->SetValueAsVector(TargetLocationKey.SelectedKeyName, BestSlot->GetComponentLocation());
 	Blackboard->SetValueAsObject(TargetObjectKey.SelectedKeyName, NearestAvailableObject);
 	
 	FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);

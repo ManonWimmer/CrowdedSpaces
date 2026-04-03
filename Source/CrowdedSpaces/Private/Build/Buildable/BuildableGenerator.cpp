@@ -58,19 +58,15 @@ void ABuildableGenerator::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	BRS->UnregisterGenerator(this);
 }
 
-bool ABuildableGenerator::StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
+bool ABuildableGenerator::StartUsingImplementation(ANPC* NPC)
 {
-	ANPC* NPC = UseObjectTask->GetNPC();
-	
 	ProductionComponent->SetProductionMultiplier(NPC->GetProductionMultiplierForType(ProductionComponent->GetProductionType()));
 	ProductionComponent->StartProduction();
 	return true; 
 }
 
-bool ABuildableGenerator::StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
+bool ABuildableGenerator::StopUsingImplementation(ANPC* NPC)
 {
-	ANPC* NPC = UseObjectTask->GetNPC();
-	
 	ProductionComponent->SetProductionMultiplier(1);
 	ProductionComponent->PauseProduction();
 	return true; 

@@ -1,35 +1,38 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "AI/CustomBTTask.h"
-#include "BehaviorTree/Tasks/BTTask_BlackboardBase.h"
+#include "BehaviorTree/BTTaskNode.h"
+#include "Resources/ResourceType.h"
 #include "BTTask_UseBuildableObject.generated.h"
 
-class UEnergyComponent;
+class ANPC;
+class ABuildableObject;
 
 UCLASS()
-class CROWDEDSPACES_API UBTTask_UseBuildableObject : public UCustomBTTask
+class UBTTask_UseBuildableObject : public UBTTaskNode
 {
 	GENERATED_BODY()
 
 public:
-	explicit UBTTask_UseBuildableObject(FObjectInitializer const& ObjectInitializer);
-	
+
+	UBTTask_UseBuildableObject();
+
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
-	virtual void OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult) override;
+	virtual void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
+	virtual EBTNodeResult::Type AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
-	UFUNCTION()
-	void OnStopAction();
+protected:
 
-	UFUNCTION()
-	void OnTargetDestroyed() const;
+	UPROPERTY()
+	ANPC* NPC = nullptr;
 
-	UFUNCTION()
-	void ForceStopTask() const;
+	UPROPERTY()
+	ABuildableObject* CurrentObject = nullptr;
 
-private:
-	UPROPERTY(EditAnywhere, Category="Blackboard")
-	FBlackboardKeySelector TargetObjectKey;
-	
-	TWeakObjectPtr<UBehaviorTreeComponent> OwnerCompPtr;
+	UPROPERTY(EditAnywhere)
+	EResourceType ResourceTypeToCheck;
+
+	bool bHasStartedUsing = false;
+
+	void StopUsingSafe();
 };

@@ -13,8 +13,8 @@ class CROWDEDSPACES_API ABuildableFood : public ABuildableObject, public ISelect
 public:
 	ABuildableFood();
 
-	virtual bool StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask) override;
-	virtual bool StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask) override;
+	virtual bool StartUsingImplementation(ANPC* NPC) override;
+	virtual bool StopUsingImplementation(ANPC* NPC) override;
 
 	// Selectable
 	virtual void OnSelected() override;

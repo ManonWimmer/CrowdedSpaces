@@ -13,8 +13,8 @@ class CROWDEDSPACES_API ABuildableBed : public ABuildableObject, public ISelecta
 public:
 	ABuildableBed();
 
-	virtual bool StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask) override;
-	virtual bool StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask) override;
+	virtual bool StartUsingImplementation(ANPC* NPC) override;
+	virtual bool StopUsingImplementation(ANPC* NPC) override;
 	
 	// Selectable
 	virtual void OnSelected() override;

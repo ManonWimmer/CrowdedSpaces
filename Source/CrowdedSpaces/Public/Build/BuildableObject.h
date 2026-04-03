@@ -76,11 +76,11 @@ public:
 	
 	bool TryReserve(const ANPC* NPC);
 	void Release(ANPC* NPC);
-	void StartUsing(const ANPC* NPC);
+	void StartUsing(ANPC* NPC);
 	void StopUsing(ANPC* NPC);
 	
-	virtual bool StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask);
-	virtual bool StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask);
+	virtual bool StartUsingImplementation(ANPC* NPC);
+	virtual bool StopUsingImplementation(ANPC* NPC);
 
 	UFUNCTION(BlueprintCallable, Category = "Object")
 	EObjectType GetObjectType() const { return ObjectType; }

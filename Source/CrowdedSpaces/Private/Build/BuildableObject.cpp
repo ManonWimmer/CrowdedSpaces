@@ -128,7 +128,7 @@ void ABuildableObject::CheckCantBeUsedStopTask() const
 			if (const UBTTask_UseBuildableObject* Task = NPC->GetCurrentUseTask())
 			{
 				CS_LOG("Force stopping task for NPC: %s", *GetNameSafe(NPC.Get()));
-				Task->ForceStopTask();
+				//FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
 			}
 		}
 	}
@@ -205,9 +205,11 @@ void ABuildableObject::Release(ANPC* NPC)
 	NPC->SetCurrentObject(nullptr);
 }
 
-void ABuildableObject::StartUsing(const ANPC* NPC)
+void ABuildableObject::StartUsing(ANPC* NPC)
 {
 	CS_LOG("START USING SUCCESS NPC: %s", *GetNameSafe(NPC));
+
+	StartUsingImplementation(NPC);
 	
 	//OnNPCComingChanged.Broadcast(bHasNPCComing);
 	//OnNPCUsingChanged.Broadcast(bHasNPCUsing);
@@ -218,20 +220,19 @@ void ABuildableObject::StopUsing(ANPC* NPC)
 	CS_LOG("StopUsing NPC: %s | Current UsingNPC: %s",
 		*GetNameSafe(NPC));
 	
-	ReleaseSlot(NPC);
-	OnSlotsUpdated.Broadcast();
+	StopUsingImplementation(NPC);
 	
 	CS_LOG("STOP USING SUCCESS");
 	
 	//OnNPCUsingChanged.Broadcast(bHasNPCUsing);
 }
 
-bool ABuildableObject::StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
+bool ABuildableObject::StartUsingImplementation(ANPC* NPC)
 {
 	return true; 
 }
 
-bool ABuildableObject::StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
+bool ABuildableObject::StopUsingImplementation(ANPC* NPC)
 {
 	return true;
 }
@@ -259,7 +260,7 @@ void ABuildableObject::DestroyObject()
 		if (UBTTask_UseBuildableObject* Task = NPC->GetCurrentUseTask())
 		{
 			CS_LOG("DestroyObject: stopping task for NPC: %s", *GetNameSafe(NPC.Get()));
-			Task->OnTargetDestroyed();
+			//Task->OnTargetDestroyed();
 		}
 		
 		NPC->SetCurrentObject(nullptr);
