@@ -12,7 +12,6 @@ class CROWDEDSPACES_API UBTTask_FindNearestAvailableBuildableObject : public UCu
 	GENERATED_BODY()
 	
 public:
-	explicit UBTTask_FindNearestAvailableBuildableObject(FObjectInitializer const& ObjectInitializer);
 	
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 	virtual void OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult) override;
