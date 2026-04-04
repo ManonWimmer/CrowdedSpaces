@@ -152,6 +152,7 @@ void AGridActor::BeginPlay()
 	BuildSubsystem = World->GetSubsystem<UBuildSubsystem>();
 }
 
+#pragma region Cells / Grid
 bool AGridActor::CheckIsValidCell(const int Row, const int Column) const
 {
 	return (Row >= 0 && Row < Rows && Column >= 0 && Column < Columns);
@@ -185,6 +186,13 @@ bool AGridActor::GetGridLocation(const bool bIsCenter, const int Row, const int 
 	return true;
 }
 
+FGridCell* AGridActor::GetGridCell(int Row, int Column)
+{
+	return Cells.Find(FIntPoint(Row, Column));
+}
+#pragma endregion
+
+#pragma region Show / Select
 void AGridActor::SelectObjectCell(const int Row, const int Column, EGridRoomType RoomType)
 {
 	FGridCell* NewSelectedCell = GetGridCell(Row, Column);
@@ -258,41 +266,44 @@ void AGridActor::ShowPlacedRooms(bool bShow)
 	}
 }
 
-FGridRoom* AGridActor::GetNearRoomOfSameType(TArray<FGridCell*> RoomCells, EGridRoomType RoomType)
+void AGridActor::ShowGrid(bool bShow)
 {
-	int MinRow = INT_MAX;
-	int MaxRow = INT_MIN;
-	int MinColumn = INT_MAX;
-	int MaxColumn = INT_MIN;
-	
-	for (FGridCell* Cell : RoomCells)
+	LinesProceduralMesh->SetVisibility(bShow);
+
+	for (auto& Pair : Cells)
 	{
+		FGridCell* Cell = &Pair.Value;
 		if (!Cell)
 			continue;
 
-		if (Cell->Row < MinRow)
-			MinRow = Cell->Row;
-		else if (Cell->Row > MaxRow)
-			MaxRow = Cell->Row;
-		
-		if (Cell->Column < MinColumn)
-			MinColumn = Cell->Column;
-		else if (Cell->Column > MaxColumn)
-			MaxColumn = Cell->Column;
+		Cell->CellProceduralMesh->SetVisibility(false);
 	}
-
-	if (FGridRoom* NeighborRowMinRoom = GetRoomOfSameType(RoomType, MinRow - 1, MinColumn))
-		return NeighborRowMinRoom;
-	if (FGridRoom* NeighborRowMaxRoom = GetRoomOfSameType(RoomType, MaxRow + 1, MaxColumn))
-		return NeighborRowMaxRoom;
-	if (FGridRoom* NeighborColMinRoom = GetRoomOfSameType(RoomType, MinRow, MinColumn - 1))
-		return NeighborColMinRoom;
-	if (FGridRoom* NeighborColMaxRoom = GetRoomOfSameType(RoomType, MinRow, MaxColumn + 1))
-		return NeighborColMaxRoom;
-	
-	return nullptr;
 }
 
+void AGridActor::DeselectSelectedCells()
+{
+	for (const FGridCell* Cell : SelectedCells)
+	{
+		if (Cell)
+		{
+			FLinearColor OutGridColor = FLinearColor::White;
+			if (bIsShowingRooms && CheckIfCellInPlacedRoom(Cell, OutGridColor))
+			{
+				Cell->CellProceduralMesh->SetVisibility(true);
+				Cell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), OutGridColor);
+			}
+			else
+			{
+				Cell->CellProceduralMesh->SetVisibility(false); 
+			}
+		}
+	}
+
+	SelectedCells.Empty();
+}
+#pragma endregion
+
+#pragma region Rooms
 FGridRoom* AGridActor::GetRoomOfSameType(EGridRoomType RoomType, int Row, int Col)
 {
 	FGridCell* Cell = GetGridCell(Row, Col);
@@ -309,123 +320,6 @@ FGridRoom* AGridActor::GetRoomOfSameType(EGridRoomType RoomType, int Row, int Co
 FGridRoom* AGridActor::GetRoom(const int RoomId)
 {
 	return Rooms.Find(RoomId);
-}
-
-TTuple<bool, int> AGridActor::CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> CellsToAssign)
-{
-	if (!BuildData || CellsToAssign.Num() == 0)
-		return MakeTuple(false, -1);
-
-	//  Get neighbor rooms of same room type
-	TSet<int> NeighborRoomIds;
-
-	for (const FGridCell* Cell : CellsToAssign)
-	{
-		if (!Cell) continue;
-
-		TArray<FGridCell*> Neighbors =
-		{
-			GetGridCell(Cell->Row - 1, Cell->Column),
-			GetGridCell(Cell->Row + 1, Cell->Column),
-			GetGridCell(Cell->Row, Cell->Column - 1),
-			GetGridCell(Cell->Row, Cell->Column + 1)
-		};
-
-		for (const FGridCell* Neighbor : Neighbors)
-		{
-			if (!Neighbor) continue;
-
-			if (Neighbor->RoomType == BuildData->RoomType)
-			{
-				NeighborRoomIds.Add(Neighbor->RoomId);
-			}
-		}
-	}
-
-	// Case : no neighbor = new room
-	
-	if (NeighborRoomIds.Num() == 0)
-	{
-		FGridRoom NewRoom;
-		NewRoom.RoomType = BuildData->RoomType;
-		NewRoom.GridColor = BuildData->GridColor;
-		NewRoom.LoseElectricityPerHourPerCell = BuildData->LoseElectricityPerHour;
-		NewRoom.DestroyMoney = BuildData->DestroyMoney;
-		NewRoom.RoomId = NextRoomId++;
-
-		for (FGridCell* Cell : CellsToAssign)
-		{
-			if (!Cell) continue;
-
-			Cell->RoomId = NewRoom.RoomId;
-			Cell->RoomType = NewRoom.RoomType;
-
-			NewRoom.Cells.Add(Cell);
-		}
-
-		Rooms.Add(NewRoom.RoomId, NewRoom);
-
-		ShowPlacedRooms(true);
-		RebuildWalls();
-
-		return MakeTuple(true, NewRoom.RoomId);
-	}
-	
-	// Case : Extend / Merge
-	
-	// Chose main room
-	int MainRoomId = *NeighborRoomIds.begin();
-	FGridRoom* MainRoom = GetRoom(MainRoomId);
-
-	if (!MainRoom)
-		return MakeTuple(false, -1);
-
-	// Merge all rooms in the main one
-	for (int OtherRoomId : NeighborRoomIds)
-	{
-		if (OtherRoomId == MainRoomId)
-			continue;
-
-		FGridRoom* OtherRoom = GetRoom(OtherRoomId);
-		if (!OtherRoom)
-			continue;
-
-		for (FGridCell* Cell : OtherRoom->Cells)
-		{
-			if (!Cell) continue;
-
-			Cell->RoomId = MainRoomId;
-			MainRoom->Cells.Add(Cell);
-		}
-
-		Rooms.Remove(OtherRoomId);
-	}
-
-	// Add cells
-	for (FGridCell* Cell : CellsToAssign)
-	{
-		if (!Cell) continue;
-		
-		if (Cell->RoomId == MainRoomId)
-			continue;
-
-		Cell->RoomId = MainRoomId;
-		Cell->RoomType = MainRoom->RoomType;
-
-		MainRoom->Cells.Add(Cell);
-	}
-
-	// Clean doubles
-	TSet<FGridCell*> UniqueCells(MainRoom->Cells);
-	MainRoom->Cells = UniqueCells.Array();
-
-	// Update map
-	Rooms[MainRoomId] = *MainRoom;
-
-	ShowPlacedRooms(true);
-	RebuildWalls();
-
-	return MakeTuple(false, MainRoomId);
 }
 
 bool AGridActor::CheckIfCellInPlacedRoom(const FGridCell* Cell, FLinearColor& OutGridColor)
@@ -455,7 +349,7 @@ bool AGridActor::DestroyRoom(const int RoomId)
 	{
 		FGridCell* GridCell = Cells.Find(FIntPoint(RoomCell->Row, RoomCell->Column));
 		GridCell->CellType = EGridCellType::None;
-		GridCell->RoomId = -1;
+		GridCell->RoomId = BuildSubsystem->InvalidRoomId;
 		GridCell->RoomType = EGridRoomType::None;
 		RoomCell->CellProceduralMesh->SetVisibility(false);
 	}
@@ -515,103 +409,6 @@ float AGridActor::GetRoomDestroyCost(int RoomId)
 	return RoomTotalDestroyCost;
 }
 
-void AGridActor::RebuildWalls()
-{
-	WallISM->ClearInstances();
-	CreatedWallsPositions.Empty();
-
-	const float Half = CellSize * 0.5f;
-
-	for (auto& Pair : Rooms)
-	{
-		FGridRoom& Room = Pair.Value;
-
-		// Get room borders
-		int MinRow = INT_MAX, MaxRow = INT_MIN;
-		int MinCol = INT_MAX, MaxCol = INT_MIN;
-
-		for (FGridCell* Cell : Room.Cells)
-		{
-			if (!Cell) continue;
-			if (Cell->Row < MinRow) MinRow = Cell->Row;
-			if (Cell->Row > MaxRow) MaxRow = Cell->Row;
-			if (Cell->Column < MinCol) MinCol = Cell->Column;
-			if (Cell->Column > MaxCol) MaxCol = Cell->Column;
-		}
-
-		// Get doors at center of each side
-		TSet<FIntPoint> DoorCells;
-		DoorCells.Add(FIntPoint(MinRow, (MinCol + MaxCol) / 2)); // North
-		DoorCells.Add(FIntPoint(MaxRow, (MinCol + MaxCol) / 2)); // South
-		DoorCells.Add(FIntPoint((MinRow + MaxRow) / 2, MinCol)); // West
-		DoorCells.Add(FIntPoint((MinRow + MaxRow) / 2, MaxCol)); // East
-		
-		for (FGridCell* Cell : Room.Cells)
-		{
-			if (!Cell) continue;
-
-			int Row = Cell->Row;
-			int Col = Cell->Column;
-			
-			TryAddWall(Cell, Row - 1, Col, EGridWallDirection::North, Half, DoorCells);
-			TryAddWall(Cell, Row + 1, Col, EGridWallDirection::South, Half, DoorCells);
-			TryAddWall(Cell, Row, Col - 1, EGridWallDirection::West, Half, DoorCells);
-			TryAddWall(Cell, Row, Col + 1, EGridWallDirection::East, Half, DoorCells);
-		}
-	}
-}
-
-void AGridActor::TryAddWall(FGridCell* Cell, int NeighborRow, int NeighborCol, EGridWallDirection Dir, float Half, const TSet<FIntPoint>& DoorCells)
-{
-	FGridCell* Neighbor = GetGridCell(NeighborRow, NeighborCol);
-
-	// Si voisin même salle : pas de mur
-	if (Neighbor && Neighbor->RoomType == Cell->RoomType)
-		return;
-
-	FVector2D CellPos;
-	if (!GetGridLocation(true, Cell->Row, Cell->Column, CellPos))
-		return;
-
-	FVector SpawnLoc(CellPos.X - GetActorLocation().X,
-					 CellPos.Y - GetActorLocation().Y,
-					 0);
-
-	FRotator Rot = FRotator::ZeroRotator;
-
-	switch (Dir)
-	{
-	case EGridWallDirection::North: SpawnLoc.X -= Half; break;
-	case EGridWallDirection::South: SpawnLoc.X += Half; break;
-	case EGridWallDirection::West:  SpawnLoc.Y -= Half; Rot = FRotator(0, 90, 0); break;
-	case EGridWallDirection::East:  SpawnLoc.Y += Half; Rot = FRotator(0, 90, 0); break;
-	}
-
-	if (CreatedWallsPositions.Contains(SpawnLoc))
-		return;
-
-	// Passage auto si cellule = porte
-	const bool bCreatePassage = DoorCells.Contains(FIntPoint(Cell->Row, Cell->Column));
-
-	if (bCreatePassage)
-	{
-		constexpr float PassageHeight = 180.f;
-		constexpr float WallHeight = 223.f;
-		
-		// Passage
-		const FVector TopLoc = SpawnLoc + FVector(0, 0, PassageHeight + (WallHeight - PassageHeight) / 2);
-		const FVector TopScale(1.f, 1.f, (WallHeight - PassageHeight) / WallHeight);
-		WallISM->AddInstance(FTransform(Rot, TopLoc, TopScale));
-	}
-	else
-	{
-		// Mur
-		WallISM->AddInstance(FTransform(Rot, SpawnLoc));
-	}
-
-	CreatedWallsPositions.Add(SpawnLoc);
-}
-
 FGridRoom* AGridActor::GetRoomAtCell(const FGridCell* Cell)
 {
 	if (!Cell || Cell->RoomType == EGridRoomType::None)
@@ -634,20 +431,6 @@ bool AGridActor::GetRoomAtWorldLocation(const FVector& WorldLoc, FGridRoom*& Out
 	OutRoom = GetRoom(Cell->RoomId);
 
 	return OutRoom != nullptr;
-}
-
-void AGridActor::ShowGrid(bool bShow)
-{
-	LinesProceduralMesh->SetVisibility(bShow);
-
-	for (auto& Pair : Cells)
-	{
-		FGridCell* Cell = &Pair.Value;
-		if (!Cell)
-			continue;
-
-		Cell->CellProceduralMesh->SetVisibility(false);
-	}
 }
 
 const UBuildRoomData* AGridActor::GetRoomDataFromType(const EGridRoomType RoomType) const
@@ -770,47 +553,253 @@ void AGridActor::RemoveCellsFromRooms(TArray<FGridCell*> CellsToRemove)
 	{
 		if (!Cell) continue;
 
-		Cell->RoomId = -1;
+		Cell->RoomId = BuildSubsystem->InvalidRoomId;
 		Cell->RoomType = EGridRoomType::None;
 	}
 
 	RecomputeAllRooms();
 }
+#pragma endregion
 
-void AGridActor::DeselectSelectedCells()
+#pragma region Walls
+void AGridActor::RebuildWalls()
 {
-	for (const FGridCell* Cell : SelectedCells)
+	WallISM->ClearInstances();
+	CreatedWallsPositions.Empty();
+	TArray<FIntPoint> BorderCells;
+	
+	CollectBorderCells(BorderCells);
+	
+	TArray<FWallSegment> Segments;
+	BuildWallSegments(BorderCells, Segments);
+	
+	for (FWallSegment& Seg : Segments)
 	{
-		if (Cell)
+		SpawnSegment(Seg);
+	}
+}
+
+void AGridActor::BuildWallSegments(const TArray<FIntPoint>& CellsToCheck, TArray<FWallSegment>& OutSegments)
+{
+	TMap<int, TArray<int>> CurrentRows;
+	TMap<int, TArray<int>> CurrentCols;
+
+	// split horizontal / vertical
+	for (const FIntPoint& C : CellsToCheck)
+	{
+		CurrentRows.FindOrAdd(C.X).Add(C.Y);
+		CurrentCols.FindOrAdd(C.Y).Add(C.X);
+	}
+	
+	// horizontal segments
+	for (auto& Pair : CurrentRows)
+	{
+		Pair.Value.Sort(); ExtractSegments(Pair.Key, Pair.Value, true, OutSegments);
+	}
+	
+	// vertical segments
+	for (auto& Pair : CurrentCols)
+	{
+		Pair.Value.Sort();
+		ExtractSegments(Pair.Key, Pair.Value, false, OutSegments);
+	}
+}
+
+void AGridActor::ExtractSegments(int Fixed, const TArray<int>& Values, bool bHorizontal, TArray<FWallSegment>& OutSegments)
+{
+	int Start = 0;
+	while (Start < Values.Num())
+	{
+		int End = Start;
+		while (End + 1 < Values.Num() && Values[End + 1] == Values[End] + 1)
 		{
-			FLinearColor OutGridColor = FLinearColor::White;
-			if (bIsShowingRooms && CheckIfCellInPlacedRoom(Cell, OutGridColor))
+			End++;
+		}
+		
+		FWallSegment Seg; Seg.bHorizontal = bHorizontal;
+		for (int i = Start; i <= End; i++)
+		{
+			FIntPoint P = bHorizontal ? FIntPoint(Fixed, Values[i]) : FIntPoint(Values[i], Fixed); Seg.Cells.Add(P);
+		}
+
+		OutSegments.Add(Seg); Start = End + 1;
+	}
+}
+
+void AGridActor::SpawnWallWithDoorLogic(FGridCell* Cell, bool bHorizontal, float Half)
+{
+	if (!Cell)
+		return;
+	
+	auto TrySpawn = [&](int NR, int NC, EGridWallDirection Dir)
+	{
+		const FGridCell* Neighbor = GetGridCell(NR, NC);
+		
+		if (Neighbor && Neighbor->RoomType == Cell->RoomType)
+			return; FVector2D CellPos;
+		
+		if (!GetGridLocation(true, Cell->Row, Cell->Column, CellPos))
+			return;
+
+		FVector SpawnLoc( CellPos.X - GetActorLocation().X, CellPos.Y - GetActorLocation().Y, 0 );
+		FRotator Rot = FRotator::ZeroRotator;
+		
+		switch (Dir)
+		{
+			case EGridWallDirection::North: SpawnLoc.X -= Half;
+				break;
+			case EGridWallDirection::South: SpawnLoc.X += Half;
+				break;
+			case EGridWallDirection::West: SpawnLoc.Y -= Half; Rot = FRotator(0, 90, 0);
+				break;
+			case EGridWallDirection::East: SpawnLoc.Y += Half; Rot = FRotator(0, 90, 0);
+				break;
+		}
+		
+		if (CreatedWallsPositions.Contains(SpawnLoc))
+			return;
+
+		const bool bCreatePassage = DoorCells.Contains(FIntPoint(Cell->Row, Cell->Column));
+		if (bCreatePassage)
+		{
+			constexpr float PassageHeight = 180.f;
+			constexpr float WallHeight = 223.f;
+			const FVector TopLoc = SpawnLoc + FVector(0, 0, PassageHeight + (WallHeight - PassageHeight) / 2); 
+			const FVector TopScale( 1.f, 1.f, (WallHeight - PassageHeight) / WallHeight );
+			WallISM->AddInstance(FTransform(Rot, TopLoc, TopScale));
+		}
+		else
+		{
+			WallISM->AddInstance(FTransform(Rot, SpawnLoc));
+		}
+
+		CreatedWallsPositions.Add(SpawnLoc);
+	};
+
+	// 4 directions
+	TrySpawn(Cell->Row - 1, Cell->Column, EGridWallDirection::North);
+	TrySpawn(Cell->Row + 1, Cell->Column, EGridWallDirection::South);
+	TrySpawn(Cell->Row, Cell->Column - 1, EGridWallDirection::West);
+	TrySpawn(Cell->Row, Cell->Column + 1, EGridWallDirection::East);
+}
+
+void AGridActor::SpawnWallPerCell(FGridCell* Cell, bool bHorizontal, float Half, bool bIsDoor)
+{
+	if (!Cell) return;
+
+	auto Spawn = [&](int NR, int NC, EGridWallDirection Dir)
+	{
+		FGridCell* Neighbor = GetGridCell(NR, NC);
+
+		if (Neighbor && Neighbor->RoomId == Cell->RoomId)
+			return;
+
+		FVector2D CellPos;
+		if (!GetGridLocation(true, Cell->Row, Cell->Column, CellPos))
+			return;
+
+		FVector SpawnLoc(CellPos.X - GetActorLocation().X, CellPos.Y - GetActorLocation().Y, 0);
+
+		FRotator Rot = FRotator::ZeroRotator;
+
+		switch (Dir)
+		{
+			case EGridWallDirection::North: SpawnLoc.X -= Half;
+				break;
+			case EGridWallDirection::South: SpawnLoc.X += Half;
+				break;
+			case EGridWallDirection::West:  SpawnLoc.Y -= Half; Rot = FRotator(0, 90, 0);
+				break;
+			case EGridWallDirection::East:  SpawnLoc.Y += Half; Rot = FRotator(0, 90, 0);
+				break;
+		}
+
+		if (CreatedWallsPositions.Contains(SpawnLoc))
+			return;
+
+		if (bIsDoor)
+		{
+			constexpr float PassageHeight = 180.f;
+			constexpr float WallHeight = 223.f;
+
+			const FVector TopLoc = SpawnLoc + FVector(0, 0, PassageHeight + (WallHeight - PassageHeight) / 2);
+
+			const FVector TopScale(1.f, 1.f, (WallHeight - PassageHeight) / WallHeight);
+
+			WallISM->AddInstance(FTransform(Rot, TopLoc, TopScale));
+		}
+		else
+		{
+			WallISM->AddInstance(FTransform(Rot, SpawnLoc));
+		}
+
+		CreatedWallsPositions.Add(SpawnLoc);
+	};
+	
+	if (bHorizontal)
+	{
+		Spawn(Cell->Row - 1, Cell->Column, EGridWallDirection::North);
+		Spawn(Cell->Row + 1, Cell->Column, EGridWallDirection::South);
+	}
+	else
+	{
+		Spawn(Cell->Row, Cell->Column - 1, EGridWallDirection::West);
+		Spawn(Cell->Row, Cell->Column + 1, EGridWallDirection::East);
+	}
+}
+
+void AGridActor::SpawnSegment(const FWallSegment& Seg)
+{
+	constexpr float Half = 50.f;
+
+	if (Seg.Cells.Num() == 0)
+		return;
+
+	const bool bHasDoor = Seg.Cells.Num() >= MinWallSizeForDoors;
+	const int DoorIndex = bHasDoor ? Seg.Cells.Num() / 2 : BuildSubsystem->InvalidRoomId;
+
+	for (int i = 0; i < Seg.Cells.Num(); i++)
+	{
+		FGridCell* Cell = GetGridCell(Seg.Cells[i].X, Seg.Cells[i].Y);
+		if (!Cell) continue;
+
+		const bool bIsDoor = (i == DoorIndex);
+
+		SpawnWallPerCell(Cell, Seg.bHorizontal, Half, bIsDoor);
+	}
+}
+
+void AGridActor::CollectBorderCells(TArray<FIntPoint>& OutCells)
+{
+	for (auto& RoomPair : Rooms)
+	{
+		FGridRoom& Room = RoomPair.Value;
+		for (const FGridCell* Cell : Room.Cells)
+		{
+			if (!Cell)
+				continue;
+			
+			int R = Cell->Row;
+			int C = Cell->Column;
+
+			// check 4 neighbors
+			if (IsBorder(Cell, R + 1, C) || IsBorder(Cell, R - 1, C) || IsBorder(Cell, R, C + 1) || IsBorder(Cell, R, C - 1))
 			{
-				Cell->CellProceduralMesh->SetVisibility(true);
-				Cell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), OutGridColor);
-			}
-			else
-			{
-				Cell->CellProceduralMesh->SetVisibility(false); 
+				OutCells.Add(FIntPoint(R, C));
 			}
 		}
 	}
-
-	SelectedCells.Empty();
 }
 
-FGridCell* AGridActor::GetGridCell(int Row, int Column)
+bool AGridActor::IsBorder(const FGridCell* Cell, const int R, const int C)
 {
-	return Cells.Find(FIntPoint(Row, Column));
-}
+	const FGridCell* N = GetGridCell(R, C);
 
-void AGridActor::DeselectCell(int Row, int Column)
-{
-	const FGridCell* Cell = GetGridCell(Row, Column);
-	if (Cell)
-		Cell->CellProceduralMesh->SetVisibility(false);
+	return (!N || N->RoomId != Cell->RoomId);
 }
+#pragma endregion
 
+#pragma region Visuals
 void AGridActor::DrawLine(const FVector& Start, const FVector& End, const float Thickness, TArray<FVector>& Vertices, TArray<int>& Triangles)
 {
 	const float HalfThickness = Thickness / 2;
@@ -862,6 +851,7 @@ TObjectPtr<UMaterialInstanceDynamic> AGridActor::CreateMaterialInstance(const FL
 
 	return DynamicMaterial;
 }
+#pragma endregion
 
 
 

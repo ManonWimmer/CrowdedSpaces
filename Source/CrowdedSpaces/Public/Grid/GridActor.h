@@ -10,6 +10,12 @@
 #include "Components/InstancedStaticMeshComponent.h"
 #include "GridActor.generated.h"
 
+struct FWallSegment
+{
+	TArray<FIntPoint> Cells;
+	bool bHorizontal;
+};
+
 UCLASS()
 class CROWDEDSPACES_API AGridActor : public AActor
 {
@@ -39,7 +45,7 @@ public:
 	void DeselectSelectedCells();
 
 	UFUNCTION(BlueprintCallable, Category = "Grid")
-	void SetIsShowingRooms(bool bShow) { bIsShowingRooms = bShow; }
+	void SetIsShowingRooms(const bool bShow) { bIsShowingRooms = bShow; }
 	
 	FGridCell* GetGridCell(int Row, int Column);
 	
@@ -50,12 +56,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Grid")
 	TMap<int, FGridRoom>& GetRooms() { return Rooms; }
 	
-	void DeselectCell(int Row, int Column);
 	void SelectRoomCell(int Row, int Column, ERoomEditMode EditMode, EGridRoomType TargetRoomType);
 	
 	void ShowPlacedRooms(bool bShow);
-	FGridRoom* GetNearRoomOfSameType(TArray<FGridCell*> RoomCells, EGridRoomType RoomType);
-	TTuple<bool, int> CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> CellsToAssign);
 	bool CheckIfCellInPlacedRoom(const FGridCell* Cell, FLinearColor& OutGridColor);
 
 	UFUNCTION(BlueprintCallable, Category = "Room")
@@ -63,9 +66,17 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	float GetRoomDestroyCost(int RoomId);
-	
+
+	// Walls
 	void RebuildWalls();
-	void TryAddWall(FGridCell* Cell, int NeighborRow, int NeighborCol, EGridWallDirection Dir, float Half, const TSet<FIntPoint>& DoorCells);
+	void CollectBorderCells(TArray<FIntPoint>& OutCells);
+	bool IsBorder(const FGridCell* Cell, int R, int C);
+	void BuildWallSegments(const TArray<FIntPoint>& CellsToCheck, TArray<FWallSegment>& OutSegments);
+	void ExtractSegments(int Fixed, const TArray<int>& Values, bool bHorizontal, TArray<FWallSegment>& OutSegments);
+	void SpawnWallWithDoorLogic(FGridCell* Cell, bool bHorizontal, float Half);
+	void SpawnWallPerCell(FGridCell* GridCell, bool bHorizontal, float Half, bool bIsDoorCell);
+	void SpawnSegment(const FWallSegment& Seg);
+	
 	FGridRoom* GetRoomAtCell(const FGridCell* Cell);
 	bool GetRoomAtWorldLocation(const FVector& WorldLoc, FGridRoom*& OutRoom);
 	FGridRoom* GetRoomOfSameType(EGridRoomType RoomType, int Row, int Col);
@@ -73,6 +84,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Grid")
 	void ShowGrid(bool bShow);
+	
 	const UBuildRoomData* GetRoomDataFromType(EGridRoomType RoomType) const;
 	void RecomputeAllRooms();
 	void AddCellsToRooms(TObjectPtr<UBuildRoomData> BuildData, TArray<FGridCell*> CellsToAdd);
@@ -135,4 +147,10 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UBuildSubsystem> BuildSubsystem{nullptr};
+
+	TSet<FIntPoint> DoorCells;
+	TSet<FIntPoint> DoorSegments;
+
+	UPROPERTY()
+	int MinWallSizeForDoors = 3;
 };

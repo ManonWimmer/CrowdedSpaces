@@ -581,6 +581,49 @@ void UBuildSubsystem::UpdateGhost()
 }
 #pragma endregion
 
+#pragma region Click & Selection
+void UBuildSubsystem::LeftClicked()
+{
+	if (bIsSelectingRoom)
+	{
+		PlaceRoom();
+	}
+	else
+	{
+		PlaceObject();
+	}
+}
+
+void UBuildSubsystem::RightClicked()
+{
+	StopBuilding();
+
+	OnDeselected.Broadcast();
+}
+
+bool UBuildSubsystem::GetCursorHit(FVector& OutHit) const
+{
+	TObjectPtr<APlayerController> PC = GetWorld()->GetFirstPlayerController();
+	if (!PC)
+		return false;
+	
+	float MouseX, MouseY;
+	if(PC->GetMousePosition(MouseX, MouseY))
+	{
+		FVector WorldOrigin, WorldDir;
+		if(PC->DeprojectScreenPositionToWorld(MouseX, MouseY, WorldOrigin, WorldDir))
+		{
+			FHitResult Hit;
+			if(GetWorld()->LineTraceSingleByChannel(Hit, WorldOrigin, WorldOrigin + WorldDir * CursorLineTraceDistance, ECC_Visibility))
+			{
+				OutHit = Hit.Location;
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 void UBuildSubsystem::UpdateRoomSelection()
 {
 	if(!GridActor)
@@ -630,48 +673,5 @@ void UBuildSubsystem::UpdateRoomSelection()
 			}
 		}
 	}
-}
-
-#pragma region Click
-void UBuildSubsystem::LeftClicked()
-{
-	if (bIsSelectingRoom)
-	{
-		PlaceRoom();
-	}
-	else
-	{
-		PlaceObject();
-	}
-}
-
-void UBuildSubsystem::RightClicked()
-{
-	StopBuilding();
-
-	OnDeselected.Broadcast();
-}
-
-bool UBuildSubsystem::GetCursorHit(FVector& OutHit) const
-{
-	TObjectPtr<APlayerController> PC = GetWorld()->GetFirstPlayerController();
-	if (!PC)
-		return false;
-	
-	float MouseX, MouseY;
-	if(PC->GetMousePosition(MouseX, MouseY))
-	{
-		FVector WorldOrigin, WorldDir;
-		if(PC->DeprojectScreenPositionToWorld(MouseX, MouseY, WorldOrigin, WorldDir))
-		{
-			FHitResult Hit;
-			if(GetWorld()->LineTraceSingleByChannel(Hit, WorldOrigin, WorldOrigin + WorldDir * CursorLineTraceDistance, ECC_Visibility))
-			{
-				OutHit = Hit.Location;
-				return true;
-			}
-		}
-	}
-	return false;
 }
 #pragma endregion
