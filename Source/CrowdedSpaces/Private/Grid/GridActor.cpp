@@ -143,7 +143,13 @@ void AGridActor::BeginPlay()
 				FGridCell(Row, Column, false, NewCellProceduralMesh, NewCellMaterialInstance));
 		}
 	}
-	#pragma endregion 
+	#pragma endregion
+
+	UWorld* World = GetWorld();
+	if (!World)
+		return;
+	
+	BuildSubsystem = World->GetSubsystem<UBuildSubsystem>();
 }
 
 bool AGridActor::CheckIsValidCell(const int Row, const int Column) const
@@ -205,7 +211,7 @@ void AGridActor::SelectObjectCell(const int Row, const int Column, EGridRoomType
 	SelectedCells.Add(NewSelectedCell);
 }
 
-void AGridActor::SelectRoomCell(const int Row, const int Column)
+void AGridActor::SelectRoomCell(const int Row, const int Column, const ERoomEditMode EditMode, const EGridRoomType TargetRoomType)
 {
 	FGridCell* NewSelectedCell = GetGridCell(Row, Column);
 	if (!NewSelectedCell)
@@ -213,11 +219,23 @@ void AGridActor::SelectRoomCell(const int Row, const int Column)
 	
 	NewSelectedCell->CellProceduralMesh->SetVisibility(true);
 
-	if (NewSelectedCell->RoomType != EGridRoomType::None)
-		NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Red);
+	if (EditMode == ERoomEditMode::Add)
+	{
+		// ADD
+		if (NewSelectedCell->RoomType != EGridRoomType::None)
+			NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Red);
+		else
+			NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Green);
+	}
 	else
-		NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Green); 
-	
+	{
+		// REMOVE
+		if (NewSelectedCell->RoomType == TargetRoomType)
+			NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Green);
+		else
+			NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Red);
+	}
+
 	SelectedCells.Add(NewSelectedCell);
 }
 
@@ -630,6 +648,133 @@ void AGridActor::ShowGrid(bool bShow)
 
 		Cell->CellProceduralMesh->SetVisibility(false);
 	}
+}
+
+const UBuildRoomData* AGridActor::GetRoomDataFromType(const EGridRoomType RoomType) const
+{
+	for (const UBuildRoomData* Data : BuildSubsystem->GetBuildDataRooms())
+	{
+		if (Data && Data->RoomType == RoomType)
+			return Data;
+	}
+
+	return nullptr;
+}
+
+void AGridActor::RecomputeAllRooms()
+{
+	// Clean all rooms
+	Rooms.Empty();
+
+	TSet<FGridCell*> Visited;
+
+	for (auto& Pair : Cells)
+	{
+		FGridCell* StartCell = &Pair.Value;
+
+		if (!StartCell)
+			continue;
+
+		if (StartCell->RoomType == EGridRoomType::None)
+			continue;
+
+		if (Visited.Contains(StartCell))
+			continue;
+
+		// Create room
+		FGridRoom NewRoom;
+		NewRoom.RoomId = NextRoomId++;
+		NewRoom.RoomType = StartCell->RoomType;
+		
+		const UBuildRoomData* RoomData = GetRoomDataFromType(StartCell->RoomType);
+		if (RoomData)
+		{
+			NewRoom.GridColor = RoomData->GridColor;
+			NewRoom.LoseElectricityPerHourPerCell = RoomData->LoseElectricityPerHour;
+			NewRoom.DestroyMoney = RoomData->DestroyMoney;
+		}
+
+		// Check around neighbors cells with flood fill (DFS with stack)
+		TArray<FGridCell*> Stack;
+		Stack.Add(StartCell);
+
+		while (Stack.Num() > 0)
+		{
+			FGridCell* Cell = Stack.Pop();
+
+			if (!Cell)
+				continue;
+
+			// Already visited
+			if (Visited.Contains(Cell))
+				continue;
+
+			// Wrong room type
+			if (Cell->RoomType != NewRoom.RoomType)
+				continue;
+
+			Visited.Add(Cell);
+
+			// Add to new room
+			Cell->RoomId = NewRoom.RoomId;
+			NewRoom.Cells.Add(Cell);
+
+			// Check cell neighbors
+			const TArray<FIntPoint> Neighbors = {
+				{Cell->Row + 1, Cell->Column},
+				{Cell->Row - 1, Cell->Column},
+				{Cell->Row, Cell->Column + 1},
+				{Cell->Row, Cell->Column - 1}
+			};
+
+			for (const FIntPoint& N : Neighbors)
+			{
+				FGridCell* Neighbor = GetGridCell(N.X, N.Y);
+
+				if (!Neighbor)
+					continue;
+
+				if (Visited.Contains(Neighbor))
+					continue;
+
+				// Same type : add neighbor to explore stack
+				if (Neighbor->RoomType == NewRoom.RoomType)
+				{
+					Stack.Add(Neighbor);
+				}
+			}
+		}
+
+		// Create final room
+		Rooms.Add(NewRoom.RoomId, NewRoom);
+	}
+
+	ShowPlacedRooms(true);
+}
+
+void AGridActor::AddCellsToRooms(TObjectPtr<UBuildRoomData> BuildData, TArray<FGridCell*> CellsToAdd)
+{
+	for (FGridCell* Cell : CellsToAdd)
+	{
+		if (!Cell) continue;
+
+		Cell->RoomType = BuildData->RoomType;
+	}
+
+	RecomputeAllRooms();
+}
+
+void AGridActor::RemoveCellsFromRooms(TArray<FGridCell*> CellsToRemove)
+{
+	for (FGridCell* Cell : CellsToRemove)
+	{
+		if (!Cell) continue;
+
+		Cell->RoomId = -1;
+		Cell->RoomType = EGridRoomType::None;
+	}
+
+	RecomputeAllRooms();
 }
 
 void AGridActor::DeselectSelectedCells()

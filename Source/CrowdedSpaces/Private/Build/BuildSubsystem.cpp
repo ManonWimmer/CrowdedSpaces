@@ -325,37 +325,42 @@ void UBuildSubsystem::PlaceRoom()
 
 	for (FGridCell* Cell : SelectedRoomCells)
 	{
-		if (!Cell)
-			continue;
+		if (!Cell) continue;
 
-		if (Cell->RoomType == EGridRoomType::None)
+		if (CurrentRoomEditMode == ERoomEditMode::Add)
 		{
-			ValidCells.Add(Cell);
+			// ADD 
+			if (Cell->RoomType == EGridRoomType::None)
+			{
+				ValidCells.Add(Cell);
+			}
+		}
+		else
+		{
+			// REMOVE
+			if (Cell->RoomType == CurrentBuildRoomData->RoomType)
+			{
+				ValidCells.Add(Cell);
+			}
 		}
 	}
 
 	if (ValidCells.Num() == 0)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("No valid cells to place room"));
 		return;
-	}
-	
-	TTuple<bool, int> IsNewRoomAndRoomId = GridActor->CreateRoom(CurrentBuildRoomData, ValidCells);
 
-	UE_LOG(LogTemp, Display, TEXT("Created room, id : %d"), IsNewRoomAndRoomId.Value);
-	UE_LOG(LogTemp, Display, TEXT("Created room, is new : %d"), IsNewRoomAndRoomId.Key);
-	
-	if (MoneyComponent)
-		MoneyComponent->RemoveResource(CurrentBuildRoomData->MoneyCost);
+	if (CurrentRoomEditMode == ERoomEditMode::Add)
+	{
+		GridActor->AddCellsToRooms(CurrentBuildRoomData, ValidCells);
+	}
+	else
+	{
+		GridActor->RemoveCellsFromRooms(ValidCells);
+	}
 
 	GridActor->DeselectSelectedCells();
-	
 	SelectedRoomCells.Empty();
 
-	if (IsNewRoomAndRoomId.Key)
-		OnRoomCreated.Broadcast(IsNewRoomAndRoomId.Value, CurrentBuildRoomData->RoomType);
-	else
-		OnRoomUpdated.Broadcast(IsNewRoomAndRoomId.Value, CurrentBuildRoomData->RoomType);
+	GridActor->RebuildWalls();
 }
 #pragma endregion
 
@@ -620,7 +625,7 @@ void UBuildSubsystem::UpdateRoomSelection()
 			FGridCell* Cell = GridActor->GetGridCell(Row, Col);
 			if (Cell)
 			{
-				GridActor->SelectRoomCell(Row, Col);
+				GridActor->SelectRoomCell(Row, Col, CurrentRoomEditMode, CurrentBuildRoomData->RoomType);
 				SelectedRoomCells.Add(Cell);
 			}
 		}

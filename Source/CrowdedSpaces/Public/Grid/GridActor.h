@@ -51,7 +51,7 @@ public:
 	TMap<int, FGridRoom>& GetRooms() { return Rooms; }
 	
 	void DeselectCell(int Row, int Column);
-	void SelectRoomCell(int Row, int Column);
+	void SelectRoomCell(int Row, int Column, ERoomEditMode EditMode, EGridRoomType TargetRoomType);
 	
 	void ShowPlacedRooms(bool bShow);
 	FGridRoom* GetNearRoomOfSameType(TArray<FGridCell*> RoomCells, EGridRoomType RoomType);
@@ -73,7 +73,11 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Grid")
 	void ShowGrid(bool bShow);
-	
+	const UBuildRoomData* GetRoomDataFromType(EGridRoomType RoomType) const;
+	void RecomputeAllRooms();
+	void AddCellsToRooms(TObjectPtr<UBuildRoomData> BuildData, TArray<FGridCell*> CellsToAdd);
+	void RemoveCellsFromRooms(TArray<FGridCell*> CellsToRemove);
+
 private:
 	void DrawLine(const FVector& Start, const FVector& End, float Thickness, TArray<FVector>& Vertices, TArray<int>& Triangles);
 	float LineWidth() const; 
@@ -128,4 +132,7 @@ private:
 	TObjectPtr<UInstancedStaticMeshComponent> WallISM;
 	
 	TSet<FVector> CreatedWallsPositions;
+
+	UPROPERTY()
+	TObjectPtr<UBuildSubsystem> BuildSubsystem{nullptr};
 };
