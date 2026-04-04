@@ -293,35 +293,41 @@ FGridRoom* AGridActor::GetRoom(const int RoomId)
 	return Rooms.Find(RoomId);
 }
 
-TTuple<bool, int> AGridActor::CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> CellsToAssign) // bool new room, int room id
+TTuple<bool, int> AGridActor::CreateRoom(const UBuildRoomData* BuildData, TArray<FGridCell*> CellsToAssign)
 {
-	FGridRoom* NearRoom = GetNearRoomOfSameType(CellsToAssign, BuildData->RoomType);
-	
-	if (NearRoom != nullptr)
+	if (!BuildData || CellsToAssign.Num() == 0)
+		return MakeTuple(false, -1);
+
+	//  Get neighbor rooms of same room type
+	TSet<int> NeighborRoomIds;
+
+	for (const FGridCell* Cell : CellsToAssign)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Larger room created"));
-		
-		// larger room
-		for (FGridCell* Cell : CellsToAssign)
+		if (!Cell) continue;
+
+		TArray<FGridCell*> Neighbors =
 		{
-			Cell->RoomId = NearRoom->RoomId;
-			Cell->RoomType = NearRoom->RoomType;
-		
-			NearRoom->Cells.Add(Cell);
+			GetGridCell(Cell->Row - 1, Cell->Column),
+			GetGridCell(Cell->Row + 1, Cell->Column),
+			GetGridCell(Cell->Row, Cell->Column - 1),
+			GetGridCell(Cell->Row, Cell->Column + 1)
+		};
+
+		for (const FGridCell* Neighbor : Neighbors)
+		{
+			if (!Neighbor) continue;
+
+			if (Neighbor->RoomType == BuildData->RoomType)
+			{
+				NeighborRoomIds.Add(Neighbor->RoomId);
+			}
 		}
-
-		Rooms[NearRoom->RoomId] = *NearRoom; // update in rooms map instead of add
-
-		ShowPlacedRooms(true);
-		RebuildWalls();
-		
-		return MakeTuple(false, NearRoom->RoomId);
 	}
-	else
+
+	// Case : no neighbor = new room
+	
+	if (NeighborRoomIds.Num() == 0)
 	{
-		UE_LOG(LogTemp, Display, TEXT("New room created"));
-		
-		// new room
 		FGridRoom NewRoom;
 		NewRoom.RoomType = BuildData->RoomType;
 		NewRoom.GridColor = BuildData->GridColor;
@@ -331,9 +337,11 @@ TTuple<bool, int> AGridActor::CreateRoom(const UBuildRoomData* BuildData, TArray
 
 		for (FGridCell* Cell : CellsToAssign)
 		{
+			if (!Cell) continue;
+
 			Cell->RoomId = NewRoom.RoomId;
 			Cell->RoomType = NewRoom.RoomType;
-		
+
 			NewRoom.Cells.Add(Cell);
 		}
 
@@ -341,9 +349,65 @@ TTuple<bool, int> AGridActor::CreateRoom(const UBuildRoomData* BuildData, TArray
 
 		ShowPlacedRooms(true);
 		RebuildWalls();
-		
-		return MakeTuple(true, NewRoom.RoomId);;
+
+		return MakeTuple(true, NewRoom.RoomId);
 	}
+	
+	// Case : Extend / Merge
+	
+	// Chose main room
+	int MainRoomId = *NeighborRoomIds.begin();
+	FGridRoom* MainRoom = GetRoom(MainRoomId);
+
+	if (!MainRoom)
+		return MakeTuple(false, -1);
+
+	// Merge all rooms in the main one
+	for (int OtherRoomId : NeighborRoomIds)
+	{
+		if (OtherRoomId == MainRoomId)
+			continue;
+
+		FGridRoom* OtherRoom = GetRoom(OtherRoomId);
+		if (!OtherRoom)
+			continue;
+
+		for (FGridCell* Cell : OtherRoom->Cells)
+		{
+			if (!Cell) continue;
+
+			Cell->RoomId = MainRoomId;
+			MainRoom->Cells.Add(Cell);
+		}
+
+		Rooms.Remove(OtherRoomId);
+	}
+
+	// Add cells
+	for (FGridCell* Cell : CellsToAssign)
+	{
+		if (!Cell) continue;
+		
+		if (Cell->RoomId == MainRoomId)
+			continue;
+
+		Cell->RoomId = MainRoomId;
+		Cell->RoomType = MainRoom->RoomType;
+
+		MainRoom->Cells.Add(Cell);
+	}
+
+	// Clean doubles
+	TSet<FGridCell*> UniqueCells(MainRoom->Cells);
+	MainRoom->Cells = UniqueCells.Array();
+
+	// Update map
+	Rooms[MainRoomId] = *MainRoom;
+
+	ShowPlacedRooms(true);
+	RebuildWalls();
+
+	return MakeTuple(false, MainRoomId);
 }
 
 bool AGridActor::CheckIfCellInPlacedRoom(const FGridCell* Cell, FLinearColor& OutGridColor)
