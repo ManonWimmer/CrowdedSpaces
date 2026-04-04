@@ -96,5 +96,4 @@ void UBTTask_UseBuildableObject::StopUsingClean() const
 	
 	CurrentObject->StopUsing(NPC);
 	CurrentObject->Release(NPC);
-	NPC->SetCurrentObject(nullptr);
 }

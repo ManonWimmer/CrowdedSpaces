@@ -245,25 +245,23 @@ void ABuildableObject::DestroyObject()
 	UResourceComponent* PlayerMoneyComponent = PlayerHelpers::GetPlayerResourceComponent(*GetWorld(), EResourceType::Money);
 	PlayerMoneyComponent->AddResource(BuildData->DestroyMoney);
 	
-	for (TWeakObjectPtr<ANPC> NPC : UsingNPCs)
+	TArray<TWeakObjectPtr<ANPC>> NPCsCopy = UsingNPCs;
+
+	for (TWeakObjectPtr<ANPC> NPC : NPCsCopy)
 	{
 		if (!NPC.IsValid())
 			continue;
 
-		// Stop propre
 		StopUsing(NPC.Get());
 
-		// Force arrêt BT
 		if (ANPCController* Controller = Cast<ANPCController>(NPC->GetController()))
 		{
 			if (UBehaviorTreeComponent* BT = Cast<UBehaviorTreeComponent>(Controller->GetBrainComponent()))
 			{
 				BT->StopTree(EBTStopMode::Safe);
-				BT->RestartTree(); 
+				BT->RestartTree();
 			}
 		}
-
-		NPC->SetCurrentObject(nullptr);
 	}
 	
 	UsingNPCs.Empty();
