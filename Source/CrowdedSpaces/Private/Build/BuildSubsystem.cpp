@@ -311,24 +311,28 @@ void UBuildSubsystem::PlaceRoom()
 	int SizeY = BuildRoomBrushSize;
 
 	GetRoomRotatedSize(SizeX, SizeY);
-	
-	// Check can place
-	for (const FGridCell* Cell : SelectedRoomCells)
+
+	// Get valid cells
+	TArray<FGridCell*> ValidCells;
+
+	for (FGridCell* Cell : SelectedRoomCells)
 	{
 		if (!Cell)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("PlaceRoom: SelectedRoomCells contient nullptr !"));
-			return;
-		}
+			continue;
 
-		if (Cell->RoomType != EGridRoomType::None)
+		if (Cell->RoomType == EGridRoomType::None)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("PlaceRoom: SelectedRoomCells contient une room non set"));
-			return;
+			ValidCells.Add(Cell);
 		}
 	}
+
+	if (ValidCells.Num() == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No valid cells to place room"));
+		return;
+	}
 	
-	TTuple<bool, int> IsNewRoomAndRoomId = GridActor->CreateRoom(CurrentBuildRoomData, SelectedRoomCells);
+	TTuple<bool, int> IsNewRoomAndRoomId = GridActor->CreateRoom(CurrentBuildRoomData, ValidCells);
 
 	UE_LOG(LogTemp, Display, TEXT("Created room, id : %d"), IsNewRoomAndRoomId.Value);
 	UE_LOG(LogTemp, Display, TEXT("Created room, is new : %d"), IsNewRoomAndRoomId.Key);
