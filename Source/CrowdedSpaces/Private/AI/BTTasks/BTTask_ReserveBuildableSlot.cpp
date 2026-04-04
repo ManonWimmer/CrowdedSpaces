@@ -13,7 +13,7 @@ UBTTask_ReserveBuildableSlot::UBTTask_ReserveBuildableSlot(FObjectInitializer co
 
 EBTNodeResult::Type UBTTask_ReserveBuildableSlot::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	AAIController* AI = OwnerComp.GetAIOwner();
+	const AAIController* AI = OwnerComp.GetAIOwner();
 	if (!AI)
 		return EBTNodeResult::Failed;
 
@@ -21,7 +21,7 @@ EBTNodeResult::Type UBTTask_ReserveBuildableSlot::ExecuteTask(UBehaviorTreeCompo
 	if (!NPC)
 		return EBTNodeResult::Failed;
 
-	UBlackboardComponent* Blackboard = OwnerComp.GetBlackboardComponent();
+	const UBlackboardComponent* Blackboard = OwnerComp.GetBlackboardComponent();
 	if (!Blackboard)
 		return EBTNodeResult::Failed;
 
@@ -34,7 +34,7 @@ EBTNodeResult::Type UBTTask_ReserveBuildableSlot::ExecuteTask(UBehaviorTreeCompo
 	if (!Object || !Slot)
 		return EBTNodeResult::Failed;
 
-	// déjà réservé
+	// Already reserved
 	if (NPC->GetCurrentObject() == Object)
 		return EBTNodeResult::Succeeded;
 

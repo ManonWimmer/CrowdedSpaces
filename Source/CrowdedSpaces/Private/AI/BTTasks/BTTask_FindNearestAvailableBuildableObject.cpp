@@ -17,7 +17,7 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBe
 	if (!Blackboard)
 		return EBTNodeResult::Failed;
 
-	ANPCController* Controller = Cast<ANPCController>(OwnerComp.GetAIOwner());
+	const ANPCController* Controller = Cast<ANPCController>(OwnerComp.GetAIOwner());
 	if (!Controller)
 		return EBTNodeResult::Failed;
 
@@ -25,21 +25,21 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBe
 	if (!NPC)
 		return EBTNodeResult::Failed;
 
-	UWorld* World = NPC->GetWorld();
+	const UWorld* World = NPC->GetWorld();
 	if (!World)
 		return EBTNodeResult::Failed;
 
-	UBuildableRegistrySubsystem* BRS = World->GetSubsystem<UBuildableRegistrySubsystem>();
-	if (!BRS)
+	UBuildableRegistrySubsystem* BuildableRegistrySubsystem = World->GetSubsystem<UBuildableRegistrySubsystem>();
+	if (!BuildableRegistrySubsystem)
 		return EBTNodeResult::Failed;
 
-	FVector Origin = NPC->GetActorLocation();
+	const FVector Origin = NPC->GetActorLocation();
 
 	ABuildableObject* BestObject = nullptr;
 	USlotComponent* BestSlot = nullptr;
 	float BestDist = FLT_MAX;
 
-	for (TWeakObjectPtr<ABuildableObject> Object : BRS->BuildableObjects)
+	for (TWeakObjectPtr<ABuildableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
 	{
 		if (!Object.IsValid())
 			continue;
@@ -52,7 +52,7 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBe
 
 		if (Object->GetObjectType() == EObjectType::Generator)
 		{
-			ABuildableGenerator* Generator = Cast<ABuildableGenerator>(Object.Get());
+			const ABuildableGenerator* Generator = Cast<ABuildableGenerator>(Object.Get());
 			if (!Generator)
 				continue;
 			
@@ -67,11 +67,11 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBe
 		if (!Slot)
 			continue;
 
-		float Dist = FVector::Dist(Origin, Slot->GetComponentLocation());
+		const float Distance = FVector::Dist(Origin, Slot->GetComponentLocation());
 
-		if (Dist < BestDist)
+		if (Distance < BestDist)
 		{
-			BestDist = Dist;
+			BestDist = Distance;
 			BestObject = Object.Get();
 			BestSlot = Slot;
 		}

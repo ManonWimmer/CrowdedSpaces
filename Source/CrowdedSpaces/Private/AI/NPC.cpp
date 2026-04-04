@@ -42,155 +42,6 @@ ANPC::ANPC()
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }
 
-UResourceComponent* ANPC::GetResourceComponentByType(const EResourceType Type) const
-{
-	if (const TObjectPtr<UResourceComponent>* Found = ResourceMap.Find(Type))
-	{
-		return Found->Get();
-	}
-
-	return nullptr;
-}
-
-int ANPC::GetResourceByType(const EResourceType Type) const
-{
-	if (!GetResourceComponentByType(Type))
-		return 0;
-	else
-		return GetResourceComponentByType(Type)->GetResource();
-}
-
-void ANPC::SetCurrentAction(const ENPCActionWidget NewAction)
-{
-	CurrentAction = NewAction;
-	FString ActionString = StaticEnum<ENPCActionWidget>()->GetDisplayNameTextByValue(static_cast<int64>(CurrentAction)).ToString();
-	
-	OnCurrentActionChanged.Broadcast(CurrentAction);
-}
-
-void ANPC::Die()
-{
-	// todo: animation ?
-
-	BO_LOG("Npc death, food : %f, energy : %f", FoodComponent->GetResource(), EnergyComponent->GetResource());
-	
-	ACrowdedGameMode* GameMode = GetWorld()->GetAuthGameMode<ACrowdedGameMode>();
-	if (!GameMode)
-		return;
-
-	GameMode->UnregisterNPC(this);
-
-	// Object
-	if (CurrentObject)
-		CurrentObject->Release(this);
-	
-	Destroy();
-}
-
-void ANPC::SetWorkOnGeneratorType(const EProductionType NewType)
-{
-	if (WorkOnGeneratorType == NewType)
-		return;
-	
-	WorkOnGeneratorType = NewType;
-
-	// Cancel use generator task in cas was working on genrator with diferent type
-	if (ANPCController* ControllerNPC = Cast<ANPCController>(GetController()))
-	{
-		if (UBlackboardComponent* BB = ControllerNPC->GetBlackboardComponent())
-		{
-			TObjectPtr<ABuildableObject> TargetObject = Cast<ABuildableObject>(BB->GetValueAsObject("TargetObject"));
-			
-			if (TargetObject && TargetObject->GetObjectType() == EObjectType::Generator)
-			{
-				if (UBehaviorTreeComponent* BTComp = Cast<UBehaviorTreeComponent>(ControllerNPC->GetBrainComponent()))
-					BTComp->RestartTree();
-			}
-		}
-	}
-}
-
-int ANPC::GetProductionMultiplierForType(const EProductionType Type) const
-{
-	switch (Type)
-	{
-		case EProductionType::Money:
-			return MoneyProductionMultiplier;
-			
-		case EProductionType::Food:
-			return FoodProductionMultiplier;
-			
-		case EProductionType::Electricity:
-			return ElectricityProductionMultiplier;
-			
-		default:
-			return 1;
-	}
-}
-
-void ANPC::SetCurrentObject(ABuildableObject* NewObject)
-{
-	CurrentObject = NewObject;
-}
-
-void ANPC::SetCurrentUseTask(UBTTask_UseBuildableObject* NewTask)
-{
-	CurrentUseTask = NewTask;
-}
-
-void ANPC::TryGenerateName()
-{
-	if (const UNameGeneratorSubsystem* NameSystem =
-	   GetWorld()->GetSubsystem<UNameGeneratorSubsystem>())
-	{
-		if (NameSystem->IsInitialized())
-		{
-			NPCName = NameSystem->GenerateName();
-			
-			// Setup npc name widget
-			if (!NPCNameWidget)
-				return;
-
-			const TObjectPtr<UUserWidget> NPCNameUserWidget = NPCNameWidget->GetUserWidgetObject();
-			if (!NPCNameUserWidget)
-				return;
-
-			const TObjectPtr<UNPCNameWidget> NPCNameWidgetPtr = Cast<UNPCNameWidget>(NPCNameUserWidget);
-			if (!NPCNameWidgetPtr)
-				return;
-	
-			NPCNameWidgetPtr->OwningActor = this;
-			NPCNameWidgetPtr->Init();
-			
-			return;
-		}
-	}
-
-	// Retry dans 0.5s
-	GetWorld()->GetTimerManager().SetTimer(
-		NameRetryTimer,
-		this,
-		&ANPC::TryGenerateName,
-		0.5f,
-		false
-	);
-}
-
-FLinearColor ANPC::GetRandomColor()
-{
-	const float Hue = FMath::FRandRange(0.f, 1.f);
-	const float Saturation = FMath::FRandRange(0.6f, 0.85f);
-	const float Value = FMath::FRandRange(0.7f, 0.95f);
-
-	const FLinearColor Color = FLinearColor::MakeFromHSV8(
-		Hue * 255,
-		Saturation * 255,
-		Value * 255
-	);
-
-	return Color;
-}
-
 void ANPC::BeginPlay()
 {
 	Super::BeginPlay();
@@ -287,10 +138,157 @@ void ANPC::Tick(const float DeltaSeconds)
 	NPCActionWidget->SetWorldRotation(YawOnlyNPCAction);
 }
 
-void ANPC::RemoveFood() const
+#pragma region Death
+void ANPC::Die()
 {
-	FoodComponent->RemoveResource(RemoveFoodPerInterval);
+	// todo: animation ?
+
+	BO_LOG("Npc death, food : %f, energy : %f", FoodComponent->GetResource(), EnergyComponent->GetResource());
+	
+	ACrowdedGameMode* GameMode = GetWorld()->GetAuthGameMode<ACrowdedGameMode>();
+	if (!GameMode)
+		return;
+
+	GameMode->UnregisterNPC(this);
+
+	// Object
+	if (CurrentObject)
+		CurrentObject->Release(this);
+	
+	Destroy();
 }
+#pragma endregion
+
+#pragma region Resources
+UResourceComponent* ANPC::GetResourceComponentByType(const EResourceType Type) const
+{
+	if (const TObjectPtr<UResourceComponent>* Found = ResourceMap.Find(Type))
+	{
+		return Found->Get();
+	}
+
+	return nullptr;
+}
+
+int ANPC::GetResourceByType(const EResourceType Type) const
+{
+	if (!GetResourceComponentByType(Type))
+		return 0;
+	else
+		return GetResourceComponentByType(Type)->GetResource();
+}
+#pragma endregion
+
+#pragma region Action & Object
+void ANPC::SetCurrentAction(const ENPCActionWidget NewAction)
+{
+	CurrentAction = NewAction;
+	FString ActionString = StaticEnum<ENPCActionWidget>()->GetDisplayNameTextByValue(static_cast<int64>(CurrentAction)).ToString();
+	
+	OnCurrentActionChanged.Broadcast(CurrentAction);
+}
+
+void ANPC::SetCurrentObject(ABuildableObject* NewObject)
+{
+	CurrentObject = NewObject;
+}
+#pragma endregion
+
+#pragma region Work
+void ANPC::SetWorkOnGeneratorType(const EProductionType NewType)
+{
+	if (WorkOnGeneratorType == NewType)
+		return;
+	
+	WorkOnGeneratorType = NewType;
+
+	// Cancel use generator task in case was working on genrator with diferent type
+	if (ANPCController* ControllerNPC = Cast<ANPCController>(GetController()))
+	{
+		if (const UBlackboardComponent* Blackboard = ControllerNPC->GetBlackboardComponent())
+		{
+			if (const TObjectPtr<ABuildableObject> TargetObject = Cast<ABuildableObject>(Blackboard->GetValueAsObject("TargetObject")); TargetObject && TargetObject->GetObjectType() == EObjectType::Generator)
+			{
+				if (UBehaviorTreeComponent* BTComp = Cast<UBehaviorTreeComponent>(ControllerNPC->GetBrainComponent()))
+					BTComp->RestartTree();
+			}
+		}
+	}
+}
+
+int ANPC::GetProductionMultiplierForType(const EProductionType Type) const
+{
+	switch (Type)
+	{
+		case EProductionType::Money:
+			return MoneyProductionMultiplier;
+			
+		case EProductionType::Food:
+			return FoodProductionMultiplier;
+			
+		case EProductionType::Electricity:
+			return ElectricityProductionMultiplier;
+			
+		default:
+			return 1;
+	}
+}
+#pragma endregion
+
+#pragma region Name & Color
+void ANPC::TryGenerateName()
+{
+	if (const UNameGeneratorSubsystem* NameSystem =
+	   GetWorld()->GetSubsystem<UNameGeneratorSubsystem>())
+	{
+		if (NameSystem->IsInitialized())
+		{
+			NPCName = NameSystem->GenerateName();
+			
+			// Setup npc name widget
+			if (!NPCNameWidget)
+				return;
+
+			const TObjectPtr<UUserWidget> NPCNameUserWidget = NPCNameWidget->GetUserWidgetObject();
+			if (!NPCNameUserWidget)
+				return;
+
+			const TObjectPtr<UNPCNameWidget> NPCNameWidgetPtr = Cast<UNPCNameWidget>(NPCNameUserWidget);
+			if (!NPCNameWidgetPtr)
+				return;
+	
+			NPCNameWidgetPtr->OwningActor = this;
+			NPCNameWidgetPtr->Init();
+			
+			return;
+		}
+	}
+
+	// Retry dans 0.5s
+	GetWorld()->GetTimerManager().SetTimer(
+		NameRetryTimer,
+		this,
+		&ANPC::TryGenerateName,
+		0.5f,
+		false
+	);
+}
+
+FLinearColor ANPC::GetRandomColor()
+{
+	const float Hue = FMath::FRandRange(0.f, 1.f);
+	const float Saturation = FMath::FRandRange(0.6f, 0.85f);
+	const float Value = FMath::FRandRange(0.7f, 0.95f);
+
+	const FLinearColor Color = FLinearColor::MakeFromHSV8(
+		Hue * 255,
+		Saturation * 255,
+		Value * 255
+	);
+
+	return Color;
+}
+#pragma endregion
 
 #pragma region Selectable
 void ANPC::OnSelected()

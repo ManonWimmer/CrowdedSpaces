@@ -6,7 +6,8 @@
 #include "AIController.h"
 #include "Debug/CrowdedSpacesLogs.h"
 
-UBTTask_UseBuildableObject::UBTTask_UseBuildableObject(FObjectInitializer const& ObjectInitializer)
+UBTTask_UseBuildableObject::UBTTask_UseBuildableObject(FObjectInitializer const& ObjectInitializer):
+	ResourceTypeToCheck()
 {
 	NodeName = "Use Buildable Object";
 
@@ -15,7 +16,7 @@ UBTTask_UseBuildableObject::UBTTask_UseBuildableObject(FObjectInitializer const&
 
 EBTNodeResult::Type UBTTask_UseBuildableObject::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	AAIController* AI = OwnerComp.GetAIOwner();
+	const AAIController* AI = OwnerComp.GetAIOwner();
 	if (!AI)
 		return EBTNodeResult::Failed;
 
@@ -34,6 +35,13 @@ EBTNodeResult::Type UBTTask_UseBuildableObject::ExecuteTask(UBehaviorTreeCompone
 
 void UBTTask_UseBuildableObject::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
+	if (!NPC || !CurrentObject || CurrentObject->IsPendingKill() || CurrentObject->bIsBeingDestroyed)
+	{
+		StopUsingClean();
+		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+		return;
+	}
+	
 	if (!NPC || !CurrentObject)
 		return;
 
@@ -45,39 +53,48 @@ void UBTTask_UseBuildableObject::TickTask(UBehaviorTreeComponent& OwnerComp, uin
 
 	if (!CurrentObject->CanBeUsed())
 	{
-		CS_LOG("Current used object set to cant be used");
+		CS_LOG_WARNING("Current used object set to cant be used, stop using");
+		
 		StopUsingClean();
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+		
 		return;
 	}
 
-	UResourceComponent* Resource = NPC->GetResourceComponentByType(ResourceTypeToCheck);
+	if (ResourceTypeToCheck == EResourceType::None)
+		return;
+	
+	const UResourceComponent* Resource = NPC->GetResourceComponentByType(ResourceTypeToCheck);
 	if (!Resource)
 		return;
 
 	if (Resource->GetResource() >= Resource->GetMaxResource())
 	{
-		CS_LOG("Max resource eat");
+		CS_LOG_WARNING("Max resource, stop using");
+		
 		StopUsingClean();
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+		
 		return;
 	}
 }
 
 EBTNodeResult::Type UBTTask_UseBuildableObject::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	CS_LOG("Abort use task");
+	CS_LOG_WARNING("Abort use task");
 	StopUsingClean();
 
 	return EBTNodeResult::Aborted;
 }
 
-void UBTTask_UseBuildableObject::StopUsingClean()
+void UBTTask_UseBuildableObject::StopUsingClean() const
 {
-	if (CurrentObject && NPC)
-	{
-		CurrentObject->StopUsing(NPC);
-		CurrentObject->Release(NPC);
-		NPC->SetCurrentObject(nullptr);
-	}
+	if (!CurrentObject || !NPC)
+		return;
+
+	CS_LOG_WARNING("Stop using object");
+	
+	CurrentObject->StopUsing(NPC);
+	CurrentObject->Release(NPC);
+	NPC->SetCurrentObject(nullptr);
 }

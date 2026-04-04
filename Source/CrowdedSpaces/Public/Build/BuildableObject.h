@@ -38,23 +38,18 @@ public:
 	UFUNCTION()
 	UStaticMeshComponent* GetMeshComponent() const { return MeshComp; }
 
-	USlotComponent* GetNearestFreeSlot(const FVector& Vector);
-	bool IsAvailableForReservation(const ANPC* NPC) const;
-
-	UPROPERTY(BlueprintAssignable)
-	FOnSlotsUpdated OnSlotsUpdated;
-	
 	UFUNCTION(BlueprintCallable, Category = "Object")
 	bool CanBeUsed() const;
 
-	UFUNCTION(BlueprintCallable, Category = "Object")
-	void CheckCantBeUsedStopTask() const;
+	// Slots
+	USlotComponent* GetNearestFreeSlot(const FVector& FromLocation);
+	bool IsAvailableForReservation(const ANPC* NPC) const;
+	void Release(ANPC* NPC);
+	USlotComponent* ReserveSpecificSlot(ANPC* NPC, USlotComponent* Slot);
+	void ReleaseSlot(ANPC* NPC);
 	
-	UFUNCTION(BlueprintCallable, Category = "Object")
-	int HasNPCComing() const;
-
-	UFUNCTION(BlueprintCallable, Category = "Object")
-	int HasNPCUsing() const;
+	UPROPERTY(BlueprintAssignable)
+	FOnSlotsUpdated OnSlotsUpdated;
 
 	UFUNCTION(BlueprintCallable, Category = "Object")
 	int GetSlotsNbr() const;
@@ -62,23 +57,23 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Object")
 	int GetFreeSlotsNbr() const;
 
+	// Electricity
 	UFUNCTION(BlueprintCallable, Category = "Object")
 	bool HasEnoughElectricity() const { return bHasEnoughElectricity; }
+	
+	UFUNCTION(BlueprintCallable, Category = "Object")
+	void SetHasEnoughElectricity(bool bEnoughElectricity);
 
+	// Activated
 	UFUNCTION(BlueprintCallable, Category = "Object")
 	bool IsActivated() const { return bIsActivated && bHasEnoughElectricity; }
 
 	UFUNCTION(BlueprintCallable, Category = "Object")
-	void SetHasEnoughElectricity(bool bEnoughElectricity);
-
-	UFUNCTION(BlueprintCallable, Category = "Object")
 	void SetIsActivated(bool bActivated);
-	
-	bool TryReserve(const ANPC* NPC);
-	void Release(ANPC* NPC);
+
+	// Using
 	void StartUsing(ANPC* NPC);
 	void StopUsing(ANPC* NPC);
-	USlotComponent* ReserveSpecificSlot(ANPC* NPC, USlotComponent* Slot);
 
 	virtual bool StartUsingImplementation(ANPC* NPC);
 	virtual bool StopUsingImplementation(ANPC* NPC);
@@ -90,20 +85,18 @@ public:
 	ENPCActionWidget GetNPCAction() const { return NPCAction;}
 
 	UFUNCTION(BlueprintCallable, Category = "Object")
-	void SetBuildData(UBuildData* NewData);
+	void SetBuildData(UBuildData* NewData) { BuildData = NewData; }
 	
 	UFUNCTION(BlueprintCallable, Category = "Object")
 	UBuildData* GetBuildData() const { return BuildData; }
 	
 	UFUNCTION(BlueprintCallable, Category = "Object")
 	void DestroyObject();
-	
-	USlotComponent* GetFreeSlot();
-	USlotComponent* ReserveSlot(ANPC* NPC);
-	void ReleaseSlot(ANPC* NPC);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int RoomId = UBuildSubsystem::InvalidRoomId; 
+	int RoomId = UBuildSubsystem::InvalidRoomId;
+
+	bool bIsBeingDestroyed;
 	
 protected:
 	UPROPERTY()

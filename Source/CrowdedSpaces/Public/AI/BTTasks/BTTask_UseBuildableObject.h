@@ -15,18 +15,17 @@ class UBTTask_UseBuildableObject : public UCustomBTTask
 	GENERATED_BODY()
 
 public:
-
 	explicit UBTTask_UseBuildableObject(FObjectInitializer const& ObjectInitializer);
 	
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 	virtual void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 	virtual EBTNodeResult::Type AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
-	void StopUsingClean();
+	
+	void StopUsingClean() const;
 
 protected:
-	
 	UPROPERTY()
-	ABuildableObject* CurrentObject = nullptr;
+	TObjectPtr<ABuildableObject> CurrentObject = nullptr;
 
 	UPROPERTY(EditAnywhere)
 	EResourceType ResourceTypeToCheck;

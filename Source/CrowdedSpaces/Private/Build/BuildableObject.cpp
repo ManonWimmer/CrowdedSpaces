@@ -1,5 +1,6 @@
 ﻿#include "Build/BuildableObject.h"
 
+#include "AI/NPCController.h"
 #include "Build/BuildableRegistrySubsystem.h"
 #include "Build/BuildSubsystem.h"
 #include "Build/SlotComponent.h"
@@ -62,6 +63,7 @@ void ABuildableObject::BeginPlay()
 	
 }
 
+#pragma region Mesh
 void ABuildableObject::SetMesh(UStaticMesh* Mesh) const
 {
 	MeshComp->SetStaticMesh(Mesh);
@@ -76,7 +78,9 @@ FVector ABuildableObject::GetExtent() const
 	
     return FVector::ZeroVector;
 }
+#pragma endregion
 
+#pragma region Slot Reservation
 USlotComponent* ABuildableObject::GetNearestFreeSlot(const FVector& FromLocation)
 {
 	USlotComponent* BestSlot = nullptr;
@@ -111,39 +115,6 @@ bool ABuildableObject::IsAvailableForReservation(const ANPC* NPC) const
 	return false;
 }
 
-bool ABuildableObject::CanBeUsed() const
-{
-	return bCanBeUsed && bHasEnoughElectricity && bIsActivated;
-}
-
-void ABuildableObject::CheckCantBeUsedStopTask() const
-{
-	if (!CanBeUsed())
-	{
-		for (TWeakObjectPtr<ANPC> NPC : UsingNPCs)
-		{
-			if (!NPC.IsValid())
-				continue;
-
-			if (const UBTTask_UseBuildableObject* Task = NPC->GetCurrentUseTask())
-			{
-				CS_LOG("Force stopping task for NPC: %s", *GetNameSafe(NPC.Get()));
-				//FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
-			}
-		}
-	}
-}
-
-int ABuildableObject::HasNPCComing() const
-{
-	return 0;
-}
-
-int ABuildableObject::HasNPCUsing() const
-{
-	return 0;
-}
-
 int ABuildableObject::GetSlotsNbr() const
 {
 	return Slots.Num();
@@ -164,78 +135,11 @@ int ABuildableObject::GetFreeSlotsNbr() const
 	return FreeSlots;
 }
 
-void ABuildableObject::SetHasEnoughElectricity(const bool bEnoughElectricity)
-{
-	bHasEnoughElectricity = bEnoughElectricity;
-
-	CheckCantBeUsedStopTask();
-}
-
-void ABuildableObject::SetIsActivated(const bool bActivated)
-{
-	bIsActivated = bActivated;
-
-	CheckCantBeUsedStopTask();
-}
-
-bool ABuildableObject::TryReserve(const ANPC* NPC)
-{
-	CS_LOG("TryReserve by NPC: %s",
-		*GetNameSafe(NPC));
-
-	if (GetFreeSlot() != nullptr)
-	{
-		CS_LOG("RESERVE SUCCESS");
-	}
-	else
-	{
-		CS_LOG("RESERVE FAILED");
-	}
-	
-	return GetFreeSlot() != nullptr;
-}
-
-void ABuildableObject::Release(ANPC* NPC)
-{
-	ReleaseSlot(NPC);
-	OnSlotsUpdated.Broadcast();
-
-	CS_LOG("Released by NPC: %s", *GetNameSafe(NPC));
-
-	NPC->SetCurrentObject(nullptr);
-}
-
-void ABuildableObject::StartUsing(ANPC* NPC)
-{
-	CS_LOG("START USING SUCCESS NPC: %s", *GetNameSafe(NPC));
-
-	StartUsingImplementation(NPC);
-	NPC->SetCurrentAction(NPCAction);
-	
-	//OnNPCComingChanged.Broadcast(bHasNPCComing);
-	//OnNPCUsingChanged.Broadcast(bHasNPCUsing);
-}
-
-void ABuildableObject::StopUsing(ANPC* NPC)
-{
-	CS_LOG("StopUsing NPC: %s | Current UsingNPC: %s",
-		*GetNameSafe(NPC));
-
-	ReleaseSlot(NPC);
-	StopUsingImplementation(NPC);
-	NPC->SetCurrentAction(ENPCActionWidget::Idle);
-	
-	CS_LOG("STOP USING SUCCESS");
-	
-	//OnNPCUsingChanged.Broadcast(bHasNPCUsing);
-}
-
 USlotComponent* ABuildableObject::ReserveSpecificSlot(ANPC* NPC, USlotComponent* Slot)
 {
 	if (!Slot || !Slot->IsFree())
 		return nullptr;
-
-	// sécurité anti multi-slot
+	
 	if (UsingNPCs.Contains(NPC))
 		return nullptr;
 
@@ -249,96 +153,14 @@ USlotComponent* ABuildableObject::ReserveSpecificSlot(ANPC* NPC, USlotComponent*
 	return Slot;
 }
 
-bool ABuildableObject::StartUsingImplementation(ANPC* NPC)
+void ABuildableObject::Release(ANPC* NPC)
 {
-	return true; 
-}
+	ReleaseSlot(NPC);
+	OnSlotsUpdated.Broadcast();
 
-bool ABuildableObject::StopUsingImplementation(ANPC* NPC)
-{
-	return true;
-}
+	CS_LOG("Released by NPC: %s", *GetNameSafe(NPC));
 
-void ABuildableObject::SetBuildData(UBuildData* NewData)
-{
-	BuildData = NewData;
-}
-
-void ABuildableObject::DestroyObject()
-{
-	if (!BuildSubsystem)
-		return;
-	
-	BuildSubsystem->RemoveObject(this);
-	
-	UResourceComponent* PlayerMoneyComponent = PlayerHelpers::GetPlayerResourceComponent(*GetWorld(), EResourceType::Money);
-	PlayerMoneyComponent->AddResource(BuildData->DestroyMoney);
-	
-	for (TWeakObjectPtr<ANPC> NPC : UsingNPCs)
-	{
-		if (!NPC.IsValid())
-			continue;
-
-		if (UBTTask_UseBuildableObject* Task = NPC->GetCurrentUseTask())
-		{
-			CS_LOG("DestroyObject: stopping task for NPC: %s", *GetNameSafe(NPC.Get()));
-			//Task->OnTargetDestroyed();
-		}
-		
-		NPC->SetCurrentObject(nullptr);
-	}
-	
-	UsingNPCs.Empty();
-
-	GameHUD->HideCurrentSelectionWidget();
-	
-	Destroy();
-}
-
-USlotComponent* ABuildableObject::GetFreeSlot()
-{
-	for (USlotComponent* Slot : Slots)
-	{
-		if (Slot && Slot->IsFree())
-		{
-			return Slot;
-		}
-	}
-	return nullptr;
-}
-
-USlotComponent* ABuildableObject::ReserveSlot(ANPC* NPC)
-{
-	CS_LOG("ReserveSlot  NPC: %s", *GetNameSafe(NPC));
-	if (UsingNPCs.Contains(NPC))
-	{
-		CS_LOG_WARNING("NPC already has a slot!");
-		return nullptr;
-	}
-	
-	for (USlotComponent* Slot : Slots)
-	{
-		if (Slot && Slot->IsFree())
-		{
-			Slot->Acquire(NPC);
-			OnSlotsUpdated.Broadcast();
-			
-			CS_LOG("Slot reserved: %s by NPC: %s",
-				*Slot->GetName(),
-				*GetNameSafe(NPC));
-			
-			CS_LOG("RESERVED SUCCESS by NPC: %s", *GetNameSafe(NPC));
-			
-			NPC->SetCurrentObject(this);
-			UsingNPCs.Add(NPC);
-			
-			return Slot;
-		}
-	}
-
-	CS_LOG("ReserveSlot FAILED: no free slot");
-	
-	return nullptr;
+	NPC->SetCurrentObject(nullptr);
 }
 
 void  ABuildableObject::ReleaseSlot(ANPC* NPC)
@@ -359,5 +181,95 @@ void  ABuildableObject::ReleaseSlot(ANPC* NPC)
 	
 	CS_LOG_WARNING("WARNING: No slot found for NPC");
 }
+#pragma endregion 
 
+#pragma region Used & Activated
+bool ABuildableObject::CanBeUsed() const
+{
+	return bCanBeUsed && bHasEnoughElectricity && bIsActivated;
+}
 
+void ABuildableObject::SetHasEnoughElectricity(const bool bEnoughElectricity)
+{
+	bHasEnoughElectricity = bEnoughElectricity;
+}
+
+void ABuildableObject::SetIsActivated(const bool bActivated)
+{
+	bIsActivated = bActivated;
+}
+#pragma endregion
+
+#pragma region Use Object
+void ABuildableObject::StartUsing(ANPC* NPC)
+{
+	CS_LOG("START USING SUCCESS NPC: %s", *GetNameSafe(NPC));
+
+	StartUsingImplementation(NPC);
+	NPC->SetCurrentAction(NPCAction);
+}
+
+void ABuildableObject::StopUsing(ANPC* NPC)
+{
+	CS_LOG("StopUsing NPC: %s | Current UsingNPC: %s",
+		*GetNameSafe(NPC));
+
+	ReleaseSlot(NPC);
+	StopUsingImplementation(NPC);
+	NPC->SetCurrentAction(ENPCActionWidget::Idle);
+	
+	CS_LOG("STOP USING SUCCESS");
+}
+
+bool ABuildableObject::StartUsingImplementation(ANPC* NPC)
+{
+	return true; 
+}
+
+bool ABuildableObject::StopUsingImplementation(ANPC* NPC)
+{
+	return true;
+}
+#pragma endregion
+
+#pragma region Destroy
+void ABuildableObject::DestroyObject()
+{
+	if (!BuildSubsystem)
+		return;
+
+	bIsBeingDestroyed = true;
+	
+	BuildSubsystem->RemoveObject(this);
+	
+	UResourceComponent* PlayerMoneyComponent = PlayerHelpers::GetPlayerResourceComponent(*GetWorld(), EResourceType::Money);
+	PlayerMoneyComponent->AddResource(BuildData->DestroyMoney);
+	
+	for (TWeakObjectPtr<ANPC> NPC : UsingNPCs)
+	{
+		if (!NPC.IsValid())
+			continue;
+
+		// Stop propre
+		StopUsing(NPC.Get());
+
+		// Force arrêt BT
+		if (ANPCController* Controller = Cast<ANPCController>(NPC->GetController()))
+		{
+			if (UBehaviorTreeComponent* BT = Cast<UBehaviorTreeComponent>(Controller->GetBrainComponent()))
+			{
+				BT->StopTree(EBTStopMode::Safe);
+				BT->RestartTree(); 
+			}
+		}
+
+		NPC->SetCurrentObject(nullptr);
+	}
+	
+	UsingNPCs.Empty();
+
+	GameHUD->HideCurrentSelectionWidget();
+	
+	Destroy();
+}
+#pragma endregion

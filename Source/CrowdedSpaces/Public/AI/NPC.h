@@ -13,6 +13,7 @@
 class UBTTask_UseBuildableObject;
 class ABuildableObject;
 class USlotComponent;
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentActionChanged, ENPCActionWidget, Value); 
 
 UCLASS()
@@ -35,11 +36,14 @@ public:
 
 	template <EResourceType Type>
 	int GetResource() const;
-	
 
 	// AI
 	UBehaviorTree* GetBehaviorTree() const { return BehaviorTree; }
 	
+	UFUNCTION(BlueprintCallable, Category="AI")
+	void Die();
+
+	// Action
 	UFUNCTION(BlueprintCallable, Category="AI")
 	void SetCurrentAction(ENPCActionWidget NewAction);
 
@@ -48,10 +52,7 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnCurrentActionChanged OnCurrentActionChanged;
-
-	UFUNCTION(BlueprintCallable, Category="AI")
-	void Die();
-
+	
 	// Work
 	UFUNCTION(BlueprintCallable, Category="AI")
 	EProductionType GetWorkOnGeneratorType() const { return WorkOnGeneratorType; }
@@ -62,28 +63,22 @@ public:
 	UFUNCTION(BlueprintCallable, Category="AI")
 	int GetProductionMultiplierForType(EProductionType Type) const;
 
-	// Name
+	// Name & Color
 	UFUNCTION(BlueprintCallable, Category="AI")
 	FString GetNPCName() const { return NPCName; }
+	
+	FTimerHandle NameRetryTimer;
+
+	void TryGenerateName();
+
+	static FLinearColor GetRandomColor();
 
 	// Object
 	UFUNCTION()
 	void SetCurrentObject(ABuildableObject* NewObject);
 	
 	UFUNCTION()
-	ABuildableObject* GetCurrentObject() { return CurrentObject; }
-	
-	UFUNCTION()
-	void SetCurrentUseTask(UBTTask_UseBuildableObject* NewTask);
-
-	UFUNCTION()
-	UBTTask_UseBuildableObject* GetCurrentUseTask() const { return CurrentUseTask; }
-
-	FTimerHandle NameRetryTimer;
-
-	void TryGenerateName();
-
-	FLinearColor GetRandomColor();
+	ABuildableObject* GetCurrentObject() const { return CurrentObject; }
 	
 protected:
 	virtual void BeginPlay() override;
@@ -98,40 +93,31 @@ private:
 	UPROPERTY()
 	TMap<EResourceType, TObjectPtr<UResourceComponent>> ResourceMap;
 	
-	// Food
+	// Resources Components
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UResourceComponent> FoodComponent;
 	
-	UPROPERTY(EditAnywhere, Category="Food")
-	float RemoveFoodInterval = 1.0f;
-
-	UPROPERTY(EditAnywhere, Category="Food")
-	int32 RemoveFoodPerInterval = 10;
-	
-	UFUNCTION()
-	void RemoveFood() const;
-
-	UPROPERTY()
-	FTimerHandle RemoveFoodTimerHandle;
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UWidgetComponent> NPCNameWidget;
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UWidgetComponent> NPCActionWidget;
-
-	// Energy
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UResourceComponent> EnergyComponent;
-
-	// Action
-	UPROPERTY()
-	ENPCActionWidget CurrentAction = ENPCActionWidget::Idle;
 
 	// Work
 	UPROPERTY(EditAnywhere)
 	EProductionType WorkOnGeneratorType = EProductionType::Money;
+	
+	// Name
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UWidgetComponent> NPCNameWidget;
 
+	UPROPERTY()
+	FString NPCName = "";
+	
+	// Action
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UWidgetComponent> NPCActionWidget;
+	
+	UPROPERTY()
+	ENPCActionWidget CurrentAction = ENPCActionWidget::Idle;
+	
 	// Multipliers
 	UPROPERTY()
 	int FoodProductionMultiplier = 1;
@@ -142,9 +128,7 @@ private:
 	UPROPERTY()
 	int MoneyProductionMultiplier = 1;
 
-	UPROPERTY()
-	FString NPCName = "";
-
+	// Color
 	UPROPERTY()
 	UMaterialInstanceDynamic* BodyMaterialInstance;
 
