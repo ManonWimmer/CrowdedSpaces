@@ -28,12 +28,6 @@ public:
 	int DestroyMoney = 10;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int GridRowsX = 1;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int GridColumnsY = 1;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	EGridRoomType RoomType = EGridRoomType::Any;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

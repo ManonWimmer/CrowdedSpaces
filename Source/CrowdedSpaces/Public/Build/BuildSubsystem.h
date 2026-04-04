@@ -108,7 +108,7 @@ public:
 	void GetRoomRotatedSize(int& OutX, int& OutY) const;
 
 	UFUNCTION(BlueprintCallable)
-	TMap<int, FGridRoom>& GetRooms();
+	TMap<int, FGridRoom>& GetRooms() const;
 	
 	UFUNCTION(BlueprintCallable)
 	void DestroyRoom(const int RoomId) const;
@@ -140,6 +140,9 @@ public:
 	FOnRoomUpdated OnRoomUpdated;
 
 	static constexpr int InvalidRoomId = -1;
+
+	UFUNCTION(BlueprintCallable)
+	void SetRoomBushSize(const int NewSize) { BuildRoomBrushSize = NewSize; }
 
 private:
 	UPROPERTY()
@@ -210,5 +213,8 @@ private:
 	EGridRoomType CurrentObjectRoomType = EGridRoomType::Any;
 
 	UPROPERTY()
-	int CurrentObjectRoomId = InvalidRoomId; 
+	int CurrentObjectRoomId = InvalidRoomId;
+
+	UPROPERTY()
+	int BuildRoomBrushSize = 1;
 };

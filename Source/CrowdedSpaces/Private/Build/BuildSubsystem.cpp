@@ -67,6 +67,26 @@ TStatId UBuildSubsystem::GetStatId() const
 	RETURN_QUICK_DECLARE_CYCLE_STAT(UBuildSubsystem, STATGROUP_Tickables); // Sinon crash quand Tickable true
 }
 
+void UBuildSubsystem::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (bIsSelectingRoom)
+	{
+		UpdateRoomSelection();
+	}
+	else
+	{
+		UpdateGhost();
+	}
+}
+
+bool UBuildSubsystem::IsTickable() const
+{
+	return bTickEnabled;
+}
+
+#pragma region GameMode / BuildMode Changed
 void UBuildSubsystem::OnGameModeChanged(EGameModeState NewMode)
 {
 	// Activer ou désactiver le tick selon le mode
@@ -99,25 +119,6 @@ void UBuildSubsystem::OnGameModeChanged(EGameModeState NewMode)
 	}
 }
 
-void UBuildSubsystem::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	if (bIsSelectingRoom)
-	{
-		UpdateRoomSelection();
-	}
-	else
-	{
-		UpdateGhost();
-	}
-}
-
-bool UBuildSubsystem::IsTickable() const
-{
-	return bTickEnabled;
-}
-
 void UBuildSubsystem::OnBuildModeSelected(EBuildModeType BuildMode)
 {
 	switch (BuildMode)
@@ -132,7 +133,9 @@ void UBuildSubsystem::OnBuildModeSelected(EBuildModeType BuildMode)
 			break;
 	}
 }
+#pragma endregion
 
+#pragma region Start/Stop Building
 void UBuildSubsystem::StartBuilding(UBuildData* BuildData)
 {
 	if (!BuildData || !BuildData->BuildClass)
@@ -222,7 +225,9 @@ void UBuildSubsystem::StopBuilding()
 
 	GridActor->DeselectSelectedCells();
 }
+#pragma endregion 
 
+#pragma region Object/Room Creation
 void UBuildSubsystem::PlaceObject()
 {
 	if (!CurrentGhost || !CurrentBuildData || !CurrentBuildData->BuildClass || !GridActor)
@@ -297,46 +302,13 @@ void UBuildSubsystem::PlaceObject()
 		MoneyComponent->RemoveResource(CurrentBuildData->MoneyCost);
 }
 
-void UBuildSubsystem::RemoveObject(const ABuildableObject* Object) const
-{
-	int SizeX = Object->GetBuildData()->GridRowsX;
-	int SizeY = Object->GetBuildData()->GridColumnsY;
-
-	// Rotation
-	if (Object->GetActorRotation() == FRotator(0.f, 90.f, 0.f) ||
-		Object->GetActorRotation() == FRotator(0.f, 270.f, 0.f)) 
-	{
-		Swap(SizeX, SizeY);
-	}
-	
-	int StartRow = 0, StartCol = 0;
-	GridActor->GetCellAtLocation(Object->GetActorLocation(), StartRow, StartCol);
-	
-	StartRow -= SizeX / 2;
-	StartCol -= SizeY / 2;
-
-	StartRow = FMath::Clamp(StartRow, 0, GridActor->GetRows() - SizeX);
-	StartCol = FMath::Clamp(StartCol, 0, GridActor->GetColumns() - SizeY);
-	
-	// Set cells unoccupied
-	for (int Row = StartRow; Row < StartRow + SizeX; ++Row)
-	{
-		for (int Col = StartCol; Col < StartCol + SizeY; ++Col)
-		{
-			FGridCell* Cell = GridActor->GetGridCell(Row, Col);
-			if (Cell)
-				Cell->bOccupied = false;
-		}
-	}
-}
-
 void UBuildSubsystem::PlaceRoom()
 {
 	if (!CurrentBuildRoomData || !GridActor)
 		return;
 
-	int SizeX = CurrentBuildRoomData->GridRowsX;
-	int SizeY = CurrentBuildRoomData->GridColumnsY;
+	int SizeX = BuildRoomBrushSize;
+	int SizeY = BuildRoomBrushSize;
 
 	GetRoomRotatedSize(SizeX, SizeY);
 	
@@ -373,17 +345,55 @@ void UBuildSubsystem::PlaceRoom()
 	else
 		OnRoomUpdated.Broadcast(IsNewRoomAndRoomId.Value, CurrentBuildRoomData->RoomType);
 }
+#pragma endregion
 
-void UBuildSubsystem::SetBuildRoomData(const TArray<UBuildRoomData*>& NewBuildRoomData)
+#pragma region Object/Room Destroy
+void UBuildSubsystem::RemoveObject(const ABuildableObject* Object) const
 {
-	BuildDataRooms = NewBuildRoomData;
-	
-	for (const TObjectPtr<UBuildRoomData> Room : BuildDataRooms)
+	int SizeX = Object->GetBuildData()->GridRowsX;
+	int SizeY = Object->GetBuildData()->GridColumnsY;
+
+	// Rotation
+	if (Object->GetActorRotation() == FRotator(0.f, 90.f, 0.f) ||
+		Object->GetActorRotation() == FRotator(0.f, 270.f, 0.f)) 
 	{
-		UnlockedRooms.Add(Room->RoomType, Room->bIsUnlockedAtStart);
+		Swap(SizeX, SizeY);
+	}
+	
+	int StartRow = 0, StartCol = 0;
+	GridActor->GetCellAtLocation(Object->GetActorLocation(), StartRow, StartCol);
+	
+	StartRow -= SizeX / 2;
+	StartCol -= SizeY / 2;
+
+	StartRow = FMath::Clamp(StartRow, 0, GridActor->GetRows() - SizeX);
+	StartCol = FMath::Clamp(StartCol, 0, GridActor->GetColumns() - SizeY);
+	
+	// Set cells unoccupied
+	for (int Row = StartRow; Row < StartRow + SizeX; ++Row)
+	{
+		for (int Col = StartCol; Col < StartCol + SizeY; ++Col)
+		{
+			FGridCell* Cell = GridActor->GetGridCell(Row, Col);
+			if (Cell)
+				Cell->bOccupied = false;
+		}
 	}
 }
 
+void UBuildSubsystem::DestroyRoom(const int RoomId) const
+{
+	if (!GridActor)
+		return;
+	
+	if (GridActor->DestroyRoom(RoomId))
+	{
+		OnRoomDestroyed.Broadcast(RoomId);
+	}
+}
+#pragma endregion
+
+#pragma region Object/Room Rotation
 void UBuildSubsystem::TryRotateBuildLeft()
 {
 	RotationIndex = (RotationIndex + 1) % 4;
@@ -423,29 +433,20 @@ void UBuildSubsystem::GetObjectRotatedSize(int& OutX, int& OutY) const
 
 void UBuildSubsystem::GetRoomRotatedSize(int& OutX, int& OutY) const
 {
-	OutX = CurrentBuildRoomData->GridRowsX;
-	OutY = CurrentBuildRoomData->GridColumnsY;
+	OutX = BuildRoomBrushSize;
+	OutY = BuildRoomBrushSize;
 
 	if (RotationIndex % 2 == 1) // 90 ou 270
 	{
 		Swap(OutX, OutY);
 	}
 }
+#pragma endregion
 
-TMap<int, FGridRoom>& UBuildSubsystem::GetRooms()
+#pragma region Get/Set Room Values
+TMap<int, FGridRoom>& UBuildSubsystem::GetRooms() const
 {
 	return GridActor->GetRooms();
-}
-
-void UBuildSubsystem::DestroyRoom(const int RoomId) const
-{
-	if (!GridActor)
-		return;
-	
-	if (GridActor->DestroyRoom(RoomId))
-	{
-		OnRoomDestroyed.Broadcast(RoomId);
-	}
 }
 
 FGridRoom* UBuildSubsystem::GetRoom(const int RoomId) const
@@ -472,6 +473,18 @@ int UBuildSubsystem::GetRoomCellsCount(const int RoomId) const
 	return GridActor->GetRoom(RoomId)->Cells.Num();
 }
 
+void UBuildSubsystem::SetBuildRoomData(const TArray<UBuildRoomData*>& NewBuildRoomData)
+{
+	BuildDataRooms = NewBuildRoomData;
+	
+	for (const TObjectPtr<UBuildRoomData> Room : BuildDataRooms)
+	{
+		UnlockedRooms.Add(Room->RoomType, Room->bIsUnlockedAtStart);
+	}
+}
+#pragma endregion
+
+#pragma region Unlock
 void UBuildSubsystem::UnlockRoom(const EGridRoomType RoomType)
 {
 	UnlockedRooms[RoomType] = true;
@@ -481,7 +494,9 @@ bool UBuildSubsystem::IsRoomUnlocked(const EGridRoomType RoomType) const
 {
 	return UnlockedRooms[RoomType];
 }
+#pragma endregion
 
+#pragma region Ghost
 void UBuildSubsystem::UpdateGhost()
 {
 	if(!CurrentGhost || !GridActor)
@@ -547,6 +562,7 @@ void UBuildSubsystem::UpdateGhost()
 
 	CurrentGhost->SetActorLocation(SnappedLocation);
 }
+#pragma endregion
 
 void UBuildSubsystem::UpdateRoomSelection()
 {
@@ -569,8 +585,11 @@ void UBuildSubsystem::UpdateRoomSelection()
 	if (!CurrentBuildRoomData)
 		return;
 
-	int SizeX = CurrentBuildRoomData->GridRowsX;
-	int SizeY = CurrentBuildRoomData->GridColumnsY;
+	//int SizeX = CurrentBuildRoomData->GridRowsX;
+	//int SizeY = CurrentBuildRoomData->GridColumnsY;
+
+	int SizeX = BuildRoomBrushSize;
+	int SizeY = BuildRoomBrushSize;
 
 	GetRoomRotatedSize(SizeX, SizeY);
 
@@ -596,6 +615,7 @@ void UBuildSubsystem::UpdateRoomSelection()
 	}
 }
 
+#pragma region Click
 void UBuildSubsystem::LeftClicked()
 {
 	if (bIsSelectingRoom)
@@ -637,3 +657,4 @@ bool UBuildSubsystem::GetCursorHit(FVector& OutHit) const
 	}
 	return false;
 }
+#pragma endregion
