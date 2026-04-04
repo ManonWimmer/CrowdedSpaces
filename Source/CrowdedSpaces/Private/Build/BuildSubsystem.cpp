@@ -86,7 +86,7 @@ bool UBuildSubsystem::IsTickable() const
 	return bTickEnabled;
 }
 
-#pragma region GameMode / BuildMode Changed
+#pragma region GameMode / BuildMode / RoomEditMode Changed
 void UBuildSubsystem::OnGameModeChanged(EGameModeState NewMode)
 {
 	// Activer ou désactiver le tick selon le mode
@@ -132,6 +132,14 @@ void UBuildSubsystem::OnBuildModeSelected(EBuildModeType BuildMode)
 			GridActor->ShowPlacedRooms(true);
 			break;
 	}
+}
+
+void UBuildSubsystem::ChangeRoomEditMode()
+{
+	if (CurrentRoomEditMode == ERoomEditMode::Add)
+		CurrentRoomEditMode = ERoomEditMode::Remove;
+	else
+		CurrentRoomEditMode = ERoomEditMode::Add;
 }
 #pragma endregion
 

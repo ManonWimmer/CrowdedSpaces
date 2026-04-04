@@ -1,15 +1,11 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "RoomEditMode.generated.h"
 
-/**
- * 
- */
-class CROWDEDSPACES_API RoomEditMode
+UENUM(BlueprintType)
+enum class ERoomEditMode : uint8
 {
-public:
-	RoomEditMode();
-	~RoomEditMode();
+	Add				UMETA(DisplayName="Add"),
+	Remove			UMETA(DisplayName="Remove")
 };

@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "BuildModeType.h"
+#include "RoomEditMode.h"
 #include "Game/GameModeState.h"
 #include "Grid/GridRoomType.h"
 #include "BuildSubsystem.generated.h"
@@ -144,6 +145,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetRoomBushSize(const int NewSize) { BuildRoomBrushSize = NewSize; }
 
+	UFUNCTION(BlueprintCallable)
+	ERoomEditMode GetRoomEditMode() const { return CurrentRoomEditMode; }
+	
+	UFUNCTION(BlueprintCallable)
+	void ChangeRoomEditMode();
+
 private:
 	UPROPERTY()
 	TObjectPtr<AGhostObject> CurrentGhost{nullptr};
@@ -217,4 +224,7 @@ private:
 
 	UPROPERTY()
 	int BuildRoomBrushSize = 1;
+
+	UPROPERTY()
+	ERoomEditMode CurrentRoomEditMode = ERoomEditMode::Add;
 };
