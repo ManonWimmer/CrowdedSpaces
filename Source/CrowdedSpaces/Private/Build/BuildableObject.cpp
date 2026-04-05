@@ -10,6 +10,7 @@
 #include "Player/PlayerHelpers.h"
 #include "UI/GameHUD.h"
 #include "Debug/CrowdedSpacesLogs.h"
+#include "Game/CrowdedGameInstance.h"
 
 ABuildableObject::ABuildableObject()
 {
@@ -60,7 +61,14 @@ void ABuildableObject::BeginPlay()
 
 		UE_LOG(LogTemp, Warning, TEXT("Slot found: %s"), *Slot->GetName());
 	}
+
+	// Materials
+	const UCrowdedGameInstance* GameInstance = Cast<UCrowdedGameInstance>(World->GetGameInstance());
+	if (!GameInstance)
+		return;
 	
+	DisabledMaterial = GameInstance->DisabledObjectsMaterial;
+	NormalMaterial = MeshComp->GetMaterial(0);
 }
 
 #pragma region Mesh
@@ -91,11 +99,11 @@ USlotComponent* ABuildableObject::GetNearestFreeSlot(const FVector& FromLocation
 		if (!Slot || !Slot->IsFree())
 			continue;
 
-		float Dist = FVector::Dist(FromLocation, Slot->GetComponentLocation());
+		const float Distance = FVector::Dist(FromLocation, Slot->GetComponentLocation());
 
-		if (Dist < BestDist)
+		if (Distance < BestDist)
 		{
-			BestDist = Dist;
+			BestDist = Distance;
 			BestSlot = Slot;
 		}
 	}
@@ -192,11 +200,27 @@ bool ABuildableObject::CanBeUsed() const
 void ABuildableObject::SetHasEnoughElectricity(const bool bEnoughElectricity)
 {
 	bHasEnoughElectricity = bEnoughElectricity;
+
+	UpdateMaterialState();
 }
 
 void ABuildableObject::SetIsActivated(const bool bActivated)
 {
 	bIsActivated = bActivated;
+
+	UpdateMaterialState();
+}
+
+void ABuildableObject::UpdateMaterialState() const
+{
+	if (!CanBeUsed())
+	{
+		MeshComp->SetMaterial(0, DisabledMaterial);
+	}
+	else
+	{
+		MeshComp->SetMaterial(0, NormalMaterial);
+	}
 }
 #pragma endregion
 

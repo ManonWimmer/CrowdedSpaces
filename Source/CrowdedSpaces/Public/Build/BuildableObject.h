@@ -97,6 +97,8 @@ public:
 	int RoomId = UBuildSubsystem::InvalidRoomId;
 
 	bool bIsBeingDestroyed;
+
+	void UpdateMaterialState() const;
 	
 protected:
 	UPROPERTY()
@@ -143,4 +145,11 @@ protected:
 	
 	UPROPERTY()
 	TArray<TWeakObjectPtr<ANPC>> UsingNPCs;
+
+	// Materials
+	UPROPERTY()
+	TObjectPtr<UMaterialInterface> NormalMaterial;
+
+	UPROPERTY()
+	TObjectPtr<UMaterialInterface> DisabledMaterial;
 };

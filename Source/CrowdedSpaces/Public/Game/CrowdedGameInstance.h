@@ -23,14 +23,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bLastGameSurvived = false;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bNPCsCanLoseFood = true;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bNPCsCanLoseEnergy = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="NPC")
 	TSubclassOf<ANPC> GlobalNPCClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<UMaterialInterface> DisabledObjectsMaterial;
 
 private:
 	TObjectPtr<UTimeSubsystem> TimeSubsystem = nullptr;
