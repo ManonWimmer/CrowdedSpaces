@@ -223,7 +223,7 @@ private:
 	int CurrentObjectRoomId = InvalidRoomId;
 
 	UPROPERTY()
-	int BuildRoomBrushSize = 1;
+	int BuildRoomBrushSize = 3;
 
 	UPROPERTY()
 	ERoomEditMode CurrentRoomEditMode = ERoomEditMode::Add;
