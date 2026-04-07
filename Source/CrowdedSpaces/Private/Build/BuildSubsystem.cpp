@@ -294,7 +294,8 @@ void UBuildSubsystem::PlaceObject()
 	// Default scale
 	TObjectPtr<ABuildableObject> DefaultBuildable = CurrentBuildData->BuildClass->GetDefaultObject<ABuildableObject>();
 	Placed->GetMeshComponent()->SetRelativeScale3D(DefaultBuildable->GetMeshComponent()->GetRelativeScale3D());
-
+	Placed->OccupiedCells.Empty();
+	
 	// Set cells occupied
 	for (int Row = StartRow; Row < StartRow + SizeX; ++Row)
 	{
@@ -302,7 +303,10 @@ void UBuildSubsystem::PlaceObject()
 		{
 			FGridCell* Cell = GridActor->GetGridCell(Row, Col);
 			if (Cell)
+			{
 				Cell->bOccupied = true;
+				Placed->OccupiedCells.Add(FIntPoint(Row, Col));
+			}
 		}
 	}
 
@@ -367,33 +371,16 @@ void UBuildSubsystem::PlaceRoom()
 #pragma region Object/Room Destroy
 void UBuildSubsystem::RemoveObject(const ABuildableObject* Object) const
 {
-	int SizeX = Object->GetBuildData()->GridRowsX;
-	int SizeY = Object->GetBuildData()->GridColumnsY;
-
-	// Rotation
-	if (Object->GetActorRotation() == FRotator(0.f, 90.f, 0.f) ||
-		Object->GetActorRotation() == FRotator(0.f, 270.f, 0.f)) 
-	{
-		Swap(SizeX, SizeY);
-	}
-	
-	int StartRow = 0, StartCol = 0;
-	GridActor->GetCellAtLocation(Object->GetActorLocation(), StartRow, StartCol);
-	
-	StartRow -= SizeX / 2;
-	StartCol -= SizeY / 2;
-
-	StartRow = FMath::Clamp(StartRow, 0, GridActor->GetRows() - SizeX);
-	StartCol = FMath::Clamp(StartCol, 0, GridActor->GetColumns() - SizeY);
+	if (!Object || !GridActor)
+		return;
 	
 	// Set cells unoccupied
-	for (int Row = StartRow; Row < StartRow + SizeX; ++Row)
+	for (const FIntPoint& CellPos : Object->OccupiedCells)
 	{
-		for (int Col = StartCol; Col < StartCol + SizeY; ++Col)
+		FGridCell* Cell = GridActor->GetGridCell(CellPos.X, CellPos.Y);
+		if (Cell)
 		{
-			FGridCell* Cell = GridActor->GetGridCell(Row, Col);
-			if (Cell)
-				Cell->bOccupied = false;
+			Cell->bOccupied = false;
 		}
 	}
 }

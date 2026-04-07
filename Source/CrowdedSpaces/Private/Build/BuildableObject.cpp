@@ -294,4 +294,16 @@ void ABuildableObject::DestroyObject()
 	
 	Destroy();
 }
+
+bool ABuildableObject::IsOverlappingCells(const TSet<FIntPoint>& Cells) const
+{
+	for (const FIntPoint& Cell : OccupiedCells)
+	{
+		if (Cells.Contains(Cell))
+		{
+			return true;
+		}
+	}
+	return false;
+}
 #pragma endregion

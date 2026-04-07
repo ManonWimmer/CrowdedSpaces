@@ -150,6 +150,8 @@ void AGridActor::BeginPlay()
 		return;
 	
 	BuildSubsystem = World->GetSubsystem<UBuildSubsystem>();
+
+	BuildableRegistrySubsystem = GetWorld()->GetSubsystem<UBuildableRegistrySubsystem>();
 }
 
 #pragma region Cells / Grid
@@ -360,8 +362,6 @@ bool AGridActor::DestroyRoom(const int RoomId)
 	
 	RebuildWalls();
 	
-	// todo: subsystem a get autre part, soit begin play soit subsystem function library
-	TObjectPtr<UBuildableRegistrySubsystem> BuildableRegistrySubsystem = GetWorld()->GetSubsystem<UBuildableRegistrySubsystem>();
 	for (TWeakObjectPtr<ABuildableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
 	{
 		if (!Object.IsValid())
@@ -392,8 +392,6 @@ float AGridActor::GetRoomDestroyCost(int RoomId)
 	
 	float RoomTotalDestroyCost = Room->DestroyMoney;
 
-	// meme todo ici
-	TObjectPtr<UBuildableRegistrySubsystem> BuildableRegistrySubsystem = GetWorld()->GetSubsystem<UBuildableRegistrySubsystem>();
 	for (TWeakObjectPtr<ABuildableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
 	{
 		if (!Object.IsValid())
@@ -532,6 +530,20 @@ void AGridActor::RecomputeAllRooms()
 		Rooms.Add(NewRoom.RoomId, NewRoom);
 	}
 
+	// Update objects new ids
+	for (const TWeakObjectPtr<ABuildableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
+	{
+		FGridRoom* Room;
+		if (GetRoomAtWorldLocation(Object->GetActorLocation(), Room))
+		{
+			Object->RoomId = Room->RoomId;
+		}
+		else
+		{
+			Object->DestroyObject();
+		}
+	}
+
 	ShowPlacedRooms(true);
 }
 
@@ -549,14 +561,34 @@ void AGridActor::AddCellsToRooms(TObjectPtr<UBuildRoomData> BuildData, TArray<FG
 
 void AGridActor::RemoveCellsFromRooms(TArray<FGridCell*> CellsToRemove)
 {
+	TSet<FIntPoint> RemovedCells;
+
+	// Remove room from cell
 	for (FGridCell* Cell : CellsToRemove)
 	{
-		if (!Cell) continue;
-
+		if (!Cell)
+			continue;
+		
+		RemovedCells.Add(FIntPoint(Cell->Row, Cell->Column));
 		Cell->RoomId = BuildSubsystem->InvalidRoomId;
 		Cell->RoomType = EGridRoomType::None;
+		Cell->bOccupied = false;
 	}
 
+	// Remove object on cells to remove
+	TArray<TWeakObjectPtr<ABuildableObject>> ObjectsCopy = BuildableRegistrySubsystem->BuildableObjects;
+
+	for (TWeakObjectPtr<ABuildableObject> Object : ObjectsCopy)
+	{
+		if (!Object.IsValid())
+			continue;
+
+		if (Object->IsOverlappingCells(RemovedCells))
+		{
+			Object->DestroyObject();
+		}
+	}
+	
 	RecomputeAllRooms();
 }
 #pragma endregion

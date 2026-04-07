@@ -153,4 +153,7 @@ private:
 
 	UPROPERTY()
 	int MinWallSizeForDoors = 3;
+
+	UPROPERTY()
+	TObjectPtr<UBuildableRegistrySubsystem> BuildableRegistrySubsystem{nullptr};
 };

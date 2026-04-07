@@ -48,6 +48,8 @@ public:
 	USlotComponent* ReserveSpecificSlot(ANPC* NPC, USlotComponent* Slot);
 	void ReleaseSlot(ANPC* NPC);
 	
+	bool IsOverlappingCells(const TSet<FIntPoint>& Cells) const;
+
 	UPROPERTY(BlueprintAssignable)
 	FOnSlotsUpdated OnSlotsUpdated;
 
@@ -99,6 +101,9 @@ public:
 	bool bIsBeingDestroyed;
 
 	void UpdateMaterialState() const;
+
+	UPROPERTY()
+	TArray<FIntPoint> OccupiedCells;
 	
 protected:
 	UPROPERTY()
