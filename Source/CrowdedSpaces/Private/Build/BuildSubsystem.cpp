@@ -1,6 +1,7 @@
 ﻿#include "Build/BuildSubsystem.h"
 
 #include "EngineUtils.h"
+#include "Build/BuildableRegistrySubsystem.h"
 #include "Build/GhostObject.h"
 #include "Grid/GridActor.h"
 #include "Game/CrowdedGameMode.h"
@@ -60,6 +61,8 @@ void UBuildSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 
 	if (!GridActor)
 		UE_LOG(LogTemp, Error, TEXT("BuildSubsystem: couldn't find GridActor in world"));
+
+	BuildableRegistrySubsystem = GetWorld()->GetSubsystem<UBuildableRegistrySubsystem>();
 }
 
 TStatId UBuildSubsystem::GetStatId() const
@@ -395,6 +398,37 @@ void UBuildSubsystem::DestroyRoom(const int RoomId) const
 		OnRoomDestroyed.Broadcast(RoomId);
 	}
 }
+
+void UBuildSubsystem::GetObjectsToBeDestroyed(TArray<ABuildableObject*>& OutObjects) const
+{
+	if (!GridActor) return;
+
+	TSet<FIntPoint> CellsToRemove;
+
+	for (const FGridCell* Cell : SelectedRoomCells)
+	{
+		if (Cell)
+		{
+			CellsToRemove.Add(FIntPoint(Cell->Row, Cell->Column));
+		}
+	}
+
+	for (TWeakObjectPtr<ABuildableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
+	{
+		if (!Object.IsValid())
+			continue;
+
+		for (const FIntPoint& Cell : Object->OccupiedCells)
+		{
+			if (CellsToRemove.Contains(Cell))
+			{
+				OutObjects.Add(Object.Get());
+				break;
+				
+			}
+		}
+	}
+}
 #pragma endregion
 
 #pragma region Object/Room Rotation
@@ -631,10 +665,7 @@ void UBuildSubsystem::UpdateRoomSelection()
 
 	if (!CurrentBuildRoomData)
 		return;
-
-	//int SizeX = CurrentBuildRoomData->GridRowsX;
-	//int SizeY = CurrentBuildRoomData->GridColumnsY;
-
+	
 	int SizeX = BuildRoomBrushSize;
 	int SizeY = BuildRoomBrushSize;
 
@@ -658,6 +689,27 @@ void UBuildSubsystem::UpdateRoomSelection()
 				GridActor->SelectRoomCell(Row, Col, CurrentRoomEditMode, CurrentBuildRoomData->RoomType);
 				SelectedRoomCells.Add(Cell);
 			}
+		}
+	}
+
+	// Reset disabled material for all objects
+	for (TWeakObjectPtr<ABuildableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
+	{
+		if (Object.IsValid())
+		{
+			Object->SetWillBeRemoved(false);
+		}
+	}
+
+	// Set disabled material for object if will be removed by room
+	if (CurrentRoomEditMode == ERoomEditMode::Remove)
+	{
+		TArray<ABuildableObject*> ObjectsToDestroy;
+		GetObjectsToBeDestroyed(ObjectsToDestroy);
+
+		for (ABuildableObject* ObjectDestroyedByRoom : ObjectsToDestroy)
+		{
+			ObjectDestroyedByRoom->SetWillBeRemoved(true);
 		}
 	}
 }

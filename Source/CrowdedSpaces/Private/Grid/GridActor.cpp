@@ -145,7 +145,7 @@ void AGridActor::BeginPlay()
 	}
 	#pragma endregion
 
-	UWorld* World = GetWorld();
+	const UWorld* World = GetWorld();
 	if (!World)
 		return;
 	
@@ -195,7 +195,7 @@ FGridCell* AGridActor::GetGridCell(int Row, int Column)
 #pragma endregion
 
 #pragma region Show / Select
-void AGridActor::SelectObjectCell(const int Row, const int Column, EGridRoomType RoomType)
+void AGridActor::SelectObjectCell(const int Row, const int Column, const EGridRoomType RoomType)
 {
 	FGridCell* NewSelectedCell = GetGridCell(Row, Column);
 	if (!NewSelectedCell)

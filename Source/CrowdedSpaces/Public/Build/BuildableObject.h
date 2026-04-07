@@ -73,6 +73,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Object")
 	void SetIsActivated(bool bActivated);
 
+	UFUNCTION(BlueprintCallable, Category = "Object")
+	void SetWillBeRemoved(bool bRemoved);
+
 	// Using
 	void StartUsing(ANPC* NPC);
 	void StopUsing(ANPC* NPC);
@@ -125,6 +128,9 @@ protected:
 	bool bIsActivated = true;
 
 	UPROPERTY()
+	bool bWillBeRemoved = false;
+
+	UPROPERTY()
 	EObjectType ObjectType = EObjectType::Default;
 
 	UPROPERTY()
@@ -153,8 +159,11 @@ protected:
 
 	// Materials
 	UPROPERTY()
-	TObjectPtr<UMaterialInterface> NormalMaterial;
+	TObjectPtr<UMaterialInterface> NormalMaterial{nullptr};
 
 	UPROPERTY()
-	TObjectPtr<UMaterialInterface> DisabledMaterial;
+	TObjectPtr<UMaterialInterface> WillBeRemovedMaterial{nullptr};
+
+	UPROPERTY()
+	TObjectPtr<UMaterialInterface> DisabledMaterial{nullptr};
 };

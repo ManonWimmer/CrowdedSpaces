@@ -35,6 +35,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UMaterialInterface> DisabledObjectsMaterial;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<UMaterialInterface> WillBeRemovedObjectsMaterial;
+
 private:
 	TObjectPtr<UTimeSubsystem> TimeSubsystem = nullptr;
 };

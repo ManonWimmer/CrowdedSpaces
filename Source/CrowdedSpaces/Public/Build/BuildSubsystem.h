@@ -7,6 +7,7 @@
 #include "Grid/GridRoomType.h"
 #include "BuildSubsystem.generated.h"
 
+class UBuildableRegistrySubsystem;
 struct FGridCell;
 class AGameHUD;
 class AGhostObject;
@@ -128,6 +129,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool IsRoomUnlocked(const EGridRoomType RoomType) const;
 
+	void GetObjectsToBeDestroyed(TArray<ABuildableObject*>& OutObjects) const;
+
 	UPROPERTY(BlueprintAssignable)
 	FOnDeselected OnDeselected; // To deselect ui
 
@@ -227,4 +230,7 @@ private:
 
 	UPROPERTY()
 	ERoomEditMode CurrentRoomEditMode = ERoomEditMode::Add;
+
+	UPROPERTY()
+	TObjectPtr<UBuildableRegistrySubsystem> BuildableRegistrySubsystem{nullptr};
 };

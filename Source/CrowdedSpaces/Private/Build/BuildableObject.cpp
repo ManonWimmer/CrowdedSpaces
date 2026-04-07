@@ -68,6 +68,7 @@ void ABuildableObject::BeginPlay()
 		return;
 	
 	DisabledMaterial = GameInstance->DisabledObjectsMaterial;
+	WillBeRemovedMaterial = GameInstance->WillBeRemovedObjectsMaterial;
 	NormalMaterial = MeshComp->GetMaterial(0);
 }
 
@@ -211,9 +212,23 @@ void ABuildableObject::SetIsActivated(const bool bActivated)
 	UpdateMaterialState();
 }
 
+void ABuildableObject::SetWillBeRemoved(const bool bRemoved)
+{
+	if (bWillBeRemoved == bRemoved)
+		return;
+	
+	bWillBeRemoved = bRemoved;
+
+	UpdateMaterialState();
+}
+
 void ABuildableObject::UpdateMaterialState() const
 {
-	if (!CanBeUsed())
+	if (bWillBeRemoved)
+	{
+		MeshComp->SetMaterial(0, WillBeRemovedMaterial);
+	}
+	else if (!CanBeUsed())
 	{
 		MeshComp->SetMaterial(0, DisabledMaterial);
 	}
@@ -222,6 +237,8 @@ void ABuildableObject::UpdateMaterialState() const
 		MeshComp->SetMaterial(0, NormalMaterial);
 	}
 }
+
+
 #pragma endregion
 
 #pragma region Use Object
