@@ -1,5 +1,6 @@
 ﻿#include "Game/CrowdedGameInstance.h"
 
+#include "Build/BuildSubsystem.h"
 #include "Electricity/ElectricitySubsystem.h"
 #include "Game/CrowdedGameMode.h"
 #include "MoralEvent/MoralEventSubsystem.h"
@@ -36,6 +37,13 @@ void UCrowdedGameInstance::OnPostWorldInitialization(UWorld* World, const UWorld
 		return;
 
 	TimeSubsystem->OnTimeChanged.AddDynamic(ElectricitySubsystem, &UElectricitySubsystem::OnTimeChanged);
+
+	// Link build & electricity subsystem :
+	const TObjectPtr<UBuildSubsystem> BuildSubsystem = World->GetSubsystem<UBuildSubsystem>();
+	if (!BuildSubsystem)
+		return;
+	
+	ElectricitySubsystem->OnRoomActiveStateChanged.AddDynamic(BuildSubsystem, &UBuildSubsystem::OnRoomActiveStateChanged);
 }
 
 void UCrowdedGameInstance::ResetGameSettings()

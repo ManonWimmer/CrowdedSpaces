@@ -50,7 +50,7 @@ public:
 	virtual bool IsTickable() const override;
 
 	UFUNCTION(BlueprintCallable)
-	void OnBuildModeSelected(EBuildModeType BuildMode);
+	void OnBuildModeSelected(EBuildModeType BuildMode) const;
 	
 	UFUNCTION(BlueprintCallable)
 	void StartBuilding(UBuildData* BuildData);
@@ -130,6 +130,9 @@ public:
 	bool IsRoomUnlocked(const EGridRoomType RoomType) const;
 
 	void GetObjectsToBeDestroyed(TArray<ABuildableObject*>& OutObjects) const;
+
+	UFUNCTION()
+	void OnRoomActiveStateChanged(int RoomId);
 
 	UPROPERTY(BlueprintAssignable)
 	FOnDeselected OnDeselected; // To deselect ui

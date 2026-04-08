@@ -10,6 +10,7 @@ class UResourceComponent;
 class ACrowdedGameState;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRoomEnoughElectricityChanged, int, RoomId); // pas dans la room directement car c'est une struct
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRoomActiveStateChanged, int, RoomId); 
 
 UCLASS()
 class CROWDEDSPACES_API UElectricitySubsystem : public UTickableWorldSubsystem
@@ -27,8 +28,11 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnRoomEnoughElectricityChanged OnRoomEnoughElectricityChanged;
 
+	UPROPERTY(BlueprintAssignable)
+	FOnRoomActiveStateChanged OnRoomActiveStateChanged;
+
 	UFUNCTION(BlueprintCallable)
-	void ChangeRoomActiveState(const int RoomId);
+	void ChangeRoomActiveState(const int RoomId) const;
 
 	UFUNCTION(BlueprintCallable)
 	float GetRoomLoseElectricityPerHourPerCell(const int RoomId) const;

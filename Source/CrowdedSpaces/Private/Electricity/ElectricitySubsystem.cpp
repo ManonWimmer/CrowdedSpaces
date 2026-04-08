@@ -58,6 +58,11 @@ void UElectricitySubsystem::OnTimeChanged(const float NewTime)
 		{
 			ElectricityComponent->RemoveResource(ConsumptionThisFrame);
 		}
+		else
+		{
+			Room.bIsActivated = false;
+			OnRoomActiveStateChanged.Broadcast(RoomId);
+		}
 	}
 	
 	// Objects
@@ -78,7 +83,7 @@ void UElectricitySubsystem::OnTimeChanged(const float NewTime)
 		// Check if active room
 		if (Object->RoomId != BuildSubsystem->InvalidRoomId)
 		{
-			if (FGridRoom* RoomPtr = Rooms.Find(Object->RoomId))
+			if (const FGridRoom* RoomPtr = Rooms.Find(Object->RoomId))
 			{
 				if (!(RoomPtr)->bHasEnoughElectricity)
 				{
@@ -103,14 +108,15 @@ void UElectricitySubsystem::OnTimeChanged(const float NewTime)
 	}
 }
 
-void UElectricitySubsystem::ChangeRoomActiveState(const int RoomId)
+void UElectricitySubsystem::ChangeRoomActiveState(const int RoomId) const
 {
 	TMap<int, FGridRoom>& Rooms = BuildSubsystem->GetRooms();
 	FGridRoom* RoomPtr = Rooms.Find(RoomId);
 	if (!RoomPtr)
 		return;
-
+	
 	RoomPtr->bIsActivated = !RoomPtr->bIsActivated;
+	OnRoomActiveStateChanged.Broadcast(RoomId);
 
 	// Activate / deactivate room objects
 	for (TWeakObjectPtr<ABuildableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
@@ -127,7 +133,7 @@ void UElectricitySubsystem::ChangeRoomActiveState(const int RoomId)
 
 float UElectricitySubsystem::GetRoomLoseElectricityPerHourPerCell(const int RoomId) const
 {
-	FGridRoom* Room = BuildSubsystem->GetRoom(RoomId);
+	const FGridRoom* Room = BuildSubsystem->GetRoom(RoomId);
 	if (!Room)
 		return 0;
 

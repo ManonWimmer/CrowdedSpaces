@@ -56,6 +56,7 @@ void UBuildSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	{
 		GridActor = *It;
 		GridActor->ShowGrid(false);
+		GridActor->UpdateRoomsVisual();
 		break; 
 	}
 
@@ -90,7 +91,7 @@ bool UBuildSubsystem::IsTickable() const
 }
 
 #pragma region GameMode / BuildMode / RoomEditMode Changed
-void UBuildSubsystem::OnGameModeChanged(EGameModeState NewMode)
+void UBuildSubsystem::OnGameModeChanged(const EGameModeState NewMode)
 {
 	// Activer ou désactiver le tick selon le mode
 	bTickEnabled = (NewMode == EGameModeState::Building);
@@ -116,13 +117,16 @@ void UBuildSubsystem::OnGameModeChanged(EGameModeState NewMode)
 			GameHUD->ShowBuildWidget(false);
 
 		if (GridActor)
+		{
 			GridActor->ShowGrid(false);
+			GridActor->UpdateRoomsVisual();
+		}
 
 		StopBuilding();
 	}
 }
 
-void UBuildSubsystem::OnBuildModeSelected(EBuildModeType BuildMode)
+void UBuildSubsystem::OnBuildModeSelected(const EBuildModeType BuildMode) const
 {
 	switch (BuildMode)
 	{
@@ -712,5 +716,13 @@ void UBuildSubsystem::UpdateRoomSelection()
 			ObjectDestroyedByRoom->SetWillBeRemoved(true);
 		}
 	}
+}
+
+void UBuildSubsystem::OnRoomActiveStateChanged(int RoomId)
+{
+	if (!GridActor)
+		return;
+	
+	GridActor->UpdateRoomsVisual();
 }
 #pragma endregion

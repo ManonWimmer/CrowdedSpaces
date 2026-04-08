@@ -202,11 +202,13 @@ void AGridActor::SelectObjectCell(const int Row, const int Column, const EGridRo
 		return;
 	
 	NewSelectedCell->CellProceduralMesh->SetVisibility(true);
+	NewSelectedCell->CellProceduralMesh->SetScalarParameterValueOnMaterials("Power", CellSelectionColorPower);
 
 	if (RoomType == EGridRoomType::Any)
 	{
 		if (NewSelectedCell->bOccupied)
 			NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Red);
+		
 		else
 			NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Green);
 	}
@@ -259,6 +261,7 @@ void AGridActor::ShowPlacedRooms(bool bShow)
 			{
 				Cell->CellProceduralMesh->SetVisibility(true);
 				Cell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), Room.Value.GridColor);
+				Cell->CellProceduralMesh->SetScalarParameterValueOnMaterials("Power", CellSelectionColorPower);
 			}
 			else
 			{
@@ -270,7 +273,7 @@ void AGridActor::ShowPlacedRooms(bool bShow)
 
 void AGridActor::ShowGrid(bool bShow)
 {
-	LinesProceduralMesh->SetVisibility(bShow);
+	//LinesProceduralMesh->SetVisibility(bShow);
 
 	for (auto& Pair : Cells)
 	{
@@ -279,6 +282,53 @@ void AGridActor::ShowGrid(bool bShow)
 			continue;
 
 		Cell->CellProceduralMesh->SetVisibility(false);
+		Cell->CellProceduralMesh->SetScalarParameterValueOnMaterials("Power", CellSelectionColorPower);
+	}
+}
+
+void AGridActor::UpdateRoomsVisual()
+{
+	// reset tout
+	for (int Row = 0; Row < Rows; ++Row)
+	{
+		for (int Col = 0; Col < Columns; ++Col)
+		{
+			FGridCell* Cell = GetGridCell(Row, Col);
+			if (!Cell || !Cell->CellProceduralMesh) continue;
+			
+			Cell->CellProceduralMesh->SetVisibility(true);
+			Cell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), NormalCellColor);
+			Cell->CellProceduralMesh->SetScalarParameterValueOnMaterials("Power", NormalCellColorPower);
+		}
+	}
+
+	// apply rooms actives
+	for (auto& Pair : Rooms)
+	{
+		FGridRoom& Room = Pair.Value;
+
+		if (Room.bIsActivated)
+		{
+			for (const FGridCell* Cell : Room.Cells)
+			{
+				if (!Cell || !Cell->CellProceduralMesh) continue;
+
+				Cell->CellProceduralMesh->SetVisibility(true);
+				Cell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), ActivatedCellColor);
+				Cell->CellProceduralMesh->SetScalarParameterValueOnMaterials("Power", ActivatedCellColorPower);
+			}
+		}
+		else
+		{
+			for (const FGridCell* Cell : Room.Cells)
+			{
+				if (!Cell || !Cell->CellProceduralMesh) continue;
+
+				Cell->CellProceduralMesh->SetVisibility(true);
+				Cell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), DeactivatedCellColor);
+				Cell->CellProceduralMesh->SetScalarParameterValueOnMaterials("Power", DeactivatedCellColorPower);
+			}
+		}
 	}
 }
 
@@ -293,6 +343,7 @@ void AGridActor::DeselectSelectedCells()
 			{
 				Cell->CellProceduralMesh->SetVisibility(true);
 				Cell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), OutGridColor);
+				Cell->CellProceduralMesh->SetScalarParameterValueOnMaterials("Power", CellSelectionColorPower);
 			}
 			else
 			{

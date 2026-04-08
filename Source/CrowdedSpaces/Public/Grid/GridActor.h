@@ -81,6 +81,7 @@ public:
 	bool GetRoomAtWorldLocation(const FVector& WorldLoc, FGridRoom*& OutRoom);
 	FGridRoom* GetRoomOfSameType(EGridRoomType RoomType, int Row, int Col);
 	FGridRoom* GetRoom(int RoomId);
+	void UpdateRoomsVisual();
 
 	UFUNCTION(BlueprintCallable, Category = "Grid")
 	void ShowGrid(bool bShow);
@@ -156,4 +157,25 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UBuildableRegistrySubsystem> BuildableRegistrySubsystem{nullptr};
+
+	UPROPERTY(EditAnywhere, Category = "Grid")
+	float CellSelectionColorPower = 2.f;
+
+	UPROPERTY(EditAnywhere, Category = "Grid")
+	FLinearColor ActivatedCellColor = FLinearColor::White;
+	
+	UPROPERTY(EditAnywhere, Category = "Grid")
+	float ActivatedCellColorPower = 2.f;
+
+	UPROPERTY(EditAnywhere, Category = "Grid")
+	FLinearColor DeactivatedCellColor = FLinearColor::Red;
+	
+	UPROPERTY(EditAnywhere, Category = "Grid")
+	float DeactivatedCellColorPower = 2.f;
+	
+	UPROPERTY(EditAnywhere, Category = "Grid")
+	FLinearColor NormalCellColor = FLinearColor::Gray;
+
+	UPROPERTY(EditAnywhere, Category = "Grid")
+	float NormalCellColorPower = 0.f;
 };
