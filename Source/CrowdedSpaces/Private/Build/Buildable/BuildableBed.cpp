@@ -6,7 +6,7 @@ ABuildableBed::ABuildableBed()
 {
 	SelectionType = ESelectionType::Bed;
 	ObjectType = EObjectType::Bed;
-	NPCAction = ENPCActionWidget::Sleep;
+	NPCAction = ENPCActionType::Sleep;
 }
 
 void ABuildableBed::BeginPlay()

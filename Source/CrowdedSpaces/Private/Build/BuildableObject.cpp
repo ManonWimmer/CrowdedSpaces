@@ -257,7 +257,7 @@ void ABuildableObject::StopUsing(ANPC* NPC)
 
 	ReleaseSlot(NPC);
 	StopUsingImplementation(NPC);
-	NPC->SetCurrentAction(ENPCActionWidget::Idle);
+	NPC->SetCurrentAction(ENPCActionType::Idle);
 	
 	CS_LOG("STOP USING SUCCESS");
 }

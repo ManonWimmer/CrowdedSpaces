@@ -35,7 +35,7 @@ EBTNodeResult::Type UBTTask_UseBuildableObject::ExecuteTask(UBehaviorTreeCompone
 
 void UBTTask_UseBuildableObject::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
-	if (!NPC || !CurrentObject || CurrentObject->IsPendingKill() || CurrentObject->bIsBeingDestroyed)
+	if (!NPC || !CurrentObject || !IsValid(CurrentObject) || CurrentObject->bIsBeingDestroyed)
 	{
 		StopUsingClean();
 		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);

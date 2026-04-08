@@ -27,4 +27,7 @@ private:
 
 	UPROPERTY(EditAnywhere, Category="Blackboard")
 	EObjectType BuildableObjectType = EObjectType::Default;
+
+	UPROPERTY(EditAnywhere, Category="Blackboard")
+	ENPCActionType NPCSearchAction;
 };

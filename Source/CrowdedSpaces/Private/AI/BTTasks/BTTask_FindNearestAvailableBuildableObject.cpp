@@ -25,6 +25,8 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBe
 	if (!NPC)
 		return EBTNodeResult::Failed;
 
+	NPC->SetCurrentAction(NPCSearchAction);
+
 	const UWorld* World = NPC->GetWorld();
 	if (!World)
 		return EBTNodeResult::Failed;

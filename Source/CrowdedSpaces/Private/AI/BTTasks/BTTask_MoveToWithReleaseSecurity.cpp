@@ -3,6 +3,7 @@
 #include "AI/NPC.h"
 #include "Build/BuildableObject.h"
 #include "AIController.h"
+#include "AI/NPCController.h"
 
 UBTTask_MoveToWithReleaseSecurity::UBTTask_MoveToWithReleaseSecurity(FObjectInitializer const& ObjectInitializer)
 {
@@ -11,6 +12,16 @@ UBTTask_MoveToWithReleaseSecurity::UBTTask_MoveToWithReleaseSecurity(FObjectInit
 
 EBTNodeResult::Type UBTTask_MoveToWithReleaseSecurity::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
+	TObjectPtr<ANPCController> const Controller = Cast<ANPCController>(OwnerComp.GetAIOwner());
+	if (!Controller)
+		return EBTNodeResult::Failed;
+	
+	NPC = Cast<ANPC>(Controller->GetPawn());
+    	if (!NPC)
+    		return EBTNodeResult::Failed;
+
+	NPC->SetCurrentAction(NPCMoveAction);
+    		
 	return Super::ExecuteTask(OwnerComp, NodeMemory);
 }
 
@@ -31,13 +42,10 @@ void UBTTask_MoveToWithReleaseSecurity::OnTaskFinished(UBehaviorTreeComponent& O
 
 void UBTTask_MoveToWithReleaseSecurity::Cleanup(const UBehaviorTreeComponent& OwnerComp)
 {
-	const AAIController* AI = OwnerComp.GetAIOwner();
-	if (!AI)
-		return;
-
-	ANPC* NPC = Cast<ANPC>(AI->GetPawn());
 	if (!NPC)
 		return;
+
+	NPC->SetCurrentAction(ENPCActionType::Idle);
 
 	ABuildableObject* Object = NPC->GetCurrentObject();
 	if (!Object)

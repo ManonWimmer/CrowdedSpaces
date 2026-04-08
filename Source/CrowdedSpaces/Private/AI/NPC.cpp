@@ -180,10 +180,10 @@ int ANPC::GetResourceByType(const EResourceType Type) const
 #pragma endregion
 
 #pragma region Action & Object
-void ANPC::SetCurrentAction(const ENPCActionWidget NewAction)
+void ANPC::SetCurrentAction(const ENPCActionType NewAction)
 {
 	CurrentAction = NewAction;
-	FString ActionString = StaticEnum<ENPCActionWidget>()->GetDisplayNameTextByValue(static_cast<int64>(CurrentAction)).ToString();
+	FString ActionString = StaticEnum<ENPCActionType>()->GetDisplayNameTextByValue(static_cast<int64>(CurrentAction)).ToString();
 	
 	OnCurrentActionChanged.Broadcast(CurrentAction);
 }

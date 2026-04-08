@@ -14,7 +14,7 @@ class UBTTask_UseBuildableObject;
 class ABuildableObject;
 class USlotComponent;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentActionChanged, ENPCActionWidget, Value); 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentActionChanged, ENPCActionType, Value); 
 
 UCLASS()
 class CROWDEDSPACES_API ANPC : public ACharacter, public ISelectable
@@ -45,10 +45,10 @@ public:
 
 	// Action
 	UFUNCTION(BlueprintCallable, Category="AI")
-	void SetCurrentAction(ENPCActionWidget NewAction);
+	void SetCurrentAction(ENPCActionType NewAction);
 
 	UFUNCTION(BlueprintCallable)
-	ENPCActionWidget GetCurrentAction() const { return CurrentAction; }
+	ENPCActionType GetCurrentAction() const { return CurrentAction; }
 
 	UPROPERTY(BlueprintAssignable)
 	FOnCurrentActionChanged OnCurrentActionChanged;
@@ -116,7 +116,7 @@ private:
 	TObjectPtr<UWidgetComponent> NPCActionWidget;
 	
 	UPROPERTY()
-	ENPCActionWidget CurrentAction = ENPCActionWidget::Idle;
+	ENPCActionType CurrentAction = ENPCActionType::Idle;
 	
 	// Multipliers
 	UPROPERTY()
