@@ -24,7 +24,7 @@ struct FGridRoom
 	float LoseElectricityPerHourPerCell = 10;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Room")
-	float DestroyMoney = 10;
+	float DestroyMoneyPerCell = 10;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Room")
 	bool bHasEnoughElectricity = true;

@@ -416,7 +416,7 @@ bool AGridActor::DestroyRoom(const int RoomId)
 	if (!RoomToDestroy)
 		return false;
 		
-	float RoomDestroyMoney = RoomToDestroy->DestroyMoney;
+	float RoomDestroyMoney = GetRoomDestroyCost(RoomId);
 	
 	for (const FGridCell* RoomCell : RoomToDestroy->Cells)
 	{
@@ -445,7 +445,8 @@ bool AGridActor::DestroyRoom(const int RoomId)
 	}
 	
 	UResourceComponent* PlayerMoneyComponent = PlayerHelpers::GetPlayerResourceComponent(*GetWorld(), EResourceType::Money);
-	PlayerMoneyComponent->AddResource(RoomDestroyMoney);
+	if (PlayerMoneyComponent)
+		PlayerMoneyComponent->AddResource(RoomDestroyMoney);
 	
 	// todo: pareil que plus haut
 	ACrowdedPlayerController* CrowdedPlayerController = Cast<ACrowdedPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
@@ -457,11 +458,11 @@ bool AGridActor::DestroyRoom(const int RoomId)
 
 float AGridActor::GetRoomDestroyCost(int RoomId)
 {
-	FGridRoom* Room = GetRoom(RoomId);
+	const FGridRoom* Room = GetRoom(RoomId);
 	if (!Room)
 		return 0.f;
 	
-	float RoomTotalDestroyCost = Room->DestroyMoney;
+	float RoomTotalDestroyCost = Room->DestroyMoneyPerCell * Room->Cells.Num();
 
 	for (TWeakObjectPtr<ABuildableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
 	{
@@ -543,7 +544,7 @@ void AGridActor::RecomputeAllRooms()
 		{
 			NewRoom.GridColor = RoomData->GridColor;
 			NewRoom.LoseElectricityPerHourPerCell = RoomData->LoseElectricityPerHour;
-			NewRoom.DestroyMoney = RoomData->DestroyMoney;
+			NewRoom.DestroyMoneyPerCell = RoomData->DestroyMoneyPerCell;
 		}
 
 		// Check around neighbors cells with flood fill (DFS with stack)

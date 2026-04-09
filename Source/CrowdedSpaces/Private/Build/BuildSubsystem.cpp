@@ -151,7 +151,7 @@ void UBuildSubsystem::ChangeRoomEditMode()
 }
 #pragma endregion
 
-#pragma region Start/Stop Building
+#pragma region Start / Stop Building
 void UBuildSubsystem::StartBuilding(UBuildData* BuildData)
 {
 	if (!BuildData || !BuildData->BuildClass)
@@ -243,7 +243,7 @@ void UBuildSubsystem::StopBuilding()
 }
 #pragma endregion 
 
-#pragma region Object/Room Creation
+#pragma region Object / Room Creation
 void UBuildSubsystem::PlaceObject()
 {
 	if (!CurrentGhost || !CurrentBuildData || !CurrentBuildData->BuildClass || !GridActor)
@@ -377,6 +377,9 @@ void UBuildSubsystem::PlaceRoom()
 			if (Cell->RoomType == EGridRoomType::None)
 			{
 				ValidCells.Add(Cell);
+
+				if (MoneyComponent)
+					MoneyComponent->RemoveResource(CurrentBuildRoomData->MoneyCostPerCell);
 			}
 		}
 		else
@@ -385,6 +388,9 @@ void UBuildSubsystem::PlaceRoom()
 			if (Cell->RoomType == CurrentBuildRoomData->RoomType)
 			{
 				ValidCells.Add(Cell);
+
+				if (MoneyComponent)
+					MoneyComponent->AddResource(CurrentBuildRoomData->DestroyMoneyPerCell);
 			}
 		}
 	}
@@ -408,7 +414,7 @@ void UBuildSubsystem::PlaceRoom()
 }
 #pragma endregion
 
-#pragma region Object/Room Destroy
+#pragma region Object / Room Destroy
 void UBuildSubsystem::RemoveObject(const ABuildableObject* Object) const
 {
 	if (!Object || !GridActor)
@@ -468,7 +474,7 @@ void UBuildSubsystem::GetObjectsToBeDestroyed(TArray<ABuildableObject*>& OutObje
 }
 #pragma endregion
 
-#pragma region Object/Room Rotation
+#pragma region Object / Room Rotation
 void UBuildSubsystem::TryRotateBuildLeft()
 {
 	RotationIndex = (RotationIndex + 1) % 4;
@@ -518,7 +524,7 @@ void UBuildSubsystem::GetRoomRotatedSize(int& OutX, int& OutY) const
 }
 #pragma endregion
 
-#pragma region Get/Set Room Values
+#pragma region Get / Set Room Values
 TMap<int, FGridRoom>& UBuildSubsystem::GetRooms() const
 {
 	return GridActor->GetRooms();
@@ -557,6 +563,14 @@ void UBuildSubsystem::SetBuildRoomData(const TArray<UBuildRoomData*>& NewBuildRo
 		UnlockedRooms.Add(Room->RoomType, Room->bIsUnlockedAtStart);
 	}
 }
+
+void UBuildSubsystem::OnRoomActiveStateChanged(int RoomId)
+{
+	if (!GridActor)
+		return;
+	
+	GridActor->UpdateRoomsVisual();
+}
 #pragma endregion
 
 #pragma region Unlock
@@ -571,7 +585,7 @@ bool UBuildSubsystem::IsRoomUnlocked(const EGridRoomType RoomType) const
 }
 #pragma endregion
 
-#pragma region Ghost
+#pragma region Object Ghost
 void UBuildSubsystem::UpdateGhost()
 {
 	if(!CurrentGhost || !GridActor)
@@ -655,49 +669,7 @@ void UBuildSubsystem::UpdateGhost()
 }
 #pragma endregion
 
-#pragma region Click & Selection
-void UBuildSubsystem::LeftClicked()
-{
-	if (bIsSelectingRoom)
-	{
-		PlaceRoom();
-	}
-	else
-	{
-		PlaceObject();
-	}
-}
-
-void UBuildSubsystem::RightClicked()
-{
-	StopBuilding();
-
-	OnDeselected.Broadcast();
-}
-
-bool UBuildSubsystem::GetCursorHit(FVector& OutHit) const
-{
-	TObjectPtr<APlayerController> PC = GetWorld()->GetFirstPlayerController();
-	if (!PC)
-		return false;
-	
-	float MouseX, MouseY;
-	if(PC->GetMousePosition(MouseX, MouseY))
-	{
-		FVector WorldOrigin, WorldDir;
-		if(PC->DeprojectScreenPositionToWorld(MouseX, MouseY, WorldOrigin, WorldDir))
-		{
-			FHitResult Hit;
-			if(GetWorld()->LineTraceSingleByChannel(Hit, WorldOrigin, WorldOrigin + WorldDir * CursorLineTraceDistance, ECC_Visibility))
-			{
-				OutHit = Hit.Location;
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
+#pragma region Room Ghost
 void UBuildSubsystem::UpdateRoomSelection()
 {
 	if(!GridActor)
@@ -766,12 +738,49 @@ void UBuildSubsystem::UpdateRoomSelection()
 		}
 	}
 }
+#pragma endregion
 
-void UBuildSubsystem::OnRoomActiveStateChanged(int RoomId)
+#pragma region Click & Hit
+void UBuildSubsystem::LeftClicked()
 {
-	if (!GridActor)
-		return;
+	if (bIsSelectingRoom)
+	{
+		PlaceRoom();
+	}
+	else
+	{
+		PlaceObject();
+	}
+}
+
+void UBuildSubsystem::RightClicked()
+{
+	StopBuilding();
+
+	OnDeselected.Broadcast();
+}
+
+bool UBuildSubsystem::GetCursorHit(FVector& OutHit) const
+{
+	TObjectPtr<APlayerController> PC = GetWorld()->GetFirstPlayerController();
+	if (!PC)
+		return false;
 	
-	GridActor->UpdateRoomsVisual();
+	float MouseX, MouseY;
+	if(PC->GetMousePosition(MouseX, MouseY))
+	{
+		FVector WorldOrigin, WorldDir;
+		if(PC->DeprojectScreenPositionToWorld(MouseX, MouseY, WorldOrigin, WorldDir))
+		{
+			FHitResult Hit;
+			if(GetWorld()->LineTraceSingleByChannel(Hit, WorldOrigin, WorldOrigin + WorldDir * CursorLineTraceDistance, ECC_Visibility))
+			{
+				OutHit = Hit.Location;
+				return true;
+			}
+		}
+	}
+	return false;
 }
 #pragma endregion
+
