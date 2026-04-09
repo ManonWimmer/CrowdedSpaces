@@ -3,6 +3,7 @@
 #include "EngineUtils.h"
 #include "Build/BuildableRegistrySubsystem.h"
 #include "Build/GhostObject.h"
+#include "Debug/CrowdedSpacesLogs.h"
 #include "Grid/GridActor.h"
 #include "Game/CrowdedGameMode.h"
 #include "Game/CrowdedGameState.h"
@@ -262,7 +263,10 @@ void UBuildSubsystem::PlaceObject()
 
 	StartRow = FMath::Clamp(StartRow, 0, GridActor->GetRows() - SizeX);
 	StartCol = FMath::Clamp(StartCol, 0, GridActor->GetColumns() - SizeY);
-
+	
+	if (CheckIsObjectCuttingRooms(SizeX, SizeY, StartRow, StartCol))
+		return;
+	
 	for (int Row = StartRow; Row < StartRow + SizeX; ++Row)
 	{
 		for (int Col = StartCol; Col < StartCol + SizeY; ++Col)
@@ -299,7 +303,7 @@ void UBuildSubsystem::PlaceObject()
 		return;
 
 	// Default scale
-	TObjectPtr<ABuildableObject> DefaultBuildable = CurrentBuildData->BuildClass->GetDefaultObject<ABuildableObject>();
+	const TObjectPtr<ABuildableObject> DefaultBuildable = CurrentBuildData->BuildClass->GetDefaultObject<ABuildableObject>();
 	Placed->GetMeshComponent()->SetRelativeScale3D(DefaultBuildable->GetMeshComponent()->GetRelativeScale3D());
 	Placed->OccupiedCells.Empty();
 	
@@ -319,6 +323,35 @@ void UBuildSubsystem::PlaceObject()
 
 	if (MoneyComponent)
 		MoneyComponent->RemoveResource(CurrentBuildData->MoneyCost);
+}
+
+bool UBuildSubsystem::CheckIsObjectCuttingRooms(const int SizeX, const int SizeY, const int StartRow, const int StartCol) const
+{
+	if (!CurrentGhost || !CurrentBuildData || !CurrentBuildData->BuildClass || !GridActor)
+		return true;
+
+	int LastCheckedRoomId = INT_MAX;
+
+	for (int Row = StartRow; Row < StartRow + SizeX; ++Row)
+	{
+		for (int Col = StartCol; Col < StartCol + SizeY; ++Col)
+		{
+			const FGridCell* Cell = GridActor->GetGridCell(Row, Col);
+			if (LastCheckedRoomId == INT_MAX)
+			{
+				LastCheckedRoomId = Cell->RoomId;
+			}
+			else
+			{
+				if (Cell->RoomId != LastCheckedRoomId)
+					return true;
+
+				LastCheckedRoomId = Cell->RoomId;
+			}
+		}
+	}
+	
+	return false;
 }
 
 void UBuildSubsystem::PlaceRoom()
@@ -578,16 +611,32 @@ void UBuildSubsystem::UpdateGhost()
 	LastStartCol = StartCol;
 	
 	GridActor->DeselectSelectedCells();
-	for (int Row = StartRow; Row < StartRow + SizeX; ++Row)
+	
+	if (CheckIsObjectCuttingRooms(SizeX, SizeY, StartRow, StartCol))
 	{
-		for (int Col = StartCol; Col < StartCol + SizeY; ++Col)
+		for (int Row = StartRow; Row < StartRow + SizeX; ++Row)
 		{
-			FGridCell* Cell = GridActor->GetGridCell(Row, Col);
-			if (Cell)
-				GridActor->SelectObjectCell(Row, Col, CurrentObjectRoomType);
+			for (int Col = StartCol; Col < StartCol + SizeY; ++Col)
+			{
+				FGridCell* Cell = GridActor->GetGridCell(Row, Col);
+				if (Cell)
+					GridActor->SelectObjectCell(Row, Col, false);
+			}
 		}
 	}
-	
+	else
+	{
+		for (int Row = StartRow; Row < StartRow + SizeX; ++Row)
+		{
+			for (int Col = StartCol; Col < StartCol + SizeY; ++Col)
+			{
+				FGridCell* Cell = GridActor->GetGridCell(Row, Col);
+				if (Cell)
+					GridActor->SelectObjectCell(Row, Col, CurrentBuildData->RoomType);
+			}
+		}
+	}
+
 	FVector2D TopLeft;
 	GridActor->GetGridLocation(false, StartRow, StartCol, TopLeft);
 	

@@ -208,7 +208,6 @@ void AGridActor::SelectObjectCell(const int Row, const int Column, const EGridRo
 	{
 		if (NewSelectedCell->bOccupied)
 			NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Red);
-		
 		else
 			NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Green);
 	}
@@ -218,6 +217,27 @@ void AGridActor::SelectObjectCell(const int Row, const int Column, const EGridRo
 			NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Red);
 		else
 			NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Green);
+	}
+	
+	SelectedCells.Add(NewSelectedCell);
+}
+
+void AGridActor::SelectObjectCell(const int Row, const int Column, const bool bSelect)
+{
+	FGridCell* NewSelectedCell = GetGridCell(Row, Column);
+	if (!NewSelectedCell)
+		return;
+	
+	NewSelectedCell->CellProceduralMesh->SetVisibility(true);
+	NewSelectedCell->CellProceduralMesh->SetScalarParameterValueOnMaterials("Power", CellSelectionColorPower);
+
+	if (bSelect)
+	{
+		NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Green);
+	}
+	else
+	{
+		NewSelectedCell->DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FColor::Red);
 	}
 	
 	SelectedCells.Add(NewSelectedCell);

@@ -40,6 +40,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Grid")
 	void SelectObjectCell(const int Row, const int Column, EGridRoomType RoomType);
+
+	void SelectObjectCell(const int Row, const int Column, const bool bSelect);
 	
 	UFUNCTION(BlueprintCallable, Category = "Grid")
 	void DeselectSelectedCells();

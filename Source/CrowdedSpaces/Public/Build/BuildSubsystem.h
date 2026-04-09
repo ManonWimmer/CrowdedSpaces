@@ -134,6 +134,8 @@ public:
 	UFUNCTION()
 	void OnRoomActiveStateChanged(int RoomId);
 
+	bool CheckIsObjectCuttingRooms(const int SizeX, const int SizeY, const int StartRow, const int StartCol) const;
+
 	UPROPERTY(BlueprintAssignable)
 	FOnDeselected OnDeselected; // To deselect ui
 
