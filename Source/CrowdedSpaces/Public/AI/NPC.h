@@ -6,10 +6,14 @@
 #include "Resources/ResourceComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Selection/Selectable.h"
-#include "NPCAction.h"
+#include "NPCActionType.h"
+#include "NPCPriorityType.h"
+#include "TrainingSkillType.h"
 #include "Production/ProductionType.h"
 #include "NPC.generated.h"
 
+enum class ETrainingSkillType : uint8;
+enum class ENPCPriorityType : uint8;
 class UBTTask_UseBuildableObject;
 class ABuildableObject;
 class USlotComponent;
@@ -62,7 +66,23 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="AI")
 	int GetProductionMultiplierForType(EProductionType Type) const;
+	
+	void CancelCurrentUse() const;
 
+	// Priority
+	UFUNCTION(BlueprintCallable, Category="AI")
+	ENPCPriorityType GetNPCPriorityType() const { return NPCPriorityType; }
+
+	UFUNCTION(BlueprintCallable, Category="AI")
+	void SetNPCPriorityType(ENPCPriorityType NewType);
+
+	// Training
+	UFUNCTION(BlueprintCallable, Category="AI")
+	ETrainingSkillType GetTrainingSkillType() const { return TrainingSkillType; }
+
+	UFUNCTION(BlueprintCallable, Category="AI")
+	void SetTrainingSkillType(ETrainingSkillType NewType);
+	
 	// Name & Color
 	UFUNCTION(BlueprintCallable, Category="AI")
 	FString GetNPCName() const { return NPCName; }
@@ -127,6 +147,13 @@ private:
 
 	UPROPERTY()
 	int MoneyProductionMultiplier = 1;
+
+	// Priority
+	UPROPERTY(EditAnywhere)
+	ENPCPriorityType NPCPriorityType = ENPCPriorityType::Work;
+
+	UPROPERTY(EditAnywhere)
+	ETrainingSkillType TrainingSkillType = ETrainingSkillType::MoneyProduction;
 
 	// Color
 	UPROPERTY()

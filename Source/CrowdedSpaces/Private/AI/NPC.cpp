@@ -194,7 +194,7 @@ void ANPC::SetCurrentObject(ABuildableObject* NewObject)
 }
 #pragma endregion
 
-#pragma region Work
+#pragma region Work / Train / Priority
 void ANPC::SetWorkOnGeneratorType(const EProductionType NewType)
 {
 	if (WorkOnGeneratorType == NewType)
@@ -202,18 +202,7 @@ void ANPC::SetWorkOnGeneratorType(const EProductionType NewType)
 	
 	WorkOnGeneratorType = NewType;
 
-	// Cancel use generator task in case was working on genrator with diferent type
-	if (ANPCController* ControllerNPC = Cast<ANPCController>(GetController()))
-	{
-		if (const UBlackboardComponent* Blackboard = ControllerNPC->GetBlackboardComponent())
-		{
-			if (const TObjectPtr<ABuildableObject> TargetObject = Cast<ABuildableObject>(Blackboard->GetValueAsObject("TargetObject")); TargetObject && TargetObject->GetObjectType() == EObjectType::Generator)
-			{
-				if (UBehaviorTreeComponent* BTComp = Cast<UBehaviorTreeComponent>(ControllerNPC->GetBrainComponent()))
-					BTComp->RestartTree();
-			}
-		}
-	}
+	CancelCurrentUse();
 }
 
 int ANPC::GetProductionMultiplierForType(const EProductionType Type) const
@@ -232,6 +221,41 @@ int ANPC::GetProductionMultiplierForType(const EProductionType Type) const
 		default:
 			return 1;
 	}
+}
+
+void ANPC::CancelCurrentUse() const
+{
+	if (ANPCController* ControllerNPC = Cast<ANPCController>(GetController()))
+	{
+		if (const UBlackboardComponent* Blackboard = ControllerNPC->GetBlackboardComponent())
+		{
+			if (const TObjectPtr<ABuildableObject> TargetObject = Cast<ABuildableObject>(Blackboard->GetValueAsObject("TargetObject")); TargetObject && TargetObject->GetObjectType() == EObjectType::Generator)
+			{
+				if (UBehaviorTreeComponent* BTComp = Cast<UBehaviorTreeComponent>(ControllerNPC->GetBrainComponent()))
+					BTComp->RestartTree();
+			}
+		}
+	}
+}
+
+void ANPC::SetNPCPriorityType(const ENPCPriorityType NewType)
+{
+	if (NPCPriorityType == NewType)
+		return;
+	
+	NPCPriorityType = NewType;
+
+	CancelCurrentUse();
+}
+
+void ANPC::SetTrainingSkillType(const ETrainingSkillType NewType)
+{
+	if (TrainingSkillType == NewType)
+		return;
+	
+	TrainingSkillType = NewType;
+
+	CancelCurrentUse();
 }
 #pragma endregion
 
