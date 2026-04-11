@@ -178,6 +178,10 @@ UCustomWidget* AGameHUD::GetWidgetFromSelectionType(const ESelectionType Type)
 		CurrentlyShownSelectionWidgetBP = StorageRoomSelectionWidgetBP;
 		break;
 
+	case ESelectionType::TrainingStation:
+		CurrentlyShownSelectionWidgetBP = TrainingStationSelectionWidgetBP;
+		break;
+
 	default:
 		return nullptr;
 	}

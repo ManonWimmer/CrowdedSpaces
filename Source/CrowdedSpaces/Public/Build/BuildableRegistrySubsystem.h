@@ -4,6 +4,7 @@
 #include "Buildable/BuildableBed.h"
 #include "Buildable/BuildableFood.h"
 #include "Buildable/BuildableGenerator.h"
+#include "Buildable/BuildableTrainingStation.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "BuildableRegistrySubsystem.generated.h"
 
@@ -33,4 +34,10 @@ public:
 	
 	void RegisterFood(ABuildableFood* Food);
 	void UnregisterFood(ABuildableFood* Food);
+
+	// Training Stations
+	TArray<TWeakObjectPtr<ABuildableTrainingStation>> TrainingStations;
+	
+	void RegisterTrainingStation(ABuildableTrainingStation* TrainingStation);
+	void UnregisterTrainingStation(ABuildableTrainingStation* TrainingStation); 
 };
