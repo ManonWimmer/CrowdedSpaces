@@ -5,6 +5,7 @@
 #include "MoralEvent/MoralEventSubsystem.h"
 #include "Storage/StorageSubsystem.h"
 #include "Time/TimeSubsystem.h"
+#include "Training/TrainingSubsystem.h"
 
 ACrowdedGameState::ACrowdedGameState()
 {
@@ -78,7 +79,7 @@ void ACrowdedGameState::TryInitSubsystems()
 
 	MoralEventSubsystem->SetPossibleEvents(PossibleMoralEvents);
 
-	// Get storage event subsystem & send data
+	// Get storage subsystem & send data
 	const TObjectPtr<UStorageSubsystem> StorageSubsystem = GetWorld()->GetSubsystem<UStorageSubsystem>();
 	if (!StorageSubsystem)
 	{
@@ -87,6 +88,16 @@ void ACrowdedGameState::TryInitSubsystems()
 	}
 
 	StorageSubsystem->SetStorageData(StorageData);
+
+	// Get training subsystem & send data
+	const TObjectPtr<UTrainingSubsystem> TrainingSubsystem = GetWorld()->GetSubsystem<UTrainingSubsystem>();
+	if (!TrainingSubsystem)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Training subsystem not found"));
+		return;
+	}
+
+	TrainingSubsystem->SetTrainingData(TrainingData);
 
 	UE_LOG(LogTemp, Warning, TEXT("All subsystem found!"));
 

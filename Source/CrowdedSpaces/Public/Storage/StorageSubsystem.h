@@ -67,7 +67,7 @@ public:
 
 private:
 	UPROPERTY()
-	TObjectPtr<UStorageData> StorageData = nullptr; // Sent by game state
+	TObjectPtr<UStorageData> StorageData{nullptr}; // Sent by game state
 
 	UPROPERTY()
 	TMap<int, FStorageRoomValues> StorageRooms; // Room ID - Storage values

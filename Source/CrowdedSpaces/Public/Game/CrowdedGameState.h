@@ -11,6 +11,8 @@
 #include "CrowdedGameState.generated.h"
 
 class UStorageData;
+class UTrainingData;
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGameDataReady);
 
 UCLASS()
@@ -69,6 +71,10 @@ public:
 	// Storage
 	UPROPERTY(EditAnywhere, Category = "Storage", meta=(AllowPrivateAccess=true))
 	TObjectPtr<UStorageData> StorageData;
+
+	// Storage
+	UPROPERTY(EditAnywhere, Category = "Training", meta=(AllowPrivateAccess=true))
+	TObjectPtr<UTrainingData> TrainingData;
 
 private:
 	UPROPERTY()
