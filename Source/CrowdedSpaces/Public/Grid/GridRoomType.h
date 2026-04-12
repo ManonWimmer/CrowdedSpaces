@@ -12,4 +12,5 @@ enum class EGridRoomType : uint8
 	Generator		UMETA(DisplayName="Generator"),
 	Bedroom			UMETA(DisplayName="Bedroom"),
 	Storage			UMETA(DisplayName="Storage"),
+	Training		UMETA(DisplayName="Training"),
 };
