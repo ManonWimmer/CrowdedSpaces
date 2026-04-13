@@ -9,6 +9,8 @@
 #include "Camera/CameraComponent.h"
 #include "Game/CrowdedGameMode.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Training/TrainingData.h"
+#include "Training/TrainingSubsystem.h"
 #include "UI/Widgets/FoodBarWidget.h"
 #include "UI/Widgets/NPCActionWidget.h"
 #include "UI/Widgets/Selection/NPCNameWidget.h"
@@ -57,9 +59,16 @@ void ANPC::BeginPlay()
 	GameMode->RegisterNPC(this);
 
 	// Multipliers
-	FoodProductionMultiplier = FMath::RandRange(1, 5);
-	ElectricityProductionMultiplier = FMath::RandRange(1, 5);
-	MoneyProductionMultiplier = FMath::RandRange(1, 5);
+	FoodProductionMultiplier = 1;
+	ElectricityProductionMultiplier = 1;
+	MoneyProductionMultiplier = 1;
+
+	// Training exp
+	TrainingSubsystem = GetWorld()->GetSubsystem<UTrainingSubsystem>();
+	
+	TrainingSkillsExp.Add(ETrainingSkillType::MoneyProduction, 0);
+	TrainingSkillsExp.Add(ETrainingSkillType::FoodProduction, 0);
+	TrainingSkillsExp.Add(ETrainingSkillType::ElectricityProduction, 0);
 
 	// Random name
 	TryGenerateName();
@@ -141,11 +150,109 @@ void ANPC::Tick(const float DeltaSeconds)
 #pragma region Training
 void ANPC::AddTrainingExp(const float AddExp)
 {
-	// to do
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Blue, "Add npc training exp");
+	const float CurrentLevelExpNeeded = GetCurrentLevelNeededExp(TrainingSkillType);
+	
+	switch (TrainingSkillType)
+	{
+		case ETrainingSkillType::MoneyProduction:
+			{
+				if (MoneyProductionMultiplier == MaxMultipliersLevel) // Max
+					break;
+				
+				TrainingSkillsExp[ETrainingSkillType::MoneyProduction] += AddExp;
+
+				if (TrainingSkillsExp[ETrainingSkillType::MoneyProduction] > CurrentLevelExpNeeded)
+				{
+					TrainingSkillsExp[ETrainingSkillType::MoneyProduction] = 0;
+					MoneyProductionMultiplier += 1;
+				}
+				break;
+			}
+			
+		
+		case ETrainingSkillType::FoodProduction:
+			{
+				if (FoodProductionMultiplier == MaxMultipliersLevel) 
+					break;
+				
+				TrainingSkillsExp[ETrainingSkillType::FoodProduction] += AddExp;
+
+				if (TrainingSkillsExp[ETrainingSkillType::FoodProduction] > CurrentLevelExpNeeded)
+				{
+					TrainingSkillsExp[ETrainingSkillType::FoodProduction] = 0;
+					FoodProductionMultiplier += 1;
+				}
+				break;
+			}
+		
+		case ETrainingSkillType::ElectricityProduction:
+			{
+				if (FoodProductionMultiplier == MaxMultipliersLevel) 
+					break;
+				
+				TrainingSkillsExp[ETrainingSkillType::FoodProduction] += AddExp;
+
+				if (TrainingSkillsExp[ETrainingSkillType::FoodProduction] > CurrentLevelExpNeeded)
+				{
+					TrainingSkillsExp[ETrainingSkillType::FoodProduction] = 0;
+					FoodProductionMultiplier += 1;
+				}
+				break;
+			}
+	}
+
+	OnSkillsTrained.Broadcast();
 }
 
+int ANPC::GetCurrentLevel(const ETrainingSkillType TrainingSkillTypeToUpdate) const
+{
+	int CurrentLevel = 0;
+	
+	switch (TrainingSkillTypeToUpdate)
+	{
+		case ETrainingSkillType::MoneyProduction:
+			CurrentLevel = MoneyProductionMultiplier - 1;  
+			break;
+			
+		case ETrainingSkillType::FoodProduction:
+			CurrentLevel = FoodProductionMultiplier - 1;
+			break;
+			
+		case ETrainingSkillType::ElectricityProduction:
+			CurrentLevel = ElectricityProductionMultiplier - 1;
+			break;
+	}
+
+	return CurrentLevel;
+}
+
+float ANPC::GetCurrentLevelExp(const ETrainingSkillType TrainingSkillTypeToUpdate) const
+{
+	switch (TrainingSkillTypeToUpdate)
+	{
+		case ETrainingSkillType::MoneyProduction:
+			return TrainingSkillsExp[ETrainingSkillType::MoneyProduction];
+		
+		case ETrainingSkillType::FoodProduction:
+			return TrainingSkillsExp[ETrainingSkillType::FoodProduction];
+		
+		case ETrainingSkillType::ElectricityProduction:
+			return TrainingSkillsExp[ETrainingSkillType::ElectricityProduction];
+	}
+
+	return 0;
+}
+
+float ANPC::GetCurrentLevelNeededExp(const ETrainingSkillType TrainingSkillTypeToUpdate) const
+{
+	const int CurrentLevel = GetCurrentLevel(TrainingSkillTypeToUpdate);
+
+	if (TrainingSubsystem->GetTrainingData()->TrainingLevelAndExpNeeded.Contains(CurrentLevel))
+		return TrainingSubsystem->GetTrainingData()->TrainingLevelAndExpNeeded[CurrentLevel];
+
+	else
+		return 0;
+}
 
 #pragma endregion
 

@@ -4,18 +4,6 @@
 #include "Engine/DataAsset.h"
 #include "TrainingData.generated.h"
 
-USTRUCT(BlueprintType)
-struct FTrainingEntry
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ClampMin = "0", ClampMax = "4"))
-	int TrainingLevel; 
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float TrainingExpNeeded;
-};
-
 UCLASS(BlueprintType)
 class CROWDEDSPACES_API UTrainingData : public UDataAsset
 {
@@ -23,7 +11,7 @@ class CROWDEDSPACES_API UTrainingData : public UDataAsset
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TArray<FTrainingEntry> TrainingData;
+	TMap<int, float> TrainingLevelAndExpNeeded;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float AddExpPerHour = 10.f;

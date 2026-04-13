@@ -28,6 +28,9 @@ public:
 	UFUNCTION()
 	void SetTrainingData(UTrainingData* NewTrainingData) { TrainingData = NewTrainingData; }
 
+	UFUNCTION()
+	UTrainingData* GetTrainingData() const { return TrainingData; }
+
 private:
 	UPROPERTY()
 	TObjectPtr<UTrainingData> TrainingData{nullptr}; // Sent by game state

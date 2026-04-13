@@ -8,17 +8,18 @@
 #include "Selection/Selectable.h"
 #include "NPCActionType.h"
 #include "NPCPriorityType.h"
-#include "TrainingSkillType.h"
 #include "Production/ProductionType.h"
+#include "Training/TrainingSkillType.h"
 #include "NPC.generated.h"
 
-enum class ETrainingSkillType : uint8;
+class UTrainingSubsystem;
 enum class ENPCPriorityType : uint8;
 class UBTTask_UseBuildableObject;
 class ABuildableObject;
 class USlotComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentActionChanged, ENPCActionType, Value); 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSkillsTrained); 
 
 UCLASS()
 class CROWDEDSPACES_API ANPC : public ACharacter, public ISelectable
@@ -75,13 +76,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="AI")
 	void SetNPCPriorityType(ENPCPriorityType NewType);
-
-	// Training
-	UFUNCTION(BlueprintCallable, Category="AI")
-	ETrainingSkillType GetTrainingSkillType() const { return TrainingSkillType; }
-
-	UFUNCTION(BlueprintCallable, Category="AI")
-	void SetTrainingSkillType(ETrainingSkillType NewType);
 	
 	// Name & Color
 	UFUNCTION(BlueprintCallable, Category="AI")
@@ -101,8 +95,29 @@ public:
 	ABuildableObject* GetCurrentObject() const { return CurrentObject; }
 
 	// Training
+	UFUNCTION(BlueprintCallable, Category="AI")
+	ETrainingSkillType GetTrainingSkillType() const { return TrainingSkillType; }
+
+	UFUNCTION(BlueprintCallable, Category="AI")
+	void SetTrainingSkillType(ETrainingSkillType NewType);
+	
 	UFUNCTION()
 	void AddTrainingExp(const float AddExp);
+	
+	UFUNCTION(BlueprintCallable)
+	int GetCurrentLevel(const ETrainingSkillType TrainingSkillTypeToUpdate) const;
+
+	UFUNCTION(BlueprintCallable)
+	float GetCurrentLevelExp(const ETrainingSkillType TrainingSkillTypeToUpdate) const;
+
+	UFUNCTION(BlueprintCallable)
+	float GetCurrentLevelNeededExp(const ETrainingSkillType TrainingSkillTypeToUpdate) const;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnSkillsTrained OnSkillsTrained;
+
+	UFUNCTION(BlueprintCallable, Category="AI")
+	int GetMaxMultipliersLevel() const { return MaxMultipliersLevel; }
 	
 protected:
 	virtual void BeginPlay() override;
@@ -172,6 +187,16 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UBTTask_UseBuildableObject> CurrentUseTask{nullptr};
+
+	// Training
+	UPROPERTY()
+	TMap<ETrainingSkillType, float> TrainingSkillsExp;
+
+	UPROPERTY()
+	TObjectPtr<UTrainingSubsystem> TrainingSubsystem{nullptr};
+
+	UPROPERTY(EditAnywhere)
+	int MaxMultipliersLevel = 5;
 	
 	// Selectable
 public:
