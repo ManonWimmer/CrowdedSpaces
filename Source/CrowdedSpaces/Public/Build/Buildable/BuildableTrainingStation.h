@@ -5,6 +5,8 @@
 #include "Selection/Selectable.h"
 #include "BuildableTrainingStation.generated.h"
 
+class UTrainingSubsystem;
+
 UCLASS()
 class CROWDEDSPACES_API ABuildableTrainingStation : public ABuildableObject, public ISelectable
 {
@@ -23,4 +25,8 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+private:
+	UPROPERTY()
+	TObjectPtr<UTrainingSubsystem> TrainingSubsystem{nullptr};
 };

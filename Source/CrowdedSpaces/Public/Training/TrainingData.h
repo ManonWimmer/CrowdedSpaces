@@ -24,4 +24,7 @@ class CROWDEDSPACES_API UTrainingData : public UDataAsset
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TArray<FTrainingEntry> TrainingData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float AddExpPerHour = 10.f;
 };

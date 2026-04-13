@@ -5,6 +5,7 @@
 #include "Game/CrowdedGameMode.h"
 #include "MoralEvent/MoralEventSubsystem.h"
 #include "Time/TimeSubsystem.h"
+#include "Training/TrainingSubsystem.h"
 
 void UCrowdedGameInstance::Init()
 {
@@ -37,6 +38,13 @@ void UCrowdedGameInstance::OnPostWorldInitialization(UWorld* World, const UWorld
 		return;
 
 	TimeSubsystem->OnTimeChanged.AddDynamic(ElectricitySubsystem, &UElectricitySubsystem::OnTimeChanged);
+
+	// Link time & training subsystem :
+	const TObjectPtr<UTrainingSubsystem> TrainingSubsystem = World->GetSubsystem<UTrainingSubsystem>();
+	if (!TrainingSubsystem)
+		return;
+
+	TimeSubsystem->OnTimeChanged.AddDynamic(TrainingSubsystem, &UTrainingSubsystem::OnTimeChanged);
 
 	// Link build & electricity subsystem :
 	const TObjectPtr<UBuildSubsystem> BuildSubsystem = World->GetSubsystem<UBuildSubsystem>();

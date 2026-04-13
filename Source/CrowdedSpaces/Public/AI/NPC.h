@@ -99,6 +99,10 @@ public:
 	
 	UFUNCTION()
 	ABuildableObject* GetCurrentObject() const { return CurrentObject; }
+
+	// Training
+	UFUNCTION()
+	void AddTrainingExp(const float AddExp);
 	
 protected:
 	virtual void BeginPlay() override;

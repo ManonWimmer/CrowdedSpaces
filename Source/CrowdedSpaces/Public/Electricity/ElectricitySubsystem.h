@@ -23,7 +23,7 @@ protected:
 
 public:
 	UFUNCTION()
-	void OnTimeChanged(float NewTime);
+	void OnTimeChanged(const float NewTime);
 
 	UPROPERTY(BlueprintAssignable)
 	FOnRoomEnoughElectricityChanged OnRoomEnoughElectricityChanged;

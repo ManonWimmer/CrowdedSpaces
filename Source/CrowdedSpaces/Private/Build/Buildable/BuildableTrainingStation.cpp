@@ -1,6 +1,7 @@
 ﻿#include "Build/Buildable/BuildableTrainingStation.h"
 
 #include "Build/BuildableRegistrySubsystem.h"
+#include "Training/TrainingSubsystem.h"
 
 ABuildableTrainingStation::ABuildableTrainingStation()
 {
@@ -20,6 +21,12 @@ void ABuildableTrainingStation::BeginPlay()
 		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Register training station");
 
 	BRS->RegisterTrainingStation(this);
+
+	const UWorld* World = GetWorld();
+	if (!World)
+		return;
+	
+	TrainingSubsystem = World->GetSubsystem<UTrainingSubsystem>();
 }
 
 void ABuildableTrainingStation::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -34,20 +41,20 @@ void ABuildableTrainingStation::EndPlay(const EEndPlayReason::Type EndPlayReason
 
 bool ABuildableTrainingStation::StartUsingImplementation(ANPC* NPC)
 {
-	// train skill type add exp
-
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Cyan, "Start training");
+
+	TrainingSubsystem->AddTrainingNPC(NPC);
 	
 	return true;
 }
 
 bool ABuildableTrainingStation::StopUsingImplementation(ANPC* NPC)
 {
-	// stop train skill
-	
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Cyan, "Stop training");
+	
+	TrainingSubsystem->RemoveTrainingNPC(NPC);
 	
 	return true;
 }

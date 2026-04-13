@@ -138,6 +138,17 @@ void ANPC::Tick(const float DeltaSeconds)
 	NPCActionWidget->SetWorldRotation(YawOnlyNPCAction);
 }
 
+#pragma region Training
+void ANPC::AddTrainingExp(const float AddExp)
+{
+	// to do
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Blue, "Add npc training exp");
+}
+
+
+#pragma endregion
+
 #pragma region Death
 void ANPC::Die()
 {
