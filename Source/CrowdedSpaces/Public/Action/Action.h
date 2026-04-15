@@ -12,11 +12,15 @@ class CROWDEDSPACES_API UAction : public UObject
 public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Action")
-	FText ActionName;
+	FString ActionName;
 
 	UFUNCTION(BlueprintNativeEvent)
 	bool CanExecute(AActor* Instigator) const;
 
+	virtual bool CanExecute_Implementation(AActor* Instigator) const;
+
 	UFUNCTION(BlueprintNativeEvent)
 	void Execute(AActor* Instigator);
+
+	virtual void Execute_Implementation(AActor* Instigator);
 };
