@@ -3,6 +3,7 @@
 #include "EngineUtils.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "Action/ActionSubsystem.h"
 #include "Game/CrowdedGameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "Time/TimeSubsystem.h"
@@ -105,6 +106,14 @@ void ACrowdedPlayerController::BeginPlay()
 
 	OnTimeInputChanged.AddDynamic(TimeSubsystem, &UTimeSubsystem::OnTimeInputChanged);
 	OnTogglePause.AddDynamic(TimeSubsystem, &UTimeSubsystem::OnTogglePause);
+
+	// Action
+	UActionSubsystem* ActionSubsystem = World->GetSubsystem<UActionSubsystem>();
+	if (!ActionSubsystem)
+		return;
+
+	OnSelectableActorSelected.AddDynamic(ActionSubsystem, &UActionSubsystem::OnSelectableActorSelected);
+	OnNotSelectableActorSelected.AddDynamic(ActionSubsystem, &UActionSubsystem::OnNotSelectableActorSelected);
 }
 
 void ACrowdedPlayerController::MouseMoveInput(const FInputActionValue& Value)
@@ -193,9 +202,13 @@ void ACrowdedPlayerController::HandleSelection() const
 	{
 		const ISelectable* Selectable = Cast<ISelectable>(HitActor);
 		GameHUD->ShowSelectionWidget(HitActor, true, Selectable->	GetSelectionType());
+
+		OnSelectableActorSelected.Broadcast(HitActor);
 		
 		return;
 	}
+
+	OnNotSelectableActorSelected.Broadcast();
 
 	// 2. Room
 	if (GridActor)

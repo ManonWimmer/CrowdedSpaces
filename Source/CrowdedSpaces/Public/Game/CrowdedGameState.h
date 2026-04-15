@@ -63,31 +63,35 @@ public:
 
 	// NPC Name
 	UPROPERTY(EditAnywhere, Category = "NPC", meta=(AllowPrivateAccess=true))
-	UNameList* NameData;
+	TObjectPtr<UNameList> NameData{nullptr};
 
 	UPROPERTY()
 	bool bHasInitSubsystems = false;
 
 	// Storage
 	UPROPERTY(EditAnywhere, Category = "Storage", meta=(AllowPrivateAccess=true))
-	TObjectPtr<UStorageData> StorageData;
+	TObjectPtr<UStorageData> StorageData{nullptr};
 
 	// Storage
 	UPROPERTY(EditAnywhere, Category = "Training", meta=(AllowPrivateAccess=true))
-	TObjectPtr<UTrainingData> TrainingData;
+	TObjectPtr<UTrainingData> TrainingData{nullptr};
+
+	// Outline
+	UPROPERTY(EditAnywhere, Category = "Outline", meta=(AllowPrivateAccess=true))
+	TObjectPtr<UMaterialInterface> OutlineMaterial{nullptr};
 
 private:
 	UPROPERTY()
 	TMap<EResourceType, TObjectPtr<UResourceComponent>> ResourceMap;
 
 	UPROPERTY(EditAnywhere, Category = "Components")
-	TObjectPtr<UResourceComponent> MoneyComponent = nullptr;
+	TObjectPtr<UResourceComponent> MoneyComponent{nullptr};
 
 	UPROPERTY(EditAnywhere, Category = "Components")
-	TObjectPtr<UResourceComponent> ElectricityComponent = nullptr;
+	TObjectPtr<UResourceComponent> ElectricityComponent{nullptr};
 
 	UPROPERTY(EditAnywhere, Category = "Components")
-	TObjectPtr<UResourceComponent> FoodComponent = nullptr;
+	TObjectPtr<UResourceComponent> FoodComponent{nullptr};
 };
 
 template <EResourceType Type>

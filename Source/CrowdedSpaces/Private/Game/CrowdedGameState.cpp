@@ -1,5 +1,6 @@
 ﻿#include "Game/CrowdedGameState.h"
 
+#include "Action/ActionSubsystem.h"
 #include "AI/NameGeneratorSubsystem.h"
 #include "Build/BuildSubsystem.h"
 #include "MoralEvent/MoralEventSubsystem.h"
@@ -98,6 +99,16 @@ void ACrowdedGameState::TryInitSubsystems()
 	}
 
 	TrainingSubsystem->SetTrainingData(TrainingData);
+
+	// Get action subsystem & send data
+	const TObjectPtr<UActionSubsystem> ActionSubsystem = GetWorld()->GetSubsystem<UActionSubsystem>();
+	if (!ActionSubsystem)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Action subsystem not found"));
+		return;
+	}
+
+	ActionSubsystem->SetOutlineMaterial(OutlineMaterial);
 
 	UE_LOG(LogTemp, Warning, TEXT("All subsystem found!"));
 
