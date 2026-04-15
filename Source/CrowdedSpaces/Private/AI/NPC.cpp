@@ -107,6 +107,9 @@ void ANPC::BeginPlay()
 	
 	NPCActionWidgetPtr->OwningActor = this;
 	NPCActionWidgetPtr->Init();
+
+	// Actions
+	SetupActions();
 }
 
 void ANPC::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -442,3 +445,14 @@ void ANPC::OnDeselected()
 }
 #pragma endregion
 
+#pragma region Actions
+TArray<TObjectPtr<UAction>> ANPC::GetAvailableActions(AActor* InInstigator)
+{
+	return Actions;
+}
+
+void ANPC::SetupActions()
+{
+	// Setup npc actions in array
+}
+#pragma endregion

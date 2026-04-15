@@ -29,6 +29,7 @@ void ABuildableBed::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	BRS->UnregisterBed(this);
 }
 
+#pragma region Use Object
 bool ABuildableBed::StartUsingImplementation(ANPC* NPC)
 {
 	UResourceComponent* EnergyComp = NPC->GetResourceComponent<EResourceType::Energy>();
@@ -62,6 +63,7 @@ bool ABuildableBed::StopUsingImplementation(ANPC* NPC)
 	
 	return true;
 }
+#pragma endregion
 
 #pragma region Selectable
 void ABuildableBed::OnSelected()
@@ -73,3 +75,9 @@ void ABuildableBed::OnDeselected()
 }
 #pragma endregion
 
+#pragma region Actions
+void ABuildableBed::SetupActions()
+{
+	Super::SetupActions();
+}
+#pragma endregion

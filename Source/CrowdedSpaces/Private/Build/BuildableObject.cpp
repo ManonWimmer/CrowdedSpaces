@@ -70,6 +70,9 @@ void ABuildableObject::BeginPlay()
 	DisabledMaterial = GameInstance->DisabledObjectsMaterial;
 	WillBeRemovedMaterial = GameInstance->WillBeRemovedObjectsMaterial;
 	NormalMaterial = MeshComp->GetMaterial(0);
+
+	// Actions
+	SetupActions();
 }
 
 #pragma region Mesh
@@ -239,6 +242,7 @@ void ABuildableObject::UpdateMaterialState() const
 }
 
 
+
 #pragma endregion
 
 #pragma region Use Object
@@ -322,5 +326,18 @@ bool ABuildableObject::IsOverlappingCells(const TSet<FIntPoint>& Cells) const
 		}
 	}
 	return false;
+}
+#pragma endregion
+
+#pragma region Actions
+TArray<TObjectPtr<UAction>> ABuildableObject::GetAvailableActions(AActor* InInstigator)
+{
+	return Actions;
+}
+
+void ABuildableObject::SetupActions()
+{
+	// To do in derived classes : add to actions
+	// Actions BP to set in game state ? 
 }
 #pragma endregion

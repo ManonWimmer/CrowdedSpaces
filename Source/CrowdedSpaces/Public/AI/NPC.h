@@ -8,6 +8,7 @@
 #include "Selection/Selectable.h"
 #include "NPCActionType.h"
 #include "NPCPriorityType.h"
+#include "Action/ActionProvider.h"
 #include "Production/ProductionType.h"
 #include "Training/TrainingSkillType.h"
 #include "NPC.generated.h"
@@ -22,7 +23,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentActionChanged, ENPCActionT
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSkillsTrained); 
 
 UCLASS()
-class CROWDEDSPACES_API ANPC : public ACharacter, public ISelectable
+class CROWDEDSPACES_API ANPC : public ACharacter, public ISelectable, public IActionProvider
 {
 	GENERATED_BODY()
 
@@ -118,6 +119,11 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="AI")
 	int GetMaxMultipliersLevel() const { return MaxMultipliersLevel; }
+
+	// Actions
+	virtual TArray<TObjectPtr<UAction>> GetAvailableActions(AActor* InInstigator) override;
+
+	virtual void SetupActions() override;
 	
 protected:
 	virtual void BeginPlay() override;
@@ -197,6 +203,10 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	int MaxMultipliersLevel = 5;
+
+	// Actions
+	UPROPERTY()
+	TArray<TObjectPtr<UAction>> Actions;
 	
 	// Selectable
 public:

@@ -58,6 +58,7 @@ void ABuildableGenerator::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	BRS->UnregisterGenerator(this);
 }
 
+#pragma region Use Object
 bool ABuildableGenerator::StartUsingImplementation(ANPC* NPC)
 {
 	ProductionComponent->SetProductionMultiplier(NPC->GetProductionMultiplierForType(ProductionComponent->GetProductionType()));
@@ -71,6 +72,7 @@ bool ABuildableGenerator::StopUsingImplementation(ANPC* NPC)
 	ProductionComponent->PauseProduction();
 	return true; 
 }
+#pragma endregion
 
 #pragma region Upgrade
 EProductionType ABuildableGenerator::GetProductionType() const
@@ -133,3 +135,9 @@ void ABuildableGenerator::OnDeselected()
 }
 #pragma endregion Selectable
 
+#pragma region Actions
+void ABuildableGenerator::SetupActions()
+{
+	Super::SetupActions();
+}
+#pragma endregion

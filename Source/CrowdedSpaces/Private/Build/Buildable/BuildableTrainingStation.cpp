@@ -39,6 +39,7 @@ void ABuildableTrainingStation::EndPlay(const EEndPlayReason::Type EndPlayReason
 	BRS->UnregisterTrainingStation(this);
 }
 
+#pragma region Use Object
 bool ABuildableTrainingStation::StartUsingImplementation(ANPC* NPC)
 {
 	if (GEngine)
@@ -58,6 +59,7 @@ bool ABuildableTrainingStation::StopUsingImplementation(ANPC* NPC)
 	
 	return true;
 }
+#pragma endregion
 
 #pragma region Selectable
 void ABuildableTrainingStation::OnSelected()
@@ -69,4 +71,10 @@ void ABuildableTrainingStation::OnDeselected()
 }
 #pragma endregion
 
+#pragma region Actions
+void ABuildableTrainingStation::SetupActions()
+{
+	Super::SetupActions();
+}
+#pragma endregion
 
