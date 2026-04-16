@@ -74,10 +74,3 @@ void ABuildableBed::OnDeselected()
 {
 }
 #pragma endregion
-
-#pragma region Actions
-void ABuildableBed::SetupActions()
-{
-	Super::SetupActions();
-}
-#pragma endregion

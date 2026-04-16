@@ -1,5 +1,7 @@
 ﻿#include "Build/BuildableObject.h"
 
+#include "Action/Action.h"
+#include "Action/ActionComponent.h"
 #include "AI/NPCController.h"
 #include "Build/BuildableRegistrySubsystem.h"
 #include "Build/BuildSubsystem.h"
@@ -72,7 +74,7 @@ void ABuildableObject::BeginPlay()
 	NormalMaterial = MeshComp->GetMaterial(0);
 
 	// Actions
-	SetupActions();
+	ActionComponent = CreateDefaultSubobject<UActionComponent>("ActionComponent");
 }
 
 #pragma region Mesh
@@ -326,18 +328,5 @@ bool ABuildableObject::IsOverlappingCells(const TSet<FIntPoint>& Cells) const
 		}
 	}
 	return false;
-}
-#pragma endregion
-
-#pragma region Actions
-TArray<TObjectPtr<UAction>> ABuildableObject::GetAvailableActions(AActor* InInstigator)
-{
-	return Actions;
-}
-
-void ABuildableObject::SetupActions()
-{
-	// To do in derived classes : add to actions
-	// Actions BP to set in game state ? 
 }
 #pragma endregion

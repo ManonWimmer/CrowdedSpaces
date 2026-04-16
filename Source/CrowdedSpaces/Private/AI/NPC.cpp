@@ -1,5 +1,6 @@
 ﻿#include "AI/NPC.h"
 
+#include "Action/ActionComponent.h"
 #include "AI/NameGeneratorSubsystem.h"
 #include "AI/NPCController.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -109,7 +110,7 @@ void ANPC::BeginPlay()
 	NPCActionWidgetPtr->Init();
 
 	// Actions
-	SetupActions();
+	ActionComponent = CreateDefaultSubobject<UActionComponent>(TEXT("ActionComponent"));
 }
 
 void ANPC::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -442,17 +443,5 @@ void ANPC::OnSelected()
 
 void ANPC::OnDeselected()
 {
-}
-#pragma endregion
-
-#pragma region Actions
-TArray<TObjectPtr<UAction>> ANPC::GetAvailableActions(AActor* InInstigator)
-{
-	return Actions;
-}
-
-void ANPC::SetupActions()
-{
-	// Setup npc actions in array
 }
 #pragma endregion

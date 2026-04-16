@@ -13,6 +13,7 @@
 #include "Training/TrainingSkillType.h"
 #include "NPC.generated.h"
 
+class UActionComponent;
 class UTrainingSubsystem;
 enum class ENPCPriorityType : uint8;
 class UBTTask_UseBuildableObject;
@@ -23,7 +24,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentActionChanged, ENPCActionT
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSkillsTrained); 
 
 UCLASS()
-class CROWDEDSPACES_API ANPC : public ACharacter, public ISelectable, public IActionProvider
+class CROWDEDSPACES_API ANPC : public ACharacter, public ISelectable
 {
 	GENERATED_BODY()
 
@@ -119,11 +120,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="AI")
 	int GetMaxMultipliersLevel() const { return MaxMultipliersLevel; }
-
-	// Actions
-	virtual TArray<TObjectPtr<UAction>> GetAvailableActions(AActor* InInstigator) override;
-
-	virtual void SetupActions() override;
 	
 protected:
 	virtual void BeginPlay() override;
@@ -205,8 +201,7 @@ private:
 	int MaxMultipliersLevel = 5;
 
 	// Actions
-	UPROPERTY()
-	TArray<TObjectPtr<UAction>> Actions;
+	TObjectPtr<UActionComponent> ActionComponent{nullptr};
 	
 	// Selectable
 public:

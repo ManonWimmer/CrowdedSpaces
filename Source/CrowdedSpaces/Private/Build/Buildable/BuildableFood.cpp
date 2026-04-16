@@ -77,10 +77,3 @@ void ABuildableFood::OnDeselected()
 {
 }
 #pragma endregion
-
-#pragma region Actions
-void ABuildableFood::SetupActions()
-{
-	Super::SetupActions();
-}
-#pragma endregion

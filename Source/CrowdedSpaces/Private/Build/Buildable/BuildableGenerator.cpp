@@ -134,10 +134,3 @@ void ABuildableGenerator::OnDeselected()
 {
 }
 #pragma endregion Selectable
-
-#pragma region Actions
-void ABuildableGenerator::SetupActions()
-{
-	Super::SetupActions();
-}
-#pragma endregion

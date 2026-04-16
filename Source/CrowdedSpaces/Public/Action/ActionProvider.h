@@ -1,7 +1,8 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Action.h"
+
+class UAction;
 
 class CROWDEDSPACES_API IActionProvider
 {

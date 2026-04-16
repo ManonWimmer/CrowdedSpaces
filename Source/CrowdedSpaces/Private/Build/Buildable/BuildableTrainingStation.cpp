@@ -70,11 +70,3 @@ void ABuildableTrainingStation::OnDeselected()
 {
 }
 #pragma endregion
-
-#pragma region Actions
-void ABuildableTrainingStation::SetupActions()
-{
-	Super::SetupActions();
-}
-#pragma endregion
-

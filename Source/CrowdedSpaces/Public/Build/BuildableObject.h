@@ -7,7 +7,6 @@
 #include "AI/NPC.h"
 #include "AI/BTTasks/BTTask_UseBuildableObject.h"
 #include "GameFramework/Actor.h"
-#include "Action/Action.h"
 #include "Grid/GridRoomType.h"
 #include "BuildableObject.generated.h"
 
@@ -18,11 +17,12 @@ class ACrowdedPlayerController;
 class UBuildData;
 class UBuildSubsystem;
 class USlotComponent;
+class UActionComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSlotsUpdated);
 
 UCLASS()
-class CROWDEDSPACES_API ABuildableObject : public AActor, public IActionProvider
+class CROWDEDSPACES_API ABuildableObject : public AActor
 {
 	GENERATED_BODY()
 
@@ -109,11 +109,6 @@ public:
 
 	UPROPERTY()
 	TArray<FIntPoint> OccupiedCells;
-
-	// Actions
-	virtual TArray<TObjectPtr<UAction>> GetAvailableActions(AActor* InInstigator) override;
-
-	virtual void SetupActions() override;
 	
 protected:
 	UPROPERTY()
@@ -176,5 +171,5 @@ protected:
 
 	// Actions
 	UPROPERTY()
-	TArray<TObjectPtr<UAction>> Actions;
+	TObjectPtr<UActionComponent> ActionComponent{nullptr};
 };
