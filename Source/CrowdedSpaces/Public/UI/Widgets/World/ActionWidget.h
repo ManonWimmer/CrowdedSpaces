@@ -13,5 +13,5 @@ class CROWDEDSPACES_API UActionWidget : public UUserWidget
 
 public:
 	UFUNCTION(BlueprintImplementableEvent)
-	void SetupActions(const TArray<UAction*>& Actions);
+	void SetupActions(const TArray<UAction*>& Actions, AActor* Actor);
 };

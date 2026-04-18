@@ -42,7 +42,7 @@ void UActionWidgetManager::ShowForActor(AActor* Actor)
 
 	Widget->SetVisibility(ESlateVisibility::Visible);
 
-	Widget->SetupActions(Actor->GetComponentByClass<UActionComponent>()->GetAvailableActions(Actor));
+	Widget->SetupActions(Actor->GetComponentByClass<UActionComponent>()->GetAvailableActions(Actor), Actor);
 
 	bIsVisible = true;
 }

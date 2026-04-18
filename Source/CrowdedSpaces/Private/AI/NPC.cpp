@@ -126,6 +126,7 @@ void ANPC::BeginPlay()
 		UAction* NewAction = NewObject<UAction>(this, ActionClass);
 		if (!NewAction) continue;
 
+		NewAction->Initialize(GetWorld());
 		InstancedActions.Add(NewAction);
 	}
 

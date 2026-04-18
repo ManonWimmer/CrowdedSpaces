@@ -22,6 +22,7 @@ public:
 	void SelectFirstPossibleNPC();
 	void SelectNPC(ANPC* NPC);
 	void DeselectNPC();
+	ANPC* GetSelectedNPC() const { return SelectedNPC; }
 
 	void ShowActionsForActor(AActor* Actor);
 	void HideActions();
