@@ -16,6 +16,7 @@ bool UAction::CanExecute_Implementation(AActor* Instigator) const
 
 void UAction::Execute_Implementation(AActor* Instigator)
 {
+	ActionSubsystem->HideActions();
 }
 
 void UAction::ExecuteWrapper(AActor* Instigator)

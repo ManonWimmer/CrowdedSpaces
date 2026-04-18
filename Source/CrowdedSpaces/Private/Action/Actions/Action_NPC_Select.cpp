@@ -26,6 +26,12 @@ void UAction_NPC_Select::Execute_Implementation(AActor* Instigator)
 {
 	Super::Execute_Implementation(Instigator);
 
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1 , 5 , FColor::Red, "Select");
+	ANPC* NPC = Cast<ANPC>(Instigator);
+	if (!NPC)
+		return;
+	
+	if (!ActionSubsystem)
+		return;
+
+	ActionSubsystem->SelectNPC(NPC);
 }
