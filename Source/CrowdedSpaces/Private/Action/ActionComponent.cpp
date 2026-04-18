@@ -28,7 +28,21 @@ void UActionComponent::BeginPlay()
 		FAttachmentTransformRules::KeepRelativeTransform
 	);
 
+	USceneComponent* Root = GetOwner()->GetRootComponent();
+
+	if (UPrimitiveComponent* Prim = Cast<UPrimitiveComponent>(Root))
+	{
+		float Height = Prim->Bounds.BoxExtent.Z;
+
+		WidgetComponent->SetRelativeLocation(FVector(0.f, 0.f, Height + 20.f));
+	}
+
 	WidgetComponent->SetWidgetSpace(EWidgetSpace::World);
+	
+	WidgetComponent->SetDrawSize(FVector2D(1000, 1000));
+	WidgetComponent->SetWorldScale3D(FVector(1.f)); 
+	WidgetComponent->SetPivot(FVector2D(0.5f, 0.5f));
+	
 	WidgetComponent->SetVisibility(false);
 	
 	const UWorld* World = GetWorld();
@@ -36,10 +50,15 @@ void UActionComponent::BeginPlay()
 
 	const ACrowdedGameState* GameState = World->GetGameState<ACrowdedGameState>();
 	if (!GameState) return;
-	
-	WidgetComponent->SetWidgetClass(GameState->ActionWidgetClass);
 
-	ShowWidget();
+	WidgetComponent->SetMaterial(0, GameState->NoDepthMaterial);
+	WidgetComponent->SetWidgetClass(GameState->ActionWidgetClass);
+	
+	WidgetComponent->SetWindowFocusable(true);
+	WidgetComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	WidgetComponent->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+	WidgetComponent->SetGenerateOverlapEvents(false);
+	WidgetComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
 }
 
 void UActionComponent::TickComponent(float DeltaTime, enum ELevelTick TickType,

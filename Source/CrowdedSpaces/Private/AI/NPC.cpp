@@ -1,5 +1,6 @@
 ﻿#include "AI/NPC.h"
 
+#include "Action/Action.h"
 #include "Action/ActionComponent.h"
 #include "AI/NameGeneratorSubsystem.h"
 #include "AI/NPCController.h"
@@ -9,6 +10,7 @@
 #include "Camera/FreeCameraPawn.h"
 #include "Camera/CameraComponent.h"
 #include "Game/CrowdedGameMode.h"
+#include "Game/CrowdedGameState.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Training/TrainingData.h"
 #include "Training/TrainingSubsystem.h"
@@ -111,6 +113,24 @@ void ANPC::BeginPlay()
 	
 	NPCActionWidgetPtr->OwningActor = this;
 	NPCActionWidgetPtr->Init();
+
+	// Actions
+	ACrowdedGameState* GameState = GetWorld()->GetGameState<ACrowdedGameState>();
+
+	TArray<TObjectPtr<UAction>> InstancedActions;
+
+	for (const TSubclassOf<UAction>& ActionClass : GameState->NPCActions)
+	{
+		if (!ActionClass) continue;
+
+		UAction* NewAction = NewObject<UAction>(this, ActionClass);
+		if (!NewAction) continue;
+
+		InstancedActions.Add(NewAction);
+	}
+
+	ActionComponent->SetupActions(InstancedActions);
+	ActionComponent->ShowWidget();
 }
 
 void ANPC::EndPlay(const EEndPlayReason::Type EndPlayReason)

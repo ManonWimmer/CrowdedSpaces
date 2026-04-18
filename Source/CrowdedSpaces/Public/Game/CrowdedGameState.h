@@ -85,6 +85,12 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Actions", meta=(AllowPrivateAccess=true))
 	TSubclassOf<UActionWidget> ActionWidgetClass;
 
+	UPROPERTY(EditAnywhere, Category = "Actions", meta=(AllowPrivateAccess=true))
+	TArray<TSubclassOf<UAction>> NPCActions;
+
+	UPROPERTY(EditAnywhere, Category = "Actions", meta=(AllowPrivateAccess=true))
+	TObjectPtr<UMaterialInterface> NoDepthMaterial;
+
 private:
 	UPROPERTY()
 	TMap<EResourceType, TObjectPtr<UResourceComponent>> ResourceMap;

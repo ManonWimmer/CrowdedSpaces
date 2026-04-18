@@ -35,6 +35,6 @@ protected:
 	UPROPERTY()
 	TArray<TObjectPtr<UAction>> Actions;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere)
 	TObjectPtr<UWidgetComponent> WidgetComponent{nullptr};
 };
