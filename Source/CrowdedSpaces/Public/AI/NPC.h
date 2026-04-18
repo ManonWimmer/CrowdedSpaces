@@ -16,6 +16,7 @@
 #include "Training/TrainingSkillType.h"
 #include "NPC.generated.h"
 
+class USpotLightComponent;
 class UActionComponent;
 class UTrainingSubsystem;
 enum class ENPCPriorityType : uint8;
@@ -234,6 +235,9 @@ private:
 
 	UPROPERTY()
 	bool bReadyForCapture = false;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<USpotLightComponent> PortraitLight{nullptr};
 	
 	// Selectable
 public:

@@ -10,6 +10,7 @@
 #include "Camera/FreeCameraPawn.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
+#include "Components/SpotLightComponent.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Game/CrowdedGameMode.h"
 #include "Game/CrowdedGameState.h"
@@ -58,6 +59,18 @@ ANPC::ANPC()
 	PortraitCapture->bCaptureOnMovement = false;
 	PortraitCapture->PrimitiveRenderMode = ESceneCapturePrimitiveRenderMode::PRM_UseShowOnlyList;
 	PortraitCapture->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
+	PortraitCapture->bAlwaysPersistRenderingState = true;
+
+	// Portrait light
+	PortraitLight = CreateDefaultSubobject<USpotLightComponent>(TEXT("PortraitLight"));
+	PortraitLight->SetupAttachment(GetMesh());
+
+	PortraitLight->SetVisibility(false); // OFF en gameplay
+
+	// réglages clean portrait
+	PortraitLight->Intensity = 5000.f;
+	PortraitLight->SetCastShadows(false);
+	PortraitLight->SetMobility(EComponentMobility::Movable);
 }
 
 void ANPC::BeginPlay()
@@ -499,6 +512,8 @@ void ANPC::CapturePortrait() const
 
 	if (!Clone) return;
 
+	PortraitLight->SetVisibility(true);
+
 	Clone->RegisterComponent();
 	Clone->SetWorldTransform(SourceMesh->GetComponentTransform());
 	
@@ -511,12 +526,15 @@ void ANPC::CapturePortrait() const
 	
 	Clone->SetRenderCustomDepth(false);
 	Clone->SetOverlayMaterial(nullptr);
+	Clone->CastShadow = false;
 	
 	PortraitCapture->ShowOnlyComponents.Empty();
 	PortraitCapture->ShowOnlyComponent(Clone);
 	PortraitCapture->CaptureScene();
 	
 	Clone->DestroyComponent();
+
+	PortraitLight->SetVisibility(false);
 }
 
 bool ANPC::IsReadyForCapture() const
@@ -528,28 +546,21 @@ void ANPC::SetupCapture()
 {
 	FEngineShowFlags& Flags = PortraitCapture->ShowFlags;
 	
-	Flags.SetLighting(true);
-	Flags.SetSkyLighting(true);
-	Flags.SetDirectionalLights(true);
-	Flags.SetPointLights(true);
-	Flags.SetSpotLights(true);
-	
-	Flags.SetDynamicShadows(false);
-	Flags.SetContactShadows(false);
-	
 	Flags.SetPostProcessing(false);
-	Flags.SetTonemapper(false);
 	Flags.SetBloom(false);
-	Flags.SetEyeAdaptation(false);
-	
-	Flags.SetAtmosphere(false);
 	Flags.SetFog(false);
+	Flags.SetAtmosphere(false);
 	Flags.SetVolumetricFog(false);
 	Flags.SetCloud(false);
 
+	Flags.SetLighting(true);
+	Flags.SetDirectionalLights(true);
+	Flags.SetPointLights(true);
+	Flags.SetSpotLights(true);
+
 	Flags.SetMaterials(true);
-	Flags.SetSeparateTranslucency(true);
 	Flags.SetTranslucency(true);
+	Flags.SetSeparateTranslucency(true);
 	
 	PortraitRenderTarget = NewObject<UTextureRenderTarget2D>();
 
