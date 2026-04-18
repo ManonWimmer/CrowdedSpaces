@@ -27,6 +27,8 @@ void UActionSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	
 	ActionWidgetManager = NewObject<UActionWidgetManager>(this);
 	ActionWidgetManager->Initialize(PlayerController);
+
+	GameHUD = Cast<AGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
 }
 
 TStatId UActionSubsystem::GetStatId() const
@@ -75,6 +77,8 @@ void UActionSubsystem::SelectNPC(ANPC* NPC)
 		NPC->GetMesh()->SetOverlayMaterial(OutlineMaterial);
 
 	SelectedNPC = NPC;
+	
+	GameHUD->UpdateNPCPortraitWidget(NPC);
 }
 
 void UActionSubsystem::DeselectNPC()
@@ -113,6 +117,7 @@ void UActionSubsystem::OnNPCUnregistered(ANPC* UnregisteredNPC)
 		return;
 
 	SelectFirstPossibleNPC();
+	
 
 	if (!ActionWidgetManager)
 		return;

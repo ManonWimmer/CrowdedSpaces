@@ -1,12 +1,5 @@
 #include "Action/ActionComponent.h"
 
-#include "Camera/CameraComponent.h"
-#include "Camera/FreeCameraPawn.h"
-#include "Components/WidgetComponent.h"
-#include "Game/CrowdedGameState.h"
-#include "Kismet/KismetMathLibrary.h"
-#include "UI/Widgets/World/ActionWidget.h"
-
 UActionComponent::UActionComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;

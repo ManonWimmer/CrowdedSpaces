@@ -4,6 +4,7 @@
 #include "Subsystems/WorldSubsystem.h"
 #include "ActionSubsystem.generated.h"
 
+class AGameHUD;
 class UActionWidgetManager;
 class ACrowdedGameMode;
 class ANPC;
@@ -22,6 +23,8 @@ public:
 	void SelectFirstPossibleNPC();
 	void SelectNPC(ANPC* NPC);
 	void DeselectNPC();
+
+	UFUNCTION(BlueprintCallable)
 	ANPC* GetSelectedNPC() const { return SelectedNPC; }
 
 	void ShowActionsForActor(AActor* Actor);
@@ -48,4 +51,7 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UActionWidgetManager> ActionWidgetManager{nullptr};
+
+	UPROPERTY()
+	TObjectPtr<AGameHUD> GameHUD{nullptr};
 };

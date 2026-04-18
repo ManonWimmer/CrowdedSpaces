@@ -8,8 +8,10 @@
 #include "Selection/Selectable.h"
 #include "NPCActionType.h"
 #include "NPCPriorityType.h"
+#include "Engine/Texture.h"
 #include "Action/ActionProvider.h"
 #include "Action/ActionSubsystem.h"
+#include "Engine/TextureRenderTarget2D.h"
 #include "Production/ProductionType.h"
 #include "Training/TrainingSkillType.h"
 #include "NPC.generated.h"
@@ -23,6 +25,7 @@ class USlotComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentActionChanged, ENPCActionType, Value); 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSkillsTrained); 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerReadyForCapture); 
 
 UCLASS()
 class CROWDEDSPACES_API ANPC : public ACharacter, public ISelectable
@@ -121,6 +124,20 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="AI")
 	int GetMaxMultipliersLevel() const { return MaxMultipliersLevel; }
+
+	// Portrait
+	UFUNCTION(BlueprintCallable)
+	UTexture* GetPortrait() const;
+
+	UFUNCTION(BlueprintCallable)
+	void CapturePortrait() const;
+
+	UFUNCTION(BlueprintCallable)
+	bool IsReadyForCapture() const;
+	void SetupCapture();
+
+	UPROPERTY(BlueprintAssignable)
+	FOnPlayerReadyForCapture OnPlayerReadyForCapture;
 	
 protected:
 	virtual void BeginPlay() override;
@@ -204,6 +221,19 @@ private:
 	// Actions
 	UPROPERTY()
 	TObjectPtr<UActionComponent> ActionComponent{nullptr};
+
+	// Portrait
+	UPROPERTY(VisibleAnywhere, Category="Portrait")
+	TObjectPtr<USceneCaptureComponent2D> PortraitCapture{nullptr};
+
+	UPROPERTY()
+	TObjectPtr<UTextureRenderTarget2D> PortraitRenderTarget{nullptr};
+
+	UPROPERTY()
+	TObjectPtr<USkeletalMeshComponent> PortraitMesh{nullptr};
+
+	UPROPERTY()
+	bool bReadyForCapture = false;
 	
 	// Selectable
 public:

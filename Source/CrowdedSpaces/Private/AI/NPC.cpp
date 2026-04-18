@@ -9,6 +9,8 @@
 #include "Build/SlotComponent.h"
 #include "Camera/FreeCameraPawn.h"
 #include "Camera/CameraComponent.h"
+#include "Components/SceneCaptureComponent2D.h"
+#include "Engine/TextureRenderTarget2D.h"
 #include "Game/CrowdedGameMode.h"
 #include "Game/CrowdedGameState.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -48,6 +50,14 @@ ANPC::ANPC()
 
 	// Actions
 	ActionComponent = CreateDefaultSubobject<UActionComponent>(TEXT("ActionComponent"));
+
+	// Portrait
+	PortraitCapture = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("PortraitCapture"));
+	PortraitCapture->SetupAttachment(GetMesh());
+	PortraitCapture->bCaptureEveryFrame = false;
+	PortraitCapture->bCaptureOnMovement = false;
+	PortraitCapture->PrimitiveRenderMode = ESceneCapturePrimitiveRenderMode::PRM_UseShowOnlyList;
+	PortraitCapture->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
 }
 
 void ANPC::BeginPlay()
@@ -131,6 +141,9 @@ void ANPC::BeginPlay()
 	}
 
 	ActionComponent->SetupActions(InstancedActions);
+
+	// Portrait
+	SetupCapture();
 }
 
 void ANPC::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -463,5 +476,91 @@ void ANPC::OnSelected()
 
 void ANPC::OnDeselected()
 {
+}
+#pragma endregion
+
+#pragma region Portrait
+UTexture* ANPC::GetPortrait() const
+{
+	if (!PortraitRenderTarget)
+		CapturePortrait();
+	
+	return PortraitRenderTarget;
+}
+
+void ANPC::CapturePortrait() const
+{
+	if (!PortraitCapture) return;
+
+	const USkeletalMeshComponent* SourceMesh = GetMesh();
+	if (!SourceMesh) return;
+	
+	USkeletalMeshComponent* Clone = NewObject<USkeletalMeshComponent>(const_cast<ANPC*>(this));
+
+	if (!Clone) return;
+
+	Clone->RegisterComponent();
+	Clone->SetWorldTransform(SourceMesh->GetComponentTransform());
+	
+	Clone->SetSkeletalMesh(SourceMesh->GetSkeletalMeshAsset());
+	const int32 MatCount = SourceMesh->GetNumMaterials();
+	for (int32 i = 0; i < MatCount; i++)
+	{
+		Clone->SetMaterial(i, SourceMesh->GetMaterial(i));
+	}
+	
+	Clone->SetRenderCustomDepth(false);
+	Clone->SetOverlayMaterial(nullptr);
+	
+	PortraitCapture->ShowOnlyComponents.Empty();
+	PortraitCapture->ShowOnlyComponent(Clone);
+	PortraitCapture->CaptureScene();
+	
+	Clone->DestroyComponent();
+}
+
+bool ANPC::IsReadyForCapture() const
+{
+	return bReadyForCapture;
+}
+
+void ANPC::SetupCapture()
+{
+	FEngineShowFlags& Flags = PortraitCapture->ShowFlags;
+	
+	Flags.SetLighting(true);
+	Flags.SetSkyLighting(true);
+	Flags.SetDirectionalLights(true);
+	Flags.SetPointLights(true);
+	Flags.SetSpotLights(true);
+	
+	Flags.SetDynamicShadows(false);
+	Flags.SetContactShadows(false);
+	
+	Flags.SetPostProcessing(false);
+	Flags.SetTonemapper(false);
+	Flags.SetBloom(false);
+	Flags.SetEyeAdaptation(false);
+	
+	Flags.SetAtmosphere(false);
+	Flags.SetFog(false);
+	Flags.SetVolumetricFog(false);
+	Flags.SetCloud(false);
+
+	Flags.SetMaterials(true);
+	Flags.SetSeparateTranslucency(true);
+	Flags.SetTranslucency(true);
+	
+	PortraitRenderTarget = NewObject<UTextureRenderTarget2D>();
+
+	PortraitRenderTarget->InitAutoFormat(512, 512);
+	PortraitRenderTarget->ClearColor = FLinearColor(0,0,0,0);
+	PortraitRenderTarget->RenderTargetFormat = RTF_RGBA8;
+	PortraitRenderTarget->bAutoGenerateMips = false;
+	
+	PortraitCapture->TextureTarget = PortraitRenderTarget;
+	
+	bReadyForCapture = true;
+	OnPlayerReadyForCapture.Broadcast();
 }
 #pragma endregion

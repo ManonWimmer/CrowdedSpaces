@@ -3,6 +3,7 @@
 #include "Game/CrowdedGameState.h"
 #include "UI/Widgets/MoralEventWidget.h"
 #include "UI/CustomWidget.h"
+#include "UI/Widgets/NPCPortraitWidget.h"
 #include "UI/Widgets/Selection/RoomSelectionWidget.h"
 
 void AGameHUD::BeginPlay()
@@ -209,9 +210,20 @@ void AGameHUD::UpdateMoralEventWidget(const UMoralEvent* MoralEvent)
 #pragma region Time
 void AGameHUD::ShowTimeWidget(bool bShow)
 {
-	ShowWidget(TimeBP, bShow, ESlateVisibility::SelfHitTestInvisible);
+	ShowWidget(TimeWidgetBP, bShow, ESlateVisibility::SelfHitTestInvisible);
 }
 #pragma endregion Time
+
+#pragma region Portrait
+void AGameHUD::UpdateNPCPortraitWidget(ANPC* NPC)
+{
+	const TObjectPtr<UNPCPortraitWidget> NPCPortraitWidget = GetOrCreateWidget<UNPCPortraitWidget>(NPCPortraitWidgetBP);
+	if (!NPCPortraitWidget)
+		return;
+
+	NPCPortraitWidget->Setup(NPC);
+}
+#pragma endregion
 
 #pragma region Generic Functions
 UCustomWidget* AGameHUD::ShowWidget(TSubclassOf<UCustomWidget> WidgetClass, bool bShow, ESlateVisibility VisibilityOnShow)
