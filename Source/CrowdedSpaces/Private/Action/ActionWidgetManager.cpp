@@ -82,7 +82,7 @@ void UActionWidgetManager::UpdateScreenPosition() const
 	{
 		const float ZoomAlpha = Cam->GetZoomAlpha();
 		
-		UIScale = FMath::Lerp(1.5f, 0.5f, ZoomAlpha);
+		UIScale = FMath::Lerp(1.f, .5f, ZoomAlpha);
 	}
 	
 	Widget->SetPositionInViewport(ScreenPos, true);
