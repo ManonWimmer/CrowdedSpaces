@@ -21,6 +21,8 @@ public:
 	float GetCurrentZoom() const { return SpringArm->TargetArmLength; }
 	float GetDefaultZoom() const { return 1500.f; }
 
+	float GetZoomAlpha() const;
+
 protected:
 	virtual void BeginPlay() override;
 

@@ -29,6 +29,15 @@ AFreeCameraPawn::AFreeCameraPawn()
 	PrimaryActorTick.bTickEvenWhenPaused = true;
 }
 
+float AFreeCameraPawn::GetZoomAlpha() const
+{
+	return FMath::GetMappedRangeValueClamped(
+		FVector2D(MinZoom, MaxZoom),
+		FVector2D(0.f, 1.f),
+		SpringArm->TargetArmLength
+	);
+}
+
 void AFreeCameraPawn::BeginPlay()
 {
 	Super::BeginPlay();

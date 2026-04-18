@@ -130,7 +130,6 @@ void ANPC::BeginPlay()
 	}
 
 	ActionComponent->SetupActions(InstancedActions);
-	ActionComponent->ShowWidget();
 }
 
 void ANPC::EndPlay(const EEndPlayReason::Type EndPlayReason)

@@ -4,6 +4,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "Action/ActionSubsystem.h"
+#include "Action/ActionWidgetManager.h"
 #include "Game/CrowdedGameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "Time/TimeSubsystem.h"
@@ -114,6 +115,19 @@ void ACrowdedPlayerController::BeginPlay()
 
 	OnSelectableActorSelected.AddDynamic(ActionSubsystem, &UActionSubsystem::OnSelectableActorSelected);
 	OnNotSelectableActorSelected.AddDynamic(ActionSubsystem, &UActionSubsystem::OnNotSelectableActorSelected);
+	
+	ActionWidgetManager = NewObject<UActionWidgetManager>(this);
+	ActionWidgetManager->Initialize(this);
+}
+
+void ACrowdedPlayerController::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (ActionWidgetManager)
+	{
+		ActionWidgetManager->Tick(DeltaSeconds);
+	}
 }
 
 void ACrowdedPlayerController::MouseMoveInput(const FInputActionValue& Value)
@@ -204,8 +218,22 @@ void ACrowdedPlayerController::HandleSelection() const
 		GameHUD->ShowSelectionWidget(HitActor, true, Selectable->	GetSelectionType());
 
 		OnSelectableActorSelected.Broadcast(HitActor);
+
+		// Test action
+		if (ActionWidgetManager)
+		{
+			ActionWidgetManager->ShowForActor(HitActor);
+		}
 		
 		return;
+	}
+	else
+	{
+		// Test action
+		if (ActionWidgetManager)
+		{
+			ActionWidgetManager->Hide();
+		}
 	}
 
 	OnNotSelectableActorSelected.Broadcast();

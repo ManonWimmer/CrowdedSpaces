@@ -9,6 +9,8 @@
 #include "CrowdedPlayerController.generated.h"
 
 class UActionSubsystem;
+class UActionWidgetManager;
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraMoveForward, float, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraMoveRight, float, Value);
 
@@ -104,6 +106,7 @@ public:
 protected:
 	virtual void SetupInputComponent() override;
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
 
 private:
 	// Axis functions
@@ -148,4 +151,8 @@ private:
 
 	UPROPERTY()
 	bool bIsRotatingCameraWithMouseWheel{nullptr};
+
+	// Actions
+	UPROPERTY()
+	TObjectPtr<UActionWidgetManager> ActionWidgetManager;
 };
