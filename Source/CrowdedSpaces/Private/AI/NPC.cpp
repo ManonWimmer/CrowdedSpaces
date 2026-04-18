@@ -43,6 +43,9 @@ ANPC::ANPC()
 
 	AIControllerClass = ANPCController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+	// Actions
+	ActionComponent = CreateDefaultSubobject<UActionComponent>(TEXT("ActionComponent"));
 }
 
 void ANPC::BeginPlay()
@@ -108,9 +111,6 @@ void ANPC::BeginPlay()
 	
 	NPCActionWidgetPtr->OwningActor = this;
 	NPCActionWidgetPtr->Init();
-
-	// Actions
-	ActionComponent = CreateDefaultSubobject<UActionComponent>(TEXT("ActionComponent"));
 }
 
 void ANPC::EndPlay(const EEndPlayReason::Type EndPlayReason)

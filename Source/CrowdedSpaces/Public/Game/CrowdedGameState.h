@@ -6,6 +6,7 @@
 #include "Build/BuildData.h"
 #include "Build/BuildRoomData.h"
 #include "MoralEvent/MoralEvent.h"
+#include "UI/Widgets/World/ActionWidget.h"
 #include "Time/TimeData.h"
 #include "Resources/ResourceComponent.h"
 #include "CrowdedGameState.generated.h"
@@ -79,6 +80,10 @@ public:
 	// Outline
 	UPROPERTY(EditAnywhere, Category = "Outline", meta=(AllowPrivateAccess=true))
 	TObjectPtr<UMaterialInterface> OutlineMaterial{nullptr};
+
+	// Actions
+	UPROPERTY(EditAnywhere, Category = "Actions", meta=(AllowPrivateAccess=true))
+	TSubclassOf<UActionWidget> ActionWidgetClass;
 
 private:
 	UPROPERTY()

@@ -22,6 +22,9 @@ ABuildableObject::ABuildableObject()
 	MeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	MeshComp->SetCollisionObjectType(ECC_GameTraceChannel1); // Build
 	MeshComp->SetCollisionResponseToAllChannels(ECR_Block);
+
+	// Actions
+	ActionComponent = CreateDefaultSubobject<UActionComponent>("ActionComponent");
 }
 
 void ABuildableObject::BeginPlay()
@@ -72,9 +75,6 @@ void ABuildableObject::BeginPlay()
 	DisabledMaterial = GameInstance->DisabledObjectsMaterial;
 	WillBeRemovedMaterial = GameInstance->WillBeRemovedObjectsMaterial;
 	NormalMaterial = MeshComp->GetMaterial(0);
-
-	// Actions
-	ActionComponent = CreateDefaultSubobject<UActionComponent>("ActionComponent");
 }
 
 #pragma region Mesh

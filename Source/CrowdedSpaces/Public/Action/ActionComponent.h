@@ -17,6 +17,15 @@ class CROWDEDSPACES_API UActionComponent : public UActorComponent
 public:
 	UActionComponent();
 
+	virtual void BeginPlay() override;
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	UFUNCTION(BlueprintCallable)
+	void ShowWidget() const;
+	
+	UFUNCTION(BlueprintCallable)
+	void HideWidget() const;
+
 public:
 	TArray<TObjectPtr<UAction>> GetAvailableActions(AActor* Instigator);
 
