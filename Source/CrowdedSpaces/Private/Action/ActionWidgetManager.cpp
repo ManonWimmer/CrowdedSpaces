@@ -2,11 +2,9 @@
 
 #include "Action/ActionComponent.h"
 #include "Blueprint/UserWidget.h"
-#include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"
 #include "UI/Widgets/World/ActionWidget.h"
-#include "AI/NPC.h"
 #include "Camera/FreeCameraPawn.h"
 #include "Game/CrowdedGameState.h"
 
@@ -31,6 +29,7 @@ void UActionWidgetManager::ShowForActor(AActor* Actor)
 		Hide();
 		return;
 	}
+	
 	CurrentActor = Actor;
 
 	if (!Widget)
@@ -67,7 +66,7 @@ void UActionWidgetManager::Tick(float DeltaTime)
 	UpdateScreenPosition();
 }
 
-void UActionWidgetManager::UpdateScreenPosition()
+void UActionWidgetManager::UpdateScreenPosition() const
 {
 	FVector WorldPos = CurrentActor->GetActorLocation() + FVector(0, 0, 100.f);
 

@@ -22,7 +22,7 @@ public:
 	void Tick(float DeltaTime);
 
 private:
-	void UpdateScreenPosition();
+	void UpdateScreenPosition() const;
 
 private:
 	UPROPERTY()

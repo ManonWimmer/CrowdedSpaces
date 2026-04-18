@@ -9,6 +9,7 @@
 #include "NPCActionType.h"
 #include "NPCPriorityType.h"
 #include "Action/ActionProvider.h"
+#include "Action/ActionSubsystem.h"
 #include "Production/ProductionType.h"
 #include "Training/TrainingSkillType.h"
 #include "NPC.generated.h"
@@ -201,6 +202,7 @@ private:
 	int MaxMultipliersLevel = 5;
 
 	// Actions
+	UPROPERTY()
 	TObjectPtr<UActionComponent> ActionComponent{nullptr};
 	
 	// Selectable

@@ -109,25 +109,7 @@ void ACrowdedPlayerController::BeginPlay()
 	OnTogglePause.AddDynamic(TimeSubsystem, &UTimeSubsystem::OnTogglePause);
 
 	// Action
-	UActionSubsystem* ActionSubsystem = World->GetSubsystem<UActionSubsystem>();
-	if (!ActionSubsystem)
-		return;
-
-	OnSelectableActorSelected.AddDynamic(ActionSubsystem, &UActionSubsystem::OnSelectableActorSelected);
-	OnNotSelectableActorSelected.AddDynamic(ActionSubsystem, &UActionSubsystem::OnNotSelectableActorSelected);
-	
-	ActionWidgetManager = NewObject<UActionWidgetManager>(this);
-	ActionWidgetManager->Initialize(this);
-}
-
-void ACrowdedPlayerController::Tick(float DeltaSeconds)
-{
-	Super::Tick(DeltaSeconds);
-
-	if (ActionWidgetManager)
-	{
-		ActionWidgetManager->Tick(DeltaSeconds);
-	}
+	ActionSubsystem = World->GetSubsystem<UActionSubsystem>();
 }
 
 void ACrowdedPlayerController::MouseMoveInput(const FInputActionValue& Value)
@@ -210,33 +192,24 @@ void ACrowdedPlayerController::HandleSelection() const
 		return;
 
 	AActor* HitActor = Hit.GetActor();
+
+	// Action
+	if (ActionSubsystem)
+	{
+		if (HitActor && HitActor->Implements<USelectable>())
+			ActionSubsystem->ShowActionsForActor(HitActor);
+		else
+			ActionSubsystem->HideActions();
+	}
 	
 	// 1. Selectable actor (NPC, generator)
 	if (HitActor && HitActor->Implements<USelectable>())
 	{
 		const ISelectable* Selectable = Cast<ISelectable>(HitActor);
 		GameHUD->ShowSelectionWidget(HitActor, true, Selectable->	GetSelectionType());
-
-		OnSelectableActorSelected.Broadcast(HitActor);
-
-		// Test action
-		if (ActionWidgetManager)
-		{
-			ActionWidgetManager->ShowForActor(HitActor);
-		}
 		
 		return;
 	}
-	else
-	{
-		// Test action
-		if (ActionWidgetManager)
-		{
-			ActionWidgetManager->Hide();
-		}
-	}
-
-	OnNotSelectableActorSelected.Broadcast();
 
 	// 2. Room
 	if (GridActor)
