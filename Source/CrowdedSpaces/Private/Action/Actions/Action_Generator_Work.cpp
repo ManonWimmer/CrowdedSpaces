@@ -28,16 +28,12 @@ void UAction_Generator_Work::Execute_Implementation(AActor* Instigator)
 {
 	Super::Execute_Implementation(Instigator);
 
-	// set current generator : instigator si cast ok
-	// set current train nullptr
-
+	// Set generator values in selected npc blackboard
+	
 	ABuildableGenerator* Generator = Cast<ABuildableGenerator>(Instigator);
 	if (!Generator)
 		return;
-
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Found generator as instigator");
-
+	
 	if (!ActionSubsystem)
 		return;
 	
@@ -50,20 +46,18 @@ void UAction_Generator_Work::Execute_Implementation(AActor* Instigator)
 		return;
 	
 	AAIController* AIController = Cast<AAIController>(SelectedNPC->GetController());
-	if (AIController)
-	{
-		UBlackboardComponent* Blackboard = AIController->GetBlackboardComponent();
-		if (Blackboard)
-		{
-			Blackboard->SetValueAsObject("Generator", Generator);
-			Blackboard->SetValueAsObject("GeneratorSlot", Slot);
-			Blackboard->SetValueAsVector("GeneratorLocation", Slot->GetComponentLocation());
-			Blackboard->SetValueAsObject("TrainStation", nullptr);
-			Blackboard->SetValueAsObject("TrainStationSlot", nullptr);
-			Blackboard->SetValueAsVector("TrainStationLocation", FVector::Zero());
-		}
-	}
+	if (!AIController)
+		return;
+	
+	UBlackboardComponent* Blackboard = AIController->GetBlackboardComponent();
+	if (!Blackboard)
+		return;
 
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Work complete execute");
+	Blackboard->SetValueAsObject("Generator", Generator);
+	Blackboard->SetValueAsObject("GeneratorSlot", Slot);
+	Blackboard->SetValueAsVector("GeneratorLocation", Slot->GetComponentLocation());
+	
+	Blackboard->SetValueAsObject("TrainStation", nullptr);
+	Blackboard->SetValueAsObject("TrainStationSlot", nullptr);
+	Blackboard->SetValueAsVector("TrainStationLocation", FVector::Zero());
 }
