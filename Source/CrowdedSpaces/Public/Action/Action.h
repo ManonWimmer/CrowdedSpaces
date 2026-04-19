@@ -2,9 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
+#include "Action/ActionSubsystem.h"
 #include "Action.generated.h"
-
-class UActionSubsystem;
 
 UCLASS(Abstract, Blueprintable, EditInlineNew, DefaultToInstanced)
 class CROWDEDSPACES_API UAction : public UObject

@@ -2,7 +2,7 @@
 
 UAction_NPC_StopAction::UAction_NPC_StopAction()
 {
-	ActionName = "StopAction";
+	ActionName = "Stop Action";
 }
 
 bool UAction_NPC_StopAction::CanExecute_Implementation(AActor* Instigator) const
@@ -13,4 +13,7 @@ bool UAction_NPC_StopAction::CanExecute_Implementation(AActor* Instigator) const
 void UAction_NPC_StopAction::Execute_Implementation(AActor* Instigator)
 {
 	Super::Execute_Implementation(Instigator);
+
+	// current work nullptr
+	// current train nullptr
 }

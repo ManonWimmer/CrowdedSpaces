@@ -2,12 +2,11 @@
 
 #include "CoreMinimal.h"
 #include "BuildSubsystem.h"
-#include "Action/ActionProvider.h"
 #include "Build/ObjectType.h"
 #include "AI/NPC.h"
-#include "AI/BTTasks/BTTask_UseBuildableObject.h"
+#include "Action/Action.h"
+#include "Action/ActionComponent.h"
 #include "GameFramework/Actor.h"
-#include "Grid/GridRoomType.h"
 #include "BuildableObject.generated.h"
 
 class UBuildableRegistrySubsystem;
@@ -109,6 +108,10 @@ public:
 
 	UPROPERTY()
 	TArray<FIntPoint> OccupiedCells;
+
+	// Actions
+	UFUNCTION()
+	virtual void InitActions();
 	
 protected:
 	UPROPERTY()

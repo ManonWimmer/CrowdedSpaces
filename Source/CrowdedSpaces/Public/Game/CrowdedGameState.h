@@ -89,7 +89,7 @@ public:
 	TArray<TSubclassOf<UAction>> NPCActions;
 
 	UPROPERTY(EditAnywhere, Category = "Actions", meta=(AllowPrivateAccess=true))
-	TObjectPtr<UMaterialInterface> NoDepthMaterial;
+	TArray<TSubclassOf<UAction>> GeneratorActions;
 
 private:
 	UPROPERTY()

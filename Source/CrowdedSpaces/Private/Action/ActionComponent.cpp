@@ -2,18 +2,7 @@
 
 UActionComponent::UActionComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
-}
-
-void UActionComponent::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
-void UActionComponent::TickComponent(float DeltaTime, enum ELevelTick TickType,
-	FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	PrimaryComponentTick.bCanEverTick = false;
 }
 
 TArray<TObjectPtr<UAction>> UActionComponent::GetAvailableActions(AActor* Instigator)

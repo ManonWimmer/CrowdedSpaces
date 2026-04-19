@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -16,11 +14,7 @@ class CROWDEDSPACES_API UActionComponent : public UActorComponent
 
 public:
 	UActionComponent();
-
-	virtual void BeginPlay() override;
-	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-public:
+	
 	TArray<TObjectPtr<UAction>> GetAvailableActions(AActor* Instigator);
 
 	void SetupActions(const TArray<TObjectPtr<UAction>>& NewActions);

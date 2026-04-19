@@ -65,9 +65,8 @@ ANPC::ANPC()
 	PortraitLight = CreateDefaultSubobject<USpotLightComponent>(TEXT("PortraitLight"));
 	PortraitLight->SetupAttachment(GetMesh());
 
-	PortraitLight->SetVisibility(false); // OFF en gameplay
-
-	// réglages clean portrait
+	PortraitLight->SetVisibility(false); 
+	
 	PortraitLight->Intensity = 5000.f;
 	PortraitLight->SetCastShadows(false);
 	PortraitLight->SetMobility(EComponentMobility::Movable);
@@ -86,6 +85,8 @@ void ANPC::BeginPlay()
 		return;
 
 	GameMode->RegisterNPC(this);
+
+	GameState = GetWorld()->GetGameState<ACrowdedGameState>();
 
 	// Multipliers
 	FoodProductionMultiplier = 1;
@@ -138,22 +139,7 @@ void ANPC::BeginPlay()
 	NPCActionWidgetPtr->Init();
 
 	// Actions
-	ACrowdedGameState* GameState = GetWorld()->GetGameState<ACrowdedGameState>();
-
-	TArray<TObjectPtr<UAction>> InstancedActions;
-
-	for (const TSubclassOf<UAction>& ActionClass : GameState->NPCActions)
-	{
-		if (!ActionClass) continue;
-
-		UAction* NewAction = NewObject<UAction>(this, ActionClass);
-		if (!NewAction) continue;
-
-		NewAction->Initialize(GetWorld());
-		InstancedActions.Add(NewAction);
-	}
-
-	ActionComponent->SetupActions(InstancedActions);
+	InitActions();
 
 	// Portrait
 	SetupCapture();
@@ -489,6 +475,29 @@ void ANPC::OnSelected()
 
 void ANPC::OnDeselected()
 {
+}
+#pragma endregion
+
+#pragma region Actions
+void ANPC::InitActions()
+{
+	if (!GameState)
+		return;
+	
+	TArray<TObjectPtr<UAction>> InstancedActions;
+
+	for (const TSubclassOf<UAction>& ActionClass : GameState->NPCActions)
+	{
+		if (!ActionClass) continue;
+
+		UAction* NewAction = NewObject<UAction>(this, ActionClass);
+		if (!NewAction) continue;
+
+		NewAction->Initialize(GetWorld());
+		InstancedActions.Add(NewAction);
+	}
+
+	ActionComponent->SetupActions(InstancedActions);
 }
 #pragma endregion
 

@@ -9,13 +9,12 @@
 #include "NPCActionType.h"
 #include "NPCPriorityType.h"
 #include "Engine/Texture.h"
-#include "Action/ActionProvider.h"
-#include "Action/ActionSubsystem.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Production/ProductionType.h"
 #include "Training/TrainingSkillType.h"
 #include "NPC.generated.h"
 
+class ACrowdedGameState;
 class USpotLightComponent;
 class UActionComponent;
 class UTrainingSubsystem;
@@ -223,6 +222,9 @@ private:
 	UPROPERTY()
 	TObjectPtr<UActionComponent> ActionComponent{nullptr};
 
+	UFUNCTION()
+	void InitActions();
+
 	// Portrait
 	UPROPERTY(VisibleAnywhere, Category="Portrait")
 	TObjectPtr<USceneCaptureComponent2D> PortraitCapture{nullptr};
@@ -238,6 +240,8 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<USpotLightComponent> PortraitLight{nullptr};
+
+	TObjectPtr<ACrowdedGameState> GameState{nullptr};
 	
 	// Selectable
 public:

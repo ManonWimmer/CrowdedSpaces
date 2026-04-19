@@ -75,6 +75,9 @@ void ABuildableObject::BeginPlay()
 	DisabledMaterial = GameInstance->DisabledObjectsMaterial;
 	WillBeRemovedMaterial = GameInstance->WillBeRemovedObjectsMaterial;
 	NormalMaterial = MeshComp->GetMaterial(0);
+
+	// Actions
+	InitActions();
 }
 
 #pragma region Mesh
@@ -242,9 +245,6 @@ void ABuildableObject::UpdateMaterialState() const
 		MeshComp->SetMaterial(0, NormalMaterial);
 	}
 }
-
-
-
 #pragma endregion
 
 #pragma region Use Object
@@ -328,5 +328,11 @@ bool ABuildableObject::IsOverlappingCells(const TSet<FIntPoint>& Cells) const
 		}
 	}
 	return false;
+}
+#pragma endregion
+
+#pragma region Actions
+void ABuildableObject::InitActions()
+{
 }
 #pragma endregion
