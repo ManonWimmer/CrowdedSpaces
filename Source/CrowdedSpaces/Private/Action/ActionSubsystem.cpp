@@ -77,6 +77,7 @@ void UActionSubsystem::SelectNPC(ANPC* NPC)
 		NPC->GetMesh()->SetOverlayMaterial(OutlineMaterial);
 
 	SelectedNPC = NPC;
+	NPC->FocusCameraOnNPC();
 	
 	GameHUD->UpdateNPCPortraitWidget(NPC);
 }

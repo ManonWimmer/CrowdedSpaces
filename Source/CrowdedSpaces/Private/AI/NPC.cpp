@@ -77,6 +77,16 @@ ANPC::ANPC()
 void ANPC::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Camera
+	const APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	if (!PlayerController) return;
+
+	FreeCameraPawn = Cast<AFreeCameraPawn>(PlayerController->GetPawn());
+	if (!FreeCameraPawn) return;
+
+	CameraComponent = FreeCameraPawn->GetCameraComponent();
+	if (!CameraComponent) return;
 	
 	// Die
 	FoodComponent->OnNoMoreResource.AddDynamic(this, &ANPC::Die);
@@ -168,18 +178,13 @@ void ANPC::Tick(const float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	// Widgets world look at camera
-	if (!NPCNameWidget || !NPCActionWidget) return;
+	if (!NPCNameWidget || !NPCActionWidget)
+		return;
 
-	const APlayerController* PC = GetWorld()->GetFirstPlayerController();
-	if (!PC) return;
+	if (!CameraComponent)
+		return;
 
-	const AFreeCameraPawn* CamPawn = Cast<AFreeCameraPawn>(PC->GetPawn());
-	if (!CamPawn) return;
-
-	const UCameraComponent* Cam = CamPawn->GetCameraComponent();
-	if (!Cam) return;
-
-	const FVector CameraLocation = Cam->GetComponentLocation();
+	const FVector CameraLocation = CameraComponent->GetComponentLocation();
 	const FVector NPCNameWidgetLocation = NPCNameWidget->GetComponentLocation();
 	const FVector NPCActionWidgetLocation = NPCActionWidget->GetComponentLocation();
 
@@ -387,7 +392,7 @@ int ANPC::GetProductionMultiplierForType(const EProductionType Type) const
 	}
 }
 
-void ANPC::CancelCurrentUse() const
+void ANPC::CancelCurrentUse()
 {
 	if (!Blackboard)
 		return;
@@ -400,6 +405,8 @@ void ANPC::CancelCurrentUse() const
 	{
 		if (UBehaviorTreeComponent* BTComp = Cast<UBehaviorTreeComponent>(ControllerNPC->GetBrainComponent()))
 			BTComp->RestartTree();
+
+		StopAction();
 	}
 }
 
@@ -598,7 +605,9 @@ void ANPC::SetupCapture()
 	bReadyForCapture = true;
 	OnPlayerReadyForCapture.Broadcast();
 }
+#pragma endregion 
 
+#pragma region Generator & Training Station
 void ANPC::SetGenerator(ABuildableGenerator* Generator)
 {
 	if (!Blackboard)
@@ -613,6 +622,8 @@ void ANPC::SetGenerator(ABuildableGenerator* Generator)
 		Blackboard->SetValueAsObject("Generator", Generator);
 		Blackboard->SetValueAsObject("GeneratorSlot", Slot);
 		Blackboard->SetValueAsVector("GeneratorLocation", Slot->GetComponentLocation());
+
+		FocusCameraOnGenerator();
 	}
 	else
 	{
@@ -638,6 +649,8 @@ void ANPC::SetTrainingStation(ABuildableTrainingStation* TrainingStation)
 		Blackboard->SetValueAsObject("TrainingStation", TrainingStation);
 		Blackboard->SetValueAsObject("TrainingStationSlot", Slot);
 		Blackboard->SetValueAsVector("TrainingStationLocation", Slot->GetComponentLocation());
+
+		FocusCameraOnTrainingStation();
 	}
 	else
 	{
@@ -679,5 +692,30 @@ ABuildableTrainingStation* ANPC::GetTrainingStation() const
 bool ANPC::HasTrainingStation() const
 {
 	return GetTrainingStation() != nullptr;
+}
+#pragma endregion
+
+#pragma region Camera
+void ANPC::FocusCameraOnGenerator() const
+{
+	const ABuildableGenerator* Generator = GetGenerator();
+	if (!Generator)
+		return;
+
+	FreeCameraPawn->FocusOnActor(Generator);
+}
+
+void ANPC::FocusCameraOnTrainingStation() const
+{
+	const ABuildableTrainingStation* TrainingStation = GetTrainingStation();
+	if (!TrainingStation)
+		return;
+
+	FreeCameraPawn->FocusOnActor(TrainingStation);
+}
+
+void ANPC::FocusCameraOnNPC() const
+{
+	FreeCameraPawn->FocusOnActor(this);
 }
 #pragma endregion

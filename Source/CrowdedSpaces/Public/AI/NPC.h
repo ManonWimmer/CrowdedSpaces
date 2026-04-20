@@ -14,6 +14,8 @@
 #include "Training/TrainingSkillType.h"
 #include "NPC.generated.h"
 
+class UCameraComponent;
+class AFreeCameraPawn;
 class ABuildableTrainingStation;
 class ABuildableGenerator;
 class ACrowdedGameState;
@@ -79,7 +81,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="AI")
 	int GetProductionMultiplierForType(EProductionType Type) const;
 	
-	void CancelCurrentUse() const;
+	void CancelCurrentUse();
 
 	// Priority
 	UFUNCTION(BlueprintCallable, Category="AI")
@@ -171,6 +173,16 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnTrainingStationChanged OnTrainingStationChanged;
+
+	// Camera
+	UFUNCTION(BlueprintCallable)
+	void FocusCameraOnGenerator() const;
+
+	UFUNCTION(BlueprintCallable)
+	void FocusCameraOnTrainingStation() const;
+
+	UFUNCTION(BlueprintCallable)
+	void FocusCameraOnNPC() const;
 	
 protected:
 	virtual void BeginPlay() override;
@@ -182,15 +194,22 @@ protected:
 	TObjectPtr<UBehaviorTree> BehaviorTree;
 
 private:
+	// Camera
+	UPROPERTY()
+	TObjectPtr<AFreeCameraPawn> FreeCameraPawn{nullptr};
+	
+	UPROPERTY()
+	TObjectPtr<UCameraComponent> CameraComponent{nullptr};
+	
 	UPROPERTY()
 	TMap<EResourceType, TObjectPtr<UResourceComponent>> ResourceMap;
 	
 	// Resources Components
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<UResourceComponent> FoodComponent;
+	TObjectPtr<UResourceComponent> FoodComponent{nullptr};
 	
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<UResourceComponent> EnergyComponent;
+	TObjectPtr<UResourceComponent> EnergyComponent{nullptr};
 
 	// Work
 	UPROPERTY(EditAnywhere)
@@ -198,14 +217,14 @@ private:
 	
 	// Name
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<UWidgetComponent> NPCNameWidget;
+	TObjectPtr<UWidgetComponent> NPCNameWidget{nullptr};
 
 	UPROPERTY()
 	FString NPCName = "";
 	
 	// Action
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<UWidgetComponent> NPCActionWidget;
+	TObjectPtr<UWidgetComponent> NPCActionWidget{nullptr};
 	
 	UPROPERTY()
 	ENPCActionType CurrentAction = ENPCActionType::Idle;
@@ -229,10 +248,10 @@ private:
 
 	// Color
 	UPROPERTY()
-	UMaterialInstanceDynamic* BodyMaterialInstance;
+	TObjectPtr<UMaterialInstanceDynamic> BodyMaterialInstance{nullptr};
 
 	UPROPERTY()
-	UMaterialInstanceDynamic* OtherMaterialInstance;
+	TObjectPtr<UMaterialInstanceDynamic> OtherMaterialInstance{nullptr};
 
 	// Object
 	UPROPERTY()

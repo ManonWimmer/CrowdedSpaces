@@ -96,4 +96,10 @@ void UBTTask_UseBuildableObject::StopUsingClean() const
 	
 	CurrentObject->StopUsing(NPC);
 	CurrentObject->Release(NPC);
+
+	if (CurrentObject->GetObjectType() == EObjectType::Generator)
+		NPC->SetGenerator(nullptr);
+	
+	if (CurrentObject->GetObjectType() == EObjectType::TrainingStation)
+		NPC->SetTrainingStation(nullptr);
 }
