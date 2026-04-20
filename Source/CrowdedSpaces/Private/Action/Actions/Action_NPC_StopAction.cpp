@@ -18,15 +18,14 @@ bool UAction_NPC_StopAction::CanExecute_Implementation(AActor* Instigator) const
 		return false;
 	
 	AAIController* AIController = Cast<AAIController>(SelectedNPC->GetController());
-	if (AIController)
-	{
-		UBlackboardComponent* Blackboard = AIController->GetBlackboardComponent();
-		if (Blackboard)
-		{
-			if (Blackboard->GetValueAsObject("Generator") == nullptr && Blackboard->GetValueAsObject("TrainStation") == nullptr)
-				return false;
-		}
-	}
+	if (!AIController)
+		return false;
+	UBlackboardComponent* Blackboard = AIController->GetBlackboardComponent();
+	if (!Blackboard)
+		return false;
+	
+	if (Blackboard->GetValueAsObject("Generator") == nullptr && Blackboard->GetValueAsObject("TrainingStation") == nullptr)
+		return false;
 
 	return true;
 }
@@ -53,7 +52,7 @@ void UAction_NPC_StopAction::Execute_Implementation(AActor* Instigator)
 	Blackboard->SetValueAsObject("GeneratorSlot", nullptr);
 	Blackboard->SetValueAsVector("GeneratorLocation", FVector::Zero());
 			
-	Blackboard->SetValueAsObject("TrainStation", nullptr);
-	Blackboard->SetValueAsObject("TrainStationSlot", nullptr);
-	Blackboard->SetValueAsVector("TrainStationLocation", FVector::Zero());
+	Blackboard->SetValueAsObject("TrainingStation", nullptr);
+	Blackboard->SetValueAsObject("TrainingStationSlot", nullptr);
+	Blackboard->SetValueAsVector("TrainingStationLocation", FVector::Zero());
 }

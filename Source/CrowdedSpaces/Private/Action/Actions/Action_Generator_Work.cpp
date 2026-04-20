@@ -21,6 +21,9 @@ bool UAction_Generator_Work::CanExecute_Implementation(AActor* Instigator) const
 	if (!SelectedNPC)
 		return false;
 
+	if (!Generator->CanBeUsed())
+		return false;
+
 	return Generator->IsAvailableForReservation(SelectedNPC);
 }
 
@@ -36,8 +39,8 @@ void UAction_Generator_Work::Execute_Implementation(AActor* Instigator)
 	
 	if (!ActionSubsystem)
 		return;
-	
-	ANPC* SelectedNPC = ActionSubsystem->GetSelectedNPC();
+
+	const ANPC* SelectedNPC = ActionSubsystem->GetSelectedNPC();
 	if (!SelectedNPC)
 		return;
 
@@ -57,7 +60,7 @@ void UAction_Generator_Work::Execute_Implementation(AActor* Instigator)
 	Blackboard->SetValueAsObject("GeneratorSlot", Slot);
 	Blackboard->SetValueAsVector("GeneratorLocation", Slot->GetComponentLocation());
 	
-	Blackboard->SetValueAsObject("TrainStation", nullptr);
-	Blackboard->SetValueAsObject("TrainStationSlot", nullptr);
-	Blackboard->SetValueAsVector("TrainStationLocation", FVector::Zero());
+	Blackboard->SetValueAsObject("TrainingStation", nullptr);
+	Blackboard->SetValueAsObject("TrainingStationSlot", nullptr);
+	Blackboard->SetValueAsVector("TrainingStationLocation", FVector::Zero());
 }
