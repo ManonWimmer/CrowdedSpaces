@@ -26,6 +26,7 @@ class USlotComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentActionChanged, ENPCActionType, Value); 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSkillsTrained); 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerReadyForCapture); 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNameSet); 
 
 UCLASS()
 class CROWDEDSPACES_API ANPC : public ACharacter, public ISelectable
@@ -86,6 +87,9 @@ public:
 	// Name & Color
 	UFUNCTION(BlueprintCallable, Category="AI")
 	FString GetNPCName() const { return NPCName; }
+	
+	UPROPERTY(BlueprintAssignable)
+	FOnNameSet OnNameSet;
 	
 	FTimerHandle NameRetryTimer;
 

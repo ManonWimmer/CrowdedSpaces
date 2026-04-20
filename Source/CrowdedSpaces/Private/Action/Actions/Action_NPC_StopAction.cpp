@@ -12,14 +12,15 @@ UAction_NPC_StopAction::UAction_NPC_StopAction()
 bool UAction_NPC_StopAction::CanExecute_Implementation(AActor* Instigator) const
 {
 	// Check if npc has generator or train station set in blackboard
-	
-	const ANPC* SelectedNPC = ActionSubsystem->GetSelectedNPC();
-	if (!SelectedNPC)
+
+	const ANPC* NPC = Cast<ANPC>(Instigator);
+	if (!NPC)
 		return false;
 	
-	AAIController* AIController = Cast<AAIController>(SelectedNPC->GetController());
+	AAIController* AIController = Cast<AAIController>(NPC->GetController());
 	if (!AIController)
 		return false;
+	
 	UBlackboardComponent* Blackboard = AIController->GetBlackboardComponent();
 	if (!Blackboard)
 		return false;
@@ -35,12 +36,12 @@ void UAction_NPC_StopAction::Execute_Implementation(AActor* Instigator)
 	Super::Execute_Implementation(Instigator);
 
 	// Reset generator & training values in blackboard
-	
-	const ANPC* SelectedNPC = ActionSubsystem->GetSelectedNPC();
-	if (!SelectedNPC)
+
+	const ANPC* NPC = Cast<ANPC>(Instigator);
+	if (!NPC)
 		return;
 	
-	AAIController* AIController = Cast<AAIController>(SelectedNPC->GetController());
+	AAIController* AIController = Cast<AAIController>(NPC->GetController());
 	if (!AIController)
 		return;
 

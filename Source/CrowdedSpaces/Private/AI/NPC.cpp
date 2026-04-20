@@ -437,6 +437,8 @@ void ANPC::TryGenerateName()
 	
 			NPCNameWidgetPtr->OwningActor = this;
 			NPCNameWidgetPtr->Init();
+
+			OnNameSet.Broadcast();
 			
 			return;
 		}
@@ -447,7 +449,7 @@ void ANPC::TryGenerateName()
 		NameRetryTimer,
 		this,
 		&ANPC::TryGenerateName,
-		0.5f,
+		0.1f,
 		false
 	);
 }
