@@ -7,6 +7,8 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Build/BuildableObject.h"
 #include "Build/SlotComponent.h"
+#include "Build/Buildable/BuildableGenerator.h"
+#include "Build/Buildable/BuildableTrainingStation.h"
 #include "Camera/FreeCameraPawn.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
@@ -139,6 +141,14 @@ void ANPC::BeginPlay()
 	NPCActionWidgetPtr->Init();
 
 	// Actions
+	ANPCController* ControllerNPC = Cast<ANPCController>(GetController());
+	if (!ControllerNPC)
+	return;
+
+	Blackboard = ControllerNPC->GetBlackboardComponent();
+	if (!Blackboard)
+		return;
+			
 	InitActions();
 
 	// Portrait
@@ -379,16 +389,17 @@ int ANPC::GetProductionMultiplierForType(const EProductionType Type) const
 
 void ANPC::CancelCurrentUse() const
 {
-	if (ANPCController* ControllerNPC = Cast<ANPCController>(GetController()))
+	if (!Blackboard)
+		return;
+
+	ANPCController* ControllerNPC = Cast<ANPCController>(GetController());
+	if (!ControllerNPC)
+		return;
+	
+	if (const TObjectPtr<ABuildableObject> TargetObject = Cast<ABuildableObject>(Blackboard->GetValueAsObject("TargetObject")); TargetObject && TargetObject->GetObjectType() == EObjectType::Generator)
 	{
-		if (const UBlackboardComponent* Blackboard = ControllerNPC->GetBlackboardComponent())
-		{
-			if (const TObjectPtr<ABuildableObject> TargetObject = Cast<ABuildableObject>(Blackboard->GetValueAsObject("TargetObject")); TargetObject && TargetObject->GetObjectType() == EObjectType::Generator)
-			{
-				if (UBehaviorTreeComponent* BTComp = Cast<UBehaviorTreeComponent>(ControllerNPC->GetBrainComponent()))
-					BTComp->RestartTree();
-			}
-		}
+		if (UBehaviorTreeComponent* BTComp = Cast<UBehaviorTreeComponent>(ControllerNPC->GetBrainComponent()))
+			BTComp->RestartTree();
 	}
 }
 
@@ -444,7 +455,7 @@ void ANPC::TryGenerateName()
 		}
 	}
 
-	// Retry dans 0.5s
+	// Retry dans 0.1s
 	GetWorld()->GetTimerManager().SetTimer(
 		NameRetryTimer,
 		this,
@@ -501,6 +512,8 @@ void ANPC::InitActions()
 
 	ActionComponent->SetupActions(InstancedActions);
 }
+
+
 #pragma endregion
 
 #pragma region Portrait
@@ -584,5 +597,87 @@ void ANPC::SetupCapture()
 	
 	bReadyForCapture = true;
 	OnPlayerReadyForCapture.Broadcast();
+}
+
+void ANPC::SetGenerator(ABuildableGenerator* Generator)
+{
+	if (!Blackboard)
+		return;
+	
+	if (Generator != nullptr)
+	{
+		USlotComponent* Slot = Generator->GetNearestFreeSlot(GetActorLocation());
+		if (!Slot)
+			return;
+		
+		Blackboard->SetValueAsObject("Generator", Generator);
+		Blackboard->SetValueAsObject("GeneratorSlot", Slot);
+		Blackboard->SetValueAsVector("GeneratorLocation", Slot->GetComponentLocation());
+	}
+	else
+	{
+		Blackboard->SetValueAsObject("Generator", nullptr);
+		Blackboard->SetValueAsObject("GeneratorSlot", nullptr);
+		Blackboard->SetValueAsVector("GeneratorLocation", FVector::Zero());
+	}
+
+	OnGeneratorChanged.Broadcast();
+}
+
+void ANPC::SetTrainingStation(ABuildableTrainingStation* TrainingStation)
+{
+	if (!Blackboard)
+		return;
+	
+	if (TrainingStation != nullptr)
+	{
+		USlotComponent* Slot = TrainingStation->GetNearestFreeSlot(GetActorLocation());
+		if (!Slot)
+			return;
+		
+		Blackboard->SetValueAsObject("TrainingStation", TrainingStation);
+		Blackboard->SetValueAsObject("TrainingStationSlot", Slot);
+		Blackboard->SetValueAsVector("TrainingStationLocation", Slot->GetComponentLocation());
+	}
+	else
+	{
+		Blackboard->SetValueAsObject("TrainingStation", nullptr);
+		Blackboard->SetValueAsObject("TrainingStationSlot", nullptr);
+		Blackboard->SetValueAsVector("TrainingStationLocation", FVector::Zero());
+	}
+
+	OnTrainingStationChanged.Broadcast();
+}
+
+void ANPC::StopAction()
+{
+	SetGenerator(nullptr);
+	SetTrainingStation(nullptr);
+}
+
+ABuildableGenerator* ANPC::GetGenerator() const
+{
+	if (!Blackboard)
+		return nullptr;
+	
+	return Cast<ABuildableGenerator>(Blackboard->GetValueAsObject("Generator"));
+}
+
+bool ANPC::HasGenerator() const
+{
+	return GetGenerator() != nullptr;
+}
+
+ABuildableTrainingStation* ANPC::GetTrainingStation() const
+{
+	if (!Blackboard)
+		return nullptr;
+	
+	return Cast<ABuildableTrainingStation>(Blackboard->GetValueAsObject("TrainingStation"));
+}
+
+bool ANPC::HasTrainingStation() const
+{
+	return GetTrainingStation() != nullptr;
 }
 #pragma endregion

@@ -14,6 +14,8 @@
 #include "Training/TrainingSkillType.h"
 #include "NPC.generated.h"
 
+class ABuildableTrainingStation;
+class ABuildableGenerator;
 class ACrowdedGameState;
 class USpotLightComponent;
 class UActionComponent;
@@ -27,6 +29,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentActionChanged, ENPCActionT
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSkillsTrained); 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerReadyForCapture); 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNameSet); 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGeneratorChanged); 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTrainingStationChanged); 
 
 UCLASS()
 class CROWDEDSPACES_API ANPC : public ACharacter, public ISelectable
@@ -142,6 +146,31 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnPlayerReadyForCapture OnPlayerReadyForCapture;
+
+	// Actions
+	void SetGenerator(ABuildableGenerator* Generator);
+	void SetTrainingStation(ABuildableTrainingStation* TrainingStation);
+
+	UFUNCTION(BlueprintCallable)
+	void StopAction();
+	
+	UFUNCTION(BlueprintCallable)
+	ABuildableGenerator* GetGenerator() const;
+
+	UFUNCTION(BlueprintCallable)
+	bool HasGenerator() const;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnGeneratorChanged OnGeneratorChanged;
+
+	UFUNCTION(BlueprintCallable)
+	ABuildableTrainingStation* GetTrainingStation() const;
+
+	UFUNCTION(BlueprintCallable)
+	bool HasTrainingStation() const;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnTrainingStationChanged OnTrainingStationChanged;
 	
 protected:
 	virtual void BeginPlay() override;
@@ -223,6 +252,9 @@ private:
 	int MaxMultipliersLevel = 5;
 
 	// Actions
+	UPROPERTY()
+	TObjectPtr<UBlackboardComponent> Blackboard{nullptr};
+	
 	UPROPERTY()
 	TObjectPtr<UActionComponent> ActionComponent{nullptr};
 

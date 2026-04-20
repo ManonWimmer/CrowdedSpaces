@@ -1,9 +1,6 @@
 ﻿#include "Action/Actions/Action_Generator_Work.h"
 
-#include "AIController.h"
 #include "AI/NPC.h"
-#include "BehaviorTree/BlackboardComponent.h"
-#include "Build/SlotComponent.h"
 #include "Build/Buildable/BuildableGenerator.h"
 
 UAction_Generator_Work::UAction_Generator_Work()
@@ -30,8 +27,6 @@ bool UAction_Generator_Work::CanExecute_Implementation(AActor* Instigator) const
 void UAction_Generator_Work::Execute_Implementation(AActor* Instigator)
 {
 	Super::Execute_Implementation(Instigator);
-
-	// Set generator values in selected npc blackboard
 	
 	ABuildableGenerator* Generator = Cast<ABuildableGenerator>(Instigator);
 	if (!Generator)
@@ -40,27 +35,10 @@ void UAction_Generator_Work::Execute_Implementation(AActor* Instigator)
 	if (!ActionSubsystem)
 		return;
 
-	const ANPC* SelectedNPC = ActionSubsystem->GetSelectedNPC();
+	ANPC* SelectedNPC = ActionSubsystem->GetSelectedNPC();
 	if (!SelectedNPC)
 		return;
 
-	USlotComponent* Slot = Generator->GetNearestFreeSlot(SelectedNPC->GetActorLocation());
-	if (!Slot)
-		return;
-	
-	AAIController* AIController = Cast<AAIController>(SelectedNPC->GetController());
-	if (!AIController)
-		return;
-	
-	UBlackboardComponent* Blackboard = AIController->GetBlackboardComponent();
-	if (!Blackboard)
-		return;
-
-	Blackboard->SetValueAsObject("Generator", Generator);
-	Blackboard->SetValueAsObject("GeneratorSlot", Slot);
-	Blackboard->SetValueAsVector("GeneratorLocation", Slot->GetComponentLocation());
-	
-	Blackboard->SetValueAsObject("TrainingStation", nullptr);
-	Blackboard->SetValueAsObject("TrainingStationSlot", nullptr);
-	Blackboard->SetValueAsVector("TrainingStationLocation", FVector::Zero());
+	SelectedNPC->SetGenerator(Generator);
+	SelectedNPC->SetTrainingStation(nullptr);
 }
