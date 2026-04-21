@@ -719,3 +719,15 @@ void ANPC::FocusCameraOnNPC() const
 	FreeCameraPawn->FocusOnActor(this);
 }
 #pragma endregion
+
+#pragma region Auto Needs
+bool ANPC::HasAutoNeeds() const
+{
+	return bAutoNeeds;
+}
+
+void ANPC::SetAutoNeeds(const bool bNewAutoNeeds)
+{
+	bAutoNeeds = bNewAutoNeeds;
+}
+#pragma endregion

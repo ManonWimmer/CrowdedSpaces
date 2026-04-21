@@ -183,6 +183,13 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void FocusCameraOnNPC() const;
+
+	// Auto needs
+	UFUNCTION(BlueprintCallable)
+	bool HasAutoNeeds() const;
+
+	UFUNCTION(BlueprintCallable)
+	void SetAutoNeeds(bool bNewAutoNeeds);
 	
 protected:
 	virtual void BeginPlay() override;
@@ -296,7 +303,12 @@ private:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<USpotLightComponent> PortraitLight{nullptr};
 
+	UPROPERTY()
 	TObjectPtr<ACrowdedGameState> GameState{nullptr};
+
+	// Auto needs
+	UPROPERTY()
+	bool bAutoNeeds = true;
 	
 	// Selectable
 public:
