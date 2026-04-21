@@ -5,7 +5,7 @@
 #include "MoralEvent/MoralEvent.h"
 #include "MoralEvent_ExpelNPCOrLoseFood.generated.h"
 
-UCLASS(Blueprintable)
+UCLASS()
 class CROWDEDSPACES_API UMoralEvent_ExpelNPCOrLoseFood : public UMoralEvent
 {
 	GENERATED_BODY()

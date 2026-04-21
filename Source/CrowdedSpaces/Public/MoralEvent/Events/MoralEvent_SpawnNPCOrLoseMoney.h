@@ -5,7 +5,7 @@
 #include "MoralEvent/MoralEvent.h"
 #include "MoralEvent_SpawnNPCOrLoseMoney.generated.h"
 
-UCLASS(Blueprintable)
+UCLASS()
 class CROWDEDSPACES_API UMoralEvent_SpawnNPCOrLoseMoney : public UMoralEvent
 {
 	GENERATED_BODY()

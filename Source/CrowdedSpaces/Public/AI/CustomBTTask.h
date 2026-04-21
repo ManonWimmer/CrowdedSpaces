@@ -15,6 +15,8 @@ class CROWDEDSPACES_API UCustomBTTask : public UBTTask_BlackboardBase
 public:
 	virtual void StartAction(ABuildableObject* Object); // Send current action to NPC, called on execute task
 	virtual void StopAction(); // Send idle action to NPC, called on task finished
+	
+	ANPC* GetNPC() const { return NPC; }
 
 protected:
 	UPROPERTY()

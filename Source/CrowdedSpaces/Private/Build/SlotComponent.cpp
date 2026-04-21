@@ -17,10 +17,21 @@ void USlotComponent::BeginPlay()
 	UpdateVisual();
 }
 
-void USlotComponent::SetOccupied(bool bNewOccupied, ANPC* NPC)
+void USlotComponent::Acquire(ANPC* NPC)
 {
-	bIsOccupied = bNewOccupied;
-	OccupyingNPC = bNewOccupied ? NPC : nullptr;
+	bIsOccupied = true;
+	OccupyingNPC = NPC;
+
+	UpdateVisual();
+}
+
+void USlotComponent::Release(ANPC* NPC)
+{
+	if (!OccupyingNPC || OccupyingNPC != NPC)
+		return;
+	
+	bIsOccupied = false;
+	OccupyingNPC = nullptr;
 
 	UpdateVisual();
 }

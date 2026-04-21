@@ -4,6 +4,8 @@
 #include "Subsystems/WorldSubsystem.h"
 #include "StorageSubsystem.generated.h"
 
+enum class EGridRoomType : uint8;
+class UBuildSubsystem;
 class UResourceComponent;
 
 USTRUCT(BlueprintType)
@@ -13,13 +15,22 @@ struct FStorageRoomValues
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float AddMaxMoney = 1000;
+	float AddMaxMoneyPerCell = 1000;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float AddMaxFood = 1000;
+	float AddMaxMoneyTotal = 1000;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float AddMaxElectricity = 1000;
+	float AddMaxFoodPerCell = 1000;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float AddMaxFoodTotal = 1000;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float AddMaxElectricityPerCell = 1000;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float AddMaxElectricityTotal = 1000;
 };
 
 class UStorageData;
@@ -35,9 +46,15 @@ public:
 
 	UFUNCTION()
 	void OnRoomCreated(const int RoomId, const EGridRoomType RoomType);
+
+	UFUNCTION()
+	void OnRoomUpdated(const int RoomId, const EGridRoomType RoomType);
 	
 	UFUNCTION()
 	void AddStorageRoom(const int RoomId);
+
+	UFUNCTION()
+	void UpdateStorageRoom(const int RoomId);
 
 	UFUNCTION()
 	void OnRoomDestroyed(const int RoomId);
@@ -50,7 +67,7 @@ public:
 
 private:
 	UPROPERTY()
-	TObjectPtr<UStorageData> StorageData = nullptr; // Sent by game state
+	TObjectPtr<UStorageData> StorageData{nullptr}; // Sent by game state
 
 	UPROPERTY()
 	TMap<int, FStorageRoomValues> StorageRooms; // Room ID - Storage values
@@ -63,4 +80,7 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UResourceComponent> ElectricityComponent = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UBuildSubsystem> BuildSubsystem = nullptr;
 };

@@ -6,11 +6,20 @@
 #include "Resources/ResourceComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Selection/Selectable.h"
-#include "NPCAction.h"
+#include "NPCActionType.h"
+#include "NPCPriorityType.h"
 #include "Production/ProductionType.h"
+#include "Training/TrainingSkillType.h"
 #include "NPC.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentActionChanged, ENPCActionWidget, Value); 
+class UTrainingSubsystem;
+enum class ENPCPriorityType : uint8;
+class UBTTask_UseBuildableObject;
+class ABuildableObject;
+class USlotComponent;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentActionChanged, ENPCActionType, Value); 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSkillsTrained); 
 
 UCLASS()
 class CROWDEDSPACES_API ANPC : public ACharacter, public ISelectable
@@ -37,17 +46,18 @@ public:
 	UBehaviorTree* GetBehaviorTree() const { return BehaviorTree; }
 	
 	UFUNCTION(BlueprintCallable, Category="AI")
-	void SetCurrentAction(ENPCActionWidget NewAction);
+	void Die();
+
+	// Action
+	UFUNCTION(BlueprintCallable, Category="AI")
+	void SetCurrentAction(ENPCActionType NewAction);
 
 	UFUNCTION(BlueprintCallable)
-	ENPCActionWidget GetCurrentAction() const { return CurrentAction; }
+	ENPCActionType GetCurrentAction() const { return CurrentAction; }
 
 	UPROPERTY(BlueprintAssignable)
 	FOnCurrentActionChanged OnCurrentActionChanged;
-
-	UFUNCTION()
-	void Die();
-
+	
 	// Work
 	UFUNCTION(BlueprintCallable, Category="AI")
 	EProductionType GetWorkOnGeneratorType() const { return WorkOnGeneratorType; }
@@ -57,16 +67,57 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="AI")
 	int GetProductionMultiplierForType(EProductionType Type) const;
+	
+	void CancelCurrentUse() const;
 
-	// Name
+	// Priority
+	UFUNCTION(BlueprintCallable, Category="AI")
+	ENPCPriorityType GetNPCPriorityType() const { return NPCPriorityType; }
+
+	UFUNCTION(BlueprintCallable, Category="AI")
+	void SetNPCPriorityType(ENPCPriorityType NewType);
+	
+	// Name & Color
 	UFUNCTION(BlueprintCallable, Category="AI")
 	FString GetNPCName() const { return NPCName; }
-
+	
 	FTimerHandle NameRetryTimer;
 
 	void TryGenerateName();
 
-	FLinearColor GetRandomColor();
+	static FLinearColor GetRandomColor();
+
+	// Object
+	UFUNCTION()
+	void SetCurrentObject(ABuildableObject* NewObject);
+	
+	UFUNCTION()
+	ABuildableObject* GetCurrentObject() const { return CurrentObject; }
+
+	// Training
+	UFUNCTION(BlueprintCallable, Category="AI")
+	ETrainingSkillType GetTrainingSkillType() const { return TrainingSkillType; }
+
+	UFUNCTION(BlueprintCallable, Category="AI")
+	void SetTrainingSkillType(ETrainingSkillType NewType);
+	
+	UFUNCTION()
+	void AddTrainingExp(const float AddExp);
+	
+	UFUNCTION(BlueprintCallable)
+	int GetCurrentLevel(const ETrainingSkillType TrainingSkillTypeToUpdate) const;
+
+	UFUNCTION(BlueprintCallable)
+	float GetCurrentLevelExp(const ETrainingSkillType TrainingSkillTypeToUpdate) const;
+
+	UFUNCTION(BlueprintCallable)
+	float GetCurrentLevelNeededExp(const ETrainingSkillType TrainingSkillTypeToUpdate) const;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnSkillsTrained OnSkillsTrained;
+
+	UFUNCTION(BlueprintCallable, Category="AI")
+	int GetMaxMultipliersLevel() const { return MaxMultipliersLevel; }
 	
 protected:
 	virtual void BeginPlay() override;
@@ -81,40 +132,31 @@ private:
 	UPROPERTY()
 	TMap<EResourceType, TObjectPtr<UResourceComponent>> ResourceMap;
 	
-	// Food
+	// Resources Components
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UResourceComponent> FoodComponent;
 	
-	UPROPERTY(EditAnywhere, Category="Food")
-	float RemoveFoodInterval = 1.0f;
-
-	UPROPERTY(EditAnywhere, Category="Food")
-	int32 RemoveFoodPerInterval = 10;
-	
-	UFUNCTION()
-	void RemoveFood() const;
-
-	UPROPERTY()
-	FTimerHandle RemoveFoodTimerHandle;
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UWidgetComponent> NPCNameWidget;
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UWidgetComponent> NPCActionWidget;
-
-	// Energy
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UResourceComponent> EnergyComponent;
-
-	// Action
-	UPROPERTY()
-	ENPCActionWidget CurrentAction = ENPCActionWidget::Idle;
 
 	// Work
 	UPROPERTY(EditAnywhere)
 	EProductionType WorkOnGeneratorType = EProductionType::Money;
+	
+	// Name
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UWidgetComponent> NPCNameWidget;
 
+	UPROPERTY()
+	FString NPCName = "";
+	
+	// Action
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UWidgetComponent> NPCActionWidget;
+	
+	UPROPERTY()
+	ENPCActionType CurrentAction = ENPCActionType::Idle;
+	
 	// Multipliers
 	UPROPERTY()
 	int FoodProductionMultiplier = 1;
@@ -125,14 +167,36 @@ private:
 	UPROPERTY()
 	int MoneyProductionMultiplier = 1;
 
-	UPROPERTY()
-	FString NPCName = "";
+	// Priority
+	UPROPERTY(EditAnywhere)
+	ENPCPriorityType NPCPriorityType = ENPCPriorityType::Work;
 
+	UPROPERTY(EditAnywhere)
+	ETrainingSkillType TrainingSkillType = ETrainingSkillType::MoneyProduction;
+
+	// Color
 	UPROPERTY()
 	UMaterialInstanceDynamic* BodyMaterialInstance;
 
 	UPROPERTY()
 	UMaterialInstanceDynamic* OtherMaterialInstance;
+
+	// Object
+	UPROPERTY()
+	TObjectPtr<ABuildableObject> CurrentObject{nullptr};
+
+	UPROPERTY()
+	TObjectPtr<UBTTask_UseBuildableObject> CurrentUseTask{nullptr};
+
+	// Training
+	UPROPERTY()
+	TMap<ETrainingSkillType, float> TrainingSkillsExp;
+
+	UPROPERTY()
+	TObjectPtr<UTrainingSubsystem> TrainingSubsystem{nullptr};
+
+	UPROPERTY(EditAnywhere)
+	int MaxMultipliersLevel = 5;
 	
 	// Selectable
 public:

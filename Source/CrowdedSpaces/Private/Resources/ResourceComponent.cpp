@@ -1,6 +1,7 @@
 ﻿#include "Resources/ResourceComponent.h"
 
 #include "Game/CrowdedGameInstance.h"
+#include "Game/CrowdedGameState.h"
 #include "Resources/ResourceDefaultsData.h"
 
 UResourceComponent::UResourceComponent()
@@ -59,6 +60,13 @@ void UResourceComponent::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("GameInstance is null!"));
 		return;
 	}
+	
+	ACrowdedGameState* GameState = World->GetGameState<ACrowdedGameState>();
+	if (!GameState)
+		return;
+
+	if (ResourceType == EResourceType::Food)
+		PlayerFoodForRegen = GameState->GetResourceComponentByType(EResourceType::Food);
 	
 	if (CanLoseAndRegenResource)
 		StartResourceTimer();
@@ -184,7 +192,18 @@ void UResourceComponent::ResourceTick()
 {
 	if (bIsInRegen)
 	{
-		AddResource(ResourceRegenPerTick);
+		if (ResourceType == EResourceType::Food && PlayerFoodForRegen)
+		{
+			if (PlayerFoodForRegen->HasEnoughResource(ResourceRegenPerTick))
+			{
+				AddResource(ResourceRegenPerTick);
+				PlayerFoodForRegen->RemoveResource(ResourceRegenPerTick);
+			}
+		}
+		else
+		{
+			AddResource(ResourceRegenPerTick);
+		}
 	}
 	else
 	{

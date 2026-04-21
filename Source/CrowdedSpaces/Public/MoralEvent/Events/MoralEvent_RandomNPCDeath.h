@@ -4,7 +4,7 @@
 #include "MoralEvent/MoralEvent.h"
 #include "MoralEvent_RandomNPCDeath.generated.h"
 
-UCLASS(Blueprintable)
+UCLASS()
 class CROWDEDSPACES_API UMoralEvent_RandomNPCDeath : public UMoralEvent
 {
 	GENERATED_BODY()

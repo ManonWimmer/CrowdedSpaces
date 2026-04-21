@@ -124,6 +124,9 @@ private:
 	UPROPERTY()
 	TObjectPtr<UCrowdedGameInstance> GameInstance = nullptr;
 
+	UPROPERTY()
+	TObjectPtr<UResourceComponent> PlayerFoodForRegen = nullptr;
+
 protected:
 	virtual void BeginPlay() override;
 };

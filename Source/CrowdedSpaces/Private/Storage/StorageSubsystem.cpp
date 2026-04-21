@@ -21,10 +21,10 @@ void UStorageSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	FoodComponent = GameState->GetResourceComponent<EResourceType::Food>();
 	ElectricityComponent = GameState->GetResourceComponent<EResourceType::Electricity>();
 	
-	UBuildSubsystem* BuildSubsystem = InWorld.GetSubsystem<UBuildSubsystem>();
+	BuildSubsystem = InWorld.GetSubsystem<UBuildSubsystem>();
 	BuildSubsystem->OnRoomDestroyed.AddDynamic(this, &UStorageSubsystem::OnRoomDestroyed);
 	BuildSubsystem->OnRoomCreated.AddDynamic(this, &UStorageSubsystem::OnRoomCreated);
-	// todo: on room updated (aggrandir)
+	BuildSubsystem->OnRoomUpdated.AddDynamic(this, &UStorageSubsystem::OnRoomUpdated);
 }
 
 TStatId UStorageSubsystem::GetStatId() const
@@ -40,23 +40,94 @@ void UStorageSubsystem::OnRoomCreated(const int RoomId, const EGridRoomType Room
 	AddStorageRoom(RoomId);
 }
 
+void UStorageSubsystem::OnRoomUpdated(const int RoomId, const EGridRoomType RoomType)
+{
+	if (RoomType != EGridRoomType::Storage)
+		return;
+
+	UpdateStorageRoom(RoomId);
+}
+
 void UStorageSubsystem::AddStorageRoom(const int RoomId)
 {
-	// Struct pour plus tard avoir des updrades de storage room pour avoir des max + grands
-	// ou pour avoir des values * nbr cells de la room
-
 	UE_LOG(LogTemp, Display, TEXT("Adding storage room %d"), RoomId);
+
+	int RoomCellsCount = BuildSubsystem->GetRoomCellsCount(RoomId);
 	
 	FStorageRoomValues StorageRoomValues;
-	StorageRoomValues.AddMaxMoney = StorageData->StorageRoomAddMaxMoney;
-	StorageRoomValues.AddMaxFood = StorageData->StorageRoomAddMaxFood;
-	StorageRoomValues.AddMaxElectricity = StorageData->StorageRoomAddMaxElectricity;
+	
+	StorageRoomValues.AddMaxMoneyPerCell = StorageData->StorageRoomAddMaxMoneyPerCell;
+	StorageRoomValues.AddMaxMoneyTotal = StorageData->StorageRoomAddMaxMoneyPerCell * RoomCellsCount;
+	
+	StorageRoomValues.AddMaxFoodPerCell = StorageData->StorageRoomAddMaxFoodPerCell;
+	StorageRoomValues.AddMaxFoodTotal = StorageData->StorageRoomAddMaxFoodPerCell * RoomCellsCount;
+	
+	StorageRoomValues.AddMaxElectricityPerCell = StorageData->StorageRoomAddMaxElectricityPerCell;
+	StorageRoomValues.AddMaxElectricityTotal = StorageData->StorageRoomAddMaxElectricityPerCell * RoomCellsCount;
 
-	MoneyComponent->AddMaxResource(StorageRoomValues.AddMaxMoney);
-	FoodComponent->AddMaxResource(StorageRoomValues.AddMaxFood);
-	ElectricityComponent->AddMaxResource(StorageRoomValues.AddMaxElectricity);
+	MoneyComponent->AddMaxResource(StorageRoomValues.AddMaxMoneyTotal);
+	FoodComponent->AddMaxResource(StorageRoomValues.AddMaxFoodTotal);
+	ElectricityComponent->AddMaxResource(StorageRoomValues.AddMaxElectricityTotal);
 	
 	StorageRooms.Add(RoomId, StorageRoomValues);
+}
+
+void UStorageSubsystem::UpdateStorageRoom(const int RoomId)
+{
+	int RoomCellsCount = BuildSubsystem->GetRoomCellsCount(RoomId);
+	
+	FStorageRoomValues StorageRoomValues = StorageRooms[RoomId];
+	FStorageRoomValues NewStorageRoomValues = StorageRoomValues;
+
+	// Money
+	float NewAddMaxMoneyTotal = StorageData->StorageRoomAddMaxMoneyPerCell * RoomCellsCount;
+	if (NewAddMaxMoneyTotal != StorageRoomValues.AddMaxMoneyTotal)
+	{
+		float AddMaxMoneyOffset = NewAddMaxMoneyTotal - StorageRoomValues.AddMaxMoneyTotal;
+		if (AddMaxMoneyOffset > 0)
+		{
+			MoneyComponent->AddMaxResource(AddMaxMoneyOffset);
+		}
+		else
+		{
+			MoneyComponent->RemoveMaxResource(abs(AddMaxMoneyOffset));
+		}
+	}
+	NewStorageRoomValues.AddMaxMoneyTotal = NewAddMaxMoneyTotal;
+
+	// Food
+	float NewAddMaxFoodTotal = StorageData->StorageRoomAddMaxFoodPerCell * RoomCellsCount;
+	if (NewAddMaxFoodTotal != StorageRoomValues.AddMaxFoodTotal)
+	{
+		float AddMaxFoodOffset = NewAddMaxFoodTotal - StorageRoomValues.AddMaxFoodTotal;
+		if (AddMaxFoodOffset > 0)
+		{
+			FoodComponent->AddMaxResource(AddMaxFoodOffset);
+		}
+		else
+		{
+			FoodComponent->RemoveMaxResource(abs(AddMaxFoodOffset));
+		}
+	}
+	NewStorageRoomValues.AddMaxFoodTotal = NewAddMaxFoodTotal;
+
+	// Electricity
+	float NewAddMaxElectricityTotal = StorageData->StorageRoomAddMaxElectricityPerCell * RoomCellsCount;
+	if (NewAddMaxElectricityTotal != StorageRoomValues.AddMaxElectricityTotal)
+	{
+		float AddMaxElectricityOffset = NewAddMaxElectricityTotal - StorageRoomValues.AddMaxElectricityTotal;
+		if (AddMaxElectricityOffset > 0)
+		{
+			ElectricityComponent->AddMaxResource(AddMaxElectricityOffset);
+		}
+		else
+		{
+			ElectricityComponent->RemoveMaxResource(abs(AddMaxElectricityOffset));
+		}
+	}
+	NewStorageRoomValues.AddMaxElectricityTotal = NewAddMaxElectricityTotal;
+
+	StorageRooms[RoomId] = NewStorageRoomValues;
 }
 
 void UStorageSubsystem::OnRoomDestroyed(const int RoomId)
@@ -70,9 +141,9 @@ void UStorageSubsystem::OnRoomDestroyed(const int RoomId)
 	
 	FStorageRoomValues StorageRoomValues = StorageRooms[RoomId];
 	
-	MoneyComponent->RemoveMaxResource(StorageRoomValues.AddMaxMoney);
-	FoodComponent->RemoveMaxResource(StorageRoomValues.AddMaxFood);
-	ElectricityComponent->RemoveMaxResource(StorageRoomValues.AddMaxElectricity);
+	MoneyComponent->RemoveMaxResource(StorageRoomValues.AddMaxMoneyTotal);
+	FoodComponent->RemoveMaxResource(StorageRoomValues.AddMaxFoodTotal);
+	ElectricityComponent->RemoveMaxResource(StorageRoomValues.AddMaxElectricityTotal);
 		
 	StorageRooms.Remove(RoomId);
 }

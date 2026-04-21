@@ -17,8 +17,7 @@ class UBuildData;
 class UBuildSubsystem;
 class USlotComponent;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNPCUsingChanged, bool, Value);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNPCComingChanged, bool, Value);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSlotsUpdated);
 
 UCLASS()
 class CROWDEDSPACES_API ABuildableObject : public AActor
@@ -39,94 +38,88 @@ public:
 	UFUNCTION()
 	UStaticMeshComponent* GetMeshComponent() const { return MeshComp; }
 
-	USlotComponent* GetNearestFreeSlot(const FVector& Vector);
-	bool IsAvailableForReservation(const ANPC* NPC) const;
-
-	UPROPERTY(BlueprintAssignable)
-	FOnNPCUsingChanged OnNPCUsingChanged;
-
-	UPROPERTY(BlueprintAssignable)
-	FOnNPCComingChanged OnNPCComingChanged;
-
 	UFUNCTION(BlueprintCallable, Category = "Object")
 	bool CanBeUsed() const;
 
+	// Slots
+	USlotComponent* GetNearestFreeSlot(const FVector& FromLocation);
+	bool IsAvailableForReservation(const ANPC* NPC) const;
+	void Release(ANPC* NPC);
+	USlotComponent* ReserveSpecificSlot(ANPC* NPC, USlotComponent* Slot);
+	void ReleaseSlot(ANPC* NPC);
+	
+	bool IsOverlappingCells(const TSet<FIntPoint>& Cells) const;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnSlotsUpdated OnSlotsUpdated;
+
 	UFUNCTION(BlueprintCallable, Category = "Object")
-	void CheckCantBeUsedStopTask() const;
+	int GetSlotsNbr() const;
 	
 	UFUNCTION(BlueprintCallable, Category = "Object")
-	bool HasNPCComing() const { return bHasNPCComing; }
+	int GetFreeSlotsNbr() const;
 
-	UFUNCTION(BlueprintCallable, Category = "Object")
-	bool HasNPCUsing() const { return bHasNPCUsing; }
-
+	// Electricity
 	UFUNCTION(BlueprintCallable, Category = "Object")
 	bool HasEnoughElectricity() const { return bHasEnoughElectricity; }
+	
+	UFUNCTION(BlueprintCallable, Category = "Object")
+	void SetHasEnoughElectricity(bool bEnoughElectricity);
 
+	// Activated
 	UFUNCTION(BlueprintCallable, Category = "Object")
 	bool IsActivated() const { return bIsActivated && bHasEnoughElectricity; }
 
 	UFUNCTION(BlueprintCallable, Category = "Object")
-	void SetHasEnoughElectricity(bool bEnoughElectricity);
+	void SetIsActivated(bool bActivated);
 
 	UFUNCTION(BlueprintCallable, Category = "Object")
-	void SetIsActivated(bool bActivated);
-	
-	bool TryReserve(ANPC* NPC);
-	bool IsReservedByOther(TObjectPtr<ANPC> NPC) const;
-	void Release(ANPC* NPC);
+	void SetWillBeRemoved(bool bRemoved);
+
+	// Using
 	void StartUsing(ANPC* NPC);
 	void StopUsing(ANPC* NPC);
-	
-	virtual bool StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask);
-	virtual bool StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask);
+
+	virtual bool StartUsingImplementation(ANPC* NPC);
+	virtual bool StopUsingImplementation(ANPC* NPC);
 
 	UFUNCTION(BlueprintCallable, Category = "Object")
 	EObjectType GetObjectType() const { return ObjectType; }
 
 	UFUNCTION(BlueprintCallable, Category = "Object")
-	ENPCActionWidget GetNPCAction() const { return NPCAction;}
+	ENPCActionType GetNPCAction() const { return NPCAction;}
 
 	UFUNCTION(BlueprintCallable, Category = "Object")
-	void SetBuildData(UBuildData* NewData);
+	void SetBuildData(UBuildData* NewData) { BuildData = NewData; }
 	
 	UFUNCTION(BlueprintCallable, Category = "Object")
 	UBuildData* GetBuildData() const { return BuildData; }
 	
 	UFUNCTION(BlueprintCallable, Category = "Object")
 	void DestroyObject();
-	
-	USlotComponent* GetFreeSlot();
-	USlotComponent* ReserveSlot(ANPC* NPC);
-	void ReleaseSlot(ANPC* NPC);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int RoomId = UBuildSubsystem::InvalidRoomId; 
+	int RoomId = UBuildSubsystem::InvalidRoomId;
+
+	bool bIsBeingDestroyed;
+
+	void UpdateMaterialState() const;
+
+	UPROPERTY()
+	TArray<FIntPoint> OccupiedCells;
 	
 protected:
 	UPROPERTY()
 	TArray<USlotComponent*> Slots; 
 	
 	UPROPERTY()
-	TObjectPtr<ACrowdedGameState> GameState = nullptr;
+	TObjectPtr<ACrowdedGameState> GameState{nullptr};
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TObjectPtr<UStaticMeshComponent> MeshComp;
-
-	UPROPERTY()
-	TWeakObjectPtr<ANPC> ComingNPC = nullptr;
-
-	UPROPERTY()
-	TWeakObjectPtr<ANPC> UsingNPC = nullptr;
-
-	UPROPERTY()
-	bool bCanBeUsed = true;
+	TObjectPtr<UStaticMeshComponent> MeshComp{nullptr};
 	
 	UPROPERTY()
-	bool bHasNPCUsing = false;
-
-	UPROPERTY()
-	bool bHasNPCComing = false;
+	bool bCanBeUsed = true;
 
 	UPROPERTY()
 	bool bHasEnoughElectricity = true;
@@ -135,29 +128,42 @@ protected:
 	bool bIsActivated = true;
 
 	UPROPERTY()
+	bool bWillBeRemoved = false;
+
+	UPROPERTY()
 	EObjectType ObjectType = EObjectType::Default;
 
 	UPROPERTY()
-	ENPCActionWidget NPCAction = ENPCActionWidget::Idle;
+	ENPCActionType NPCAction = ENPCActionType::Idle;
 
 	UPROPERTY()
-	TObjectPtr<UBuildData> BuildData;
+	TObjectPtr<UBuildData> BuildData{nullptr};
 
 	UPROPERTY()
-	TObjectPtr<UBuildSubsystem> BuildSubsystem;
+	TObjectPtr<UBuildSubsystem> BuildSubsystem{nullptr};
 
 	UPROPERTY()
-	TObjectPtr<ACrowdedPlayerController> CrowdedPlayerController;
+	TObjectPtr<ACrowdedPlayerController> CrowdedPlayerController{nullptr};
 
 	UPROPERTY()
-	TObjectPtr<ACrowdedGameState> CrowdedGameState;
+	TObjectPtr<ACrowdedGameState> CrowdedGameState{nullptr};
 
 	UPROPERTY()
-	TObjectPtr<AGameHUD> GameHUD;
+	TObjectPtr<AGameHUD> GameHUD{nullptr};
 
 	UPROPERTY()
-	TObjectPtr<UBuildableRegistrySubsystem> BRS;
+	TObjectPtr<UBuildableRegistrySubsystem> BRS{nullptr};
 	
 	UPROPERTY()
-	UBTTask_UseBuildableObject* CurrentTask;
+	TArray<TWeakObjectPtr<ANPC>> UsingNPCs;
+
+	// Materials
+	UPROPERTY()
+	TObjectPtr<UMaterialInterface> NormalMaterial{nullptr};
+
+	UPROPERTY()
+	TObjectPtr<UMaterialInterface> WillBeRemovedMaterial{nullptr};
+
+	UPROPERTY()
+	TObjectPtr<UMaterialInterface> DisabledMaterial{nullptr};
 };

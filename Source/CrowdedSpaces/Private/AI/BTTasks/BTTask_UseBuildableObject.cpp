@@ -1,95 +1,99 @@
 ﻿#include "AI/BTTasks/BTTask_UseBuildableObject.h"
 
-#include "AI/NPCController.h"
+#include "AI/NPC.h"
 #include "Build/BuildableObject.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "AIController.h"
+#include "Debug/CrowdedSpacesLogs.h"
 
-UBTTask_UseBuildableObject::UBTTask_UseBuildableObject(FObjectInitializer const& ObjectInitializer)
+UBTTask_UseBuildableObject::UBTTask_UseBuildableObject(FObjectInitializer const& ObjectInitializer):
+	ResourceTypeToCheck()
 {
 	NodeName = "Use Buildable Object";
 
-	bCreateNodeInstance = true;  
-	bNotifyTaskFinished = true;
+	bNotifyTick = true;
 }
 
 EBTNodeResult::Type UBTTask_UseBuildableObject::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	TObjectPtr<ANPCController> Controller = Cast<ANPCController>(OwnerComp.GetAIOwner());
-	if (!Controller)
+	const AAIController* AI = OwnerComp.GetAIOwner();
+	if (!AI)
 		return EBTNodeResult::Failed;
 
-	NPC = Cast<ANPC>(Controller->GetPawn());
+	NPC = Cast<ANPC>(AI->GetPawn());
 	if (!NPC)
 		return EBTNodeResult::Failed;
-	
-	TObjectPtr<UBlackboardComponent> Blackboard = OwnerComp.GetBlackboardComponent();
-	if (!Blackboard)
+
+	CurrentObject = NPC->GetCurrentObject();
+	if (!CurrentObject)
 		return EBTNodeResult::Failed;
 
-	TObjectPtr<ABuildableObject> TargetObject = Cast<ABuildableObject>(Blackboard->GetValueAsObject(TargetObjectKey.SelectedKeyName));
-	if (!TargetObject)
-		return EBTNodeResult::Failed;
+	bHasStartedUsing = false;
 
-	if (!TargetObject->CanBeUsed())
-		return EBTNodeResult::Failed;
-
-	StartAction(TargetObject);
-
-	TargetObject->StartUsing(NPC);
-	if (!TargetObject->StartUsingImplementation(this))
-	{
-		return EBTNodeResult::Failed;
-	}
-
-	OwnerCompPtr = &OwnerComp;
-	
 	return EBTNodeResult::InProgress;
 }
 
-void UBTTask_UseBuildableObject::OnStopAction()
+void UBTTask_UseBuildableObject::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
-	if (!OwnerCompPtr.IsValid())
+	if (!NPC || !CurrentObject || !IsValid(CurrentObject) || CurrentObject->bIsBeingDestroyed)
+	{
+		StopUsingClean();
+		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+		return;
+	}
+	
+	if (!NPC || !CurrentObject)
 		return;
 
-	TObjectPtr<ANPCController> Controller = Cast<ANPCController>(OwnerCompPtr->GetAIOwner());
-	if (!Controller)
-		return;
+	if (!bHasStartedUsing)
+	{
+		CurrentObject->StartUsing(NPC);
+		bHasStartedUsing = true;
+	}
 
-	NPC = Cast<ANPC>(Controller->GetPawn());
-	if (!NPC)
+	if (!CurrentObject->CanBeUsed())
+	{
+		CS_LOG_WARNING("Current used object set to cant be used, stop using");
+		
+		StopUsingClean();
+		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+		
+		return;
+	}
+
+	if (ResourceTypeToCheck == EResourceType::None)
 		return;
 	
-	FinishLatentTask(*OwnerCompPtr, EBTNodeResult::Succeeded);
-}
-
-void UBTTask_UseBuildableObject::OnTargetDestroyed() const
-{
-	OwnerCompPtr->GetBlackboardComponent()->SetValueAsObject(TargetObjectKey.SelectedKeyName, nullptr);
-	ForceStopTask();
-}
-
-void UBTTask_UseBuildableObject::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory,
-                                                EBTNodeResult::Type TaskResult)
-{
-	Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);
-	
-	TObjectPtr<UBlackboardComponent> Blackboard = OwnerComp.GetBlackboardComponent();
-	if (!Blackboard)
+	const UResourceComponent* Resource = NPC->GetResourceComponentByType(ResourceTypeToCheck);
+	if (!Resource)
 		return;
 
-	StopAction();
-	
-	TObjectPtr<ABuildableObject> TargetObject = Cast<ABuildableObject>(Blackboard->GetValueAsObject(TargetObjectKey.SelectedKeyName));
-	if (!TargetObject)
+	if (Resource->GetResource() >= Resource->GetMaxResource())
+	{
+		CS_LOG_WARNING("Max resource, stop using");
+		
+		StopUsingClean();
+		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+		
 		return;
-
-	TargetObject->StopUsingImplementation(this);
-	TargetObject->StopUsing(NPC);
-
-	Blackboard->SetValueAsObject(TargetObjectKey.SelectedKeyName, nullptr);
+	}
 }
 
-void UBTTask_UseBuildableObject::ForceStopTask() const
+EBTNodeResult::Type UBTTask_UseBuildableObject::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	FinishLatentTask(*OwnerCompPtr, EBTNodeResult::Failed);
+	CS_LOG_WARNING("Abort use task");
+	StopUsingClean();
+
+	return EBTNodeResult::Aborted;
+}
+
+void UBTTask_UseBuildableObject::StopUsingClean() const
+{
+	if (!CurrentObject || !NPC)
+		return;
+
+	CS_LOG_WARNING("Stop using object");
+	
+	CurrentObject->StopUsing(NPC);
+	CurrentObject->Release(NPC);
 }

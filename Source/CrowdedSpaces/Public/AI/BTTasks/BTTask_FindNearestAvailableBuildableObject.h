@@ -13,14 +13,9 @@ class CROWDEDSPACES_API UBTTask_FindNearestAvailableBuildableObject : public UCu
 	
 public:
 	explicit UBTTask_FindNearestAvailableBuildableObject(FObjectInitializer const& ObjectInitializer);
-	
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
-	virtual void OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult) override;
-
+	
 private:
-	UPROPERTY(EditAnywhere, Category = "AI")
-	float SearchRadius = 500.f;
-
 	UPROPERTY(EditAnywhere, Category="Blackboard")
 	FBlackboardKeySelector TargetLocationKey;
 	
@@ -28,5 +23,11 @@ private:
 	FBlackboardKeySelector TargetObjectKey;
 
 	UPROPERTY(EditAnywhere, Category="Blackboard")
+	FBlackboardKeySelector TargetSlotKey;
+
+	UPROPERTY(EditAnywhere, Category="Blackboard")
 	EObjectType BuildableObjectType = EObjectType::Default;
+
+	UPROPERTY(EditAnywhere, Category="Blackboard")
+	ENPCActionType NPCSearchAction;
 };

@@ -2,10 +2,12 @@
 
 #include "CoreMinimal.h"
 #include "BuildModeType.h"
+#include "RoomEditMode.h"
 #include "Game/GameModeState.h"
 #include "Grid/GridRoomType.h"
 #include "BuildSubsystem.generated.h"
 
+class UBuildableRegistrySubsystem;
 struct FGridCell;
 class AGameHUD;
 class AGhostObject;
@@ -30,6 +32,7 @@ class UResourceComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeselected);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRoomDestroyed, int, RoomId);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnRoomCreated, int, RoomId, EGridRoomType, RoomType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnRoomUpdated, int, RoomId, EGridRoomType, RoomType);
 
 UCLASS()
 class CROWDEDSPACES_API UBuildSubsystem : public UTickableWorldSubsystem
@@ -47,7 +50,7 @@ public:
 	virtual bool IsTickable() const override;
 
 	UFUNCTION(BlueprintCallable)
-	void OnBuildModeSelected(EBuildModeType BuildMode);
+	void OnBuildModeSelected(EBuildModeType BuildMode) const;
 	
 	UFUNCTION(BlueprintCallable)
 	void StartBuilding(UBuildData* BuildData);
@@ -107,19 +110,31 @@ public:
 	void GetRoomRotatedSize(int& OutX, int& OutY) const;
 
 	UFUNCTION(BlueprintCallable)
-	TMap<int, FGridRoom>& GetRooms();
+	TMap<int, FGridRoom>& GetRooms() const;
 	
 	UFUNCTION(BlueprintCallable)
-	void DestroyRoom(int RoomId) const;
+	void DestroyRoom(const int RoomId) const;
+	
+	FGridRoom* GetRoom(const int RoomId) const;
 
 	UFUNCTION(BlueprintCallable)
-	float GetRoomDestroyCost(int RoomId) const;
+	float GetRoomDestroyCost(const int RoomId) const;
 
 	UFUNCTION(BlueprintCallable)
-	void UnlockRoom(EGridRoomType RoomType);
+	int GetRoomCellsCount(const int RoomId) const;
 
 	UFUNCTION(BlueprintCallable)
-	bool IsRoomUnlocked(EGridRoomType RoomType) const;
+	void UnlockRoom(const EGridRoomType RoomType);
+
+	UFUNCTION(BlueprintCallable)
+	bool IsRoomUnlocked(const EGridRoomType RoomType) const;
+
+	void GetObjectsToBeDestroyed(TArray<ABuildableObject*>& OutObjects) const;
+
+	UFUNCTION()
+	void OnRoomActiveStateChanged(int RoomId);
+
+	bool CheckIsObjectCuttingRooms(const int SizeX, const int SizeY, const int StartRow, const int StartCol) const;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnDeselected OnDeselected; // To deselect ui
@@ -130,7 +145,19 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnRoomCreated OnRoomCreated;
 
+	UPROPERTY(BlueprintAssignable)
+	FOnRoomUpdated OnRoomUpdated;
+
 	static constexpr int InvalidRoomId = -1;
+
+	UFUNCTION(BlueprintCallable)
+	void SetRoomBushSize(const int NewSize) { BuildRoomBrushSize = NewSize; }
+
+	UFUNCTION(BlueprintCallable)
+	ERoomEditMode GetRoomEditMode() const { return CurrentRoomEditMode; }
+	
+	UFUNCTION(BlueprintCallable)
+	void ChangeRoomEditMode();
 
 private:
 	UPROPERTY()
@@ -201,5 +228,14 @@ private:
 	EGridRoomType CurrentObjectRoomType = EGridRoomType::Any;
 
 	UPROPERTY()
-	int CurrentObjectRoomId = InvalidRoomId; 
+	int CurrentObjectRoomId = InvalidRoomId;
+
+	UPROPERTY()
+	int BuildRoomBrushSize = 3;
+
+	UPROPERTY()
+	ERoomEditMode CurrentRoomEditMode = ERoomEditMode::Add;
+
+	UPROPERTY()
+	TObjectPtr<UBuildableRegistrySubsystem> BuildableRegistrySubsystem{nullptr};
 };

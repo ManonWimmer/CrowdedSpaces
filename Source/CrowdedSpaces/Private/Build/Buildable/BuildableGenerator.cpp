@@ -10,7 +10,7 @@ ABuildableGenerator::ABuildableGenerator()
 	
 	SelectionType = ESelectionType::Generator;
 	ObjectType = EObjectType::Generator;
-	NPCAction = ENPCActionWidget::Work;
+	NPCAction = ENPCActionType::Work;
 }
 
 void ABuildableGenerator::BeginPlay()
@@ -58,19 +58,15 @@ void ABuildableGenerator::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	BRS->UnregisterGenerator(this);
 }
 
-bool ABuildableGenerator::StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
+bool ABuildableGenerator::StartUsingImplementation(ANPC* NPC)
 {
-	CurrentTask = UseObjectTask;
-	
-	ProductionComponent->SetProductionMultiplier(UsingNPC->GetProductionMultiplierForType(ProductionComponent->GetProductionType()));
+	ProductionComponent->SetProductionMultiplier(NPC->GetProductionMultiplierForType(ProductionComponent->GetProductionType()));
 	ProductionComponent->StartProduction();
 	return true; 
 }
 
-bool ABuildableGenerator::StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
+bool ABuildableGenerator::StopUsingImplementation(ANPC* NPC)
 {
-	CurrentTask = nullptr;
-	
 	ProductionComponent->SetProductionMultiplier(1);
 	ProductionComponent->PauseProduction();
 	return true; 

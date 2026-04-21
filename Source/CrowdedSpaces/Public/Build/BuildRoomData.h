@@ -22,16 +22,10 @@ public:
 	TObjectPtr<UTexture2D> Texture;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int MoneyCost = 10;
+	int MoneyCostPerCell = 10;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int DestroyMoney = 10;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int GridRowsX = 1;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int GridColumnsY = 1;
+	int DestroyMoneyPerCell = 10;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	EGridRoomType RoomType = EGridRoomType::Any;

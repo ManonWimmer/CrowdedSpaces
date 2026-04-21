@@ -6,7 +6,7 @@ ABuildableBed::ABuildableBed()
 {
 	SelectionType = ESelectionType::Bed;
 	ObjectType = EObjectType::Bed;
-	NPCAction = ENPCActionWidget::Sleep;
+	NPCAction = ENPCActionType::Sleep;
 }
 
 void ABuildableBed::BeginPlay()
@@ -29,50 +29,36 @@ void ABuildableBed::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	BRS->UnregisterBed(this);
 }
 
-bool ABuildableBed::StartUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
+bool ABuildableBed::StartUsingImplementation(ANPC* NPC)
 {
-	CurrentTask = UseObjectTask;
-	
-	if (!UsingNPC.IsValid())
-		return false;
-	
-	UResourceComponent* EnergyComp = UsingNPC->GetResourceComponent<EResourceType::Energy>();
+	UResourceComponent* EnergyComp = NPC->GetResourceComponent<EResourceType::Energy>();
 	if (!EnergyComp)
 		return false;
 	
 	EnergyComp->SetIsInRegen(true);
 	
-	EnergyComp->OnResourceFull.AddDynamic(UseObjectTask, &UBTTask_UseBuildableObject::OnStopAction);
-
-	UResourceComponent* FoodComp = UsingNPC->GetResourceComponent<EResourceType::Food>();
+	UResourceComponent* FoodComp = NPC->GetResourceComponent<EResourceType::Food>();
 	if (!FoodComp)
 		return false;
 	
-	FoodComp->ToggleResourceTimer();  // todo: plus tard petit multiplicateur?
+	FoodComp->ToggleResourceTimer(); 
 	
 	return true;
 }
 
-bool ABuildableBed::StopUsingImplementation(UBTTask_UseBuildableObject* UseObjectTask)
+bool ABuildableBed::StopUsingImplementation(ANPC* NPC)
 {
-	CurrentTask = nullptr;
-	
-	if (!UsingNPC.IsValid())
-		return false;
-	
-	UResourceComponent* EnergyComp = UsingNPC->GetResourceComponent<EResourceType::Energy>();
+	UResourceComponent* EnergyComp = NPC->GetResourceComponent<EResourceType::Energy>();
 	if (!EnergyComp)
 		return false;
 
 	EnergyComp->SetIsInRegen(false);
-
-	EnergyComp->OnResourceFull.RemoveDynamic(UseObjectTask, &UBTTask_UseBuildableObject::OnStopAction);
-
-	UResourceComponent* FoodComp = UsingNPC->GetResourceComponent<EResourceType::Food>();
+	
+	UResourceComponent* FoodComp = NPC->GetResourceComponent<EResourceType::Food>();
 	if (!FoodComp)
 		return false;
 	
-	FoodComp->ToggleResourceTimer(); // todo: plus tard petit multiplicateur?
+	FoodComp->ToggleResourceTimer(); 
 	
 	return true;
 }

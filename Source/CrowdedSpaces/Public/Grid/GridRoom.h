@@ -21,10 +21,10 @@ struct FGridRoom
 	FLinearColor GridColor = FLinearColor::Yellow;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Room")
-	float LoseElectricityPerHour = 10;
+	float LoseElectricityPerHourPerCell = 10;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Room")
-	float DestroyMoney = 10;
+	float DestroyMoneyPerCell = 10;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Room")
 	bool bHasEnoughElectricity = true;
