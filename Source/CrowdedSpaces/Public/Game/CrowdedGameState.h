@@ -94,6 +94,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Actions", meta=(AllowPrivateAccess=true))
 	TArray<TSubclassOf<UAction>> TrainingStationActions;
 
+	UPROPERTY(EditAnywhere, Category = "Actions", meta=(AllowPrivateAccess=true))
+	TArray<TSubclassOf<UAction>> FireActions;
+
 private:
 	UPROPERTY()
 	TMap<EResourceType, TObjectPtr<UResourceComponent>> ResourceMap;

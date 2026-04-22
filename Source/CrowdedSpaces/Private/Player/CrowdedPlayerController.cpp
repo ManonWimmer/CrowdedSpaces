@@ -193,6 +193,11 @@ void ACrowdedPlayerController::HandleSelection() const
 
 	AActor* HitActor = Hit.GetActor();
 
+	if (bHit && Hit.GetActor())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Hit: %s"), *Hit.GetActor()->GetName());
+	}
+
 	// Action
 	if (ActionSubsystem)
 	{

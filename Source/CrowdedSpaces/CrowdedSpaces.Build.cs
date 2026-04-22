@@ -20,7 +20,8 @@ public class CrowdedSpaces : ModuleRules
 			"AIModule",
 			"GameplayTasks",
 			"NavigationSystem",
-			"ProceduralMeshComponent"
+			"ProceduralMeshComponent",
+			"Niagara",
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
