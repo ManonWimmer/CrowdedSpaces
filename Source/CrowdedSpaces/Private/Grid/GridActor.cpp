@@ -664,19 +664,29 @@ void AGridActor::RemoveCellsFromRooms(TArray<FGridCell*> CellsToRemove)
 	RecomputeAllRooms();
 }
 
-FGridCell AGridActor::GetRandomCell()
+bool AGridActor::GetRandomCellWorldPosition(FVector& OutWorldPos, int& Row, int& Column, const bool bCenter)
 {
-	const int RandomIndex = rand() % Cells.Num();
+	if (Cells.Num() == 0)
+		return false;
 
-	int i = 0;
-	for (const TTuple<UE::Math::TIntPoint<int>, FGridCell> IteratedPair : Cells)
-	{
-		if (i == RandomIndex)
-			return IteratedPair.Value;
-		i++;
-	}
+	TArray<FIntPoint> Keys;
+	Cells.GetKeys(Keys);
 
-	return FGridCell();
+	const FIntPoint& RandomKey = Keys[FMath::RandRange(0, Keys.Num() - 1)];
+	const FGridCell* Cell = Cells.Find(RandomKey);
+
+	if (!Cell)
+		return false;
+
+	Row = Cell->Row;
+	Column = Cell->Column;
+
+	FVector2D GridPos;
+	if (!GetGridLocation(bCenter, Cell->Row, Cell->Column, GridPos))
+		return false;
+
+	OutWorldPos = FVector(GridPos.X, GridPos.Y, GetActorLocation().Z);
+	return true;
 }
 #pragma endregion
 

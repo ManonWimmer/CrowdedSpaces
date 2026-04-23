@@ -16,11 +16,15 @@ class CROWDEDSPACES_API UFireSubsystem : public UTickableWorldSubsystem
 protected:
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
 	virtual TStatId GetStatId() const override;
+	virtual void Tick(float DeltaTime) override;
 
 public:
 	void StartFire();
 	void SpawnFireAtRandomCell();
-	FVector GetRandomSpawnLocation();
+	void SpawnFireAtCell(int Row, int Column);
+	TPair<FVector, FIntPoint> GetRandomSpawnLocation() const;
+	bool IsCellAlreadyOnFire(FIntPoint IntPoint);
+	void SpreadFire();
 
 private:
 	bool bIsInFire = false;
@@ -33,4 +37,8 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UBuildSubsystem> BuildSubsystem{nullptr};
+
+	float SpawnAfterTime = 5.f;
+
+	float CurrentTime = 0.f;
 };

@@ -159,7 +159,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ChangeRoomEditMode();
 
-	FGridCell GetRandomGridcell() const;
+	bool GetRandomCellWorldPos(FVector& OutWorldPos, int& Row, int& Column, const bool bCenter) const;
+	bool GetCellWorldPos(FVector& OutWorldPos, int Row, int Column) const;
+	bool CheckIsValidCell(int Row, int Column) const;
 
 private:
 	UPROPERTY()

@@ -93,7 +93,7 @@ public:
 	void AddCellsToRooms(TObjectPtr<UBuildRoomData> BuildData, TArray<FGridCell*> CellsToAdd);
 	void RemoveCellsFromRooms(TArray<FGridCell*> CellsToRemove);
 
-	FGridCell GetRandomCell();
+	bool GetRandomCellWorldPosition(FVector& OutWorldPos, int& Row, int& Column, bool bCenter);
 
 private:
 	void DrawLine(const FVector& Start, const FVector& End, float Thickness, TArray<FVector>& Vertices, TArray<int>& Triangles);

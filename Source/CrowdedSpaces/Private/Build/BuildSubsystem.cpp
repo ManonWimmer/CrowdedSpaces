@@ -150,12 +150,35 @@ void UBuildSubsystem::ChangeRoomEditMode()
 		CurrentRoomEditMode = ERoomEditMode::Add;
 }
 
-FGridCell UBuildSubsystem::GetRandomGridcell() const
+bool UBuildSubsystem::GetRandomCellWorldPos(FVector& OutWorldPos, int& Row, int& Column, const bool bCenter) const
 {
 	if (!GridActor)
-		return FGridCell();
+		return false;
 	
-	return GridActor->GetRandomCell();
+	return GridActor->GetRandomCellWorldPosition(OutWorldPos, Row,Column, bCenter);
+}
+
+bool UBuildSubsystem::GetCellWorldPos(FVector& OutWorldPos, int Row, int Column) const
+{
+	if (!GridActor)
+		return false;
+
+	FVector2D GridPos;
+	const bool bSuccess = GridActor->GetGridLocation(true, Row, Column, GridPos);
+
+	if (!bSuccess)
+		return false;
+
+	OutWorldPos = FVector(GridPos.X, GridPos.Y, GridActor->GetActorLocation().Z);
+	return true;
+}
+
+bool UBuildSubsystem::CheckIsValidCell(const int Row, const int Column) const
+{
+	if (!GridActor)
+		return false;
+
+	return GridActor->CheckIsValidCell(Row, Column);
 }
 #pragma endregion
 

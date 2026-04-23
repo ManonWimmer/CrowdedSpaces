@@ -23,6 +23,8 @@ public:
 	virtual void OnSelected() override;
 	virtual void OnDeselected() override;
 
+	FIntPoint GridCoords;
+
 protected:
 	virtual void BeginPlay() override;
 
