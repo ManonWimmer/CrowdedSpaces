@@ -149,6 +149,14 @@ void UBuildSubsystem::ChangeRoomEditMode()
 	else
 		CurrentRoomEditMode = ERoomEditMode::Add;
 }
+
+FGridCell UBuildSubsystem::GetRandomGridcell() const
+{
+	if (!GridActor)
+		return FGridCell();
+	
+	return GridActor->GetRandomCell();
+}
 #pragma endregion
 
 #pragma region Start / Stop Building

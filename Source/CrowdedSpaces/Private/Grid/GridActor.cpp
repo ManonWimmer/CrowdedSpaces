@@ -663,6 +663,21 @@ void AGridActor::RemoveCellsFromRooms(TArray<FGridCell*> CellsToRemove)
 	
 	RecomputeAllRooms();
 }
+
+FGridCell AGridActor::GetRandomCell()
+{
+	const int RandomIndex = rand() % Cells.Num();
+
+	int i = 0;
+	for (const TTuple<UE::Math::TIntPoint<int>, FGridCell> IteratedPair : Cells)
+	{
+		if (i == RandomIndex)
+			return IteratedPair.Value;
+		i++;
+	}
+
+	return FGridCell();
+}
 #pragma endregion
 
 #pragma region Walls

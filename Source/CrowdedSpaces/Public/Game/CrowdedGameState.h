@@ -11,6 +11,7 @@
 #include "Resources/ResourceComponent.h"
 #include "CrowdedGameState.generated.h"
 
+class AFire;
 class UStorageData;
 class UTrainingData;
 
@@ -96,6 +97,10 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Actions", meta=(AllowPrivateAccess=true))
 	TArray<TSubclassOf<UAction>> FireActions;
+
+	// Fire
+	UPROPERTY(EditAnywhere, Category = "Fire", meta=(AllowPrivateAccess=true))
+	TSubclassOf<AFire> FireBP{nullptr};
 
 private:
 	UPROPERTY()

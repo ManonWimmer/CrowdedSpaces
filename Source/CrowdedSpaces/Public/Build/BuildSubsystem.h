@@ -159,6 +159,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ChangeRoomEditMode();
 
+	FGridCell GetRandomGridcell() const;
+
 private:
 	UPROPERTY()
 	TObjectPtr<AGhostObject> CurrentGhost{nullptr};
