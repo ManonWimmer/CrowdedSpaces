@@ -61,6 +61,15 @@ void AFire::InitActions()
 }
 #pragma endregion
 
+#pragma region Fire
+void AFire::ExtinguishFire()
+{
+	OnFireExtinguished.Broadcast(this);
+	
+	Destroy();
+}
+#pragma endregion
+
 #pragma region Selection
 void AFire::OnSelected()
 {

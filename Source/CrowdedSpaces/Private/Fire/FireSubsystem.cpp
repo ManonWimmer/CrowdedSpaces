@@ -31,6 +31,9 @@ void UFireSubsystem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (!bIsInFire)
+		return;
+	
 	CurrentTime += DeltaTime;
 
 	if (CurrentTime > SpawnAfterTime)
@@ -47,6 +50,39 @@ void UFireSubsystem::StartFire()
 	SpawnFireAtRandomCell();
 }
 
+void UFireSubsystem::CheckIsFireExtinguished()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Nb Fires: %d"), SpawnedFires.Num());
+	
+	if (SpawnedFires.Num() == 0)
+	{
+		StopFire();
+	}
+}
+
+void UFireSubsystem::OnFireExtinguished(AFire* Fire)
+{
+	if (!Fire)
+		return;
+	
+	Fire->OnFireExtinguished.RemoveDynamic(this, &UFireSubsystem::OnFireExtinguished);
+
+	SpawnedFires.Remove(Fire);
+
+	SpawnedFires.RemoveAll([](const TWeakObjectPtr<AFire>& F)
+	{
+		return !F.IsValid();
+	});
+
+	CheckIsFireExtinguished();
+}
+
+void UFireSubsystem::StopFire()
+{
+	bIsInFire = false;
+	CurrentTime = 0.0f;
+}
+
 void UFireSubsystem::SpawnFireAtRandomCell()
 {
 	const auto RandomLocationWorldAndGrid = GetRandomSpawnLocation();
@@ -55,6 +91,8 @@ void UFireSubsystem::SpawnFireAtRandomCell()
 	SpawnedFire->GridCoords = RandomLocationWorldAndGrid.Value;
 	
 	SpawnedFires.Add(SpawnedFire);
+
+	SpawnedFire->OnFireExtinguished.AddDynamic(this, &UFireSubsystem::OnFireExtinguished);
 }
 
 void UFireSubsystem::SpawnFireAtCell(const int Row, const int Column)
@@ -71,6 +109,8 @@ void UFireSubsystem::SpawnFireAtCell(const int Row, const int Column)
 	UE_LOG(LogTemp, Warning, TEXT("Spawn fire at %s"), *CellLocation.ToString());
 	
 	SpawnedFires.Add(SpawnedFire);
+
+	SpawnedFire->OnFireExtinguished.AddDynamic(this, &UFireSubsystem::OnFireExtinguished);
 }
 
 TPair<FVector, FIntPoint> UFireSubsystem::GetRandomSpawnLocation() const
@@ -107,6 +147,9 @@ bool UFireSubsystem::IsCellAlreadyOnFire(const FIntPoint IntPoint)
 
 void UFireSubsystem::SpreadFire()
 {
+	if (!bIsInFire)
+		return;
+	
 	if (SpawnedFires.Num() == 0)
 		return;
 	

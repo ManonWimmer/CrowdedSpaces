@@ -20,6 +20,11 @@ protected:
 
 public:
 	void StartFire();
+	void CheckIsFireExtinguished();
+
+	UFUNCTION()
+	void OnFireExtinguished(AFire* Fire);
+	void StopFire();
 	void SpawnFireAtRandomCell();
 	void SpawnFireAtCell(int Row, int Column);
 	TPair<FVector, FIntPoint> GetRandomSpawnLocation() const;

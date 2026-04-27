@@ -10,6 +10,8 @@ class ACrowdedGameState;
 class UActionComponent;
 class USphereComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFireExtinguished, AFire*, Fire);
+
 UCLASS()
 class CROWDEDSPACES_API AFire : public AActor, public ISelectable
 {
@@ -19,11 +21,15 @@ public:
 	AFire();
 
 	void InitActions();
+	void ExtinguishFire();
 	
 	virtual void OnSelected() override;
 	virtual void OnDeselected() override;
 
 	FIntPoint GridCoords;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnFireExtinguished OnFireExtinguished;
 
 protected:
 	virtual void BeginPlay() override;
