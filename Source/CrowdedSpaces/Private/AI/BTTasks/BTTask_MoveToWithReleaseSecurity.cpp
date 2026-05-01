@@ -20,7 +20,11 @@ EBTNodeResult::Type UBTTask_MoveToWithReleaseSecurity::ExecuteTask(UBehaviorTree
     	if (!NPC)
     		return EBTNodeResult::Failed;
 
-	NPC->SetCurrentAction(NPCMoveAction);
+	const ABuildableObject* CurrentObject = NPC->GetCurrentObject();
+	if (!CurrentObject)
+		return EBTNodeResult::Failed;
+	
+	NPC->SetCurrentAction(CurrentObject->GetNPCMoveAction());
     		
 	return Super::ExecuteTask(OwnerComp, NodeMemory);
 }
@@ -40,7 +44,7 @@ void UBTTask_MoveToWithReleaseSecurity::OnTaskFinished(UBehaviorTreeComponent& O
 	Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);
 }
 
-void UBTTask_MoveToWithReleaseSecurity::Cleanup(const UBehaviorTreeComponent& OwnerComp)
+void UBTTask_MoveToWithReleaseSecurity::Cleanup(const UBehaviorTreeComponent& OwnerComp) const
 {
 	if (!NPC)
 		return;

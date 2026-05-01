@@ -9,7 +9,7 @@ void UCustomBTTask::StartAction(ABuildableObject* Object) // Send current action
 	if (!Object)
 		return;
 	
-	NPC->SetCurrentAction(Object->GetNPCAction());
+	NPC->SetCurrentAction(Object->GetNPCUseAction());
 }
 
 void UCustomBTTask::StopAction()  // Send idle action to NPC, called on task finished

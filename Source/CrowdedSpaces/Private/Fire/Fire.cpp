@@ -24,7 +24,8 @@ AFire::AFire()
 
 	SelectionType = ESelectionType::Default;
 	ObjectType = EObjectType::Fire;
-	NPCAction = ENPCActionType::ExtinguishFire;
+	NPCUseAction = ENPCActionType::ExtinguishFire;
+	NPCMoveAction = ENPCActionType::MoveToFire;
 	
 	SphereCollision->OnComponentBeginOverlap.AddDynamic(this, &AFire::OnOverlapBegin);
 	SphereCollision->OnComponentEndOverlap.AddDynamic(this, &AFire::OnOverlapEnd);

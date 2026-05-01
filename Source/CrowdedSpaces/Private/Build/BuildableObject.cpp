@@ -267,7 +267,7 @@ void ABuildableObject::StartUsing(ANPC* NPC)
 	CS_LOG("START USING SUCCESS NPC: %s", *GetNameSafe(NPC));
 
 	StartUsingImplementation(NPC);
-	NPC->SetCurrentAction(NPCAction);
+	NPC->SetCurrentAction(NPCUseAction);
 }
 
 void ABuildableObject::StopUsing(ANPC* NPC)

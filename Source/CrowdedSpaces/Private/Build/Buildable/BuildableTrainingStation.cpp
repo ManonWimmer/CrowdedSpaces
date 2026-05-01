@@ -8,7 +8,8 @@ ABuildableTrainingStation::ABuildableTrainingStation()
 {
 	SelectionType = ESelectionType::TrainingStation;
 	ObjectType = EObjectType::TrainingStation;
-	NPCAction = ENPCActionType::Train;
+	NPCUseAction = ENPCActionType::Train;
+	NPCMoveAction = ENPCActionType::MoveToTrainingStation;
 }
 
 void ABuildableTrainingStation::BeginPlay()

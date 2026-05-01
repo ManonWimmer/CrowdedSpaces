@@ -19,10 +19,7 @@ protected:
 	virtual void OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult) override;
 
 private:
-	void Cleanup(const UBehaviorTreeComponent& OwnerComp);
-
-	UPROPERTY(EditAnywhere, Category="Blackboard")
-	ENPCActionType NPCMoveAction;
+	void Cleanup(const UBehaviorTreeComponent& OwnerComp) const;
 
 	UPROPERTY()
 	TObjectPtr<ANPC> NPC;
