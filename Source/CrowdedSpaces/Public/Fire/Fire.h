@@ -20,7 +20,13 @@ class CROWDEDSPACES_API AFire : public ABuildableObject, public ISelectable
 
 public:
 	AFire();
+	
+	UFUNCTION()
+	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+	UFUNCTION()
+	void OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	
 	virtual void InitActions() override;
 	void ExtinguishFire();
 	
@@ -36,6 +42,7 @@ public:
 	FOnFireExtinguished OnFireExtinguished;
 
 protected:
+	void ApplyDamage();
 	virtual void BeginPlay() override;
 
 public:
@@ -47,4 +54,16 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<USphereComponent> SphereCollision{nullptr};
+
+	UPROPERTY()
+	TArray<TObjectPtr<AActor>> OverlappingActors;
+
+	UPROPERTY()
+	FTimerHandle DamageTimerHandle;
+
+	UPROPERTY(EditAnywhere)
+	float DamageInterval = 1.0f;
+
+	UPROPERTY(EditAnywhere)
+	float DamageAmount = 10.0f;
 };

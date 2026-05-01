@@ -8,6 +8,7 @@
 #include "Selection/Selectable.h"
 #include "NPCActionType.h"
 #include "NPCPriorityType.h"
+#include "Damage/Damageable.h"
 #include "Engine/Texture.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Production/ProductionType.h"
@@ -32,9 +33,10 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSkillsTrained);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerReadyForCapture); 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNameSet); 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnActionObjectChanged); 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHealthChanged); 
 
 UCLASS()
-class CROWDEDSPACES_API ANPC : public ACharacter, public ISelectable
+class CROWDEDSPACES_API ANPC : public ACharacter, public ISelectable, public IDamageable
 {
 	GENERATED_BODY()
 
@@ -176,6 +178,18 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetAutoNeeds(bool bNewAutoNeeds);
+
+	// Damage
+	virtual void TakeDamage_Implementation(const float Amount) override;
+	virtual void Heal_Implementation(const float Amount) override;
+	virtual float GetHealth_Implementation() const override;
+	
+	virtual void OnDamaged() override;
+	virtual void OnHealed() override;
+	virtual void OnDead() override;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnHealthChanged OnHealthChanged;
 	
 protected:
 	virtual void BeginPlay() override;
@@ -295,6 +309,13 @@ private:
 	// Auto needs
 	UPROPERTY()
 	bool bAutoNeeds = true;
+
+	// Health
+	UPROPERTY(EditAnywhere)
+	float Health = 100;
+
+	UPROPERTY(EditAnywhere)
+	float MaxHealth = 100;
 	
 	// Selectable
 public:

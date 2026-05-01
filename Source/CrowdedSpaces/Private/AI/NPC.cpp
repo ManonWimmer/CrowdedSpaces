@@ -684,3 +684,47 @@ void ANPC::SetAutoNeeds(const bool bNewAutoNeeds)
 	bAutoNeeds = bNewAutoNeeds;
 }
 #pragma endregion
+
+#pragma region Health
+void ANPC::TakeDamage_Implementation(const float Amount)
+{
+	CS_LOG("NPC take damage");
+	Health -= Amount;
+	OnDamaged();
+
+	if (Health <= 0)
+	{
+		Health = 0;
+		OnDead();
+	}
+}
+
+void ANPC::Heal_Implementation(const float Amount)
+{
+	// TODO
+	IDamageable::Heal_Implementation(Amount);
+}
+
+float ANPC::GetHealth_Implementation() const
+{
+	return Health;
+}
+
+void ANPC::OnDamaged()
+{
+	OnHealthChanged.Broadcast();
+	// VFX feedback to do, change color to red x seconds (timeline fade?) ? 
+}
+
+void ANPC::OnHealed()
+{
+	OnHealthChanged.Broadcast();
+	// VFX feedback to do
+}
+
+void ANPC::OnDead()
+{
+	OnHealthChanged.Broadcast();
+	Die();
+}
+#pragma endregion
