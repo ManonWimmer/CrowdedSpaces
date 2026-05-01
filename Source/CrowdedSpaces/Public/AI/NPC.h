@@ -149,33 +149,23 @@ public:
 	FOnPlayerReadyForCapture OnPlayerReadyForCapture;
 
 	// Actions
-	void SetGenerator(ABuildableGenerator* Generator);
-	void SetTrainingStation(ABuildableTrainingStation* TrainingStation);
+	void SetActionObject(ABuildableObject* Object);
 
 	UFUNCTION(BlueprintCallable)
-	void StopAction();
+	void StopAction() const;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnActionObjectChanged OnActionObjectChanged;
-	
-	UFUNCTION(BlueprintCallable)
-	ABuildableGenerator* GetGenerator() const;
 
 	UFUNCTION(BlueprintCallable)
-	bool HasGenerator() const;
+	ABuildableObject* GetActionObject() const;
 
 	UFUNCTION(BlueprintCallable)
-	ABuildableTrainingStation* GetTrainingStation() const;
-
-	UFUNCTION(BlueprintCallable)
-	bool HasTrainingStation() const;
+	bool HasActionObject() const;
 
 	// Camera
 	UFUNCTION(BlueprintCallable)
-	void FocusCameraOnGenerator() const;
-
-	UFUNCTION(BlueprintCallable)
-	void FocusCameraOnTrainingStation() const;
+	void FocusCameraOnActionObject() const;
 
 	UFUNCTION(BlueprintCallable)
 	void FocusCameraOnNPC() const;

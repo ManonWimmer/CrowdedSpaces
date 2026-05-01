@@ -39,5 +39,5 @@ void UAction_Generator_Work::Execute_Implementation(AActor* Instigator)
 	if (!SelectedNPC)
 		return;
 	
-	SelectedNPC->SetGenerator(Generator);
+	SelectedNPC->SetActionObject(Generator);
 }

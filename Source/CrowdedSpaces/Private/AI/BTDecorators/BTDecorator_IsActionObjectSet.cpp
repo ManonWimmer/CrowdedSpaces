@@ -1,20 +1,19 @@
-﻿#include "AI/BTDecorators/BTDecorator_IsTrainingStationSet.h"
+﻿#include "AI/BTDecorators/BTDecorator_IsActionObjectSet.h"
 
 #include "AIController.h"
 #include "AI/NPC.h"
 #include "AI/NPCController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
-UBTDecorator_IsTrainingStationSet::UBTDecorator_IsTrainingStationSet(FObjectInitializer const& ObjectInitializer)
+UBTDecorator_IsActionObjectSet::UBTDecorator_IsActionObjectSet(FObjectInitializer const& ObjectInitializer)
 {
-	NodeName = "Is Training Station Set";
+	NodeName = "Is Action Object Set";
 
 	bCreateNodeInstance = true; 
 	bNotifyTick = true;
 }
 
-bool UBTDecorator_IsTrainingStationSet::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp,
-	uint8* NodeMemory) const
+bool UBTDecorator_IsActionObjectSet::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const
 {
 	const ANPCController* Controller = Cast<ANPCController>(OwnerComp.GetAIOwner());
 	if (!Controller)
@@ -24,11 +23,10 @@ bool UBTDecorator_IsTrainingStationSet::CalculateRawConditionValue(UBehaviorTree
 	if (!NPC)
 		return EBTNodeResult::Failed;
 	
-	return NPC->HasTrainingStation();
+	return NPC->HasActionObject();
 }
 
-void UBTDecorator_IsTrainingStationSet::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory,
-	float DeltaSeconds)
+void UBTDecorator_IsActionObjectSet::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 

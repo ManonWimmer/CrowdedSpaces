@@ -2,15 +2,15 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/Decorators/BTDecorator_BlackboardBase.h"
-#include "BTDecorator_IsTrainPriority.generated.h"
+#include "BTDecorator_IsActionObjectSet.generated.h"
 
 UCLASS()
-class CROWDEDSPACES_API UBTDecorator_IsTrainPriority : public UBTDecorator_BlackboardBase
+class CROWDEDSPACES_API UBTDecorator_IsActionObjectSet : public UBTDecorator_BlackboardBase
 {
 	GENERATED_BODY()
 
 public:
-	explicit UBTDecorator_IsTrainPriority(FObjectInitializer const& ObjectInitializer);
+	explicit UBTDecorator_IsActionObjectSet(FObjectInitializer const& ObjectInitializer);
 
 	virtual bool CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const override;
 	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;

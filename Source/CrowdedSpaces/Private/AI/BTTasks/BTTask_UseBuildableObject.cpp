@@ -27,7 +27,7 @@ EBTNodeResult::Type UBTTask_UseBuildableObject::ExecuteTask(UBehaviorTreeCompone
 	CurrentObject = NPC->GetCurrentObject();
 	if (!CurrentObject)
 		return EBTNodeResult::Failed;
-
+	
 	bHasStartedUsing = false;
 
 	return EBTNodeResult::InProgress;
@@ -35,6 +35,15 @@ EBTNodeResult::Type UBTTask_UseBuildableObject::ExecuteTask(UBehaviorTreeCompone
 
 void UBTTask_UseBuildableObject::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
+	ABuildableObject* ActionObject = Cast<ABuildableObject>(OwnerComp.GetBlackboardComponent()->GetValueAsObject("ActionObject"));
+	if (ActionObject && CurrentObject != ActionObject)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Return action object != current object use"));
+		StopUsing();
+		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+		return;
+	}
+	
 	if (!NPC || !CurrentObject || !IsValid(CurrentObject) || CurrentObject->bIsBeingDestroyed)
 	{
 		StopUsing();
@@ -97,9 +106,6 @@ void UBTTask_UseBuildableObject::StopUsing() const
 	CurrentObject->StopUsing(NPC);
 	CurrentObject->Release(NPC);
 
-	if (CurrentObject->GetObjectType() == EObjectType::Generator)
-		NPC->SetGenerator(nullptr);
-	
-	if (CurrentObject->GetObjectType() == EObjectType::TrainingStation)
-		NPC->SetTrainingStation(nullptr);
+	if (NPC->GetActionObject() == CurrentObject)
+		NPC->StopAction();
 }

@@ -38,5 +38,5 @@ void UAction_TrainingStation_Train::Execute_Implementation(AActor* Instigator)
 	if (!SelectedNPC)
 		return;
 	
-	SelectedNPC->SetTrainingStation(TrainingStation);
+	SelectedNPC->SetActionObject(TrainingStation);
 }

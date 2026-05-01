@@ -13,7 +13,7 @@ bool UAction_NPC_StopAction::CanExecute_Implementation(AActor* Instigator) const
 	if (!NPC)
 		return false;
 	
-	if (!NPC->HasGenerator() && !NPC->HasTrainingStation())
+	if (!NPC->HasActionObject())
 		return false;
 
 	return true;

@@ -13,6 +13,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "Components/SpotLightComponent.h"
+#include "Debug/CrowdedSpacesLogs.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Game/CrowdedGameMode.h"
 #include "Game/CrowdedGameState.h"
@@ -241,11 +242,11 @@ void ANPC::AddTrainingExp(const float AddExp)
 				if (FoodProductionMultiplier == MaxMultipliersLevel) 
 					break;
 				
-				TrainingSkillsExp[ETrainingSkillType::FoodProduction] += AddExp;
+				TrainingSkillsExp[ETrainingSkillType::ElectricityProduction] += AddExp;
 
-				if (TrainingSkillsExp[ETrainingSkillType::FoodProduction] > CurrentLevelExpNeeded)
+				if (TrainingSkillsExp[ETrainingSkillType::ElectricityProduction] > CurrentLevelExpNeeded)
 				{
-					TrainingSkillsExp[ETrainingSkillType::FoodProduction] = 0;
+					TrainingSkillsExp[ETrainingSkillType::ElectricityProduction] = 0;
 					FoodProductionMultiplier += 1;
 				}
 				break;
@@ -607,108 +608,61 @@ void ANPC::SetupCapture()
 }
 #pragma endregion 
 
-#pragma region Generator & Training Station
-void ANPC::SetGenerator(ABuildableGenerator* Generator)
+#pragma region Action Object
+void ANPC::SetActionObject(ABuildableObject* Object)
 {
 	if (!Blackboard)
 		return;
-
-	if (!Generator)
-	{
-		StopAction();
-		return;
-	}
 	
-	USlotComponent* Slot = Generator->GetNearestFreeSlot(GetActorLocation());
+	if (!Object)
+		return;
+	
+	USlotComponent* Slot = Object->GetNearestFreeSlot(GetActorLocation());
 	if (!Slot)
 		return;
 	
-	Blackboard->SetValueAsObject("ActionObject", Generator);
+	Blackboard->SetValueAsObject("ActionObject", Object);
 	Blackboard->SetValueAsObject("ActionObjectSlot", Slot);
 	Blackboard->SetValueAsVector("ActionObjectLocation", Slot->GetComponentLocation());
 
-	FocusCameraOnGenerator();
+	FocusCameraOnActionObject();
 	
 	OnActionObjectChanged.Broadcast();
 }
 
-void ANPC::SetTrainingStation(ABuildableTrainingStation* TrainingStation)
+void ANPC::StopAction() const
 {
-	if (!Blackboard)
-		return;
-
-	if (!TrainingStation)
-	{
-		StopAction();
-		return;
-	}
+	CS_LOG_WARNING("Stop action behavior tree reset");
 	
-	USlotComponent* Slot = TrainingStation->GetNearestFreeSlot(GetActorLocation());
-	if (!Slot)
-		return;
-	
-	Blackboard->SetValueAsObject("ActionObject", TrainingStation);
-	Blackboard->SetValueAsObject("ActionObjectSlot", Slot);
-	Blackboard->SetValueAsVector("ActionObjectLocation", Slot->GetComponentLocation());
-
-	FocusCameraOnTrainingStation();
-	
-	OnActionObjectChanged.Broadcast();
-}
-
-void ANPC::StopAction()
-{
 	Blackboard->SetValueAsObject("ActionObject", nullptr);
 	Blackboard->SetValueAsObject("ActionObjectSlot", nullptr);
 	Blackboard->SetValueAsVector("ActionObjectLocation", FVector::Zero());
-
+	
 	OnActionObjectChanged.Broadcast();
 }
 
-ABuildableGenerator* ANPC::GetGenerator() const
+ABuildableObject* ANPC::GetActionObject() const
 {
 	if (!Blackboard)
 		return nullptr;
 	
-	return Cast<ABuildableGenerator>(Blackboard->GetValueAsObject("ActionObject"));
+	return Cast<ABuildableObject>(Blackboard->GetValueAsObject("ActionObject"));
 }
 
-bool ANPC::HasGenerator() const
+bool ANPC::HasActionObject() const
 {
-	return GetGenerator() != nullptr;
-}
-
-ABuildableTrainingStation* ANPC::GetTrainingStation() const
-{
-	if (!Blackboard)
-		return nullptr;
-	
-	return Cast<ABuildableTrainingStation>(Blackboard->GetValueAsObject("ActionObject"));
-}
-
-bool ANPC::HasTrainingStation() const
-{
-	return GetTrainingStation() != nullptr;
+	return GetActionObject() != nullptr;
 }
 #pragma endregion
 
 #pragma region Camera
-void ANPC::FocusCameraOnGenerator() const
+void ANPC::FocusCameraOnActionObject() const
 {
-	const ABuildableGenerator* Generator = GetGenerator();
-	if (!Generator)
+	const ABuildableObject* ActionObject = GetActionObject();
+	if (!ActionObject)
 		return;
 
-	FreeCameraPawn->FocusOnActor(Generator);
-}
-
-void ANPC::FocusCameraOnTrainingStation() const
-{
-	const ABuildableTrainingStation* TrainingStation = GetTrainingStation();
-	if (!TrainingStation)
-		return;
-
-	FreeCameraPawn->FocusOnActor(TrainingStation);
+	FreeCameraPawn->FocusOnActor(ActionObject);
 }
 
 void ANPC::FocusCameraOnNPC() const
