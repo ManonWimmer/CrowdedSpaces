@@ -38,7 +38,6 @@ void UAction_Generator_Work::Execute_Implementation(AActor* Instigator)
 	ANPC* SelectedNPC = ActionSubsystem->GetSelectedNPC();
 	if (!SelectedNPC)
 		return;
-
-	SelectedNPC->SetTrainingStation(nullptr);
+	
 	SelectedNPC->SetGenerator(Generator);
 }

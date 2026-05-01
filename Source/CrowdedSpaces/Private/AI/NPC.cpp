@@ -612,60 +612,57 @@ void ANPC::SetGenerator(ABuildableGenerator* Generator)
 {
 	if (!Blackboard)
 		return;
+
+	if (!Generator)
+	{
+		StopAction();
+		return;
+	}
 	
-	if (Generator != nullptr)
-	{
-		USlotComponent* Slot = Generator->GetNearestFreeSlot(GetActorLocation());
-		if (!Slot)
-			return;
-		
-		Blackboard->SetValueAsObject("Generator", Generator);
-		Blackboard->SetValueAsObject("GeneratorSlot", Slot);
-		Blackboard->SetValueAsVector("GeneratorLocation", Slot->GetComponentLocation());
+	USlotComponent* Slot = Generator->GetNearestFreeSlot(GetActorLocation());
+	if (!Slot)
+		return;
+	
+	Blackboard->SetValueAsObject("ActionObject", Generator);
+	Blackboard->SetValueAsObject("ActionObjectSlot", Slot);
+	Blackboard->SetValueAsVector("ActionObjectLocation", Slot->GetComponentLocation());
 
-		FocusCameraOnGenerator();
-	}
-	else
-	{
-		Blackboard->SetValueAsObject("Generator", nullptr);
-		Blackboard->SetValueAsObject("GeneratorSlot", nullptr);
-		Blackboard->SetValueAsVector("GeneratorLocation", FVector::Zero());
-	}
-
-	OnGeneratorChanged.Broadcast();
+	FocusCameraOnGenerator();
+	
+	OnActionObjectChanged.Broadcast();
 }
 
 void ANPC::SetTrainingStation(ABuildableTrainingStation* TrainingStation)
 {
 	if (!Blackboard)
 		return;
+
+	if (!TrainingStation)
+	{
+		StopAction();
+		return;
+	}
 	
-	if (TrainingStation != nullptr)
-	{
-		USlotComponent* Slot = TrainingStation->GetNearestFreeSlot(GetActorLocation());
-		if (!Slot)
-			return;
-		
-		Blackboard->SetValueAsObject("TrainingStation", TrainingStation);
-		Blackboard->SetValueAsObject("TrainingStationSlot", Slot);
-		Blackboard->SetValueAsVector("TrainingStationLocation", Slot->GetComponentLocation());
+	USlotComponent* Slot = TrainingStation->GetNearestFreeSlot(GetActorLocation());
+	if (!Slot)
+		return;
+	
+	Blackboard->SetValueAsObject("ActionObject", TrainingStation);
+	Blackboard->SetValueAsObject("ActionObjectSlot", Slot);
+	Blackboard->SetValueAsVector("ActionObjectLocation", Slot->GetComponentLocation());
 
-		FocusCameraOnTrainingStation();
-	}
-	else
-	{
-		Blackboard->SetValueAsObject("TrainingStation", nullptr);
-		Blackboard->SetValueAsObject("TrainingStationSlot", nullptr);
-		Blackboard->SetValueAsVector("TrainingStationLocation", FVector::Zero());
-	}
-
-	OnTrainingStationChanged.Broadcast();
+	FocusCameraOnTrainingStation();
+	
+	OnActionObjectChanged.Broadcast();
 }
 
 void ANPC::StopAction()
 {
-	SetGenerator(nullptr);
-	SetTrainingStation(nullptr);
+	Blackboard->SetValueAsObject("ActionObject", nullptr);
+	Blackboard->SetValueAsObject("ActionObjectSlot", nullptr);
+	Blackboard->SetValueAsVector("ActionObjectLocation", FVector::Zero());
+
+	OnActionObjectChanged.Broadcast();
 }
 
 ABuildableGenerator* ANPC::GetGenerator() const
@@ -673,7 +670,7 @@ ABuildableGenerator* ANPC::GetGenerator() const
 	if (!Blackboard)
 		return nullptr;
 	
-	return Cast<ABuildableGenerator>(Blackboard->GetValueAsObject("Generator"));
+	return Cast<ABuildableGenerator>(Blackboard->GetValueAsObject("ActionObject"));
 }
 
 bool ANPC::HasGenerator() const
@@ -686,7 +683,7 @@ ABuildableTrainingStation* ANPC::GetTrainingStation() const
 	if (!Blackboard)
 		return nullptr;
 	
-	return Cast<ABuildableTrainingStation>(Blackboard->GetValueAsObject("TrainingStation"));
+	return Cast<ABuildableTrainingStation>(Blackboard->GetValueAsObject("ActionObject"));
 }
 
 bool ANPC::HasTrainingStation() const

@@ -31,8 +31,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentActionChanged, ENPCActionT
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSkillsTrained); 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerReadyForCapture); 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNameSet); 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGeneratorChanged); 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTrainingStationChanged); 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnActionObjectChanged); 
 
 UCLASS()
 class CROWDEDSPACES_API ANPC : public ACharacter, public ISelectable
@@ -155,6 +154,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void StopAction();
+
+	UPROPERTY(BlueprintAssignable)
+	FOnActionObjectChanged OnActionObjectChanged;
 	
 	UFUNCTION(BlueprintCallable)
 	ABuildableGenerator* GetGenerator() const;
@@ -162,17 +164,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool HasGenerator() const;
 
-	UPROPERTY(BlueprintAssignable)
-	FOnGeneratorChanged OnGeneratorChanged;
-
 	UFUNCTION(BlueprintCallable)
 	ABuildableTrainingStation* GetTrainingStation() const;
 
 	UFUNCTION(BlueprintCallable)
 	bool HasTrainingStation() const;
-
-	UPROPERTY(BlueprintAssignable)
-	FOnTrainingStationChanged OnTrainingStationChanged;
 
 	// Camera
 	UFUNCTION(BlueprintCallable)

@@ -21,6 +21,10 @@ bool UBTDecorator_HasAutoNeeds::CalculateRawConditionValue(UBehaviorTreeComponen
 	if (!NPC)
 		return EBTNodeResult::Failed;
 	
+	return NPC->HasAutoNeeds();const ANPC* NPC = Cast<ANPC>(Controller->GetPawn());
+	if (!NPC)
+		return EBTNodeResult::Failed;
+	
 	return NPC->HasAutoNeeds();
 }
 

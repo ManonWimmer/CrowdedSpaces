@@ -1,6 +1,8 @@
 ﻿#include "AI/BTDecorators/BTDecorator_IsTrainingStationSet.h"
 
 #include "AIController.h"
+#include "AI/NPC.h"
+#include "AI/NPCController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
 UBTDecorator_IsTrainingStationSet::UBTDecorator_IsTrainingStationSet(FObjectInitializer const& ObjectInitializer)
@@ -14,15 +16,15 @@ UBTDecorator_IsTrainingStationSet::UBTDecorator_IsTrainingStationSet(FObjectInit
 bool UBTDecorator_IsTrainingStationSet::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp,
 	uint8* NodeMemory) const
 {
-	TObjectPtr<AAIController> AIController = OwnerComp.GetAIOwner();
-	if (!AIController)
-		return false;
-
-	UBlackboardComponent* Blackboard = AIController->GetBlackboardComponent();
-	if (!Blackboard)
-		return false;
-
-	return Blackboard->GetValueAsObject("TrainingStation") != nullptr;
+	const ANPCController* Controller = Cast<ANPCController>(OwnerComp.GetAIOwner());
+	if (!Controller)
+		return EBTNodeResult::Failed;
+	
+	const ANPC* NPC = Cast<ANPC>(Controller->GetPawn());
+	if (!NPC)
+		return EBTNodeResult::Failed;
+	
+	return NPC->HasTrainingStation();
 }
 
 void UBTDecorator_IsTrainingStationSet::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory,

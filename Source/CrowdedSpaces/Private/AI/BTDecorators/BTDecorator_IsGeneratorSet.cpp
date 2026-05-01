@@ -1,6 +1,8 @@
 ﻿#include "AI/BTDecorators/BTDecorator_IsGeneratorSet.h"
 
 #include "AIController.h"
+#include "AI/NPC.h"
+#include "AI/NPCController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
 UBTDecorator_IsGeneratorSet::UBTDecorator_IsGeneratorSet(FObjectInitializer const& ObjectInitializer)
@@ -13,15 +15,15 @@ UBTDecorator_IsGeneratorSet::UBTDecorator_IsGeneratorSet(FObjectInitializer cons
 
 bool UBTDecorator_IsGeneratorSet::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const
 {
-	TObjectPtr<AAIController> AIController = OwnerComp.GetAIOwner();
-	if (!AIController)
-		return false;
-
-	UBlackboardComponent* Blackboard = AIController->GetBlackboardComponent();
-	if (!Blackboard)
-		return false;
-
-	return Blackboard->GetValueAsObject("Generator") != nullptr;
+	const ANPCController* Controller = Cast<ANPCController>(OwnerComp.GetAIOwner());
+	if (!Controller)
+		return EBTNodeResult::Failed;
+	
+	const ANPC* NPC = Cast<ANPC>(Controller->GetPawn());
+	if (!NPC)
+		return EBTNodeResult::Failed;
+	
+	return NPC->HasGenerator();
 }
 
 void UBTDecorator_IsGeneratorSet::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
