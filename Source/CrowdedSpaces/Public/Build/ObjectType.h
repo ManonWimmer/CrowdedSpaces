@@ -10,4 +10,5 @@ enum class EObjectType : uint8
 	Food				UMETA(DisplayName="Food"),
 	Bed					UMETA(DisplayName="Bed"),
 	TrainingStation		UMETA(DisplayName="TrainingStation"),
+	Fire				UMETA(DisplayName="Fire"),
 };	

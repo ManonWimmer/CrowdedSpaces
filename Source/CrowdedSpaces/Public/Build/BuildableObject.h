@@ -43,7 +43,7 @@ public:
 	bool CanBeUsed() const;
 
 	// Slots
-	USlotComponent* GetNearestFreeSlot(const FVector& FromLocation);
+	USlotComponent* GetNearestFreeAndWalkableSlot(ANPC* NPC, const FVector& FromLocation);
 	bool IsAvailableForReservation(const ANPC* NPC) const;
 	void Release(ANPC* NPC);
 	USlotComponent* ReserveSpecificSlot(ANPC* NPC, USlotComponent* Slot);

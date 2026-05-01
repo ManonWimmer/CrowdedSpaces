@@ -21,16 +21,14 @@ AFire::AFire()
 	NiagaraComponent->SetupAttachment(RootComponent);
 	NiagaraComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	ActionComponent = CreateDefaultSubobject<UActionComponent>(TEXT("ActionComponent"));
+	SelectionType = ESelectionType::Default;
+	ObjectType = EObjectType::Fire;
+	NPCAction = ENPCActionType::ExtinguishFire;
 }
 
 void AFire::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	GameState = GetWorld()->GetGameState<ACrowdedGameState>();
-
-	InitActions();
 }
 
 void AFire::Tick(float DeltaTime)
@@ -77,6 +75,22 @@ void AFire::OnSelected()
 
 void AFire::OnDeselected()
 {
+}
+
+bool AFire::StartUsingImplementation(ANPC* NPC)
+{
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Fire");
+
+	return true;
+}
+
+bool AFire::StopUsingImplementation(ANPC* NPC)
+{
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Stop Fire");
+
+	return true;
 }
 #pragma endregion
 

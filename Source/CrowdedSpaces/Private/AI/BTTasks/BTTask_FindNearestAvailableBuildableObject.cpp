@@ -65,7 +65,7 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBe
 		if (!Object->IsAvailableForReservation(NPC))
 			continue;
 
-		USlotComponent* Slot = Object->GetNearestFreeSlot(Origin);
+		USlotComponent* Slot = Object->GetNearestFreeAndWalkableSlot(NPC, Origin);
 		if (!Slot)
 			continue;
 

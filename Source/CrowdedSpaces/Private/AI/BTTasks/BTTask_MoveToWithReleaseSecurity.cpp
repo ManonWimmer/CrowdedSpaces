@@ -47,10 +47,13 @@ void UBTTask_MoveToWithReleaseSecurity::Cleanup(const UBehaviorTreeComponent& Ow
 
 	NPC->SetCurrentAction(ENPCActionType::Idle);
 
-	ABuildableObject* Object = NPC->GetCurrentObject();
-	if (!Object)
+	ABuildableObject* CurrentObject = NPC->GetCurrentObject();
+	if (!CurrentObject)
 		return;
 
 	// Release on failed move to
-	Object->Release(NPC);
+	CurrentObject->Release(NPC);
+	
+	if (NPC->GetActionObject() == CurrentObject)
+		NPC->StopAction();
 }

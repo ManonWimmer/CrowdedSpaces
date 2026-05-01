@@ -1,5 +1,7 @@
 ﻿#include "Build/BuildableObject.h"
 
+#include "NavigationPath.h"
+#include "NavigationSystem.h"
 #include "Action/Action.h"
 #include "Action/ActionComponent.h"
 #include "AI/NPCController.h"
@@ -98,21 +100,33 @@ FVector ABuildableObject::GetExtent() const
 #pragma endregion
 
 #pragma region Slot Reservation
-USlotComponent* ABuildableObject::GetNearestFreeSlot(const FVector& FromLocation)
+USlotComponent* ABuildableObject::GetNearestFreeAndWalkableSlot(ANPC* NPC, const FVector& FromLocation)
 {
 	USlotComponent* BestSlot = nullptr;
 	float BestDist = FLT_MAX;
+
+	UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld());
+	if (!NavSys || !NPC)
+		return nullptr;
 
 	for (USlotComponent* Slot : Slots)
 	{
 		if (!Slot || !Slot->IsFree())
 			continue;
 
-		const float Distance = FVector::Dist(FromLocation, Slot->GetComponentLocation());
+		const FVector SlotLocation = Slot->GetComponentLocation();
 
-		if (Distance < BestDist)
+		// Check path validity
+		const UNavigationPath* Path = NavSys->FindPathToLocationSynchronously(GetWorld(),FromLocation, SlotLocation, NPC);
+
+		if (!Path || !Path->IsValid())
+			continue;
+		
+		const float PathLength = Path->GetPathLength();
+
+		if (PathLength < BestDist)
 		{
-			BestDist = Distance;
+			BestDist = PathLength;
 			BestSlot = Slot;
 		}
 	}

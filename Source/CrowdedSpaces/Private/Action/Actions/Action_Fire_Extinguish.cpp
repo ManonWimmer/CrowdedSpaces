@@ -9,7 +9,15 @@ UAction_Fire_Extinguish::UAction_Fire_Extinguish()
 
 bool UAction_Fire_Extinguish::CanExecute_Implementation(AActor* Instigator) const
 {
-	return Super::CanExecute_Implementation(Instigator);
+	const AFire* Fire = Cast<AFire>(Instigator);
+	if (!Fire)
+		return false;
+
+	const ANPC* SelectedNPC = ActionSubsystem->GetSelectedNPC();
+	if (!SelectedNPC)
+		return false;
+
+	return Fire->IsAvailableForReservation(SelectedNPC);
 }
 
 void UAction_Fire_Extinguish::Execute_Implementation(AActor* Instigator)
@@ -20,5 +28,13 @@ void UAction_Fire_Extinguish::Execute_Implementation(AActor* Instigator)
 	if (!Fire)
 		return;
 	
-	Fire->ExtinguishFire();
+	//Fire->ExtinguishFire();
+	if (!ActionSubsystem)
+		return;
+
+	ANPC* SelectedNPC = ActionSubsystem->GetSelectedNPC();
+	if (!SelectedNPC)
+		return;
+	
+	SelectedNPC->SetActionObject(Fire);
 }

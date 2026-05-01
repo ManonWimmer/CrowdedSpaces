@@ -617,7 +617,7 @@ void ANPC::SetActionObject(ABuildableObject* Object)
 	if (!Object)
 		return;
 	
-	USlotComponent* Slot = Object->GetNearestFreeSlot(GetActorLocation());
+	USlotComponent* Slot = Object->GetNearestFreeAndWalkableSlot(this, GetActorLocation());
 	if (!Slot)
 		return;
 	
@@ -637,6 +637,8 @@ void ANPC::StopAction() const
 	Blackboard->SetValueAsObject("ActionObject", nullptr);
 	Blackboard->SetValueAsObject("ActionObjectSlot", nullptr);
 	Blackboard->SetValueAsVector("ActionObjectLocation", FVector::Zero());
+
+	FocusCameraOnNPC();
 	
 	OnActionObjectChanged.Broadcast();
 }

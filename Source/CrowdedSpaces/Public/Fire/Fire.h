@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "NiagaraComponent.h"
+#include "Build/BuildableObject.h"
 #include "GameFramework/Actor.h"
 #include "Selection/Selectable.h"
 #include "Fire.generated.h"
@@ -13,18 +14,21 @@ class USphereComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFireExtinguished, AFire*, Fire);
 
 UCLASS()
-class CROWDEDSPACES_API AFire : public AActor, public ISelectable
+class CROWDEDSPACES_API AFire : public ABuildableObject, public ISelectable
 {
 	GENERATED_BODY()
 
 public:
 	AFire();
 
-	void InitActions();
+	virtual void InitActions() override;
 	void ExtinguishFire();
 	
 	virtual void OnSelected() override;
 	virtual void OnDeselected() override;
+
+	virtual bool StartUsingImplementation(ANPC* NPC) override;
+	virtual bool StopUsingImplementation(ANPC* NPC) override;
 
 	FIntPoint GridCoords;
 
@@ -43,10 +47,4 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<USphereComponent> SphereCollision{nullptr};
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UActionComponent> ActionComponent{nullptr};
-
-	UPROPERTY()
-	TObjectPtr<ACrowdedGameState> GameState{nullptr};
 };
