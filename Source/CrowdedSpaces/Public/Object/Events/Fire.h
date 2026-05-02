@@ -61,6 +61,9 @@ private:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<USphereComponent> SphereCollision{nullptr};
 
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<USphereComponent> ClickCollision{nullptr};
+
 	UPROPERTY()
 	TArray<TObjectPtr<AActor>> OverlappingActors;
 

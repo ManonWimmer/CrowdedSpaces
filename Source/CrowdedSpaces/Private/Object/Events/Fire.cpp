@@ -21,6 +21,14 @@ AFire::AFire()
 	SphereCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
 	SphereCollision->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 
+	ClickCollision = CreateDefaultSubobject<USphereComponent>(TEXT("ClickCollision"));
+	ClickCollision->SetupAttachment(RootComponent);
+
+	ClickCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	ClickCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
+	ClickCollision->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+	ClickCollision->SetSphereRadius(50.f);
+
 	NiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraComponent"));
 	NiagaraComponent->SetupAttachment(RootComponent);
 	NiagaraComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
