@@ -20,8 +20,9 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Training/TrainingData.h"
 #include "Training/TrainingSubsystem.h"
-#include "UI/Widgets/FoodBarWidget.h"
-#include "UI/Widgets/NPCActionWidget.h"
+#include "UI/UIUtils.h"
+#include "UI/Widgets/World/FoodBarWidget.h"
+#include "UI/Widgets/World/NPCActionWidget.h"
 #include "UI/Widgets/Selection/NPCNameWidget.h"
 
 #define BO_LOG(Format, ...) UE_LOG(LogTemp, Warning, TEXT("[BuildableObject:%s] " Format), *GetNameSafe(this), ##__VA_ARGS__)
@@ -80,7 +81,7 @@ void ANPC::BeginPlay()
 	Super::BeginPlay();
 
 	// Camera
-	const APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	PlayerController = GetWorld()->GetFirstPlayerController();
 	if (!PlayerController) return;
 
 	FreeCameraPawn = Cast<AFreeCameraPawn>(PlayerController->GetPawn());
@@ -178,25 +179,8 @@ void ANPC::Tick(const float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	// Widgets world look at camera
-	if (!NPCNameWidget || !NPCActionWidget)
-		return;
-
-	if (!CameraComponent)
-		return;
-
-	const FVector CameraLocation = CameraComponent->GetComponentLocation();
-	const FVector NPCNameWidgetLocation = NPCNameWidget->GetComponentLocation();
-	const FVector NPCActionWidgetLocation = NPCActionWidget->GetComponentLocation();
-
-	const FRotator LookAtNPCName = UKismetMathLibrary::FindLookAtRotation(NPCNameWidgetLocation, CameraLocation);
-	const FRotator LookAtNPCAction = UKismetMathLibrary::FindLookAtRotation(NPCActionWidgetLocation, CameraLocation);
-	
-	const FRotator YawOnlyNPCName(0.f, LookAtNPCName.Yaw, 0.f);
-	const FRotator YawOnlyNPCAction(0.f, LookAtNPCAction.Yaw, 0.f);
-
-	NPCNameWidget->SetWorldRotation(YawOnlyNPCName);
-	NPCActionWidget->SetWorldRotation(YawOnlyNPCAction);
+	FUIUtils::RotateComponentToCameraYaw(PlayerController, NPCNameWidget);
+	FUIUtils::RotateComponentToCameraYaw(PlayerController, NPCActionWidget);
 }
 
 #pragma region Training

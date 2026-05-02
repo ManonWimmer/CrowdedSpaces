@@ -7,6 +7,7 @@
 #include "UI/Widgets/Others/ActionWidget.h"
 #include "Camera/FreeCameraPawn.h"
 #include "Game/CrowdedGameState.h"
+#include "UI/UIUtils.h"
 
 void UActionWidgetManager::Initialize(APlayerController* InPC)
 {
@@ -63,28 +64,5 @@ void UActionWidgetManager::Tick(float DeltaTime)
 	if (!bIsVisible || !CurrentActor || !Widget || !PC)
 		return;
 
-	UpdateScreenPosition();
-}
-
-void UActionWidgetManager::UpdateScreenPosition() const
-{
-	FVector WorldPos = CurrentActor->GetActorLocation() + FVector(0, 0, 100.f);
-
-	FVector2D ScreenPos;
-
-	if (!PC->ProjectWorldLocationToScreen(WorldPos, ScreenPos))
-		return;
-	
-	float UIScale = 1.f;
-
-	// Scale with camera zoom
-	if (const AFreeCameraPawn* Cam = Cast<AFreeCameraPawn>(PC->GetPawn()))
-	{
-		const float ZoomAlpha = Cam->GetZoomAlpha();
-		
-		UIScale = FMath::Lerp(1.f, .5f, ZoomAlpha);
-	}
-	
-	Widget->SetPositionInViewport(ScreenPos, true);
-	Widget->SetRenderScale(FVector2D(UIScale, UIScale));
+	FUIUtils::UpdateWidgetScreenPosition(PC, Widget, CurrentActor->GetActorLocation());
 }

@@ -316,6 +316,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float MaxHealth = 100;
+
+	UPROPERTY()
+	TObjectPtr<APlayerController> PlayerController{nullptr};
 	
 	// Selectable
 public:

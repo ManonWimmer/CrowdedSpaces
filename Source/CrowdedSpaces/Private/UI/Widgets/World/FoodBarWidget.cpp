@@ -1,6 +1,4 @@
-﻿#include "UI/Widgets/FoodBarWidget.h"
-
-#include "Kismet/KismetMathLibrary.h"
+﻿#include "UI/Widgets/World/FoodBarWidget.h"
 
 void UFoodBarWidget::NativeConstruct()
 {

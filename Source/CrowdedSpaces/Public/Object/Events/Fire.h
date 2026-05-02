@@ -21,7 +21,7 @@ class CROWDEDSPACES_API AFire : public AUsableObject, public ISelectable
 
 public:
 	AFire();
-
+	
 	virtual void Tick(float DeltaTime) override;
 	
 	UFUNCTION()
@@ -80,5 +80,11 @@ private:
 	float CurrentExtinguishProgress = 0.f;
 
 	UPROPERTY(EditAnywhere)
-	float TimeToExtinguish = 3.f; 
+	float TimeToExtinguish = 3.f;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UWidgetComponent> ExtinguishProgressWidget{nullptr};
+
+	UPROPERTY()
+	TObjectPtr<APlayerController> PlayerController{nullptr};
 };

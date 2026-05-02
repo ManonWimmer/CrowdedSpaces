@@ -1,4 +1,4 @@
-﻿#include "UI/Widgets/NPCActionWidget.h"
+﻿#include "UI/Widgets/World/NPCActionWidget.h"
 
 void UNPCActionWidget::NativeConstruct()
 {

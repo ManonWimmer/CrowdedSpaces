@@ -6,6 +6,8 @@
 #include "Game/CrowdedGameState.h"
 #include "Damage/Damageable.h"
 #include "Debug/CrowdedSpacesLogs.h"
+#include "UI/UIUtils.h"
+#include "UI/Widgets/World/FireProgressWidget.h"
 
 AFire::AFire()
 {
@@ -30,18 +32,42 @@ AFire::AFire()
 	
 	SphereCollision->OnComponentBeginOverlap.AddDynamic(this, &AFire::OnOverlapBegin);
 	SphereCollision->OnComponentEndOverlap.AddDynamic(this, &AFire::OnOverlapEnd);
+
+	// Progress widget
+	ExtinguishProgressWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("ExtinguishProgressWidget"));
+	ExtinguishProgressWidget->SetupAttachment(RootComponent);
 }
 void AFire::BeginPlay()
 {
 	Super::BeginPlay();
 
 	GetWorldTimerManager().SetTimer(DamageTimerHandle, this, &AFire::ApplyDamage,DamageInterval,true);
+
+	PlayerController = GetWorld()->GetFirstPlayerController();
+	if (!PlayerController) return;
+	
+	// Setup extinguish progress widget
+	if (!ExtinguishProgressWidget)
+		return;
+
+	const TObjectPtr<UUserWidget> ExtinguishProgressUserWidget = ExtinguishProgressWidget->GetUserWidgetObject();
+	if (!ExtinguishProgressUserWidget)
+		return;
+
+	const TObjectPtr<UFireProgressWidget> ExtinguishProgressWidgetPtr = Cast<UFireProgressWidget>(ExtinguishProgressUserWidget);
+	if (!ExtinguishProgressWidgetPtr)
+		return;
+	
+	ExtinguishProgressWidgetPtr->OwningActor = this;
+	ExtinguishProgressWidgetPtr->Init();
 }
 
 void AFire::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	
+	FUIUtils::RotateComponentToCameraYaw(PlayerController, ExtinguishProgressWidget);
+	
 	if (NPCsExtinguishing.Num() == 0)
 	{
 		// Remove progress on NPC stop extinguish
