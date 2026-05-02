@@ -12,6 +12,7 @@ class UActionComponent;
 class USphereComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFireExtinguished, AFire*, Fire);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFireExtinguishProgress);
 
 UCLASS()
 class CROWDEDSPACES_API AFire : public AUsableObject, public ISelectable
@@ -20,6 +21,8 @@ class CROWDEDSPACES_API AFire : public AUsableObject, public ISelectable
 
 public:
 	AFire();
+
+	virtual void Tick(float DeltaTime) override;
 	
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -36,17 +39,20 @@ public:
 	virtual bool StartUsingImplementation(ANPC* NPC) override;
 	virtual bool StopUsingImplementation(ANPC* NPC) override;
 
+	UFUNCTION(BlueprintCallable)
+	float GetFireExtinguishProgress() const;
+
 	FIntPoint GridCoords;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnFireExtinguished OnFireExtinguished;
 
+	UPROPERTY(BlueprintAssignable)
+	FOnFireExtinguishProgress OnFireExtinguishProgress;
+
 protected:
 	void ApplyDamage();
 	virtual void BeginPlay() override;
-
-public:
-	virtual void Tick(float DeltaTime) override;
 
 private:
 	UPROPERTY(EditAnywhere)
@@ -66,4 +72,13 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float DamageAmount = 10.0f;
+
+	// Extinguish
+	UPROPERTY()
+	TArray<TWeakObjectPtr<ANPC>> NPCsExtinguishing;
+
+	float CurrentExtinguishProgress = 0.f;
+
+	UPROPERTY(EditAnywhere)
+	float TimeToExtinguish = 3.f; 
 };

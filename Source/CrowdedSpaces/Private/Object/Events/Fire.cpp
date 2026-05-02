@@ -5,6 +5,7 @@
 #include "Components/SphereComponent.h"
 #include "Game/CrowdedGameState.h"
 #include "Damage/Damageable.h"
+#include "Debug/CrowdedSpacesLogs.h"
 
 AFire::AFire()
 {
@@ -30,9 +31,84 @@ AFire::AFire()
 	SphereCollision->OnComponentBeginOverlap.AddDynamic(this, &AFire::OnOverlapBegin);
 	SphereCollision->OnComponentEndOverlap.AddDynamic(this, &AFire::OnOverlapEnd);
 }
+void AFire::BeginPlay()
+{
+	Super::BeginPlay();
 
+	GetWorldTimerManager().SetTimer(DamageTimerHandle, this, &AFire::ApplyDamage,DamageInterval,true);
+}
+
+void AFire::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (NPCsExtinguishing.Num() == 0)
+	{
+		// Remove progress on NPC stop extinguish
+		if (CurrentExtinguishProgress > 0)
+		{
+			CurrentExtinguishProgress -= DeltaTime;
+			
+			if (CurrentExtinguishProgress <= 0)
+				CurrentExtinguishProgress = 0;
+			
+			OnFireExtinguishProgress.Broadcast();
+		}
+		
+		return;
+	}
+	
+	NPCsExtinguishing.RemoveAll([](const TWeakObjectPtr<ANPC>& NPC)
+	{
+		return !NPC.IsValid();
+	});
+
+	const int NPCCount = NPCsExtinguishing.Num();
+
+	CurrentExtinguishProgress += DeltaTime * NPCCount;
+	CS_LOG("Fire progress : %f", GetFireExtinguishProgress());
+	OnFireExtinguishProgress.Broadcast();
+
+	if (CurrentExtinguishProgress >= TimeToExtinguish)
+	{
+		ExtinguishFire();
+	}
+}
+
+#pragma region Fire
+void AFire::ExtinguishFire()
+{
+	CS_LOG("Extinguish fire");
+	OnFireExtinguished.Broadcast(this);
+	
+	Destroy();
+}
+
+void AFire::ApplyDamage()
+{
+	for (int i = OverlappingActors.Num() - 1; i >= 0; --i)
+	{
+		AActor* Actor = OverlappingActors[i];
+
+		if (!Actor || !Actor->Implements<UDamageable>())
+		{
+			OverlappingActors.RemoveAt(i);
+			continue;
+		}
+
+		IDamageable::Execute_TakeDamage(Actor, DamageAmount);
+	}
+}
+
+float AFire::GetFireExtinguishProgress() const
+{
+	return CurrentExtinguishProgress / TimeToExtinguish;
+}
+#pragma endregion
+
+#pragma region Overlap Take Damage
 void AFire::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+						   int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (!OtherActor) return;
 
@@ -49,20 +125,24 @@ void AFire::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* Other
 
 	OverlappingActors.Remove(OtherActor);
 }
+#pragma endregion
 
-
-
-void AFire::BeginPlay()
+#pragma region Using Object
+bool AFire::StartUsingImplementation(ANPC* NPC)
 {
-	Super::BeginPlay();
+	if (!NPC)
+		return false;
 
-	GetWorldTimerManager().SetTimer(DamageTimerHandle, this, &AFire::ApplyDamage,DamageInterval,true);
+	NPCsExtinguishing.AddUnique(NPC);
+	return true;
 }
 
-void AFire::Tick(float DeltaTime)
+bool AFire::StopUsingImplementation(ANPC* NPC)
 {
-	Super::Tick(DeltaTime);
+	NPCsExtinguishing.Remove(NPC);
+	return true;
 }
+#pragma endregion 
 
 #pragma region Actions
 void AFire::InitActions()
@@ -87,31 +167,6 @@ void AFire::InitActions()
 }
 #pragma endregion
 
-#pragma region Fire
-void AFire::ExtinguishFire()
-{
-	OnFireExtinguished.Broadcast(this);
-	
-	Destroy();
-}
-
-void AFire::ApplyDamage()
-{
-	for (int i = OverlappingActors.Num() - 1; i >= 0; --i)
-	{
-		AActor* Actor = OverlappingActors[i];
-
-		if (!Actor || !Actor->Implements<UDamageable>())
-		{
-			OverlappingActors.RemoveAt(i);
-			continue;
-		}
-
-		IDamageable::Execute_TakeDamage(Actor, DamageAmount);
-	}
-}
-#pragma endregion
-
 #pragma region Selection
 void AFire::OnSelected()
 {
@@ -119,22 +174,6 @@ void AFire::OnSelected()
 
 void AFire::OnDeselected()
 {
-}
-
-bool AFire::StartUsingImplementation(ANPC* NPC)
-{
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Fire");
-
-	return true;
-}
-
-bool AFire::StopUsingImplementation(ANPC* NPC)
-{
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "Stop Fire");
-
-	return true;
 }
 #pragma endregion
 
