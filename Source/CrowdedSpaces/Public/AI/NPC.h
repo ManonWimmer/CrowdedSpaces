@@ -183,6 +183,7 @@ public:
 	virtual void TakeDamage_Implementation(const float Amount) override;
 	virtual void Heal_Implementation(const float Amount) override;
 	virtual float GetHealth_Implementation() const override;
+	virtual float GetMaxHealth_Implementation() const override;
 	
 	virtual void OnDamaged() override;
 	virtual void OnHealed() override;

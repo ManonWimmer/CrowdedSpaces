@@ -685,8 +685,11 @@ void ANPC::TakeDamage_Implementation(const float Amount)
 
 void ANPC::Heal_Implementation(const float Amount)
 {
-	// TODO
-	IDamageable::Heal_Implementation(Amount);
+	Health += Amount;
+	if (Health > MaxHealth)
+		Health = MaxHealth;
+
+	OnHealed();
 }
 
 float ANPC::GetHealth_Implementation() const
@@ -694,16 +697,21 @@ float ANPC::GetHealth_Implementation() const
 	return Health;
 }
 
+float ANPC::GetMaxHealth_Implementation() const
+{
+	return MaxHealth;
+}
+
 void ANPC::OnDamaged()
 {
 	OnHealthChanged.Broadcast();
-	// VFX feedback to do, change color to red x seconds (timeline fade?) ? 
+	// VFX feedback to do, change color to red x seconds (timeline fade?) ? in bp ?
 }
 
 void ANPC::OnHealed()
 {
 	OnHealthChanged.Broadcast();
-	// VFX feedback to do
+	// VFX feedback to do, in bp ?
 }
 
 void ANPC::OnDead()

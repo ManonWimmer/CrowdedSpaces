@@ -24,6 +24,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	float GetHealth() const;
 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	float GetMaxHealth() const;
+
 	virtual void OnDamaged() = 0;
 	virtual void OnHealed() = 0;
 	virtual void OnDead() = 0;
