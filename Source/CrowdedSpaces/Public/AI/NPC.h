@@ -104,6 +104,15 @@ public:
 
 	static FLinearColor GetRandomColor();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FLinearColor RandomColor;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<UMaterialInstanceDynamic> BodyMaterialInstance{nullptr};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<UMaterialInstanceDynamic> OtherMaterialInstance{nullptr};
+
 	// Object
 	UFUNCTION()
 	void SetCurrentObject(AUsableObject* NewObject);
@@ -189,6 +198,15 @@ public:
 	virtual void OnHealed() override;
 	virtual void OnDead() override;
 
+	UFUNCTION(BlueprintNativeEvent)
+	void OnDamagedFeedback();
+
+	UFUNCTION(BlueprintNativeEvent)
+	void OnHealedFeedback();
+
+	UFUNCTION(BlueprintNativeEvent)
+	void OnDeadFeedback();
+
 	UPROPERTY(BlueprintAssignable)
 	FOnHealthChanged OnHealthChanged;
 	
@@ -253,14 +271,7 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	ETrainingSkillType TrainingSkillType = ETrainingSkillType::MoneyProduction;
-
-	// Color
-	UPROPERTY()
-	TObjectPtr<UMaterialInstanceDynamic> BodyMaterialInstance{nullptr};
-
-	UPROPERTY()
-	TObjectPtr<UMaterialInstanceDynamic> OtherMaterialInstance{nullptr};
-
+	
 	// Object
 	UPROPERTY()
 	TObjectPtr<AUsableObject> CurrentObject{nullptr};

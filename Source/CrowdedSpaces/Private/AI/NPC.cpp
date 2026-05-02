@@ -125,7 +125,7 @@ void ANPC::BeginPlay()
 	BodyMaterialInstance = MeshComp->CreateAndSetMaterialInstanceDynamic(0);
 	OtherMaterialInstance = MeshComp->CreateAndSetMaterialInstanceDynamic(1);
 
-	const FLinearColor RandomColor = GetRandomColor();
+	RandomColor = GetRandomColor();
 	
 	if (BodyMaterialInstance)
 	{
@@ -705,18 +705,33 @@ float ANPC::GetMaxHealth_Implementation() const
 void ANPC::OnDamaged()
 {
 	OnHealthChanged.Broadcast();
+	OnDamagedFeedback();
 	// VFX feedback to do, change color to red x seconds (timeline fade?) ? in bp ?
 }
 
 void ANPC::OnHealed()
 {
 	OnHealthChanged.Broadcast();
+	OnHealedFeedback();
 	// VFX feedback to do, in bp ?
 }
 
 void ANPC::OnDead()
 {
 	OnHealthChanged.Broadcast();
+	OnDeadFeedback();
 	Die();
+}
+
+void ANPC::OnHealedFeedback_Implementation()
+{
+}
+
+void ANPC::OnDamagedFeedback_Implementation()
+{
+}
+
+void ANPC::OnDeadFeedback_Implementation()
+{
 }
 #pragma endregion
