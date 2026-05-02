@@ -1,6 +1,6 @@
 ﻿#include "Action/Actions/Action_TrainingStation_Train.h"
 
-#include "Build/Buildable/BuildableTrainingStation.h"
+#include "Object/Buildable/BuildableTrainingStation.h"
 
 UAction_TrainingStation_Train::UAction_TrainingStation_Train()
 {

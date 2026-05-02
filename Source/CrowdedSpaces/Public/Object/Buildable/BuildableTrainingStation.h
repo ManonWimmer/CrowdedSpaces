@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Build/BuildableObject.h"
+#include "Object/UsableObject.h"
 #include "Selection/Selectable.h"
 #include "Training/TrainingSkillType.h"
 #include "BuildableTrainingStation.generated.h"
@@ -9,7 +9,7 @@
 class UTrainingSubsystem;
 
 UCLASS()
-class CROWDEDSPACES_API ABuildableTrainingStation : public ABuildableObject, public ISelectable
+class CROWDEDSPACES_API ABuildableTrainingStation : public AUsableObject, public ISelectable
 {
 	GENERATED_BODY()
 

@@ -14,7 +14,7 @@ class AGhostObject;
 struct FGridRoom;
 class UBuildRoomData;
 class UBuildData;
-class ABuildableObject;
+class AUsableObject;
 
 USTRUCT()
 struct FTMapArrayObjects
@@ -23,7 +23,7 @@ struct FTMapArrayObjects
 
 public:
 	UPROPERTY()
-	TArray<ABuildableObject*> Entries;
+	TArray<AUsableObject*> Entries;
 };
 
 class AGridActor;
@@ -65,7 +65,7 @@ public:
 	void PlaceObject();
 
 	UFUNCTION()
-	void RemoveObject(const ABuildableObject* Object) const;
+	void RemoveObject(const AUsableObject* Object) const;
 	
 	UFUNCTION()
 	void LeftClicked();
@@ -129,7 +129,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool IsRoomUnlocked(const EGridRoomType RoomType) const;
 
-	void GetObjectsToBeDestroyed(TArray<ABuildableObject*>& OutObjects) const;
+	void GetObjectsToBeDestroyed(TArray<AUsableObject*>& OutObjects) const;
 
 	UFUNCTION()
 	void OnRoomActiveStateChanged(int RoomId);

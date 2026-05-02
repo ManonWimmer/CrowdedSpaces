@@ -2,7 +2,7 @@
 
 #include "AI/NPC.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "Build/BuildableObject.h"
+#include "Object/UsableObject.h"
 #include "AIController.h"
 #include "Build/SlotComponent.h"
 
@@ -25,7 +25,7 @@ EBTNodeResult::Type UBTTask_ReserveBuildableSlot::ExecuteTask(UBehaviorTreeCompo
 	if (!Blackboard)
 		return EBTNodeResult::Failed;
 
-	ABuildableObject* Object = Cast<ABuildableObject>(Blackboard->GetValueAsObject(TargetObjectKey.SelectedKeyName));
+	AUsableObject* Object = Cast<AUsableObject>(Blackboard->GetValueAsObject(TargetObjectKey.SelectedKeyName));
 
 	USlotComponent* Slot = Cast<USlotComponent>(Blackboard->GetValueAsObject(TargetSlotKey.SelectedKeyName));
 

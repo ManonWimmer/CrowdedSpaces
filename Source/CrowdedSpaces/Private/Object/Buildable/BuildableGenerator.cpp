@@ -1,4 +1,4 @@
-﻿#include "Build/Buildable/BuildableGenerator.h"
+﻿#include "Object/Buildable/BuildableGenerator.h"
 
 #include "Build/BuildableRegistrySubsystem.h"
 #include "Game/CrowdedGameState.h"

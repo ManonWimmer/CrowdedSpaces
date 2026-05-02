@@ -1,7 +1,7 @@
 ﻿#include "Action/Actions/Action_Generator_Work.h"
 
 #include "AI/NPC.h"
-#include "Build/Buildable/BuildableGenerator.h"
+#include "Object/Buildable/BuildableGenerator.h"
 
 UAction_Generator_Work::UAction_Generator_Work()
 {

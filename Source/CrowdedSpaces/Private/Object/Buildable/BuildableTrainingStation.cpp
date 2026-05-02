@@ -1,4 +1,4 @@
-﻿#include "Build/Buildable/BuildableTrainingStation.h"
+﻿#include "Object/Buildable/BuildableTrainingStation.h"
 
 #include "Build/BuildableRegistrySubsystem.h"
 #include "Game/CrowdedGameState.h"

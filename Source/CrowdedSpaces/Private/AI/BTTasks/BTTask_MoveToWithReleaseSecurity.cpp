@@ -1,7 +1,7 @@
 ﻿#include "AI/BTTasks/BTTask_MoveToWithReleaseSecurity.h"
 
 #include "AI/NPC.h"
-#include "Build/BuildableObject.h"
+#include "Object/UsableObject.h"
 #include "AIController.h"
 #include "AI/NPCController.h"
 
@@ -20,7 +20,7 @@ EBTNodeResult::Type UBTTask_MoveToWithReleaseSecurity::ExecuteTask(UBehaviorTree
     	if (!NPC)
     		return EBTNodeResult::Failed;
 
-	const ABuildableObject* CurrentObject = NPC->GetCurrentObject();
+	const AUsableObject* CurrentObject = NPC->GetCurrentObject();
 	if (!CurrentObject)
 		return EBTNodeResult::Failed;
 	
@@ -51,7 +51,7 @@ void UBTTask_MoveToWithReleaseSecurity::Cleanup(const UBehaviorTreeComponent& Ow
 
 	NPC->SetCurrentAction(ENPCActionType::Idle);
 
-	ABuildableObject* CurrentObject = NPC->GetCurrentObject();
+	AUsableObject* CurrentObject = NPC->GetCurrentObject();
 	if (!CurrentObject)
 		return;
 

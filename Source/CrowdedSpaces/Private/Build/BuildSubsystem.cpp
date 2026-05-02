@@ -204,8 +204,8 @@ void UBuildSubsystem::StartBuilding(UBuildData* BuildData)
 	CurrentGhost->SetActorHiddenInGame(false);
 
 	// Get mesh from buildable
-	TObjectPtr<ABuildableObject> const DefaultBuildable =
-		BuildData->BuildClass->GetDefaultObject<ABuildableObject>();
+	TObjectPtr<AUsableObject> const DefaultBuildable =
+		BuildData->BuildClass->GetDefaultObject<AUsableObject>();
 
 	if (!DefaultBuildable)
 		return;
@@ -321,7 +321,7 @@ void UBuildSubsystem::PlaceObject()
 	FVector SpawnLocation = CurrentGhost->GetActorLocation();
 	SpawnLocation -= CurrentBuildRotation.RotateVector(MeshOffset);;
 
-	const TObjectPtr<ABuildableObject> Placed = GetWorld()->SpawnActor<ABuildableObject>(
+	const TObjectPtr<AUsableObject> Placed = GetWorld()->SpawnActor<AUsableObject>(
 		CurrentBuildData->BuildClass,
 		SpawnLocation,
 		CurrentBuildRotation
@@ -334,7 +334,7 @@ void UBuildSubsystem::PlaceObject()
 		return;
 
 	// Default scale
-	const TObjectPtr<ABuildableObject> DefaultBuildable = CurrentBuildData->BuildClass->GetDefaultObject<ABuildableObject>();
+	const TObjectPtr<AUsableObject> DefaultBuildable = CurrentBuildData->BuildClass->GetDefaultObject<AUsableObject>();
 	Placed->GetMeshComponent()->SetRelativeScale3D(DefaultBuildable->GetMeshComponent()->GetRelativeScale3D());
 	Placed->OccupiedCells.Empty();
 	
@@ -446,7 +446,7 @@ void UBuildSubsystem::PlaceRoom()
 #pragma endregion
 
 #pragma region Object / Room Destroy
-void UBuildSubsystem::RemoveObject(const ABuildableObject* Object) const
+void UBuildSubsystem::RemoveObject(const AUsableObject* Object) const
 {
 	if (!Object || !GridActor)
 		return;
@@ -473,7 +473,7 @@ void UBuildSubsystem::DestroyRoom(const int RoomId) const
 	}
 }
 
-void UBuildSubsystem::GetObjectsToBeDestroyed(TArray<ABuildableObject*>& OutObjects) const
+void UBuildSubsystem::GetObjectsToBeDestroyed(TArray<AUsableObject*>& OutObjects) const
 {
 	if (!GridActor) return;
 
@@ -487,7 +487,7 @@ void UBuildSubsystem::GetObjectsToBeDestroyed(TArray<ABuildableObject*>& OutObje
 		}
 	}
 
-	for (TWeakObjectPtr<ABuildableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
+	for (TWeakObjectPtr<AUsableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
 	{
 		if (!Object.IsValid())
 			continue;
@@ -749,7 +749,7 @@ void UBuildSubsystem::UpdateRoomSelection()
 	}
 
 	// Reset disabled material for all objects
-	for (TWeakObjectPtr<ABuildableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
+	for (TWeakObjectPtr<AUsableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
 	{
 		if (Object.IsValid())
 		{
@@ -760,10 +760,10 @@ void UBuildSubsystem::UpdateRoomSelection()
 	// Set disabled material for object if will be removed by room
 	if (CurrentRoomEditMode == ERoomEditMode::Remove)
 	{
-		TArray<ABuildableObject*> ObjectsToDestroy;
+		TArray<AUsableObject*> ObjectsToDestroy;
 		GetObjectsToBeDestroyed(ObjectsToDestroy);
 
-		for (ABuildableObject* ObjectDestroyedByRoom : ObjectsToDestroy)
+		for (AUsableObject* ObjectDestroyedByRoom : ObjectsToDestroy)
 		{
 			ObjectDestroyedByRoom->SetWillBeRemoved(true);
 		}

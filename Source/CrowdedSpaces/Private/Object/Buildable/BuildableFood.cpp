@@ -1,4 +1,4 @@
-﻿#include "Build/Buildable/BuildableFood.h"
+﻿#include "Object/Buildable/BuildableFood.h"
 
 #include "Build/BuildableRegistrySubsystem.h"
 

@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "Build/BuildableObject.h"
+#include "Object/UsableObject.h"
 #include "Grid/GridRoomType.h"
 #include "BuildRoomData.generated.h"
 

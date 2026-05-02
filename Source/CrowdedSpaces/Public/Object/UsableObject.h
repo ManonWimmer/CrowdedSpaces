@@ -1,13 +1,13 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "BuildSubsystem.h"
-#include "Build/ObjectType.h"
+#include "Build/BuildSubsystem.h"
+#include "Object/ObjectType.h"
 #include "AI/NPC.h"
 #include "Action/Action.h"
 #include "Action/ActionComponent.h"
 #include "GameFramework/Actor.h"
-#include "BuildableObject.generated.h"
+#include "UsableObject.generated.h"
 
 class UBuildableRegistrySubsystem;
 class AGameHUD;
@@ -21,12 +21,12 @@ class UActionComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSlotsUpdated);
 
 UCLASS()
-class CROWDEDSPACES_API ABuildableObject : public AActor
+class CROWDEDSPACES_API AUsableObject : public AActor
 {
 	GENERATED_BODY()
 
 public:
-	ABuildableObject();
+	AUsableObject();
 
 	virtual void BeginPlay() override;
 

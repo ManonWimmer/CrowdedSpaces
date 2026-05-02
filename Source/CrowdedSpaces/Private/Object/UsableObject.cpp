@@ -1,4 +1,4 @@
-﻿#include "Build/BuildableObject.h"
+﻿#include "Object/UsableObject.h"
 
 #include "NavigationPath.h"
 #include "NavigationSystem.h"
@@ -16,7 +16,7 @@
 #include "Debug/CrowdedSpacesLogs.h"
 #include "Game/CrowdedGameInstance.h"
 
-ABuildableObject::ABuildableObject()
+AUsableObject::AUsableObject()
 {
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
@@ -29,7 +29,7 @@ ABuildableObject::ABuildableObject()
 	ActionComponent = CreateDefaultSubobject<UActionComponent>("ActionComponent");
 }
 
-void ABuildableObject::BeginPlay()
+void AUsableObject::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -83,12 +83,12 @@ void ABuildableObject::BeginPlay()
 }
 
 #pragma region Mesh
-void ABuildableObject::SetMesh(UStaticMesh* Mesh) const
+void AUsableObject::SetMesh(UStaticMesh* Mesh) const
 {
 	MeshComp->SetStaticMesh(Mesh);
 }
 
-FVector ABuildableObject::GetExtent() const
+FVector AUsableObject::GetExtent() const
 {
 	if(MeshComp && MeshComp->GetStaticMesh())
     {
@@ -100,7 +100,7 @@ FVector ABuildableObject::GetExtent() const
 #pragma endregion
 
 #pragma region Slot Reservation
-USlotComponent* ABuildableObject::GetNearestFreeAndWalkableSlot(ANPC* NPC, const FVector& FromLocation)
+USlotComponent* AUsableObject::GetNearestFreeAndWalkableSlot(ANPC* NPC, const FVector& FromLocation)
 {
 	USlotComponent* BestSlot = nullptr;
 	float BestDist = FLT_MAX;
@@ -134,7 +134,7 @@ USlotComponent* ABuildableObject::GetNearestFreeAndWalkableSlot(ANPC* NPC, const
 	return BestSlot;
 }
 
-bool ABuildableObject::IsAvailableForReservation(const ANPC* NPC) const
+bool AUsableObject::IsAvailableForReservation(const ANPC* NPC) const
 {
 	for (const USlotComponent* Slot : Slots)
 	{
@@ -146,12 +146,12 @@ bool ABuildableObject::IsAvailableForReservation(const ANPC* NPC) const
 	return false;
 }
 
-int ABuildableObject::GetSlotsNbr() const
+int AUsableObject::GetSlotsNbr() const
 {
 	return Slots.Num();
 }
 
-int ABuildableObject::GetFreeSlotsNbr() const
+int AUsableObject::GetFreeSlotsNbr() const
 {
 	int FreeSlots = 0;
 	
@@ -166,7 +166,7 @@ int ABuildableObject::GetFreeSlotsNbr() const
 	return FreeSlots;
 }
 
-USlotComponent* ABuildableObject::ReserveSpecificSlot(ANPC* NPC, USlotComponent* Slot)
+USlotComponent* AUsableObject::ReserveSpecificSlot(ANPC* NPC, USlotComponent* Slot)
 {
 	if (!Slot || !Slot->IsFree())
 		return nullptr;
@@ -184,7 +184,7 @@ USlotComponent* ABuildableObject::ReserveSpecificSlot(ANPC* NPC, USlotComponent*
 	return Slot;
 }
 
-void ABuildableObject::Release(ANPC* NPC)
+void AUsableObject::Release(ANPC* NPC)
 {
 	ReleaseSlot(NPC);
 	OnSlotsUpdated.Broadcast();
@@ -194,7 +194,7 @@ void ABuildableObject::Release(ANPC* NPC)
 	NPC->SetCurrentObject(nullptr);
 }
 
-void  ABuildableObject::ReleaseSlot(ANPC* NPC)
+void  AUsableObject::ReleaseSlot(ANPC* NPC)
 {
 	CS_LOG("ReleaseSlot NPC: %s", *GetNameSafe(NPC));
 	
@@ -215,26 +215,26 @@ void  ABuildableObject::ReleaseSlot(ANPC* NPC)
 #pragma endregion 
 
 #pragma region Used & Activated
-bool ABuildableObject::CanBeUsed() const
+bool AUsableObject::CanBeUsed() const
 {
 	return bCanBeUsed && bHasEnoughElectricity && bIsActivated;
 }
 
-void ABuildableObject::SetHasEnoughElectricity(const bool bEnoughElectricity)
+void AUsableObject::SetHasEnoughElectricity(const bool bEnoughElectricity)
 {
 	bHasEnoughElectricity = bEnoughElectricity;
 
 	UpdateMaterialState();
 }
 
-void ABuildableObject::SetIsActivated(const bool bActivated)
+void AUsableObject::SetIsActivated(const bool bActivated)
 {
 	bIsActivated = bActivated;
 
 	UpdateMaterialState();
 }
 
-void ABuildableObject::SetWillBeRemoved(const bool bRemoved)
+void AUsableObject::SetWillBeRemoved(const bool bRemoved)
 {
 	if (bWillBeRemoved == bRemoved)
 		return;
@@ -244,7 +244,7 @@ void ABuildableObject::SetWillBeRemoved(const bool bRemoved)
 	UpdateMaterialState();
 }
 
-void ABuildableObject::UpdateMaterialState() const
+void AUsableObject::UpdateMaterialState() const
 {
 	if (bWillBeRemoved)
 	{
@@ -262,7 +262,7 @@ void ABuildableObject::UpdateMaterialState() const
 #pragma endregion
 
 #pragma region Use Object
-void ABuildableObject::StartUsing(ANPC* NPC)
+void AUsableObject::StartUsing(ANPC* NPC)
 {
 	CS_LOG("START USING SUCCESS NPC: %s", *GetNameSafe(NPC));
 
@@ -270,7 +270,7 @@ void ABuildableObject::StartUsing(ANPC* NPC)
 	NPC->SetCurrentAction(NPCUseAction);
 }
 
-void ABuildableObject::StopUsing(ANPC* NPC)
+void AUsableObject::StopUsing(ANPC* NPC)
 {
 	CS_LOG("StopUsing NPC: %s | Current UsingNPC: %s",
 		*GetNameSafe(NPC));
@@ -282,19 +282,19 @@ void ABuildableObject::StopUsing(ANPC* NPC)
 	CS_LOG("STOP USING SUCCESS");
 }
 
-bool ABuildableObject::StartUsingImplementation(ANPC* NPC)
+bool AUsableObject::StartUsingImplementation(ANPC* NPC)
 {
 	return true; 
 }
 
-bool ABuildableObject::StopUsingImplementation(ANPC* NPC)
+bool AUsableObject::StopUsingImplementation(ANPC* NPC)
 {
 	return true;
 }
 #pragma endregion
 
 #pragma region Destroy
-void ABuildableObject::DestroyObject()
+void AUsableObject::DestroyObject()
 {
 	if (!BuildSubsystem)
 		return;
@@ -332,7 +332,7 @@ void ABuildableObject::DestroyObject()
 	Destroy();
 }
 
-bool ABuildableObject::IsOverlappingCells(const TSet<FIntPoint>& Cells) const
+bool AUsableObject::IsOverlappingCells(const TSet<FIntPoint>& Cells) const
 {
 	for (const FIntPoint& Cell : OccupiedCells)
 	{
@@ -346,7 +346,7 @@ bool ABuildableObject::IsOverlappingCells(const TSet<FIntPoint>& Cells) const
 #pragma endregion
 
 #pragma region Actions
-void ABuildableObject::InitActions()
+void AUsableObject::InitActions()
 {
 }
 #pragma endregion

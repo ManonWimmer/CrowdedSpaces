@@ -1,12 +1,12 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Build/BuildableObject.h"
+#include "Object/UsableObject.h"
 #include "Selection/Selectable.h"
 #include "BuildableBed.generated.h"
 
 UCLASS()
-class CROWDEDSPACES_API ABuildableBed : public ABuildableObject, public ISelectable
+class CROWDEDSPACES_API ABuildableBed : public AUsableObject, public ISelectable
 {
 	GENERATED_BODY()
 

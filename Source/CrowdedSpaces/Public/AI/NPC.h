@@ -25,7 +25,7 @@ class UActionComponent;
 class UTrainingSubsystem;
 enum class ENPCPriorityType : uint8;
 class UBTTask_UseBuildableObject;
-class ABuildableObject;
+class AUsableObject;
 class USlotComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentActionChanged, ENPCActionType, Value); 
@@ -106,10 +106,10 @@ public:
 
 	// Object
 	UFUNCTION()
-	void SetCurrentObject(ABuildableObject* NewObject);
+	void SetCurrentObject(AUsableObject* NewObject);
 	
 	UFUNCTION()
-	ABuildableObject* GetCurrentObject() const { return CurrentObject; }
+	AUsableObject* GetCurrentObject() const { return CurrentObject; }
 
 	// Training
 	UFUNCTION(BlueprintCallable, Category="AI")
@@ -151,7 +151,7 @@ public:
 	FOnPlayerReadyForCapture OnPlayerReadyForCapture;
 
 	// Actions
-	void SetActionObject(ABuildableObject* Object);
+	void SetActionObject(AUsableObject* Object);
 
 	UFUNCTION(BlueprintCallable)
 	void StopAction() const;
@@ -160,7 +160,7 @@ public:
 	FOnActionObjectChanged OnActionObjectChanged;
 
 	UFUNCTION(BlueprintCallable)
-	ABuildableObject* GetActionObject() const;
+	AUsableObject* GetActionObject() const;
 
 	UFUNCTION(BlueprintCallable)
 	bool HasActionObject() const;
@@ -262,7 +262,7 @@ private:
 
 	// Object
 	UPROPERTY()
-	TObjectPtr<ABuildableObject> CurrentObject{nullptr};
+	TObjectPtr<AUsableObject> CurrentObject{nullptr};
 
 	UPROPERTY()
 	TObjectPtr<UBTTask_UseBuildableObject> CurrentUseTask{nullptr};

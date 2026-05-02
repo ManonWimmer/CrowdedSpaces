@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "NiagaraComponent.h"
-#include "Build/BuildableObject.h"
+#include "Object/UsableObject.h"
 #include "GameFramework/Actor.h"
 #include "Selection/Selectable.h"
 #include "Fire.generated.h"
@@ -14,7 +14,7 @@ class USphereComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFireExtinguished, AFire*, Fire);
 
 UCLASS()
-class CROWDEDSPACES_API AFire : public ABuildableObject, public ISelectable
+class CROWDEDSPACES_API AFire : public AUsableObject, public ISelectable
 {
 	GENERATED_BODY()
 

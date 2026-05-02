@@ -1,6 +1,6 @@
 ﻿#include "Action/Actions/Action_Fire_Extinguish.h"
 
-#include "Fire/Fire.h"
+#include "Object/Events/Fire.h"
 
 UAction_Fire_Extinguish::UAction_Fire_Extinguish()
 {

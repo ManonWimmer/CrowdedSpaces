@@ -1,7 +1,7 @@
 ﻿#include "AI/BTTasks/BTTask_UseBuildableObject.h"
 
 #include "AI/NPC.h"
-#include "Build/BuildableObject.h"
+#include "Object/UsableObject.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "AIController.h"
 #include "Debug/CrowdedSpacesLogs.h"
@@ -35,7 +35,7 @@ EBTNodeResult::Type UBTTask_UseBuildableObject::ExecuteTask(UBehaviorTreeCompone
 
 void UBTTask_UseBuildableObject::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
-	ABuildableObject* ActionObject = Cast<ABuildableObject>(OwnerComp.GetBlackboardComponent()->GetValueAsObject("ActionObject"));
+	AUsableObject* ActionObject = Cast<AUsableObject>(OwnerComp.GetBlackboardComponent()->GetValueAsObject("ActionObject"));
 	if (ActionObject && CurrentObject != ActionObject)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Return action object != current object use"));

@@ -433,7 +433,7 @@ bool AGridActor::DestroyRoom(const int RoomId)
 	
 	RebuildWalls();
 	
-	for (TWeakObjectPtr<ABuildableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
+	for (TWeakObjectPtr<AUsableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
 	{
 		if (!Object.IsValid())
 			continue;
@@ -464,7 +464,7 @@ float AGridActor::GetRoomDestroyCost(int RoomId)
 	
 	float RoomTotalDestroyCost = Room->DestroyMoneyPerCell * Room->Cells.Num();
 
-	for (TWeakObjectPtr<ABuildableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
+	for (TWeakObjectPtr<AUsableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
 	{
 		if (!Object.IsValid())
 			continue;
@@ -603,7 +603,7 @@ void AGridActor::RecomputeAllRooms()
 	}
 
 	// Update objects new ids
-	for (const TWeakObjectPtr<ABuildableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
+	for (const TWeakObjectPtr<AUsableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
 	{
 		FGridRoom* Room;
 		if (GetRoomAtWorldLocation(Object->GetActorLocation(), Room))
@@ -648,9 +648,9 @@ void AGridActor::RemoveCellsFromRooms(TArray<FGridCell*> CellsToRemove)
 	}
 
 	// Remove object on cells to remove
-	TArray<TWeakObjectPtr<ABuildableObject>> ObjectsCopy = BuildableRegistrySubsystem->BuildableObjects;
+	TArray<TWeakObjectPtr<AUsableObject>> ObjectsCopy = BuildableRegistrySubsystem->BuildableObjects;
 
-	for (TWeakObjectPtr<ABuildableObject> Object : ObjectsCopy)
+	for (TWeakObjectPtr<AUsableObject> Object : ObjectsCopy)
 	{
 		if (!Object.IsValid())
 			continue;

@@ -5,10 +5,10 @@
 #include "AI/NameGeneratorSubsystem.h"
 #include "AI/NPCController.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "Build/BuildableObject.h"
+#include "Object/UsableObject.h"
 #include "Build/SlotComponent.h"
-#include "Build/Buildable/BuildableGenerator.h"
-#include "Build/Buildable/BuildableTrainingStation.h"
+#include "Object/Buildable/BuildableGenerator.h"
+#include "Object/Buildable/BuildableTrainingStation.h"
 #include "Camera/FreeCameraPawn.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
@@ -358,7 +358,7 @@ void ANPC::SetCurrentAction(const ENPCActionType NewAction)
 	OnCurrentActionChanged.Broadcast(CurrentAction);
 }
 
-void ANPC::SetCurrentObject(ABuildableObject* NewObject)
+void ANPC::SetCurrentObject(AUsableObject* NewObject)
 {
 	CurrentObject = NewObject;
 }
@@ -402,7 +402,7 @@ void ANPC::CancelCurrentUse()
 	if (!ControllerNPC)
 		return;
 	
-	if (const TObjectPtr<ABuildableObject> TargetObject = Cast<ABuildableObject>(Blackboard->GetValueAsObject("TargetObject")); TargetObject && TargetObject->GetObjectType() == EObjectType::Generator)
+	if (const TObjectPtr<AUsableObject> TargetObject = Cast<AUsableObject>(Blackboard->GetValueAsObject("TargetObject")); TargetObject && TargetObject->GetObjectType() == EObjectType::Generator)
 	{
 		if (UBehaviorTreeComponent* BTComp = Cast<UBehaviorTreeComponent>(ControllerNPC->GetBrainComponent()))
 			BTComp->RestartTree();
@@ -609,7 +609,7 @@ void ANPC::SetupCapture()
 #pragma endregion 
 
 #pragma region Action Object
-void ANPC::SetActionObject(ABuildableObject* Object)
+void ANPC::SetActionObject(AUsableObject* Object)
 {
 	if (!Blackboard)
 		return;
@@ -643,12 +643,12 @@ void ANPC::StopAction() const
 	OnActionObjectChanged.Broadcast();
 }
 
-ABuildableObject* ANPC::GetActionObject() const
+AUsableObject* ANPC::GetActionObject() const
 {
 	if (!Blackboard)
 		return nullptr;
 	
-	return Cast<ABuildableObject>(Blackboard->GetValueAsObject("ActionObject"));
+	return Cast<AUsableObject>(Blackboard->GetValueAsObject("ActionObject"));
 }
 
 bool ANPC::HasActionObject() const
@@ -660,7 +660,7 @@ bool ANPC::HasActionObject() const
 #pragma region Camera
 void ANPC::FocusCameraOnActionObject() const
 {
-	const ABuildableObject* ActionObject = GetActionObject();
+	const AUsableObject* ActionObject = GetActionObject();
 	if (!ActionObject)
 		return;
 

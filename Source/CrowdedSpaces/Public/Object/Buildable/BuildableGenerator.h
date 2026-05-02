@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Build/BuildableObject.h"
+#include "Object/UsableObject.h"
 #include "Production/ProductionComponent.h"
 #include "Production/ProductionUpgradeData.h"
 #include "Selection/Selectable.h"
@@ -10,7 +10,7 @@
 class UResourceComponent;
 
 UCLASS()
-class CROWDEDSPACES_API ABuildableGenerator : public ABuildableObject, public ISelectable
+class CROWDEDSPACES_API ABuildableGenerator : public AUsableObject, public ISelectable
 {
 	GENERATED_BODY()
 

@@ -1,4 +1,4 @@
-﻿#include "Build/Buildable/BuildableBed.h"
+﻿#include "Object/Buildable/BuildableBed.h"
 
 #include "Build/BuildableRegistrySubsystem.h"
 
