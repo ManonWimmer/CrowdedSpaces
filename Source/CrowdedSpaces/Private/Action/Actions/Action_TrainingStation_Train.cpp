@@ -9,11 +9,11 @@ UAction_TrainingStation_Train::UAction_TrainingStation_Train()
 
 bool UAction_TrainingStation_Train::CanExecute_Implementation(AActor* Instigator) const
 {
-	const ABuildableTrainingStation* TrainingStation = Cast<ABuildableTrainingStation>(Instigator);
+	const TObjectPtr<ABuildableTrainingStation> TrainingStation = Cast<ABuildableTrainingStation>(Instigator);
 	if (!TrainingStation)
 		return false;
 
-	const ANPC* SelectedNPC = ActionSubsystem->GetSelectedNPC();
+	const TObjectPtr<ANPC> SelectedNPC = ActionSubsystem->GetSelectedNPC();
 	if (!SelectedNPC)
 		return false;
 
@@ -26,15 +26,15 @@ bool UAction_TrainingStation_Train::CanExecute_Implementation(AActor* Instigator
 void UAction_TrainingStation_Train::Execute_Implementation(AActor* Instigator)
 {
 	Super::Execute_Implementation(Instigator);
-	
-	ABuildableTrainingStation* TrainingStation = Cast<ABuildableTrainingStation>(Instigator);
+
+	const TObjectPtr<ABuildableTrainingStation> TrainingStation = Cast<ABuildableTrainingStation>(Instigator);
 	if (!TrainingStation)
 		return;
 	
 	if (!ActionSubsystem)
 		return;
 
-	ANPC* SelectedNPC = ActionSubsystem->GetSelectedNPC();
+	const TObjectPtr<ANPC> SelectedNPC = ActionSubsystem->GetSelectedNPC();
 	if (!SelectedNPC)
 		return;
 	

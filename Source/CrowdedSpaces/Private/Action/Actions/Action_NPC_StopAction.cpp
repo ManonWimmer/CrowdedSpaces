@@ -9,7 +9,7 @@ UAction_NPC_StopAction::UAction_NPC_StopAction()
 
 bool UAction_NPC_StopAction::CanExecute_Implementation(AActor* Instigator) const
 {
-	const ANPC* NPC = Cast<ANPC>(Instigator);
+	const TObjectPtr<ANPC> NPC = Cast<ANPC>(Instigator);
 	if (!NPC)
 		return false;
 	
@@ -23,7 +23,7 @@ void UAction_NPC_StopAction::Execute_Implementation(AActor* Instigator)
 {
 	Super::Execute_Implementation(Instigator);
 
-	ANPC* NPC = Cast<ANPC>(Instigator);
+	const TObjectPtr<ANPC> NPC = Cast<ANPC>(Instigator);
 	if (!NPC)
 		return;
 	

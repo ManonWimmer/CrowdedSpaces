@@ -2,6 +2,7 @@
 
 #include "Build/BuildableRegistrySubsystem.h"
 #include "Debug/CrowdedSpacesLogs.h"
+#include "Game/CrowdedGameState.h"
 
 ABuildableHealingStation::ABuildableHealingStation()
 {
@@ -56,5 +57,28 @@ void ABuildableHealingStation::OnSelected()
 
 void ABuildableHealingStation::OnDeselected()
 {
+}
+
+void ABuildableHealingStation::InitActions()
+{
+	Super::InitActions();
+
+	if (!GameState)
+		return;
+	
+	TArray<TObjectPtr<UAction>> InstancedActions;
+
+	for (const TSubclassOf<UAction>& ActionClass : GameState->HealingStationActions)
+	{
+		if (!ActionClass) continue;
+
+		UAction* NewAction = NewObject<UAction>(this, ActionClass);
+		if (!NewAction) continue;
+
+		NewAction->Initialize(GetWorld());
+		InstancedActions.Add(NewAction);
+	}
+
+	ActionComponent->SetupActions(InstancedActions);
 }
 #pragma endregion

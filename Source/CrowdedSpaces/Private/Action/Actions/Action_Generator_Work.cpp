@@ -10,11 +10,11 @@ UAction_Generator_Work::UAction_Generator_Work()
 
 bool UAction_Generator_Work::CanExecute_Implementation(AActor* Instigator) const
 {
-	const ABuildableGenerator* Generator = Cast<ABuildableGenerator>(Instigator);
+	const TObjectPtr<ABuildableGenerator> Generator = Cast<ABuildableGenerator>(Instigator);
 	if (!Generator)
 		return false;
 
-	const ANPC* SelectedNPC = ActionSubsystem->GetSelectedNPC();
+	const TObjectPtr<ANPC> SelectedNPC = ActionSubsystem->GetSelectedNPC();
 	if (!SelectedNPC)
 		return false;
 
@@ -27,15 +27,15 @@ bool UAction_Generator_Work::CanExecute_Implementation(AActor* Instigator) const
 void UAction_Generator_Work::Execute_Implementation(AActor* Instigator)
 {
 	Super::Execute_Implementation(Instigator);
-	
-	ABuildableGenerator* Generator = Cast<ABuildableGenerator>(Instigator);
+
+	const TObjectPtr<ABuildableGenerator> Generator = Cast<ABuildableGenerator>(Instigator);
 	if (!Generator)
 		return;
 	
 	if (!ActionSubsystem)
 		return;
 
-	ANPC* SelectedNPC = ActionSubsystem->GetSelectedNPC();
+	const TObjectPtr<ANPC> SelectedNPC = ActionSubsystem->GetSelectedNPC();
 	if (!SelectedNPC)
 		return;
 	

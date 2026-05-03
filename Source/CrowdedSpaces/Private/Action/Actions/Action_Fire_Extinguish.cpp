@@ -9,11 +9,11 @@ UAction_Fire_Extinguish::UAction_Fire_Extinguish()
 
 bool UAction_Fire_Extinguish::CanExecute_Implementation(AActor* Instigator) const
 {
-	const AFire* Fire = Cast<AFire>(Instigator);
+	const TObjectPtr<AFire> Fire = Cast<AFire>(Instigator);
 	if (!Fire)
 		return false;
 
-	const ANPC* SelectedNPC = ActionSubsystem->GetSelectedNPC();
+	const TObjectPtr<ANPC> SelectedNPC = ActionSubsystem->GetSelectedNPC();
 	if (!SelectedNPC)
 		return false;
 
@@ -32,7 +32,7 @@ void UAction_Fire_Extinguish::Execute_Implementation(AActor* Instigator)
 	if (!ActionSubsystem)
 		return;
 
-	ANPC* SelectedNPC = ActionSubsystem->GetSelectedNPC();
+	const TObjectPtr<ANPC> SelectedNPC = ActionSubsystem->GetSelectedNPC();
 	if (!SelectedNPC)
 		return;
 	

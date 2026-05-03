@@ -9,14 +9,14 @@ UAction_NPC_Kill::UAction_NPC_Kill()
 
 bool UAction_NPC_Kill::CanExecute_Implementation(AActor* Instigator) const
 {
-	return Super::CanExecute_Implementation(Instigator);
+	return true;
 }
 
 void UAction_NPC_Kill::Execute_Implementation(AActor* Instigator)
 {
 	Super::Execute_Implementation(Instigator);
 
-	ANPC* NPC = Cast<ANPC>(Instigator);
+	const TObjectPtr<ANPC> NPC = Cast<ANPC>(Instigator);
 	if (!NPC)
 		return;
 
