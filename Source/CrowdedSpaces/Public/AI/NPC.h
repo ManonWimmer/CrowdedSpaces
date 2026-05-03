@@ -33,10 +33,9 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSkillsTrained);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerReadyForCapture); 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNameSet); 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnActionObjectChanged); 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHealthChanged); 
 
 UCLASS()
-class CROWDEDSPACES_API ANPC : public ACharacter, public ISelectable, public IDamageable
+class CROWDEDSPACES_API ANPC : public ACharacter, public ISelectable
 {
 	GENERATED_BODY()
 
@@ -189,21 +188,14 @@ public:
 	void SetAutoNeeds(bool bNewAutoNeeds);
 
 	// Health
-	virtual void TakeDamage_Implementation(const float Amount) override;
-	virtual void Heal_Implementation(const float Amount) override;
-	virtual void StartHeal_Implementation(const float RegenAmountPerTick) override;
-	virtual void EndHeal_Implementation() override;
-	virtual float GetHealth_Implementation() const override;
-	virtual float GetMaxHealth_Implementation() const override;
-
 	UFUNCTION()
-	virtual void OnDamaged() override;
+	void OnDamaged();
 	
 	UFUNCTION()
-	virtual void OnHealed() override;
+	void OnHealed();
 	
 	UFUNCTION()
-	virtual void OnDead() override;
+	void OnDead();
 
 	UFUNCTION(BlueprintNativeEvent)
 	void OnDamagedFeedback();
@@ -213,9 +205,6 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent)
 	void OnDeadFeedback();
-
-	UPROPERTY(BlueprintAssignable)
-	FOnHealthChanged OnHealthChanged;
 	
 protected:
 	virtual void BeginPlay() override;

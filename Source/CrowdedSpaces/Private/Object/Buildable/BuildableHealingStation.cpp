@@ -38,16 +38,20 @@ bool ABuildableHealingStation::StartUsingImplementation(ANPC* NPC)
 	CS_LOG("Start using healing station");
 
 	// Regen health
-	IDamageable::Execute_StartHeal(NPC, 1.0f);
+	TObjectPtr<UResourceComponent> HealthComp = NPC->GetResourceComponent<EResourceType::Health>();
+	if (!HealthComp)
+		return false;
+	
+	HealthComp->SetIsInRegen(true);
 
 	// Toggle sleep & hunger
-	const TObjectPtr<UResourceComponent> EnergyComp = NPC->GetResourceComponent<EResourceType::Energy>();
+	TObjectPtr<UResourceComponent> EnergyComp = NPC->GetResourceComponent<EResourceType::Energy>();
 	if (!EnergyComp)
 		return false;
 	
 	EnergyComp->ToggleResourceTimer(); 
 
-	const TObjectPtr<UResourceComponent> FoodComp = NPC->GetResourceComponent<EResourceType::Food>();
+	TObjectPtr<UResourceComponent> FoodComp = NPC->GetResourceComponent<EResourceType::Food>();
 	if (!FoodComp)
 		return false;
 	
@@ -61,7 +65,11 @@ bool ABuildableHealingStation::StopUsingImplementation(ANPC* NPC)
 	CS_LOG("Stop using healing station");
 
 	// Stop regen health
-	IDamageable::Execute_EndHeal(NPC);
+	const TObjectPtr<UResourceComponent> HealthComp = NPC->GetResourceComponent<EResourceType::Health>();
+	if (!HealthComp)
+		return false;
+	
+	HealthComp->SetIsInRegen(false);
 
 	// Toggle sleep & hunger
 	const TObjectPtr<UResourceComponent> EnergyComp = NPC->GetResourceComponent<EResourceType::Energy>();

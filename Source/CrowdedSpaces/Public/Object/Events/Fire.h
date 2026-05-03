@@ -65,7 +65,7 @@ private:
 	TObjectPtr<USphereComponent> ClickCollision{nullptr};
 
 	UPROPERTY()
-	TArray<TObjectPtr<AActor>> OverlappingActors;
+	TArray<TObjectPtr<UResourceComponent>> DamageableComponents;
 
 	UPROPERTY()
 	FTimerHandle DamageTimerHandle;

@@ -45,14 +45,15 @@ void UResourceComponent::SetType(EResourceType NewType)
 void UResourceComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-
+	
 	const UWorld* World = GetWorld();
 	if (!World)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("World is null!"));
 		return;
 	}
+
+	Resource = MaxResource;
 	
 	GameInstance = World->GetGameInstance<UCrowdedGameInstance>();
 
@@ -84,6 +85,7 @@ void UResourceComponent::AddResource(const float Amount)
 
 	if (Resource != OldResource)
 	{
+		OnResourceAdded.Broadcast();
 		OnResourceChanged.Broadcast(Resource);
 	}
 
@@ -107,6 +109,8 @@ void UResourceComponent::RemoveResource(const float Amount)
 	
 	if (Resource <= 0)
 		OnNoMoreResource.Broadcast();
+	else
+		OnResourceRemoved.Broadcast();
 	
 	OnResourceChanged.Broadcast(Resource);
 }
@@ -186,29 +190,28 @@ void UResourceComponent::SetCanLoseAndRegenResource(const bool bCanLoseAndRegen)
 void UResourceComponent::SetIsInRegen(const bool bInRegen)
 {
 	bIsInRegen = bInRegen;
-	CS_LOG("SET REGEN %s | ptr=%p | owner=%s",
-	bIsInRegen ? TEXT("TRUE") : TEXT("FALSE"),
-	this,
-	*GetOwner()->GetName());
+	check(!IsTemplate());
+
+	CS_LOG("OWNER VALID CHECK: %s | IsTemplate=%d | World=%s",
+		*GetNameSafe(this),
+		IsTemplate(),
+		GetWorld() ? TEXT("VALID") : TEXT("NULL"));
+	CS_LOG("SET REGEN %s | ptr=%p | owner=%s", bIsInRegen ? TEXT("TRUE") : TEXT("FALSE"), this, *GetOwner()->GetName());
 	OnIsInRegenChanged.Broadcast(bIsInRegen);
 }
 
 void UResourceComponent::ResourceTick()
 {
-	CS_LOG("TICK %s | REGEN ACTUAL=%s | ptr=%p | owner=%s",
-	*StaticEnum<EResourceType>()->GetValueAsString(ResourceType),
-	bIsInRegen ? TEXT("TRUE") : TEXT("FALSE"),
-	this,
-	*GetOwner()->GetName());
+	CS_LOG("TICK %s | REGEN ACTUAL=%s | ptr=%p | owner=%s", *StaticEnum<EResourceType>()->GetValueAsString(ResourceType), bIsInRegen ? TEXT("TRUE") : TEXT("FALSE"), this, *GetOwner()->GetName());
 	
 	if (!bIsInRegen && !CanLoseAndRegenResource)
 		return;
 	
-	CS_LOG("resource tick type : %s", *StaticEnum<EResourceType>()->GetValueAsString(ResourceType));
+	//CS_LOG("resource tick type : %s", *StaticEnum<EResourceType>()->GetValueAsString(ResourceType));
 	
 	if (bIsInRegen)
 	{
-		CS_LOG("is in regen");
+		//CS_LOG("is in regen");
 		if (ResourceType == EResourceType::Food && PlayerFoodForRegen)
 		{
 			if (PlayerFoodForRegen->HasEnoughResource(ResourceRegenPerTick))
@@ -219,7 +222,7 @@ void UResourceComponent::ResourceTick()
 		}
 		else
 		{
-			CS_LOG("else add resource");
+			//CS_LOG("else add resource");
 			AddResource(ResourceRegenPerTick);
 		}
 	}

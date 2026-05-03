@@ -100,6 +100,8 @@ void ANPC::BeginPlay()
 	FoodComponent->OnNoMoreResource.AddDynamic(this, &ANPC::OnDead);
 	EnergyComponent->OnNoMoreResource.AddDynamic(this, &ANPC::OnDead);
 	HealthComponent->OnNoMoreResource.AddDynamic(this, &ANPC::OnDead);
+	HealthComponent->OnResourceAdded.AddDynamic(this, &ANPC::OnHealed);
+	HealthComponent->OnResourceRemoved.AddDynamic(this, &ANPC::OnDamaged);
 
 	ACrowdedGameMode* GameMode = GetWorld()->GetAuthGameMode<ACrowdedGameMode>();
 	if (!GameMode)
@@ -179,6 +181,8 @@ void ANPC::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	FoodComponent->OnNoMoreResource.RemoveDynamic(this, &ANPC::OnDead);
 	EnergyComponent->OnNoMoreResource.RemoveDynamic(this, &ANPC::OnDead);
 	HealthComponent->OnNoMoreResource.RemoveDynamic(this, &ANPC::OnDead);
+	HealthComponent->OnResourceAdded.RemoveDynamic(this, &ANPC::OnHealed);
+	HealthComponent->OnResourceRemoved.RemoveDynamic(this, &ANPC::OnDamaged);
 	
 	Super::EndPlay(EndPlayReason);
 }
@@ -324,9 +328,18 @@ void ANPC::Die()
 #pragma region Resources
 UResourceComponent* ANPC::GetResourceComponentByType(const EResourceType Type) const
 {
-	if (const TObjectPtr<UResourceComponent>* Found = ResourceMap.Find(Type))
+	// Map qui renvoyait pas bon pour le health component...
+	
+	switch (Type)
 	{
-		return Found->Get();
+	case EResourceType::Food:
+		return FoodComponent;
+	case EResourceType::Energy:
+		return EnergyComponent;
+	case EResourceType::Health:
+		return HealthComponent;
+	default:
+		return nullptr;
 	}
 
 	return nullptr;
@@ -678,73 +691,14 @@ void ANPC::SetAutoNeeds(const bool bNewAutoNeeds)
 #pragma endregion
 
 #pragma region Health
-void ANPC::TakeDamage_Implementation(const float Amount)
-{
-	CS_LOG("NPC take damage");
-	if (!HealthComponent)
-		return;
-
-	HealthComponent->RemoveResource(Amount);
-	OnDamaged();
-}
-
-void ANPC::Heal_Implementation(const float Amount)
-{
-	CS_LOG("NPC heal");
-	if (!HealthComponent)
-		return;
-
-	HealthComponent->AddResource(Amount);
-	OnHealed();
-}
-
-void ANPC::StartHeal_Implementation(const float RegenAmountPerTick)
-{
-	if (!HealthComponent)
-		return;
-
-	UResourceComponent* HealthComp = GetResourceComponent<EResourceType::Health>();
-	if (!HealthComp)
-		return;
-	
-	HealthComp->SetResourceRegenPerTick(RegenAmountPerTick);
-	HealthComp->SetIsInRegen(true);
-}
-
-void ANPC::EndHeal_Implementation()
-{
-	if (!HealthComponent)
-		return;
-	
-	HealthComponent->SetIsInRegen(false);
-}
-
-float ANPC::GetHealth_Implementation() const
-{
-	if (!HealthComponent)
-		return 0;
-	
-	return HealthComponent->GetResource();
-}
-
-float ANPC::GetMaxHealth_Implementation() const
-{
-	if (!HealthComponent)
-		return 0;
-	
-	return HealthComponent->GetMaxResource();
-}
-
 void ANPC::OnDamaged()
 {
-	OnHealthChanged.Broadcast();
 	OnDamagedFeedback();
 	// VFX feedback to do, change color to red x seconds (timeline fade?) ? in bp ?
 }
 
 void ANPC::OnHealed()
 {
-	OnHealthChanged.Broadcast();
 	OnHealedFeedback();
 	// VFX feedback to do, in bp ?
 }

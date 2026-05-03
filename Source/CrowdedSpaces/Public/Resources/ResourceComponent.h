@@ -8,6 +8,8 @@
 class UCrowdedGameInstance;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnResourceFull); 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnResourceChanged, int32, Value); 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnResourceAdded); 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnResourceRemoved); 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxResourceChanged, int32, Value); 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIsInRegenChanged, bool, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNoMoreResource); 
@@ -85,6 +87,12 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnResourceChanged OnResourceChanged;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnResourceAdded OnResourceAdded;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnResourceRemoved OnResourceRemoved;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnIsInRegenChanged OnIsInRegenChanged;

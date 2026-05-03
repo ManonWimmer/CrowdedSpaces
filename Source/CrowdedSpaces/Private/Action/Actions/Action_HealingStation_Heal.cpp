@@ -24,10 +24,11 @@ bool UAction_HealingStation_Heal::CanExecute_Implementation(AActor* Instigator) 
 	if (!HealingStation->IsAvailableForReservation(SelectedNPC))
 		return false;
 
+	const TObjectPtr<UResourceComponent> Health = SelectedNPC->GetResourceComponent<EResourceType::Health>();
+	if (!Health)
+		return false;
 	
-	CS_LOG("Health : %f, Max health : %f", IDamageable::Execute_GetHealth(SelectedNPC), IDamageable::Execute_GetMaxHealth(SelectedNPC))
-	
-	return IDamageable::Execute_GetHealth(SelectedNPC) < IDamageable::Execute_GetMaxHealth(SelectedNPC);
+	return !Health->HasMaxResource();
 }
 
 void UAction_HealingStation_Heal::Execute_Implementation(AActor* Instigator)

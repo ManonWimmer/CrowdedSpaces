@@ -100,7 +100,7 @@ void AFire::Tick(float DeltaTime)
 	const int NPCCount = NPCsExtinguishing.Num();
 
 	CurrentExtinguishProgress += DeltaTime * NPCCount;
-	CS_LOG("Fire progress : %f", GetFireExtinguishProgress());
+	//CS_LOG("Fire progress : %f", GetFireExtinguishProgress());
 	OnFireExtinguishProgress.Broadcast();
 
 	if (CurrentExtinguishProgress >= TimeToExtinguish)
@@ -112,7 +112,7 @@ void AFire::Tick(float DeltaTime)
 #pragma region Fire
 void AFire::ExtinguishFire()
 {
-	CS_LOG("Extinguish fire");
+	//CS_LOG("Extinguish fire");
 	OnFireExtinguished.Broadcast(this);
 	
 	Destroy();
@@ -120,17 +120,20 @@ void AFire::ExtinguishFire()
 
 void AFire::ApplyDamage()
 {
-	for (int i = OverlappingActors.Num() - 1; i >= 0; --i)
+	//CS_LOG("ApplyDamage tick | Components count = %d", DamageableComponents.Num());
+	
+	for (int i = DamageableComponents.Num() - 1; i >= 0; --i)
 	{
-		AActor* Actor = OverlappingActors[i];
-
-		if (!Actor || !Actor->Implements<UDamageable>())
+		if (!DamageableComponents[i])
 		{
-			OverlappingActors.RemoveAt(i);
+			//CS_LOG_WARNING("Invalid component at index %d", i);
+			DamageableComponents.RemoveAt(i);
 			continue;
 		}
 
-		IDamageable::Execute_TakeDamage(Actor, DamageAmount);
+		//CS_LOG("Applying damage to comp ptr=%p", DamageableComponents[i]);
+		
+		DamageableComponents[i]->RemoveResource(DamageAmount);
 	}
 }
 
@@ -146,9 +149,30 @@ void AFire::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* Oth
 {
 	if (!OtherActor) return;
 
-	if (OtherActor->Implements<UDamageable>())
+	//CS_LOG("OverlapBegin: Actor = %s", *OtherActor->GetName())
+	TArray<UResourceComponent*> ResourceComps;
+	OtherActor->GetComponents<UResourceComponent>(ResourceComps);
+
+	bool bFoundHealth = false;
+
+	for (UResourceComponent* Comp : ResourceComps)
 	{
-		OverlappingActors.AddUnique(OtherActor);
+		if (!Comp)
+			continue;
+
+		//CS_LOG("Found ResourceComponent | Actor=%s | Type=%d | ptr=%p", *OtherActor->GetName(),(int32)Comp->GetType(),Comp);
+
+		if (Comp->GetType() == EResourceType::Health)
+		{
+			//CS_LOG("HEALTH COMPONENT ADDED");
+			DamageableComponents.AddUnique(Comp);
+			bFoundHealth = true;
+		}
+	}
+
+	if (!bFoundHealth)
+	{
+		CS_LOG_WARNING("No HealthComponent found on %s", *OtherActor->GetName());
 	}
 }
 
@@ -157,7 +181,23 @@ void AFire::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* Other
 {
 	if (!OtherActor) return;
 
-	OverlappingActors.Remove(OtherActor);
+	//CS_LOG("OverlapEnd: Actor = %s", *OtherActor->GetName());
+	
+	TArray<UResourceComponent*> ResourceComps;
+	OtherActor->GetComponents<UResourceComponent>(ResourceComps);
+
+	for (UResourceComponent* Comp : ResourceComps)
+	{
+		if (!Comp)
+			continue;
+
+		if (Comp->GetType() == EResourceType::Health)
+		{
+			//CS_LOG("Removing HealthComponent | Actor=%s | ptr=%p", *OtherActor->GetName(), Comp);
+
+			DamageableComponents.Remove(Comp);
+		}
+	}
 }
 #pragma endregion
 
