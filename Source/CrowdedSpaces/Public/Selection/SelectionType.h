@@ -13,6 +13,7 @@ enum class ESelectionType : uint8
 	Food				UMETA(DisplayName="Food"),
 	Bed					UMETA(DisplayName="Bed"),
 	TrainingStation 	UMETA(DisplayName="Training Station"),
+	HealingStation		UMETA(DisplayName="Healing Station"),
 		
 	Room				UMETA(DisplayName="Room"),
 	StorageRoom			UMETA(DisplayName="StorageRoom"),

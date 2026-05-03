@@ -720,7 +720,7 @@ void ANPC::OnDead()
 {
 	OnHealthChanged.Broadcast();
 	OnDeadFeedback();
-	Die();
+	Die(); // mettre die dans feedback bp plus tard pour play sound, vfx etc sans null ref
 }
 
 void ANPC::OnHealedFeedback_Implementation()
