@@ -47,6 +47,12 @@ ANPC::ANPC()
 	EnergyComponent->SetCanLoseAndRegenResource(true);
 	ResourceMap.Add(EResourceType::Energy, EnergyComponent);
 
+	// Health
+	HealthComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("HealthComponent"));
+	HealthComponent->SetType(EResourceType::Health);
+	HealthComponent->SetCanLoseAndRegenResource(false);
+	ResourceMap.Add(EResourceType::Health, HealthComponent);
+
 	// Selectable
 	SelectionType = ESelectionType::NPC;
 
@@ -91,8 +97,9 @@ void ANPC::BeginPlay()
 	if (!CameraComponent) return;
 	
 	// Die
-	FoodComponent->OnNoMoreResource.AddDynamic(this, &ANPC::Die);
-	EnergyComponent->OnNoMoreResource.AddDynamic(this, &ANPC::Die);
+	FoodComponent->OnNoMoreResource.AddDynamic(this, &ANPC::OnDead);
+	EnergyComponent->OnNoMoreResource.AddDynamic(this, &ANPC::OnDead);
+	HealthComponent->OnNoMoreResource.AddDynamic(this, &ANPC::OnDead);
 
 	ACrowdedGameMode* GameMode = GetWorld()->GetAuthGameMode<ACrowdedGameMode>();
 	if (!GameMode)
@@ -169,8 +176,9 @@ void ANPC::BeginPlay()
 
 void ANPC::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	FoodComponent->OnNoMoreResource.RemoveDynamic(this, &ANPC::Die);
-	EnergyComponent->OnNoMoreResource.RemoveDynamic(this, &ANPC::Die);
+	FoodComponent->OnNoMoreResource.RemoveDynamic(this, &ANPC::OnDead);
+	EnergyComponent->OnNoMoreResource.RemoveDynamic(this, &ANPC::OnDead);
+	HealthComponent->OnNoMoreResource.RemoveDynamic(this, &ANPC::OnDead);
 	
 	Super::EndPlay(EndPlayReason);
 }
@@ -673,33 +681,58 @@ void ANPC::SetAutoNeeds(const bool bNewAutoNeeds)
 void ANPC::TakeDamage_Implementation(const float Amount)
 {
 	CS_LOG("NPC take damage");
-	Health -= Amount;
-	OnDamaged();
+	if (!HealthComponent)
+		return;
 
-	if (Health <= 0)
-	{
-		Health = 0;
-		OnDead();
-	}
+	HealthComponent->RemoveResource(Amount);
+	OnDamaged();
 }
 
 void ANPC::Heal_Implementation(const float Amount)
 {
-	Health += Amount;
-	if (Health > MaxHealth)
-		Health = MaxHealth;
+	CS_LOG("NPC heal");
+	if (!HealthComponent)
+		return;
 
+	HealthComponent->AddResource(Amount);
 	OnHealed();
+}
+
+void ANPC::StartHeal_Implementation(const float RegenAmountPerTick)
+{
+	if (!HealthComponent)
+		return;
+
+	UResourceComponent* HealthComp = GetResourceComponent<EResourceType::Health>();
+	if (!HealthComp)
+		return;
+	
+	HealthComp->SetResourceRegenPerTick(RegenAmountPerTick);
+	HealthComp->SetIsInRegen(true);
+}
+
+void ANPC::EndHeal_Implementation()
+{
+	if (!HealthComponent)
+		return;
+	
+	HealthComponent->SetIsInRegen(false);
 }
 
 float ANPC::GetHealth_Implementation() const
 {
-	return Health;
+	if (!HealthComponent)
+		return 0;
+	
+	return HealthComponent->GetResource();
 }
 
 float ANPC::GetMaxHealth_Implementation() const
 {
-	return MaxHealth;
+	if (!HealthComponent)
+		return 0;
+	
+	return HealthComponent->GetMaxResource();
 }
 
 void ANPC::OnDamaged()
@@ -718,9 +751,8 @@ void ANPC::OnHealed()
 
 void ANPC::OnDead()
 {
-	OnHealthChanged.Broadcast();
 	OnDeadFeedback();
-	Die(); // mettre die dans feedback bp plus tard pour play sound, vfx etc sans null ref
+	Die(); // mettre die dans feedback bp plus tard pour play sound, vfx etc sans null ref si il est direct destroy
 }
 
 void ANPC::OnHealedFeedback_Implementation()

@@ -35,9 +35,23 @@ void ABuildableHealingStation::EndPlay(const EEndPlayReason::Type EndPlayReason)
 #pragma region Use Object
 bool ABuildableHealingStation::StartUsingImplementation(ANPC* NPC)
 {
-	// TODO : health component ici au lieu de damageable ?
-
 	CS_LOG("Start using healing station");
+
+	// Regen health
+	IDamageable::Execute_StartHeal(NPC, 1.0f);
+
+	// Toggle sleep & hunger
+	const TObjectPtr<UResourceComponent> EnergyComp = NPC->GetResourceComponent<EResourceType::Energy>();
+	if (!EnergyComp)
+		return false;
+	
+	EnergyComp->ToggleResourceTimer(); 
+
+	const TObjectPtr<UResourceComponent> FoodComp = NPC->GetResourceComponent<EResourceType::Food>();
+	if (!FoodComp)
+		return false;
+	
+	FoodComp->ToggleResourceTimer();
 	
 	return true;
 }
@@ -45,6 +59,22 @@ bool ABuildableHealingStation::StartUsingImplementation(ANPC* NPC)
 bool ABuildableHealingStation::StopUsingImplementation(ANPC* NPC)
 {
 	CS_LOG("Stop using healing station");
+
+	// Stop regen health
+	IDamageable::Execute_EndHeal(NPC);
+
+	// Toggle sleep & hunger
+	const TObjectPtr<UResourceComponent> EnergyComp = NPC->GetResourceComponent<EResourceType::Energy>();
+	if (!EnergyComp)
+		return false;
+	
+	EnergyComp->ToggleResourceTimer(); 
+
+	const TObjectPtr<UResourceComponent> FoodComp = NPC->GetResourceComponent<EResourceType::Food>();
+	if (!FoodComp)
+		return false;
+	
+	FoodComp->ToggleResourceTimer(); 
 	
 	return true;
 }

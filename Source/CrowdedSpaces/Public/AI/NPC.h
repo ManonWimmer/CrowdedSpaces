@@ -188,14 +188,21 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetAutoNeeds(bool bNewAutoNeeds);
 
-	// Damage
+	// Health
 	virtual void TakeDamage_Implementation(const float Amount) override;
 	virtual void Heal_Implementation(const float Amount) override;
+	virtual void StartHeal_Implementation(const float RegenAmountPerTick) override;
+	virtual void EndHeal_Implementation() override;
 	virtual float GetHealth_Implementation() const override;
 	virtual float GetMaxHealth_Implementation() const override;
-	
+
+	UFUNCTION()
 	virtual void OnDamaged() override;
+	
+	UFUNCTION()
 	virtual void OnHealed() override;
+	
+	UFUNCTION()
 	virtual void OnDead() override;
 
 	UFUNCTION(BlueprintNativeEvent)
@@ -236,6 +243,9 @@ private:
 	
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UResourceComponent> EnergyComponent{nullptr};
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UResourceComponent> HealthComponent{nullptr};
 
 	// Work
 	UPROPERTY(EditAnywhere)
@@ -321,13 +331,6 @@ private:
 	// Auto needs
 	UPROPERTY()
 	bool bAutoNeeds = true;
-
-	// Health
-	UPROPERTY(EditAnywhere)
-	float Health = 100;
-
-	UPROPERTY(EditAnywhere)
-	float MaxHealth = 100;
 
 	UPROPERTY()
 	TObjectPtr<APlayerController> PlayerController{nullptr};

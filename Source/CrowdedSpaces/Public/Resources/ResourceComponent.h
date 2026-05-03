@@ -73,6 +73,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool GetIsInRegen() const { return bIsInRegen; }
 
+	UFUNCTION(BlueprintCallable)
+	void SetResourceRegenPerTick(const float NewRegen) { ResourceRegenPerTick = NewRegen; }
+
+	UFUNCTION(BlueprintCallable)
+	void SetResourceLossPerTick(const float NewRegen) { ResourceLossPerTick = NewRegen; }
+
 	// Delegates
 	UPROPERTY(BlueprintAssignable)
 	FOnResourceFull OnResourceFull;

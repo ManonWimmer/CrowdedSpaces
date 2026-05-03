@@ -22,12 +22,23 @@ public:
 	void Heal(const float Amount);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void StartHeal(const float RegenAmountPerTick);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void EndHeal();
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	float GetHealth() const;
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	float GetMaxHealth() const;
 
+	UFUNCTION()
 	virtual void OnDamaged() = 0;
+	
+	UFUNCTION()
 	virtual void OnHealed() = 0;
+
+	UFUNCTION()
 	virtual void OnDead() = 0;
 };

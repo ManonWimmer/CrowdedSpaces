@@ -1,5 +1,6 @@
 ﻿#include "Action/Actions/Action_HealingStation_Heal.h"
 
+#include "Debug/CrowdedSpacesLogs.h"
 #include "Object/Buildable/BuildableHealingStation.h"
 
 UAction_HealingStation_Heal::UAction_HealingStation_Heal()
@@ -20,7 +21,13 @@ bool UAction_HealingStation_Heal::CanExecute_Implementation(AActor* Instigator) 
 	if (!HealingStation->CanBeUsed())
 		return false;
 
-	return HealingStation->IsAvailableForReservation(SelectedNPC);
+	if (!HealingStation->IsAvailableForReservation(SelectedNPC))
+		return false;
+
+	
+	CS_LOG("Health : %f, Max health : %f", IDamageable::Execute_GetHealth(SelectedNPC), IDamageable::Execute_GetMaxHealth(SelectedNPC))
+	
+	return IDamageable::Execute_GetHealth(SelectedNPC) < IDamageable::Execute_GetMaxHealth(SelectedNPC);
 }
 
 void UAction_HealingStation_Heal::Execute_Implementation(AActor* Instigator)
