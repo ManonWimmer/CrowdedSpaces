@@ -8,8 +8,11 @@ ABuildableHealingStation::ABuildableHealingStation()
 {
 	SelectionType = ESelectionType::HealingStation;
 	ObjectType = EObjectType::HealingStation;
+	
 	NPCUseAction = ENPCActionType::Heal;
 	NPCMoveAction = ENPCActionType::MoveToHealingStation;
+	
+	UsingResourceTypeToCheck = EResourceType::Health;
 }
 
 void ABuildableHealingStation::BeginPlay()

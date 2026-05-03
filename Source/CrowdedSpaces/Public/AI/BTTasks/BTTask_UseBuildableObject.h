@@ -27,8 +27,5 @@ protected:
 	UPROPERTY()
 	TObjectPtr<AUsableObject> CurrentObject = nullptr;
 
-	UPROPERTY(EditAnywhere)
-	EResourceType ResourceTypeToCheck;
-
 	bool bHasStartedUsing = false;
 };

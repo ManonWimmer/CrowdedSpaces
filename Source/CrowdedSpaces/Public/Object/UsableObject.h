@@ -94,6 +94,9 @@ public:
 	ENPCActionType GetNPCMoveAction() const { return NPCMoveAction; }
 
 	UFUNCTION(BlueprintCallable, Category = "Object")
+	EResourceType GetUsingResourceTypeToCheck() const { return UsingResourceTypeToCheck; }
+
+	UFUNCTION(BlueprintCallable, Category = "Object")
 	void SetBuildData(UBuildData* NewData) { BuildData = NewData; }
 	
 	UFUNCTION(BlueprintCallable, Category = "Object")
@@ -146,6 +149,9 @@ protected:
 
 	UPROPERTY()
 	ENPCActionType NPCMoveAction = ENPCActionType::MoveToWork;
+	
+	UPROPERTY(EditAnywhere)
+	EResourceType UsingResourceTypeToCheck = EResourceType::None;
 
 	UPROPERTY()
 	TObjectPtr<UBuildData> BuildData{nullptr};

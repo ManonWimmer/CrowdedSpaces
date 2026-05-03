@@ -6,8 +6,11 @@ ABuildableFood::ABuildableFood()
 {
 	SelectionType = ESelectionType::Food;
 	ObjectType = EObjectType::Food;
+	
 	NPCUseAction = ENPCActionType::Eat;
 	NPCMoveAction = ENPCActionType::MoveToFood;
+	
+	UsingResourceTypeToCheck = EResourceType::Food;
 }
 
 void ABuildableFood::BeginPlay()

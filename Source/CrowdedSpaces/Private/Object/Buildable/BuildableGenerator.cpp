@@ -10,8 +10,11 @@ ABuildableGenerator::ABuildableGenerator()
 	
 	SelectionType = ESelectionType::Generator;
 	ObjectType = EObjectType::Generator;
+	
 	NPCUseAction = ENPCActionType::Work;
 	NPCMoveAction = ENPCActionType::MoveToWork;
+	
+	UsingResourceTypeToCheck = EResourceType::None;
 }
 
 void ABuildableGenerator::BeginPlay()

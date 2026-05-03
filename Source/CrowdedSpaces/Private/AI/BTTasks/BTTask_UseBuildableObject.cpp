@@ -6,8 +6,7 @@
 #include "AIController.h"
 #include "Debug/CrowdedSpacesLogs.h"
 
-UBTTask_UseBuildableObject::UBTTask_UseBuildableObject(FObjectInitializer const& ObjectInitializer):
-	ResourceTypeToCheck()
+UBTTask_UseBuildableObject::UBTTask_UseBuildableObject(FObjectInitializer const& ObjectInitializer)
 {
 	NodeName = "Use Buildable Object";
 
@@ -70,16 +69,16 @@ void UBTTask_UseBuildableObject::TickTask(UBehaviorTreeComponent& OwnerComp, uin
 		return;
 	}
 
-	if (ResourceTypeToCheck == EResourceType::None)
+	if (CurrentObject->GetUsingResourceTypeToCheck() == EResourceType::None)
 		return;
 	
-	const UResourceComponent* Resource = NPC->GetResourceComponentByType(ResourceTypeToCheck);
+	const UResourceComponent* Resource = NPC->GetResourceComponentByType(CurrentObject->GetUsingResourceTypeToCheck());
 	if (!Resource)
 		return;
 
 	if (Resource->GetResource() >= Resource->GetMaxResource())
 	{
-		CS_LOG_WARNING("Max resource, stop using");
+		CS_LOG_WARNING("Using at max resource, stop using");
 		
 		StopUsing();
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);

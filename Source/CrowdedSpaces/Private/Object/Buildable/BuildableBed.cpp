@@ -6,8 +6,11 @@ ABuildableBed::ABuildableBed()
 {
 	SelectionType = ESelectionType::Bed;
 	ObjectType = EObjectType::Bed;
+	
 	NPCUseAction = ENPCActionType::Sleep;
 	NPCMoveAction = ENPCActionType::MoveToBed;
+	
+	UsingResourceTypeToCheck = EResourceType::Energy;
 }
 
 void ABuildableBed::BeginPlay()
