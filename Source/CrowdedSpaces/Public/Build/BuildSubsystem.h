@@ -66,6 +66,12 @@ public:
 
 	UFUNCTION()
 	void RemoveObject(const AUsableObject* Object) const;
+
+	UFUNCTION(BlueprintCallable)
+	float GetObjectRepairCost(const AUsableObject* Object) const;
+
+	UFUNCTION(BlueprintCallable)
+	void RepairObject(const AUsableObject* Object) const;
 	
 	UFUNCTION()
 	void LeftClicked();

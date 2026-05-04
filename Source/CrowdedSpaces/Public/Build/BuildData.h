@@ -41,4 +41,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float LoseElectricityPerHour = 10;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float RepairCostPerDamage = 1;
 };

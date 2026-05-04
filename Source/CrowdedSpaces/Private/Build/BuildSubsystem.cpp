@@ -445,7 +445,7 @@ void UBuildSubsystem::PlaceRoom()
 }
 #pragma endregion
 
-#pragma region Object / Room Destroy
+#pragma region Object / Room Destroy & Repair
 void UBuildSubsystem::RemoveObject(const AUsableObject* Object) const
 {
 	if (!Object || !GridActor)
@@ -460,6 +460,26 @@ void UBuildSubsystem::RemoveObject(const AUsableObject* Object) const
 			Cell->bOccupied = false;
 		}
 	}
+}
+
+float UBuildSubsystem::GetObjectRepairCost(const AUsableObject* Object) const
+{
+	const TObjectPtr<UResourceComponent> Health = Object->GetHealthComponent();
+	if (!Health)
+		return 0;
+
+	const int ObjectDamage = Health->GetMaxResource() - Health->GetResource();
+
+	return ObjectDamage * Object->GetBuildData()->RepairCostPerDamage;
+}
+
+void UBuildSubsystem::RepairObject(const AUsableObject* Object) const
+{
+	const TObjectPtr<UResourceComponent> Health = Object->GetHealthComponent();
+	if (!Health)
+		return;
+
+	Health->AddResource(Health->GetMaxResource() - Health->GetResource());
 }
 
 void UBuildSubsystem::DestroyRoom(const int RoomId) const
@@ -608,11 +628,15 @@ void UBuildSubsystem::OnRoomActiveStateChanged(int RoomId)
 void UBuildSubsystem::UnlockRoom(const EGridRoomType RoomType)
 {
 	UnlockedRooms[RoomType] = true;
+
+	// todo: unlock objects too
 }
 
 bool UBuildSubsystem::IsRoomUnlocked(const EGridRoomType RoomType) const 
 {
 	return UnlockedRooms[RoomType];
+
+	// todo: is object unlocked function
 }
 #pragma endregion
 
