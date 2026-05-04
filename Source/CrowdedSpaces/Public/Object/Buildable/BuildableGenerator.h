@@ -52,11 +52,11 @@ protected:
 private:
 	// Production
 	UPROPERTY(EditAnywhere)
-	UProductionComponent* ProductionComponent = nullptr;
+	TObjectPtr<UProductionComponent> ProductionComponent{nullptr};
 
 	// Upgrade
 	UPROPERTY(EditAnywhere)
-	UProductionUpgradeData* ProductionUpgradeData = nullptr;
+	TObjectPtr<UProductionUpgradeData> ProductionUpgradeData{nullptr};
 
 	UPROPERTY();
 	int CurrentUpgrade = 0;
@@ -68,5 +68,5 @@ private:
 	FUpgradeStruct NextUpgrade;
 
 	UPROPERTY()
-	UResourceComponent* PlayerMoneyComponent = nullptr;
+	TObjectPtr<UResourceComponent> PlayerMoneyComponent{nullptr};
 };

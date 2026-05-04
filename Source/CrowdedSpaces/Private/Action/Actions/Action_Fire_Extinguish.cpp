@@ -28,7 +28,6 @@ void UAction_Fire_Extinguish::Execute_Implementation(AActor* Instigator)
 	if (!Fire)
 		return;
 	
-	//Fire->ExtinguishFire();
 	if (!ActionSubsystem)
 		return;
 

@@ -118,6 +118,9 @@ public:
 	// Actions
 	UFUNCTION()
 	virtual void InitActions();
+
+	UFUNCTION(BlueprintCallable, Category = "Object")
+	UResourceComponent* GetHealthComponent() const { return HealthComponent; }
 	
 protected:
 	UPROPERTY()
@@ -187,4 +190,8 @@ protected:
 	// Actions
 	UPROPERTY()
 	TObjectPtr<UActionComponent> ActionComponent{nullptr};
+
+	// Health
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UResourceComponent> HealthComponent{nullptr};
 };

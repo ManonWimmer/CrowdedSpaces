@@ -33,7 +33,6 @@ ANPC::ANPC()
 	FoodComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("FoodComponent"));
 	FoodComponent->SetType(EResourceType::Food);
 	FoodComponent->SetCanLoseAndRegenResource(true);
-	ResourceMap.Add(EResourceType::Food, FoodComponent);
 	
 	NPCNameWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("NPCNameWidget"));
 	NPCNameWidget->SetupAttachment(GetMesh());
@@ -45,13 +44,11 @@ ANPC::ANPC()
 	EnergyComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("EnergyComponent"));
 	EnergyComponent->SetType(EResourceType::Energy);
 	EnergyComponent->SetCanLoseAndRegenResource(true);
-	ResourceMap.Add(EResourceType::Energy, EnergyComponent);
 
 	// Health
 	HealthComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("HealthComponent"));
 	HealthComponent->SetType(EResourceType::Health);
 	HealthComponent->SetCanLoseAndRegenResource(false);
-	ResourceMap.Add(EResourceType::Health, HealthComponent);
 
 	// Selectable
 	SelectionType = ESelectionType::NPC;
@@ -694,13 +691,11 @@ void ANPC::SetAutoNeeds(const bool bNewAutoNeeds)
 void ANPC::OnDamaged()
 {
 	OnDamagedFeedback();
-	// VFX feedback to do, change color to red x seconds (timeline fade?) ? in bp ?
 }
 
 void ANPC::OnHealed()
 {
 	OnHealedFeedback();
-	// VFX feedback to do, in bp ?
 }
 
 void ANPC::OnDead()

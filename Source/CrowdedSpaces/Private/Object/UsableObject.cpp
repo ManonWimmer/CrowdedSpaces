@@ -27,6 +27,11 @@ AUsableObject::AUsableObject()
 
 	// Actions
 	ActionComponent = CreateDefaultSubobject<UActionComponent>("ActionComponent");
+
+	// Health
+	HealthComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("HealthComponent"));
+	HealthComponent->SetType(EResourceType::Health);
+	HealthComponent->SetCanLoseAndRegenResource(false);
 }
 
 void AUsableObject::BeginPlay()

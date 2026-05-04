@@ -223,9 +223,6 @@ private:
 	UPROPERTY()
 	TObjectPtr<UCameraComponent> CameraComponent{nullptr};
 	
-	UPROPERTY()
-	TMap<EResourceType, TObjectPtr<UResourceComponent>> ResourceMap;
-	
 	// Resources Components
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UResourceComponent> FoodComponent{nullptr};
