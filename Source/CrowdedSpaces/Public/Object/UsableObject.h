@@ -104,7 +104,10 @@ public:
 	UBuildData* GetBuildData() const { return BuildData; }
 	
 	UFUNCTION(BlueprintCallable, Category = "Object")
-	void DestroyObject();
+	void DestroyObject(bool bDestroyMoney = true);
+
+	UFUNCTION(BlueprintCallable, Category = "Object")
+	void DestroyObjectWithoutMoney();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int RoomId = UBuildSubsystem::InvalidRoomId;

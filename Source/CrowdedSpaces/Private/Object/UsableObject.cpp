@@ -87,7 +87,7 @@ void AUsableObject::BeginPlay()
 	InitActions();
 
 	// Dead
-	HealthComponent->OnNoMoreResource.AddDynamic(this, &AUsableObject::DestroyObject);
+	HealthComponent->OnNoMoreResource.AddDynamic(this, &AUsableObject::DestroyObjectWithoutMoney);
 }
 
 void AUsableObject::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -95,7 +95,7 @@ void AUsableObject::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 
 	// Dead
-	HealthComponent->OnNoMoreResource.RemoveDynamic(this, &AUsableObject::DestroyObject);
+	HealthComponent->OnNoMoreResource.RemoveDynamic(this, &AUsableObject::DestroyObjectWithoutMoney);
 }
 
 #pragma region Mesh
@@ -310,7 +310,7 @@ bool AUsableObject::StopUsingImplementation(ANPC* NPC)
 #pragma endregion
 
 #pragma region Destroy
-void AUsableObject::DestroyObject()
+void AUsableObject::DestroyObject(bool bDestroyMoney)
 {
 	if (!BuildSubsystem)
 		return;
@@ -320,32 +320,42 @@ void AUsableObject::DestroyObject()
 	BuildSubsystem->RemoveObject(this);
 	
 	UResourceComponent* PlayerMoneyComponent = PlayerHelpers::GetPlayerResourceComponent(*GetWorld(), EResourceType::Money);
-	PlayerMoneyComponent->AddResource(BuildData->DestroyMoney);
-	
-	TArray<TWeakObjectPtr<ANPC>> NPCsCopy = UsingNPCs;
+	if (PlayerMoneyComponent && BuildData && bDestroyMoney)
+		PlayerMoneyComponent->AddResource(BuildData->DestroyMoney);
 
-	for (TWeakObjectPtr<ANPC> NPC : NPCsCopy)
+	if (!UsingNPCs.IsEmpty())
 	{
-		if (!NPC.IsValid())
-			continue;
+		TArray<TWeakObjectPtr<ANPC>> NPCsCopy = UsingNPCs;
 
-		StopUsing(NPC.Get());
-
-		if (ANPCController* Controller = Cast<ANPCController>(NPC->GetController()))
+		for (TWeakObjectPtr<ANPC> NPC : NPCsCopy)
 		{
-			if (UBehaviorTreeComponent* BT = Cast<UBehaviorTreeComponent>(Controller->GetBrainComponent()))
+			if (!NPC.IsValid())
+				continue;
+
+			StopUsing(NPC.Get());
+
+			if (ANPCController* Controller = Cast<ANPCController>(NPC->GetController()))
 			{
-				BT->StopTree(EBTStopMode::Safe);
-				BT->RestartTree();
+				if (UBehaviorTreeComponent* BT = Cast<UBehaviorTreeComponent>(Controller->GetBrainComponent()))
+				{
+					BT->StopTree(EBTStopMode::Safe);
+					BT->RestartTree();
+				}
 			}
 		}
+
+		UsingNPCs.Empty();
 	}
 	
-	UsingNPCs.Empty();
-
-	GameHUD->HideCurrentSelectionWidget();
+	if (GameHUD)
+		GameHUD->HideCurrentSelectionWidget();
 	
 	Destroy();
+}
+
+void AUsableObject::DestroyObjectWithoutMoney()
+{
+	DestroyObject(false);
 }
 
 bool AUsableObject::IsOverlappingCells(const TSet<FIntPoint>& Cells) const
