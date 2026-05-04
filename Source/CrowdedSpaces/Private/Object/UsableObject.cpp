@@ -85,6 +85,17 @@ void AUsableObject::BeginPlay()
 
 	// Actions
 	InitActions();
+
+	// Dead
+	HealthComponent->OnNoMoreResource.AddDynamic(this, &AUsableObject::DestroyObject);
+}
+
+void AUsableObject::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	// Dead
+	HealthComponent->OnNoMoreResource.RemoveDynamic(this, &AUsableObject::DestroyObject);
 }
 
 #pragma region Mesh
