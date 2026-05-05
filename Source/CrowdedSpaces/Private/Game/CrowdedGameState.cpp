@@ -56,8 +56,8 @@ void ACrowdedGameState::TryInitSubsystems()
 		return;
 	}
 
-	BuildSubsystem->SetBuildData(BuildDataObjects);
 	BuildSubsystem->SetBuildRoomData(BuildDataRooms);
+	BuildSubsystem->SetBuildData(BuildDataObjects);
 	BuildSubsystem->SetSnapSize(SnapSize);
 
 	// Get time subsystem & send data

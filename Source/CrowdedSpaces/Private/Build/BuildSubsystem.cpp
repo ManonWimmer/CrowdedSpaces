@@ -605,19 +605,23 @@ int UBuildSubsystem::GetRoomCellsCount(const int RoomId) const
 	return GridActor->GetRoom(RoomId)->Cells.Num();
 }
 
+void UBuildSubsystem::SetBuildData(const TArray<UBuildData*>& NewBuildData)
+{
+	BuildDataObjects = NewBuildData;
+
+	for (const TObjectPtr<UBuildData> Object : BuildDataObjects)
+	{
+		UnlockedObjects.Add(Object->ObjectType, IsRoomUnlocked(Object->RoomType));
+	}
+}
+
 void UBuildSubsystem::SetBuildRoomData(const TArray<UBuildRoomData*>& NewBuildRoomData)
 {
 	BuildDataRooms = NewBuildRoomData;
 	
-	// Unlock rooms & objects at start 
 	for (const TObjectPtr<UBuildRoomData> Room : BuildDataRooms)
 	{
 		UnlockedRooms.Add(Room->RoomType, Room->bIsUnlockedAtStart);
-	}
-
-	for (const TObjectPtr<UBuildData> Object : BuildDataObjects)
-	{
-		UnlockedRooms.Add(Object->RoomType, IsRoomUnlocked(Object->RoomType));
 	}
 }
 

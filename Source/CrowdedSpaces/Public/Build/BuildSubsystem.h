@@ -84,7 +84,7 @@ public:
 	void PlaceRoom();
 
 	UFUNCTION()
-	void SetBuildData(const TArray<UBuildData*>& NewBuildData) { BuildDataObjects = NewBuildData; }
+	void SetBuildData(const TArray<UBuildData*>& NewBuildData);
 
 	UFUNCTION()
 	void SetBuildRoomData(const TArray<UBuildRoomData*>& NewBuildRoomData);
