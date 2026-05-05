@@ -22,22 +22,24 @@ EBTNodeResult::Type UBTTask_FindRandomLocation::ExecuteTask(UBehaviorTreeCompone
 	if (!NPC)
 		return EBTNodeResult::Failed;
 	
-	// Find random location in navigation system
 	FVector const Origin = NPC->GetActorLocation();
-	if (TObjectPtr<UNavigationSystemV1> const NavigationSystem = UNavigationSystemV1::GetCurrent(GetWorld()))
-	{
-		FNavLocation Location;
-		if (NavigationSystem->GetRandomPointInNavigableRadius(Origin, SearchRadius, Location))
-		{
-			OwnerComp.GetBlackboardComponent()->SetValueAsVector(GetSelectedBlackboardKey(), Location);	
-		}
+	TObjectPtr<UNavigationSystemV1> const NavigationSystem = UNavigationSystemV1::GetCurrent(GetWorld());
+	if (!NavigationSystem)
+		return EBTNodeResult::Failed;
+	
+	FNavLocation Location;
+	bool bFoundPoint = NavigationSystem->GetRandomPointInNavigableRadius(Origin, SearchRadius, Location);
+	if (!bFoundPoint)
+		return EBTNodeResult::Failed;
 
-		// Success
-		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
-		return EBTNodeResult::Succeeded;
-	}
-
-	return EBTNodeResult::Failed;
+	const TObjectPtr<UBlackboardComponent> Blackboard = OwnerComp.GetBlackboardComponent();
+	if (!Blackboard)
+		return EBTNodeResult::Failed;
+	
+	Blackboard->SetValueAsVector(RandomLocationKey.SelectedKeyName, Location);
+	
+	FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+	return EBTNodeResult::Succeeded;
 }
 
 void UBTTask_FindRandomLocation::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory,

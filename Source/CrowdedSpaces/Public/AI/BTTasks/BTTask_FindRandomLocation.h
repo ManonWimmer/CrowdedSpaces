@@ -17,6 +17,9 @@ public:
 	virtual void OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult) override;
 
 private:
+	UPROPERTY(EditAnywhere, Category="Blackboard")
+	FBlackboardKeySelector RandomLocationKey;
+	
 	UPROPERTY(EditAnywhere, Category = "AI")
 	float SearchRadius = 500.f;
 };

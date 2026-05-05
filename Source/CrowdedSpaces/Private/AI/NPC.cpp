@@ -699,6 +699,10 @@ void ANPC::SetAutoNeeds(const bool bNewAutoNeeds)
 void ANPC::OnDamaged()
 {
 	OnDamagedFeedback();
+
+	// Flee
+	StopAction();
+	Blackboard->SetValueAsBool("bIsFleeing", true);
 }
 
 void ANPC::OnHealed()
