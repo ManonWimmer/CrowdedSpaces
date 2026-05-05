@@ -79,6 +79,14 @@ ANPC::ANPC()
 	PortraitLight->SetMobility(EComponentMobility::Movable);
 }
 
+void ANPC::OnNPCSelected_Implementation()
+{
+}
+
+void ANPC::OnNPCDeselected_Implementation()
+{
+}
+
 void ANPC::BeginPlay()
 {
 	Super::BeginPlay();
@@ -559,7 +567,7 @@ void ANPC::CapturePortrait() const
 	}
 	
 	Clone->SetRenderCustomDepth(false);
-	Clone->SetOverlayMaterial(nullptr);
+	//Clone->SetOverlayMaterial(nullptr);
 	Clone->CastShadow = false;
 	
 	PortraitCapture->ShowOnlyComponents.Empty();

@@ -26,16 +26,16 @@ private:
 
 private:
 	UPROPERTY()
-	TObjectPtr<APlayerController> PC;
+	TObjectPtr<APlayerController> PC{nullptr};
 
 	UPROPERTY()
-	TObjectPtr<UActionWidget> Widget;
+	TObjectPtr<UActionWidget> Widget{nullptr};
 
 	UPROPERTY()
-	TObjectPtr<AActor> CurrentActor;
+	TObjectPtr<AActor> CurrentActor{nullptr};
 
 	UPROPERTY()
-	TSubclassOf<UActionWidget> WidgetClass;
+	TSubclassOf<UActionWidget> WidgetClass{nullptr};
 
 	bool bIsVisible = false;
 };

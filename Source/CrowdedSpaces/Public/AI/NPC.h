@@ -205,6 +205,13 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent)
 	void OnDeadFeedback();
+
+	// Selected
+	UFUNCTION(BlueprintNativeEvent)
+	void OnNPCSelected();
+
+	UFUNCTION(BlueprintNativeEvent)
+	void OnNPCDeselected();
 	
 protected:
 	virtual void BeginPlay() override;
