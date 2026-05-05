@@ -5,6 +5,7 @@
 #include "RoomEditMode.h"
 #include "Game/GameModeState.h"
 #include "Grid/GridRoomType.h"
+#include "Object/ObjectType.h"
 #include "BuildSubsystem.generated.h"
 
 class UBuildableRegistrySubsystem;
@@ -135,6 +136,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool IsRoomUnlocked(const EGridRoomType RoomType) const;
 
+	UFUNCTION(BlueprintCallable)
+	bool IsObjectUnlocked(const EObjectType ObjectType) const;
+
 	void GetObjectsToBeDestroyed(TArray<AUsableObject*>& OutObjects) const;
 
 	UFUNCTION()
@@ -184,6 +188,9 @@ private:
 
 	UPROPERTY()
 	TMap<EGridRoomType, bool> UnlockedRooms;
+	
+	UPROPERTY()
+	TMap<EObjectType, bool> UnlockedObjects;
 
 	UPROPERTY()
 	TArray<TObjectPtr<UBuildRoomData>> BuildDataRooms; // Sent by game state

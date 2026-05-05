@@ -609,9 +609,15 @@ void UBuildSubsystem::SetBuildRoomData(const TArray<UBuildRoomData*>& NewBuildRo
 {
 	BuildDataRooms = NewBuildRoomData;
 	
+	// Unlock rooms & objects at start 
 	for (const TObjectPtr<UBuildRoomData> Room : BuildDataRooms)
 	{
 		UnlockedRooms.Add(Room->RoomType, Room->bIsUnlockedAtStart);
+	}
+
+	for (const TObjectPtr<UBuildData> Object : BuildDataObjects)
+	{
+		UnlockedRooms.Add(Object->RoomType, IsRoomUnlocked(Object->RoomType));
 	}
 }
 
@@ -629,14 +635,24 @@ void UBuildSubsystem::UnlockRoom(const EGridRoomType RoomType)
 {
 	UnlockedRooms[RoomType] = true;
 
-	// todo: unlock objects too
+	// Unlock objects too
+	for (const TObjectPtr<UBuildData> Object : BuildDataObjects)
+	{
+		if (Object->RoomType != RoomType)
+			continue;
+		
+		UnlockedObjects[Object->ObjectType] = true;
+	}
 }
 
 bool UBuildSubsystem::IsRoomUnlocked(const EGridRoomType RoomType) const 
 {
 	return UnlockedRooms[RoomType];
+}
 
-	// todo: is object unlocked function
+bool UBuildSubsystem::IsObjectUnlocked(const EObjectType ObjectType) const
+{
+	return UnlockedObjects[ObjectType];
 }
 #pragma endregion
 

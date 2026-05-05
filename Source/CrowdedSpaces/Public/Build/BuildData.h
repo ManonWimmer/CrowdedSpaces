@@ -25,6 +25,9 @@ public:
 	TSubclassOf<AUsableObject> BuildClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	EObjectType ObjectType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	EGridRoomType RoomType = EGridRoomType::Any;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
