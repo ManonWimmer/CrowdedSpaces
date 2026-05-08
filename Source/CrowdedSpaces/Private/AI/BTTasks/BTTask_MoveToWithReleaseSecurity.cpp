@@ -41,6 +41,24 @@ void UBTTask_MoveToWithReleaseSecurity::OnTaskFinished(UBehaviorTreeComponent& O
 	if (TaskResult == EBTNodeResult::Failed)
 		Cleanup(OwnerComp);
 
+	if (TaskResult == EBTNodeResult::Succeeded)
+	{
+		if (NPC)
+		{
+			AUsableObject* CurrentObject = NPC->GetCurrentObject();
+
+			if (CurrentObject && CurrentObject->GetSlotComponent())
+			{
+				const FRotator TargetRotation =
+					CurrentObject->GetSlotComponent()->GetComponentRotation();
+
+				NPC->StartSmoothRotation(TargetRotation);
+			}
+		}
+	}
+
+	Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);
+
 	Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);
 }
 

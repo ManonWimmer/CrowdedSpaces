@@ -22,5 +22,5 @@ private:
 	void Cleanup(const UBehaviorTreeComponent& OwnerComp) const;
 
 	UPROPERTY()
-	TObjectPtr<ANPC> NPC;
+	TObjectPtr<ANPC> NPC{nullptr};
 };

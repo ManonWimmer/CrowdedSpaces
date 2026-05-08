@@ -231,6 +231,16 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsInTrainAnimation = false;
+
+	// Rotation
+	bool bSmoothRotate = false;
+	FRotator TargetRotation;
+
+	UPROPERTY(EditAnywhere, Category = "Rotation")
+	float RotationSpeed = 5.f;
+	
+	void StartSmoothRotation(const FRotator& NewRotation);
+	void SmoothRotate(float DeltaTime);
 	
 protected:
 	virtual void BeginPlay() override;

@@ -17,6 +17,7 @@
 #include "Engine/TextureRenderTarget2D.h"
 #include "Game/CrowdedGameMode.h"
 #include "Game/CrowdedGameState.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Training/TrainingData.h"
 #include "Training/TrainingSubsystem.h"
@@ -198,6 +199,9 @@ void ANPC::Tick(const float DeltaSeconds)
 
 	FUIUtils::RotateComponentToCameraYaw(PlayerController, NPCNameWidget);
 	FUIUtils::RotateComponentToCameraYaw(PlayerController, NPCActionWidget);
+
+	if (bSmoothRotate)
+		SmoothRotate(DeltaSeconds);
 }
 
 #pragma region Training
@@ -726,5 +730,29 @@ void ANPC::OnDamagedFeedback_Implementation()
 
 void ANPC::OnDeadFeedback_Implementation()
 {
+}
+#pragma endregion
+
+#pragma region Rotation
+void ANPC::StartSmoothRotation(const FRotator& NewRotation)
+{
+	TargetRotation = NewRotation;
+	bSmoothRotate = true;
+
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+}
+
+void ANPC::SmoothRotate(const float DeltaTime)
+{
+	const FRotator NewRotation = FMath::RInterpTo(GetActorRotation(), TargetRotation, DeltaTime, RotationSpeed);
+
+	SetActorRotation(NewRotation);
+
+	if (GetActorRotation().Equals(TargetRotation, 1.f))
+	{
+		bSmoothRotate = false;
+
+		GetCharacterMovement()->bOrientRotationToMovement = true;
+	}
 }
 #pragma endregion
