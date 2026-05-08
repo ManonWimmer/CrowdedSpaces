@@ -59,6 +59,8 @@ bool ABuildableHealingStation::StartUsingImplementation(ANPC* NPC)
 		return false;
 	
 	FoodComp->ToggleResourceTimer();
+
+	NPC->bIsInHealAnimation = true;
 	
 	return true;
 }
@@ -85,7 +87,9 @@ bool ABuildableHealingStation::StopUsingImplementation(ANPC* NPC)
 	if (!FoodComp)
 		return false;
 	
-	FoodComp->ToggleResourceTimer(); 
+	FoodComp->ToggleResourceTimer();
+
+	NPC->bIsInHealAnimation = false;
 	
 	return true;
 }
