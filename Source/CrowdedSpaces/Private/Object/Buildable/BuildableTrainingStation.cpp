@@ -51,6 +51,8 @@ bool ABuildableTrainingStation::StartUsingImplementation(ANPC* NPC)
 		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Cyan, "Start training");
 
 	TrainingSubsystem->AddTrainingNPC(NPC);
+
+	NPC->bIsInTrainAnimation = true;
 	
 	return true;
 }
@@ -61,6 +63,8 @@ bool ABuildableTrainingStation::StopUsingImplementation(ANPC* NPC)
 		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Cyan, "Stop training");
 	
 	TrainingSubsystem->RemoveTrainingNPC(NPC);
+
+	NPC->bIsInTrainAnimation = false;
 	
 	return true;
 }

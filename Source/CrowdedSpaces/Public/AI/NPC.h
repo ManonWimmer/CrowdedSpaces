@@ -228,6 +228,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsInWorkAnimation = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsInTrainAnimation = false;
 	
 protected:
 	virtual void BeginPlay() override;
