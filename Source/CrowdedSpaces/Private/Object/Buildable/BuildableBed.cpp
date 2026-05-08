@@ -46,7 +46,9 @@ bool ABuildableBed::StartUsingImplementation(ANPC* NPC)
 	if (!FoodComp)
 		return false;
 	
-	FoodComp->ToggleResourceTimer(); 
+	FoodComp->ToggleResourceTimer();
+
+	NPC->bIsInSleepAnimation = true;
 	
 	return true;
 }
@@ -63,7 +65,9 @@ bool ABuildableBed::StopUsingImplementation(ANPC* NPC)
 	if (!FoodComp)
 		return false;
 	
-	FoodComp->ToggleResourceTimer(); 
+	FoodComp->ToggleResourceTimer();
+
+	NPC->bIsInSleepAnimation = false;
 	
 	return true;
 }

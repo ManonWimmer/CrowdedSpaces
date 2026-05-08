@@ -51,7 +51,7 @@ bool ABuildableFood::StartUsingImplementation(ANPC* NPC)
 	
 	EnergyComp->ToggleResourceTimer();
 
-	NPC->bIsInEatingAnimation = true;
+	NPC->bIsInEatAnimation = true;
 	
 	return true;
 }
@@ -70,7 +70,7 @@ bool ABuildableFood::StopUsingImplementation(ANPC* NPC)
 	
 	EnergyComp->ToggleResourceTimer();
 	
-	NPC->bIsInEatingAnimation = false;
+	NPC->bIsInEatAnimation = false;
 	
 	return true;
 }

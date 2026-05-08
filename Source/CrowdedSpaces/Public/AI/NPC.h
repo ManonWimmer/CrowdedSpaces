@@ -218,7 +218,10 @@ public:
 	bool bIsInExtinguishAnimation = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bIsInEatingAnimation = false;
+	bool bIsInEatAnimation = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsInSleepAnimation = false;
 	
 protected:
 	virtual void BeginPlay() override;
