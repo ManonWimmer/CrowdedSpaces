@@ -67,6 +67,9 @@ bool ABuildableGenerator::StartUsingImplementation(ANPC* NPC)
 {
 	ProductionComponent->SetProductionMultiplier(NPC->GetProductionMultiplierForType(ProductionComponent->GetProductionType()));
 	ProductionComponent->StartProduction();
+
+	NPC->bIsInWorkAnimation = true;
+	
 	return true; 
 }
 
@@ -74,6 +77,9 @@ bool ABuildableGenerator::StopUsingImplementation(ANPC* NPC)
 {
 	ProductionComponent->SetProductionMultiplier(1);
 	ProductionComponent->PauseProduction();
+
+	NPC->bIsInWorkAnimation = false;
+	
 	return true; 
 }
 #pragma endregion

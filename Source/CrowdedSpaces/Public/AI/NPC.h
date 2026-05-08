@@ -225,6 +225,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsInHealAnimation = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsInWorkAnimation = false;
 	
 protected:
 	virtual void BeginPlay() override;
