@@ -216,6 +216,9 @@ public:
 	// Anim bools
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsInExtinguishAnimation = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsInEatingAnimation = false;
 	
 protected:
 	virtual void BeginPlay() override;
