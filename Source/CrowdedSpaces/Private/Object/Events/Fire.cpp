@@ -211,12 +211,18 @@ bool AFire::StartUsingImplementation(ANPC* NPC)
 		return false;
 
 	NPCsExtinguishing.AddUnique(NPC);
+
+	NPC->bIsInExtinguishAnimation = true;
+	
 	return true;
 }
 
 bool AFire::StopUsingImplementation(ANPC* NPC)
 {
 	NPCsExtinguishing.Remove(NPC);
+	
+	NPC->bIsInExtinguishAnimation = false;
+	
 	return true;
 }
 #pragma endregion 

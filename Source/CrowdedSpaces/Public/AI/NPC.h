@@ -212,6 +212,10 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent)
 	void OnNPCDeselected();
+
+	// Anim bools
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsInExtinguishAnimation = false;
 	
 protected:
 	virtual void BeginPlay() override;
