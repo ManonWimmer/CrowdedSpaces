@@ -125,10 +125,13 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Object")
 	UResourceComponent* GetHealthComponent() const { return HealthComponent; }
+
+	UFUNCTION()
+	USlotComponent* GetNPCSlot(ANPC* NPC);
 	
 protected:
 	UPROPERTY()
-	TArray<USlotComponent*> Slots; 
+	TArray<TObjectPtr<USlotComponent>> Slots; 
 	
 	UPROPERTY()
 	TObjectPtr<ACrowdedGameState> GameState{nullptr};

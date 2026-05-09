@@ -4,6 +4,7 @@
 #include "Object/UsableObject.h"
 #include "AIController.h"
 #include "AI/NPCController.h"
+#include "Build/SlotComponent.h"
 
 UBTTask_MoveToWithReleaseSecurity::UBTTask_MoveToWithReleaseSecurity(FObjectInitializer const& ObjectInitializer)
 {
@@ -45,19 +46,16 @@ void UBTTask_MoveToWithReleaseSecurity::OnTaskFinished(UBehaviorTreeComponent& O
 	{
 		if (NPC)
 		{
-			AUsableObject* CurrentObject = NPC->GetCurrentObject();
-
-			if (CurrentObject && CurrentObject->GetSlotComponent())
+			const TObjectPtr<AUsableObject> CurrentObject = NPC->GetCurrentObject();
+			const TObjectPtr<USlotComponent> Slot = CurrentObject->GetNPCSlot(NPC);
+			if (Slot)
 			{
-				const FRotator TargetRotation =
-					CurrentObject->GetSlotComponent()->GetComponentRotation();
+				const FRotator TargetRotation = Slot->GetComponentRotation();
 
 				NPC->StartSmoothRotation(TargetRotation);
 			}
 		}
 	}
-
-	Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);
 
 	Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);
 }

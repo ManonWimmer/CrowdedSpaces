@@ -200,6 +200,17 @@ USlotComponent* AUsableObject::ReserveSpecificSlot(ANPC* NPC, USlotComponent* Sl
 	return Slot;
 }
 
+USlotComponent* AUsableObject::GetNPCSlot(ANPC* NPC)
+{
+	for (const TObjectPtr<USlotComponent> Slot : Slots)
+	{
+		if (Slot->OccupyingNPC == NPC)
+			return Slot;
+	}
+
+	return nullptr;
+}
+
 void AUsableObject::Release(ANPC* NPC)
 {
 	ReleaseSlot(NPC);

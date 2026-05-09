@@ -13,7 +13,7 @@ UBTTask_ReserveBuildableSlot::UBTTask_ReserveBuildableSlot(FObjectInitializer co
 
 EBTNodeResult::Type UBTTask_ReserveBuildableSlot::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	const AAIController* AI = OwnerComp.GetAIOwner();
+	const TObjectPtr<AAIController> AI = OwnerComp.GetAIOwner();
 	if (!AI)
 		return EBTNodeResult::Failed;
 
@@ -21,13 +21,13 @@ EBTNodeResult::Type UBTTask_ReserveBuildableSlot::ExecuteTask(UBehaviorTreeCompo
 	if (!NPC)
 		return EBTNodeResult::Failed;
 
-	const UBlackboardComponent* Blackboard = OwnerComp.GetBlackboardComponent();
+	const TObjectPtr<UBlackboardComponent> Blackboard = OwnerComp.GetBlackboardComponent();
 	if (!Blackboard)
 		return EBTNodeResult::Failed;
 
-	AUsableObject* Object = Cast<AUsableObject>(Blackboard->GetValueAsObject(TargetObjectKey.SelectedKeyName));
+	const TObjectPtr<AUsableObject> Object = Cast<AUsableObject>(Blackboard->GetValueAsObject(TargetObjectKey.SelectedKeyName));
 
-	USlotComponent* Slot = Cast<USlotComponent>(Blackboard->GetValueAsObject(TargetSlotKey.SelectedKeyName));
+	const TObjectPtr<USlotComponent> Slot = Cast<USlotComponent>(Blackboard->GetValueAsObject(TargetSlotKey.SelectedKeyName));
 
 	if (!Object || !Slot)
 		return EBTNodeResult::Failed;
