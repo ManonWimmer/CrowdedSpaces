@@ -608,7 +608,7 @@ void ANPC::SetupCapture()
 	Flags.SetTranslucency(true);
 	Flags.SetSeparateTranslucency(true);
 	
-	PortraitRenderTarget = NewObject<UTextureRenderTarget2D>();
+	PortraitRenderTarget = NewObject<UTextureRenderTarget2D>(this);
 
 	PortraitRenderTarget->InitAutoFormat(512, 512);
 	PortraitRenderTarget->ClearColor = FLinearColor(0,0,0,0);
