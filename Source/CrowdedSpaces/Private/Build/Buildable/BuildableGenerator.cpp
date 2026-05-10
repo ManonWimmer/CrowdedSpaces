@@ -58,6 +58,7 @@ void ABuildableGenerator::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	BRS->UnregisterGenerator(this);
 }
 
+#pragma region Use Object
 bool ABuildableGenerator::StartUsingImplementation(ANPC* NPC)
 {
 	ProductionComponent->SetProductionMultiplier(NPC->GetProductionMultiplierForType(ProductionComponent->GetProductionType()));
@@ -71,6 +72,7 @@ bool ABuildableGenerator::StopUsingImplementation(ANPC* NPC)
 	ProductionComponent->PauseProduction();
 	return true; 
 }
+#pragma endregion
 
 #pragma region Upgrade
 EProductionType ABuildableGenerator::GetProductionType() const
@@ -133,3 +135,27 @@ void ABuildableGenerator::OnDeselected()
 }
 #pragma endregion Selectable
 
+#pragma region Actions
+void ABuildableGenerator::InitActions()
+{
+	Super::InitActions();
+
+	if (!GameState)
+		return;
+	
+	TArray<TObjectPtr<UAction>> InstancedActions;
+
+	for (const TSubclassOf<UAction>& ActionClass : GameState->GeneratorActions)
+	{
+		if (!ActionClass) continue;
+
+		UAction* NewAction = NewObject<UAction>(this, ActionClass);
+		if (!NewAction) continue;
+
+		NewAction->Initialize(GetWorld());
+		InstancedActions.Add(NewAction);
+	}
+
+	ActionComponent->SetupActions(InstancedActions);
+}
+#pragma endregion 

@@ -663,6 +663,31 @@ void AGridActor::RemoveCellsFromRooms(TArray<FGridCell*> CellsToRemove)
 	
 	RecomputeAllRooms();
 }
+
+bool AGridActor::GetRandomCellWorldPosition(FVector& OutWorldPos, int& Row, int& Column, const bool bCenter)
+{
+	if (Cells.Num() == 0)
+		return false;
+
+	TArray<FIntPoint> Keys;
+	Cells.GetKeys(Keys);
+
+	const FIntPoint& RandomKey = Keys[FMath::RandRange(0, Keys.Num() - 1)];
+	const FGridCell* Cell = Cells.Find(RandomKey);
+
+	if (!Cell)
+		return false;
+
+	Row = Cell->Row;
+	Column = Cell->Column;
+
+	FVector2D GridPos;
+	if (!GetGridLocation(bCenter, Cell->Row, Cell->Column, GridPos))
+		return false;
+
+	OutWorldPos = FVector(GridPos.X, GridPos.Y, GetActorLocation().Z);
+	return true;
+}
 #pragma endregion
 
 #pragma region Walls

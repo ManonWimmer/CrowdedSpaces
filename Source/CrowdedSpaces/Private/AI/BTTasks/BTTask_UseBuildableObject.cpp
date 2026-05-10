@@ -37,7 +37,7 @@ void UBTTask_UseBuildableObject::TickTask(UBehaviorTreeComponent& OwnerComp, uin
 {
 	if (!NPC || !CurrentObject || !IsValid(CurrentObject) || CurrentObject->bIsBeingDestroyed)
 	{
-		StopUsingClean();
+		StopUsing();
 		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
 		return;
 	}
@@ -55,7 +55,7 @@ void UBTTask_UseBuildableObject::TickTask(UBehaviorTreeComponent& OwnerComp, uin
 	{
 		CS_LOG_WARNING("Current used object set to cant be used, stop using");
 		
-		StopUsingClean();
+		StopUsing();
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		
 		return;
@@ -72,7 +72,7 @@ void UBTTask_UseBuildableObject::TickTask(UBehaviorTreeComponent& OwnerComp, uin
 	{
 		CS_LOG_WARNING("Max resource, stop using");
 		
-		StopUsingClean();
+		StopUsing();
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		
 		return;
@@ -82,12 +82,12 @@ void UBTTask_UseBuildableObject::TickTask(UBehaviorTreeComponent& OwnerComp, uin
 EBTNodeResult::Type UBTTask_UseBuildableObject::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	CS_LOG_WARNING("Abort use task");
-	StopUsingClean();
+	StopUsing();
 
 	return EBTNodeResult::Aborted;
 }
 
-void UBTTask_UseBuildableObject::StopUsingClean() const
+void UBTTask_UseBuildableObject::StopUsing() const
 {
 	if (!CurrentObject || !NPC)
 		return;
@@ -96,4 +96,10 @@ void UBTTask_UseBuildableObject::StopUsingClean() const
 	
 	CurrentObject->StopUsing(NPC);
 	CurrentObject->Release(NPC);
+
+	if (CurrentObject->GetObjectType() == EObjectType::Generator)
+		NPC->SetGenerator(nullptr);
+	
+	if (CurrentObject->GetObjectType() == EObjectType::TrainingStation)
+		NPC->SetTrainingStation(nullptr);
 }

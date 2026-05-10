@@ -6,10 +6,12 @@
 #include "Build/BuildData.h"
 #include "Build/BuildRoomData.h"
 #include "MoralEvent/MoralEvent.h"
+#include "UI/Widgets/Others/ActionWidget.h"
 #include "Time/TimeData.h"
 #include "Resources/ResourceComponent.h"
 #include "CrowdedGameState.generated.h"
 
+class AFire;
 class UStorageData;
 class UTrainingData;
 
@@ -63,31 +65,55 @@ public:
 
 	// NPC Name
 	UPROPERTY(EditAnywhere, Category = "NPC", meta=(AllowPrivateAccess=true))
-	UNameList* NameData;
+	TObjectPtr<UNameList> NameData{nullptr};
 
 	UPROPERTY()
 	bool bHasInitSubsystems = false;
 
 	// Storage
 	UPROPERTY(EditAnywhere, Category = "Storage", meta=(AllowPrivateAccess=true))
-	TObjectPtr<UStorageData> StorageData;
+	TObjectPtr<UStorageData> StorageData{nullptr};
 
 	// Storage
 	UPROPERTY(EditAnywhere, Category = "Training", meta=(AllowPrivateAccess=true))
-	TObjectPtr<UTrainingData> TrainingData;
+	TObjectPtr<UTrainingData> TrainingData{nullptr};
+
+	// Outline
+	UPROPERTY(EditAnywhere, Category = "Outline", meta=(AllowPrivateAccess=true))
+	TObjectPtr<UMaterialInterface> OutlineMaterial{nullptr};
+
+	// Actions
+	UPROPERTY(EditAnywhere, Category = "Actions", meta=(AllowPrivateAccess=true))
+	TSubclassOf<UActionWidget> ActionWidgetClass;
+
+	UPROPERTY(EditAnywhere, Category = "Actions", meta=(AllowPrivateAccess=true))
+	TArray<TSubclassOf<UAction>> NPCActions;
+
+	UPROPERTY(EditAnywhere, Category = "Actions", meta=(AllowPrivateAccess=true))
+	TArray<TSubclassOf<UAction>> GeneratorActions;
+
+	UPROPERTY(EditAnywhere, Category = "Actions", meta=(AllowPrivateAccess=true))
+	TArray<TSubclassOf<UAction>> TrainingStationActions;
+
+	UPROPERTY(EditAnywhere, Category = "Actions", meta=(AllowPrivateAccess=true))
+	TArray<TSubclassOf<UAction>> FireActions;
+
+	// Fire
+	UPROPERTY(EditAnywhere, Category = "Fire", meta=(AllowPrivateAccess=true))
+	TSubclassOf<AFire> FireBP{nullptr};
 
 private:
 	UPROPERTY()
 	TMap<EResourceType, TObjectPtr<UResourceComponent>> ResourceMap;
 
 	UPROPERTY(EditAnywhere, Category = "Components")
-	TObjectPtr<UResourceComponent> MoneyComponent = nullptr;
+	TObjectPtr<UResourceComponent> MoneyComponent{nullptr};
 
 	UPROPERTY(EditAnywhere, Category = "Components")
-	TObjectPtr<UResourceComponent> ElectricityComponent = nullptr;
+	TObjectPtr<UResourceComponent> ElectricityComponent{nullptr};
 
 	UPROPERTY(EditAnywhere, Category = "Components")
-	TObjectPtr<UResourceComponent> FoodComponent = nullptr;
+	TObjectPtr<UResourceComponent> FoodComponent{nullptr};
 };
 
 template <EResourceType Type>

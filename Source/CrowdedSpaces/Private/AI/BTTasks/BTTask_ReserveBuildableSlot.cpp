@@ -25,11 +25,9 @@ EBTNodeResult::Type UBTTask_ReserveBuildableSlot::ExecuteTask(UBehaviorTreeCompo
 	if (!Blackboard)
 		return EBTNodeResult::Failed;
 
-	ABuildableObject* Object = Cast<ABuildableObject>(
-		Blackboard->GetValueAsObject(TargetObjectKey.SelectedKeyName));
+	ABuildableObject* Object = Cast<ABuildableObject>(Blackboard->GetValueAsObject(TargetObjectKey.SelectedKeyName));
 
-	USlotComponent* Slot = Cast<USlotComponent>(
-		Blackboard->GetValueAsObject(TargetSlotKey.SelectedKeyName));
+	USlotComponent* Slot = Cast<USlotComponent>(Blackboard->GetValueAsObject(TargetSlotKey.SelectedKeyName));
 
 	if (!Object || !Slot)
 		return EBTNodeResult::Failed;

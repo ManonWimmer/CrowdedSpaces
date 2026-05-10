@@ -3,6 +3,8 @@
 #include "EngineUtils.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "Action/ActionSubsystem.h"
+#include "Action/ActionWidgetManager.h"
 #include "Game/CrowdedGameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "Time/TimeSubsystem.h"
@@ -105,6 +107,9 @@ void ACrowdedPlayerController::BeginPlay()
 
 	OnTimeInputChanged.AddDynamic(TimeSubsystem, &UTimeSubsystem::OnTimeInputChanged);
 	OnTogglePause.AddDynamic(TimeSubsystem, &UTimeSubsystem::OnTogglePause);
+
+	// Action
+	ActionSubsystem = World->GetSubsystem<UActionSubsystem>();
 }
 
 void ACrowdedPlayerController::MouseMoveInput(const FInputActionValue& Value)
@@ -187,6 +192,20 @@ void ACrowdedPlayerController::HandleSelection() const
 		return;
 
 	AActor* HitActor = Hit.GetActor();
+
+	if (bHit && Hit.GetActor())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Hit: %s"), *Hit.GetActor()->GetName());
+	}
+
+	// Action
+	if (ActionSubsystem)
+	{
+		if (HitActor && HitActor->Implements<USelectable>())
+			ActionSubsystem->ShowActionsForActor(HitActor);
+		else
+			ActionSubsystem->HideActions();
+	}
 	
 	// 1. Selectable actor (NPC, generator)
 	if (HitActor && HitActor->Implements<USelectable>())

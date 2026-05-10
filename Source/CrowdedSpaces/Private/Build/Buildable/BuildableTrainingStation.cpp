@@ -1,6 +1,7 @@
 ﻿#include "Build/Buildable/BuildableTrainingStation.h"
 
 #include "Build/BuildableRegistrySubsystem.h"
+#include "Game/CrowdedGameState.h"
 #include "Training/TrainingSubsystem.h"
 
 ABuildableTrainingStation::ABuildableTrainingStation()
@@ -39,6 +40,7 @@ void ABuildableTrainingStation::EndPlay(const EEndPlayReason::Type EndPlayReason
 	BRS->UnregisterTrainingStation(this);
 }
 
+#pragma region Use Object
 bool ABuildableTrainingStation::StartUsingImplementation(ANPC* NPC)
 {
 	if (GEngine)
@@ -58,6 +60,7 @@ bool ABuildableTrainingStation::StopUsingImplementation(ANPC* NPC)
 	
 	return true;
 }
+#pragma endregion
 
 #pragma region Selectable
 void ABuildableTrainingStation::OnSelected()
@@ -69,4 +72,27 @@ void ABuildableTrainingStation::OnDeselected()
 }
 #pragma endregion
 
+#pragma region Actions
+void ABuildableTrainingStation::InitActions()
+{
+	Super::InitActions();
 
+	if (!GameState)
+		return;
+	
+	TArray<TObjectPtr<UAction>> InstancedActions;
+
+	for (const TSubclassOf<UAction>& ActionClass : GameState->TrainingStationActions)
+	{
+		if (!ActionClass) continue;
+
+		UAction* NewAction = NewObject<UAction>(this, ActionClass);
+		if (!NewAction) continue;
+
+		NewAction->Initialize(GetWorld());
+		InstancedActions.Add(NewAction);
+	}
+
+	ActionComponent->SetupActions(InstancedActions);
+}
+#pragma endregion

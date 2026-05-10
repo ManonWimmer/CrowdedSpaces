@@ -62,6 +62,10 @@ public:
 	// Time
 	UFUNCTION(BlueprintCallable, Category="Widgets")
 	void ShowTimeWidget(bool bShow);
+
+	// Portrait
+	UFUNCTION(BlueprintCallable, Category="Widgets")
+	void UpdateNPCPortraitWidget(ANPC* NPC);
 	
 private:
 	UPROPERTY()
@@ -113,7 +117,11 @@ private:
 
 	// Time
 	UPROPERTY(EditAnywhere, Category="Widgets")
-	TSubclassOf<UCustomWidget> TimeBP;
+	TSubclassOf<UCustomWidget> TimeWidgetBP;
+
+	// Portrait
+	UPROPERTY(EditAnywhere, Category="Widgets")
+	TSubclassOf<UCustomWidget> NPCPortraitWidgetBP;
 
 	UPROPERTY()
 	TMap<TSubclassOf<UCustomWidget>, TObjectPtr<UCustomWidget>> WidgetInstances;

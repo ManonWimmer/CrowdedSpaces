@@ -1,5 +1,7 @@
 ﻿#include "Build/BuildableObject.h"
 
+#include "Action/Action.h"
+#include "Action/ActionComponent.h"
 #include "AI/NPCController.h"
 #include "Build/BuildableRegistrySubsystem.h"
 #include "Build/BuildSubsystem.h"
@@ -20,6 +22,9 @@ ABuildableObject::ABuildableObject()
 	MeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	MeshComp->SetCollisionObjectType(ECC_GameTraceChannel1); // Build
 	MeshComp->SetCollisionResponseToAllChannels(ECR_Block);
+
+	// Actions
+	ActionComponent = CreateDefaultSubobject<UActionComponent>("ActionComponent");
 }
 
 void ABuildableObject::BeginPlay()
@@ -70,6 +75,9 @@ void ABuildableObject::BeginPlay()
 	DisabledMaterial = GameInstance->DisabledObjectsMaterial;
 	WillBeRemovedMaterial = GameInstance->WillBeRemovedObjectsMaterial;
 	NormalMaterial = MeshComp->GetMaterial(0);
+
+	// Actions
+	InitActions();
 }
 
 #pragma region Mesh
@@ -237,8 +245,6 @@ void ABuildableObject::UpdateMaterialState() const
 		MeshComp->SetMaterial(0, NormalMaterial);
 	}
 }
-
-
 #pragma endregion
 
 #pragma region Use Object
@@ -322,5 +328,11 @@ bool ABuildableObject::IsOverlappingCells(const TSet<FIntPoint>& Cells) const
 		}
 	}
 	return false;
+}
+#pragma endregion
+
+#pragma region Actions
+void ABuildableObject::InitActions()
+{
 }
 #pragma endregion

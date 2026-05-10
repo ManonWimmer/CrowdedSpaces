@@ -4,9 +4,9 @@
 #include "BuildSubsystem.h"
 #include "Build/ObjectType.h"
 #include "AI/NPC.h"
-#include "AI/BTTasks/BTTask_UseBuildableObject.h"
+#include "Action/Action.h"
+#include "Action/ActionComponent.h"
 #include "GameFramework/Actor.h"
-#include "Grid/GridRoomType.h"
 #include "BuildableObject.generated.h"
 
 class UBuildableRegistrySubsystem;
@@ -16,6 +16,7 @@ class ACrowdedPlayerController;
 class UBuildData;
 class UBuildSubsystem;
 class USlotComponent;
+class UActionComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSlotsUpdated);
 
@@ -107,6 +108,10 @@ public:
 
 	UPROPERTY()
 	TArray<FIntPoint> OccupiedCells;
+
+	// Actions
+	UFUNCTION()
+	virtual void InitActions();
 	
 protected:
 	UPROPERTY()
@@ -166,4 +171,8 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<UMaterialInterface> DisabledMaterial{nullptr};
+
+	// Actions
+	UPROPERTY()
+	TObjectPtr<UActionComponent> ActionComponent{nullptr};
 };

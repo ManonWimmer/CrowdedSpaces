@@ -8,6 +8,8 @@
 #include "UI/GameHUD.h"
 #include "CrowdedPlayerController.generated.h"
 
+class UActionSubsystem;
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraMoveForward, float, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraMoveRight, float, Value);
 
@@ -28,6 +30,9 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRightRotateBuild);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTimeInputChanged, int, TimeIndex);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTogglePause);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectableActorSelected, AActor*, SelectableActor);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNotSelectableActorSelected);
+
 UCLASS()
 class CROWDEDSPACES_API ACrowdedPlayerController : public APlayerController
 {
@@ -37,7 +42,7 @@ class CROWDEDSPACES_API ACrowdedPlayerController : public APlayerController
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Input")
-	UInputMappingContext* CameraIMC = nullptr;
+	TObjectPtr<UInputMappingContext> CameraIMC{nullptr};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UPlayerActionsData> PlayerInputsData;
@@ -89,6 +94,13 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnTogglePause OnTogglePause;
+
+	// Selection
+	UPROPERTY(BlueprintAssignable)
+	FOnSelectableActorSelected OnSelectableActorSelected;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnNotSelectableActorSelected OnNotSelectableActorSelected;
 	
 protected:
 	virtual void SetupInputComponent() override;
@@ -127,14 +139,18 @@ private:
 	void HandleSelection() const;
 
 	UPROPERTY()
-	AGridActor* GridActor = nullptr;
+	TObjectPtr<AGridActor> GridActor{nullptr};
 	
 	UPROPERTY()
-	AActor* SelectedObject = nullptr;
+	TObjectPtr<AActor> SelectedObject{nullptr};
 
 	UPROPERTY()
-	TObjectPtr<AGameHUD> GameHUD = nullptr;
+	TObjectPtr<AGameHUD> GameHUD{nullptr};
 
 	UPROPERTY()
-	bool bIsRotatingCameraWithMouseWheel = false;
+	bool bIsRotatingCameraWithMouseWheel{nullptr};
+
+	// Actions
+	UPROPERTY()
+	TObjectPtr<UActionSubsystem> ActionSubsystem{nullptr};
 };

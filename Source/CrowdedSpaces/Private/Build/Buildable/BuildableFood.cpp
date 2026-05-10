@@ -32,6 +32,7 @@ void ABuildableFood::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	BRS->UnregisterFood(this);
 }
 
+#pragma region Use Object
 bool ABuildableFood::StartUsingImplementation(ANPC* NPC)
 {
 	UResourceComponent* FoodComp = NPC->GetResourceComponent<EResourceType::Food>();
@@ -65,6 +66,7 @@ bool ABuildableFood::StopUsingImplementation(ANPC* NPC)
 	
 	return true;
 }
+#pragma endregion
 
 #pragma region Selectable
 void ABuildableFood::OnSelected()
@@ -75,5 +77,3 @@ void ABuildableFood::OnDeselected()
 {
 }
 #pragma endregion
-
-

@@ -6,8 +6,11 @@
 #include "CrowdedGameMode.generated.h"
 
 class ANPC;
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameModeChanged, EGameModeState, NewGameMode);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNbrAliveNPCChanged);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnNPCRegistered, ANPC*, NPC, bool, bWasFirst);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNPCUnregistered, ANPC*, NPC);
 
 UCLASS()
 class CROWDEDSPACES_API ACrowdedGameMode : public AGameMode
@@ -44,13 +47,22 @@ public:
 	void UnregisterNPC(ANPC* NPC);
 
 	UFUNCTION(BlueprintCallable, Category = "GameMode")
-	int GetNbrAliveNPCs() const { return AliveNPCCount; }
+	int GetNbrAliveNPCs() const { return AliveNPCs.Num(); }
+	
+	UFUNCTION(BlueprintCallable, Category = "GameMode")
+	TArray<ANPC*> GetAliveNPCs() const { return AliveNPCs; }
 	
 	UPROPERTY(BlueprintAssignable)
 	FOnGameModeChanged OnGameModeChanged;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnNbrAliveNPCChanged OnNbrAliveNPCChanged;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnNPCRegistered OnNPCRegistered;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnNPCUnregistered OnNPCUnregistered;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "GameMode")
@@ -60,5 +72,5 @@ private:
 	EGameModeState CurrentGameMode = EGameModeState::Game;
 
 	UPROPERTY()
-	int AliveNPCCount = 0;
+	TArray<TObjectPtr<ANPC>> AliveNPCs;
 };

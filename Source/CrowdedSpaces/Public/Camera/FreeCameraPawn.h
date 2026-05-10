@@ -21,6 +21,10 @@ public:
 	float GetCurrentZoom() const { return SpringArm->TargetArmLength; }
 	float GetDefaultZoom() const { return 1500.f; }
 
+	float GetZoomAlpha() const;
+
+	void FocusOnActor(const AActor* Target);
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -40,7 +44,10 @@ protected:
 	float MoveSpeed = 1500.f;
 
 	UPROPERTY(EditAnywhere, Category="Movement")
-	float MoveSmooth = 50.f;
+	float MoveSmooth = 10.f;
+
+	UPROPERTY(EditAnywhere, Category="Movement")
+	float FocusSmooth = 3.f;
 	
 	UPROPERTY(EditAnywhere, Category="Rotation")
 	float RotationSpeed = 60.f;
@@ -97,5 +104,7 @@ private:
 	// Movement / Rotation
 	void ApplyMovement(float DeltaTime);
 	void ApplyRotation(float DeltaTime);
-	
+
+	FVector DesiredLocation;
+	bool bIsFocusing = false;
 };

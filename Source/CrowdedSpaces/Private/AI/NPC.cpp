@@ -1,13 +1,21 @@
 ﻿#include "AI/NPC.h"
 
+#include "Action/Action.h"
+#include "Action/ActionComponent.h"
 #include "AI/NameGeneratorSubsystem.h"
 #include "AI/NPCController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Build/BuildableObject.h"
 #include "Build/SlotComponent.h"
+#include "Build/Buildable/BuildableGenerator.h"
+#include "Build/Buildable/BuildableTrainingStation.h"
 #include "Camera/FreeCameraPawn.h"
 #include "Camera/CameraComponent.h"
+#include "Components/SceneCaptureComponent2D.h"
+#include "Components/SpotLightComponent.h"
+#include "Engine/TextureRenderTarget2D.h"
 #include "Game/CrowdedGameMode.h"
+#include "Game/CrowdedGameState.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Training/TrainingData.h"
 #include "Training/TrainingSubsystem.h"
@@ -42,11 +50,43 @@ ANPC::ANPC()
 
 	AIControllerClass = ANPCController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+	// Actions
+	ActionComponent = CreateDefaultSubobject<UActionComponent>(TEXT("ActionComponent"));
+
+	// Portrait
+	PortraitCapture = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("PortraitCapture"));
+	PortraitCapture->SetupAttachment(GetMesh());
+	PortraitCapture->bCaptureEveryFrame = false;
+	PortraitCapture->bCaptureOnMovement = false;
+	PortraitCapture->PrimitiveRenderMode = ESceneCapturePrimitiveRenderMode::PRM_UseShowOnlyList;
+	PortraitCapture->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
+	PortraitCapture->bAlwaysPersistRenderingState = true;
+
+	// Portrait light
+	PortraitLight = CreateDefaultSubobject<USpotLightComponent>(TEXT("PortraitLight"));
+	PortraitLight->SetupAttachment(GetMesh());
+
+	PortraitLight->SetVisibility(false); 
+	
+	PortraitLight->Intensity = 5000.f;
+	PortraitLight->SetCastShadows(false);
+	PortraitLight->SetMobility(EComponentMobility::Movable);
 }
 
 void ANPC::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Camera
+	const APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	if (!PlayerController) return;
+
+	FreeCameraPawn = Cast<AFreeCameraPawn>(PlayerController->GetPawn());
+	if (!FreeCameraPawn) return;
+
+	CameraComponent = FreeCameraPawn->GetCameraComponent();
+	if (!CameraComponent) return;
 	
 	// Die
 	FoodComponent->OnNoMoreResource.AddDynamic(this, &ANPC::Die);
@@ -57,6 +97,8 @@ void ANPC::BeginPlay()
 		return;
 
 	GameMode->RegisterNPC(this);
+
+	GameState = GetWorld()->GetGameState<ACrowdedGameState>();
 
 	// Multipliers
 	FoodProductionMultiplier = 1;
@@ -107,6 +149,20 @@ void ANPC::BeginPlay()
 	
 	NPCActionWidgetPtr->OwningActor = this;
 	NPCActionWidgetPtr->Init();
+
+	// Actions
+	ANPCController* ControllerNPC = Cast<ANPCController>(GetController());
+	if (!ControllerNPC)
+	return;
+
+	Blackboard = ControllerNPC->GetBlackboardComponent();
+	if (!Blackboard)
+		return;
+			
+	InitActions();
+
+	// Portrait
+	SetupCapture();
 }
 
 void ANPC::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -122,18 +178,13 @@ void ANPC::Tick(const float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	// Widgets world look at camera
-	if (!NPCNameWidget || !NPCActionWidget) return;
+	if (!NPCNameWidget || !NPCActionWidget)
+		return;
 
-	const APlayerController* PC = GetWorld()->GetFirstPlayerController();
-	if (!PC) return;
+	if (!CameraComponent)
+		return;
 
-	const AFreeCameraPawn* CamPawn = Cast<AFreeCameraPawn>(PC->GetPawn());
-	if (!CamPawn) return;
-
-	const UCameraComponent* Cam = CamPawn->GetCameraComponent();
-	if (!Cam) return;
-
-	const FVector CameraLocation = Cam->GetComponentLocation();
+	const FVector CameraLocation = CameraComponent->GetComponentLocation();
 	const FVector NPCNameWidgetLocation = NPCNameWidget->GetComponentLocation();
 	const FVector NPCActionWidgetLocation = NPCActionWidget->GetComponentLocation();
 
@@ -341,18 +392,21 @@ int ANPC::GetProductionMultiplierForType(const EProductionType Type) const
 	}
 }
 
-void ANPC::CancelCurrentUse() const
+void ANPC::CancelCurrentUse()
 {
-	if (ANPCController* ControllerNPC = Cast<ANPCController>(GetController()))
+	if (!Blackboard)
+		return;
+
+	ANPCController* ControllerNPC = Cast<ANPCController>(GetController());
+	if (!ControllerNPC)
+		return;
+	
+	if (const TObjectPtr<ABuildableObject> TargetObject = Cast<ABuildableObject>(Blackboard->GetValueAsObject("TargetObject")); TargetObject && TargetObject->GetObjectType() == EObjectType::Generator)
 	{
-		if (const UBlackboardComponent* Blackboard = ControllerNPC->GetBlackboardComponent())
-		{
-			if (const TObjectPtr<ABuildableObject> TargetObject = Cast<ABuildableObject>(Blackboard->GetValueAsObject("TargetObject")); TargetObject && TargetObject->GetObjectType() == EObjectType::Generator)
-			{
-				if (UBehaviorTreeComponent* BTComp = Cast<UBehaviorTreeComponent>(ControllerNPC->GetBrainComponent()))
-					BTComp->RestartTree();
-			}
-		}
+		if (UBehaviorTreeComponent* BTComp = Cast<UBehaviorTreeComponent>(ControllerNPC->GetBrainComponent()))
+			BTComp->RestartTree();
+
+		StopAction();
 	}
 }
 
@@ -401,17 +455,19 @@ void ANPC::TryGenerateName()
 	
 			NPCNameWidgetPtr->OwningActor = this;
 			NPCNameWidgetPtr->Init();
+
+			OnNameSet.Broadcast();
 			
 			return;
 		}
 	}
 
-	// Retry dans 0.5s
+	// Retry dans 0.1s
 	GetWorld()->GetTimerManager().SetTimer(
 		NameRetryTimer,
 		this,
 		&ANPC::TryGenerateName,
-		0.5f,
+		0.1f,
 		false
 	);
 }
@@ -442,3 +498,236 @@ void ANPC::OnDeselected()
 }
 #pragma endregion
 
+#pragma region Actions
+void ANPC::InitActions()
+{
+	if (!GameState)
+		return;
+	
+	TArray<TObjectPtr<UAction>> InstancedActions;
+
+	for (const TSubclassOf<UAction>& ActionClass : GameState->NPCActions)
+	{
+		if (!ActionClass) continue;
+
+		UAction* NewAction = NewObject<UAction>(this, ActionClass);
+		if (!NewAction) continue;
+
+		NewAction->Initialize(GetWorld());
+		InstancedActions.Add(NewAction);
+	}
+
+	ActionComponent->SetupActions(InstancedActions);
+}
+
+
+#pragma endregion
+
+#pragma region Portrait
+UTexture* ANPC::GetPortrait() const
+{
+	if (!PortraitRenderTarget)
+		CapturePortrait();
+	
+	return PortraitRenderTarget;
+}
+
+void ANPC::CapturePortrait() const
+{
+	if (!PortraitCapture) return;
+
+	const USkeletalMeshComponent* SourceMesh = GetMesh();
+	if (!SourceMesh) return;
+	
+	USkeletalMeshComponent* Clone = NewObject<USkeletalMeshComponent>(const_cast<ANPC*>(this));
+
+	if (!Clone) return;
+
+	PortraitLight->SetVisibility(true);
+
+	Clone->RegisterComponent();
+	Clone->SetWorldTransform(SourceMesh->GetComponentTransform());
+	
+	Clone->SetSkeletalMesh(SourceMesh->GetSkeletalMeshAsset());
+	const int32 MatCount = SourceMesh->GetNumMaterials();
+	for (int32 i = 0; i < MatCount; i++)
+	{
+		Clone->SetMaterial(i, SourceMesh->GetMaterial(i));
+	}
+	
+	Clone->SetRenderCustomDepth(false);
+	Clone->SetOverlayMaterial(nullptr);
+	Clone->CastShadow = false;
+	
+	PortraitCapture->ShowOnlyComponents.Empty();
+	PortraitCapture->ShowOnlyComponent(Clone);
+	PortraitCapture->CaptureScene();
+	
+	Clone->DestroyComponent();
+
+	PortraitLight->SetVisibility(false);
+}
+
+bool ANPC::IsReadyForCapture() const
+{
+	return bReadyForCapture;
+}
+
+void ANPC::SetupCapture()
+{
+	FEngineShowFlags& Flags = PortraitCapture->ShowFlags;
+	
+	Flags.SetPostProcessing(false);
+	Flags.SetBloom(false);
+	Flags.SetFog(false);
+	Flags.SetAtmosphere(false);
+	Flags.SetVolumetricFog(false);
+	Flags.SetCloud(false);
+
+	Flags.SetLighting(true);
+	Flags.SetDirectionalLights(true);
+	Flags.SetPointLights(true);
+	Flags.SetSpotLights(true);
+
+	Flags.SetMaterials(true);
+	Flags.SetTranslucency(true);
+	Flags.SetSeparateTranslucency(true);
+	
+	PortraitRenderTarget = NewObject<UTextureRenderTarget2D>();
+
+	PortraitRenderTarget->InitAutoFormat(512, 512);
+	PortraitRenderTarget->ClearColor = FLinearColor(0,0,0,0);
+	PortraitRenderTarget->RenderTargetFormat = RTF_RGBA8;
+	PortraitRenderTarget->bAutoGenerateMips = false;
+	
+	PortraitCapture->TextureTarget = PortraitRenderTarget;
+	
+	bReadyForCapture = true;
+	OnPlayerReadyForCapture.Broadcast();
+}
+#pragma endregion 
+
+#pragma region Generator & Training Station
+void ANPC::SetGenerator(ABuildableGenerator* Generator)
+{
+	if (!Blackboard)
+		return;
+	
+	if (Generator != nullptr)
+	{
+		USlotComponent* Slot = Generator->GetNearestFreeSlot(GetActorLocation());
+		if (!Slot)
+			return;
+		
+		Blackboard->SetValueAsObject("Generator", Generator);
+		Blackboard->SetValueAsObject("GeneratorSlot", Slot);
+		Blackboard->SetValueAsVector("GeneratorLocation", Slot->GetComponentLocation());
+
+		FocusCameraOnGenerator();
+	}
+	else
+	{
+		Blackboard->SetValueAsObject("Generator", nullptr);
+		Blackboard->SetValueAsObject("GeneratorSlot", nullptr);
+		Blackboard->SetValueAsVector("GeneratorLocation", FVector::Zero());
+	}
+
+	OnGeneratorChanged.Broadcast();
+}
+
+void ANPC::SetTrainingStation(ABuildableTrainingStation* TrainingStation)
+{
+	if (!Blackboard)
+		return;
+	
+	if (TrainingStation != nullptr)
+	{
+		USlotComponent* Slot = TrainingStation->GetNearestFreeSlot(GetActorLocation());
+		if (!Slot)
+			return;
+		
+		Blackboard->SetValueAsObject("TrainingStation", TrainingStation);
+		Blackboard->SetValueAsObject("TrainingStationSlot", Slot);
+		Blackboard->SetValueAsVector("TrainingStationLocation", Slot->GetComponentLocation());
+
+		FocusCameraOnTrainingStation();
+	}
+	else
+	{
+		Blackboard->SetValueAsObject("TrainingStation", nullptr);
+		Blackboard->SetValueAsObject("TrainingStationSlot", nullptr);
+		Blackboard->SetValueAsVector("TrainingStationLocation", FVector::Zero());
+	}
+
+	OnTrainingStationChanged.Broadcast();
+}
+
+void ANPC::StopAction()
+{
+	SetGenerator(nullptr);
+	SetTrainingStation(nullptr);
+}
+
+ABuildableGenerator* ANPC::GetGenerator() const
+{
+	if (!Blackboard)
+		return nullptr;
+	
+	return Cast<ABuildableGenerator>(Blackboard->GetValueAsObject("Generator"));
+}
+
+bool ANPC::HasGenerator() const
+{
+	return GetGenerator() != nullptr;
+}
+
+ABuildableTrainingStation* ANPC::GetTrainingStation() const
+{
+	if (!Blackboard)
+		return nullptr;
+	
+	return Cast<ABuildableTrainingStation>(Blackboard->GetValueAsObject("TrainingStation"));
+}
+
+bool ANPC::HasTrainingStation() const
+{
+	return GetTrainingStation() != nullptr;
+}
+#pragma endregion
+
+#pragma region Camera
+void ANPC::FocusCameraOnGenerator() const
+{
+	const ABuildableGenerator* Generator = GetGenerator();
+	if (!Generator)
+		return;
+
+	FreeCameraPawn->FocusOnActor(Generator);
+}
+
+void ANPC::FocusCameraOnTrainingStation() const
+{
+	const ABuildableTrainingStation* TrainingStation = GetTrainingStation();
+	if (!TrainingStation)
+		return;
+
+	FreeCameraPawn->FocusOnActor(TrainingStation);
+}
+
+void ANPC::FocusCameraOnNPC() const
+{
+	FreeCameraPawn->FocusOnActor(this);
+}
+#pragma endregion
+
+#pragma region Auto Needs
+bool ANPC::HasAutoNeeds() const
+{
+	return bAutoNeeds;
+}
+
+void ANPC::SetAutoNeeds(const bool bNewAutoNeeds)
+{
+	bAutoNeeds = bNewAutoNeeds;
+}
+#pragma endregion

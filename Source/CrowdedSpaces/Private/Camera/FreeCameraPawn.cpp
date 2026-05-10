@@ -29,12 +29,6 @@ AFreeCameraPawn::AFreeCameraPawn()
 	PrimaryActorTick.bTickEvenWhenPaused = true;
 }
 
-void AFreeCameraPawn::BeginPlay()
-{
-	Super::BeginPlay();
-	BindControllerEvents();
-}
-
 void AFreeCameraPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -51,6 +45,12 @@ void AFreeCameraPawn::Tick(float DeltaTime)
 	RealDeltaTime,
 	ZoomSmooth
 	);
+}
+
+void AFreeCameraPawn::BeginPlay()
+{
+	Super::BeginPlay();
+	BindControllerEvents();
 }
 
 void AFreeCameraPawn::BindControllerEvents()
@@ -107,6 +107,25 @@ void AFreeCameraPawn::OnZoom(float Value)
 
 void AFreeCameraPawn::ApplyMovement(float DeltaTime)
 {
+	if (bIsFocusing)
+	{
+		const FVector Smoothed = FMath::VInterpTo(
+			GetActorLocation(),
+			DesiredLocation,
+			DeltaTime,
+			FocusSmooth
+		);
+
+		SetActorLocation(Smoothed);
+		
+		if (FVector::Dist(GetActorLocation(), DesiredLocation) < 10.f)
+		{
+			bIsFocusing = false;
+		}
+	
+		return; 
+	}
+	
 	if (CurrentVelocity.IsNearlyZero())
 		return;
 	
@@ -147,5 +166,22 @@ void AFreeCameraPawn::ApplyRotation(float DeltaTime)
 	SetActorRotation(FRotator(GetActorRotation().Pitch, SmoothedYaw, 0.f));
 	
 	MouseYawInput = 0.f;
+}
+
+float AFreeCameraPawn::GetZoomAlpha() const
+{
+	return FMath::GetMappedRangeValueClamped(
+		FVector2D(MinZoom, MaxZoom),
+		FVector2D(0.f, 1.f),
+		SpringArm->TargetArmLength
+	);
+}
+
+void AFreeCameraPawn::FocusOnActor(const AActor* Target)
+{
+	if (!Target) return;
+
+	DesiredLocation = Target->GetActorLocation();
+	bIsFocusing = true;
 }
 

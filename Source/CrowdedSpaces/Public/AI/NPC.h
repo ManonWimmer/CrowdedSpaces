@@ -8,10 +8,19 @@
 #include "Selection/Selectable.h"
 #include "NPCActionType.h"
 #include "NPCPriorityType.h"
+#include "Engine/Texture.h"
+#include "Engine/TextureRenderTarget2D.h"
 #include "Production/ProductionType.h"
 #include "Training/TrainingSkillType.h"
 #include "NPC.generated.h"
 
+class UCameraComponent;
+class AFreeCameraPawn;
+class ABuildableTrainingStation;
+class ABuildableGenerator;
+class ACrowdedGameState;
+class USpotLightComponent;
+class UActionComponent;
 class UTrainingSubsystem;
 enum class ENPCPriorityType : uint8;
 class UBTTask_UseBuildableObject;
@@ -20,6 +29,10 @@ class USlotComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentActionChanged, ENPCActionType, Value); 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSkillsTrained); 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerReadyForCapture); 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNameSet); 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGeneratorChanged); 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTrainingStationChanged); 
 
 UCLASS()
 class CROWDEDSPACES_API ANPC : public ACharacter, public ISelectable
@@ -68,7 +81,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="AI")
 	int GetProductionMultiplierForType(EProductionType Type) const;
 	
-	void CancelCurrentUse() const;
+	void CancelCurrentUse();
 
 	// Priority
 	UFUNCTION(BlueprintCallable, Category="AI")
@@ -80,6 +93,9 @@ public:
 	// Name & Color
 	UFUNCTION(BlueprintCallable, Category="AI")
 	FString GetNPCName() const { return NPCName; }
+	
+	UPROPERTY(BlueprintAssignable)
+	FOnNameSet OnNameSet;
 	
 	FTimerHandle NameRetryTimer;
 
@@ -118,6 +134,62 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="AI")
 	int GetMaxMultipliersLevel() const { return MaxMultipliersLevel; }
+
+	// Portrait
+	UFUNCTION(BlueprintCallable)
+	UTexture* GetPortrait() const;
+
+	UFUNCTION(BlueprintCallable)
+	void CapturePortrait() const;
+
+	UFUNCTION(BlueprintCallable)
+	bool IsReadyForCapture() const;
+	void SetupCapture();
+
+	UPROPERTY(BlueprintAssignable)
+	FOnPlayerReadyForCapture OnPlayerReadyForCapture;
+
+	// Actions
+	void SetGenerator(ABuildableGenerator* Generator);
+	void SetTrainingStation(ABuildableTrainingStation* TrainingStation);
+
+	UFUNCTION(BlueprintCallable)
+	void StopAction();
+	
+	UFUNCTION(BlueprintCallable)
+	ABuildableGenerator* GetGenerator() const;
+
+	UFUNCTION(BlueprintCallable)
+	bool HasGenerator() const;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnGeneratorChanged OnGeneratorChanged;
+
+	UFUNCTION(BlueprintCallable)
+	ABuildableTrainingStation* GetTrainingStation() const;
+
+	UFUNCTION(BlueprintCallable)
+	bool HasTrainingStation() const;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnTrainingStationChanged OnTrainingStationChanged;
+
+	// Camera
+	UFUNCTION(BlueprintCallable)
+	void FocusCameraOnGenerator() const;
+
+	UFUNCTION(BlueprintCallable)
+	void FocusCameraOnTrainingStation() const;
+
+	UFUNCTION(BlueprintCallable)
+	void FocusCameraOnNPC() const;
+
+	// Auto needs
+	UFUNCTION(BlueprintCallable)
+	bool HasAutoNeeds() const;
+
+	UFUNCTION(BlueprintCallable)
+	void SetAutoNeeds(bool bNewAutoNeeds);
 	
 protected:
 	virtual void BeginPlay() override;
@@ -129,15 +201,22 @@ protected:
 	TObjectPtr<UBehaviorTree> BehaviorTree;
 
 private:
+	// Camera
+	UPROPERTY()
+	TObjectPtr<AFreeCameraPawn> FreeCameraPawn{nullptr};
+	
+	UPROPERTY()
+	TObjectPtr<UCameraComponent> CameraComponent{nullptr};
+	
 	UPROPERTY()
 	TMap<EResourceType, TObjectPtr<UResourceComponent>> ResourceMap;
 	
 	// Resources Components
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<UResourceComponent> FoodComponent;
+	TObjectPtr<UResourceComponent> FoodComponent{nullptr};
 	
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<UResourceComponent> EnergyComponent;
+	TObjectPtr<UResourceComponent> EnergyComponent{nullptr};
 
 	// Work
 	UPROPERTY(EditAnywhere)
@@ -145,14 +224,14 @@ private:
 	
 	// Name
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<UWidgetComponent> NPCNameWidget;
+	TObjectPtr<UWidgetComponent> NPCNameWidget{nullptr};
 
 	UPROPERTY()
 	FString NPCName = "";
 	
 	// Action
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<UWidgetComponent> NPCActionWidget;
+	TObjectPtr<UWidgetComponent> NPCActionWidget{nullptr};
 	
 	UPROPERTY()
 	ENPCActionType CurrentAction = ENPCActionType::Idle;
@@ -176,10 +255,10 @@ private:
 
 	// Color
 	UPROPERTY()
-	UMaterialInstanceDynamic* BodyMaterialInstance;
+	TObjectPtr<UMaterialInstanceDynamic> BodyMaterialInstance{nullptr};
 
 	UPROPERTY()
-	UMaterialInstanceDynamic* OtherMaterialInstance;
+	TObjectPtr<UMaterialInstanceDynamic> OtherMaterialInstance{nullptr};
 
 	// Object
 	UPROPERTY()
@@ -197,6 +276,39 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	int MaxMultipliersLevel = 5;
+
+	// Actions
+	UPROPERTY()
+	TObjectPtr<UBlackboardComponent> Blackboard{nullptr};
+	
+	UPROPERTY()
+	TObjectPtr<UActionComponent> ActionComponent{nullptr};
+
+	UFUNCTION()
+	void InitActions();
+
+	// Portrait
+	UPROPERTY(VisibleAnywhere, Category="Portrait")
+	TObjectPtr<USceneCaptureComponent2D> PortraitCapture{nullptr};
+
+	UPROPERTY()
+	TObjectPtr<UTextureRenderTarget2D> PortraitRenderTarget{nullptr};
+
+	UPROPERTY()
+	TObjectPtr<USkeletalMeshComponent> PortraitMesh{nullptr};
+
+	UPROPERTY()
+	bool bReadyForCapture = false;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<USpotLightComponent> PortraitLight{nullptr};
+
+	UPROPERTY()
+	TObjectPtr<ACrowdedGameState> GameState{nullptr};
+
+	// Auto needs
+	UPROPERTY()
+	bool bAutoNeeds = true;
 	
 	// Selectable
 public:

@@ -40,7 +40,7 @@ void ACrowdedGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	TimeSubsystem->OnDayChanged.RemoveDynamic(this, &ACrowdedGameMode::CheckEndGame);
 }
 
-void ACrowdedGameMode::SetGameMode(EGameModeState NewGameMode)
+void ACrowdedGameMode::SetGameMode(const EGameModeState NewGameMode)
 {
 	if (CurrentGameMode == NewGameMode)
 		return;
@@ -50,7 +50,7 @@ void ACrowdedGameMode::SetGameMode(EGameModeState NewGameMode)
 	OnGameModeChanged.Broadcast(NewGameMode);
 }
 
-void ACrowdedGameMode::CheckEndGame(int NewDay)
+void ACrowdedGameMode::CheckEndGame(const int NewDay)
 {
 	if (NewDay > MaxDaysToSurvive)
 	{
@@ -58,7 +58,7 @@ void ACrowdedGameMode::CheckEndGame(int NewDay)
 	}
 }
 
-void ACrowdedGameMode::EndGame(bool bSurvived) const
+void ACrowdedGameMode::EndGame(const bool bSurvived) const
 {
 	UCrowdedGameInstance* GameInstance = GetGameInstance<UCrowdedGameInstance>();
 	if (!GameInstance)
@@ -71,22 +71,32 @@ void ACrowdedGameMode::EndGame(bool bSurvived) const
 
 void ACrowdedGameMode::RegisterNPC(ANPC* NPC)
 {
-	AliveNPCCount++;
+	if (!NPC)
+		return;
+
+	const bool bWasEmpty = AliveNPCs.Num() == 0;
+	
+	AliveNPCs.Add(NPC);
 
 	OnNbrAliveNPCChanged.Broadcast();
+	OnNPCRegistered.Broadcast(NPC, bWasEmpty);
 }
 
 void ACrowdedGameMode::UnregisterNPC(ANPC* NPC)
 {
-	AliveNPCCount--;
+	if (!NPC || !AliveNPCs.Contains(NPC))
+		return;
+	
+	AliveNPCs.Remove(NPC);
 
-	if (AliveNPCCount <= 0)
+	if (GetNbrAliveNPCs() <= 0)
 	{
 		EndGame(false); 
 	}
 	else
 	{
 		OnNbrAliveNPCChanged.Broadcast();
+		OnNPCUnregistered.Broadcast(NPC);
 	}
 }
 
