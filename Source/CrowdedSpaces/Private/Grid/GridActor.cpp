@@ -617,6 +617,7 @@ void AGridActor::RecomputeAllRooms()
 	}
 
 	ShowPlacedRooms(true);
+	BuildSubsystem->OnRoomsRecomputed.Broadcast();
 }
 
 void AGridActor::AddCellsToRooms(TObjectPtr<UBuildRoomData> BuildData, TArray<FGridCell*> CellsToAdd)

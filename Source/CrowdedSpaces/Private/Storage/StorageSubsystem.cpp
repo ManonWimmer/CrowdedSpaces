@@ -3,6 +3,8 @@
 #include "Game/CrowdedGameState.h"
 #include "Resources/ResourceComponent.h"
 #include "Build/BuildSubsystem.h"
+#include "Debug/CrowdedSpacesLogs.h"
+#include "Grid/GridRoom.h"
 #include "Storage/StorageData.h"
 
 void UStorageSubsystem::OnWorldBeginPlay(UWorld& InWorld)
@@ -23,8 +25,7 @@ void UStorageSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	
 	BuildSubsystem = InWorld.GetSubsystem<UBuildSubsystem>();
 	BuildSubsystem->OnRoomDestroyed.AddDynamic(this, &UStorageSubsystem::OnRoomDestroyed);
-	BuildSubsystem->OnRoomCreated.AddDynamic(this, &UStorageSubsystem::OnRoomCreated);
-	BuildSubsystem->OnRoomUpdated.AddDynamic(this, &UStorageSubsystem::OnRoomUpdated);
+	BuildSubsystem->OnRoomsRecomputed.AddDynamic(this, &UStorageSubsystem::RefreshStorageRooms);
 }
 
 TStatId UStorageSubsystem::GetStatId() const
@@ -32,20 +33,33 @@ TStatId UStorageSubsystem::GetStatId() const
 	RETURN_QUICK_DECLARE_CYCLE_STAT(UBuildSubsystem, STATGROUP_Tickables);
 }
 
-void UStorageSubsystem::OnRoomCreated(const int RoomId, const EGridRoomType RoomType)
+void UStorageSubsystem::RefreshStorageRooms()
 {
-	if (RoomType != EGridRoomType::Storage)
-		return;
+	// Remove old bonuses
+	for (auto& Pair : StorageRooms)
+	{
+		const FStorageRoomValues& Values = Pair.Value;
 
-	AddStorageRoom(RoomId);
-}
+		MoneyComponent->RemoveMaxResource(Values.AddMaxMoneyTotal);
+		FoodComponent->RemoveMaxResource(Values.AddMaxFoodTotal);
+		ElectricityComponent->RemoveMaxResource(Values.AddMaxElectricityTotal);
+	}
 
-void UStorageSubsystem::OnRoomUpdated(const int RoomId, const EGridRoomType RoomType)
-{
-	if (RoomType != EGridRoomType::Storage)
-		return;
+	StorageRooms.Empty();
 
-	UpdateStorageRoom(RoomId);
+	// Recreate all storage rooms
+	const TMap<int, FGridRoom>& Rooms = BuildSubsystem->GetRooms();
+
+	for (const auto& Pair : Rooms)
+	{
+		const int RoomId = Pair.Key;
+		const FGridRoom& Room = Pair.Value;
+
+		if (Room.RoomType != EGridRoomType::Storage)
+			continue;
+
+		AddStorageRoom(RoomId);
+	}
 }
 
 void UStorageSubsystem::AddStorageRoom(const int RoomId)
@@ -74,6 +88,12 @@ void UStorageSubsystem::AddStorageRoom(const int RoomId)
 
 void UStorageSubsystem::UpdateStorageRoom(const int RoomId)
 {
+	if (!StorageData)
+	{
+		CS_LOG("No storage data");
+		return;
+	}
+	
 	int RoomCellsCount = BuildSubsystem->GetRoomCellsCount(RoomId);
 	
 	FStorageRoomValues StorageRoomValues = StorageRooms[RoomId];
@@ -150,5 +170,8 @@ void UStorageSubsystem::OnRoomDestroyed(const int RoomId)
 
 FStorageRoomValues UStorageSubsystem::GetStorageValuesForCreatedRoom(const int RoomId)
 {
+	if (!StorageRooms.Find(RoomId))
+		return FStorageRoomValues();
+	
 	return StorageRooms[RoomId];
 }
