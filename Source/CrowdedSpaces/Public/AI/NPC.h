@@ -15,6 +15,7 @@
 #include "Training/TrainingSkillType.h"
 #include "NPC.generated.h"
 
+class ANPCController;
 class UCameraComponent;
 class AFreeCameraPawn;
 class ABuildableTrainingStation;
@@ -258,6 +259,9 @@ private:
 	
 	UPROPERTY()
 	TObjectPtr<UCameraComponent> CameraComponent{nullptr};
+
+	UPROPERTY()
+	TObjectPtr<ANPCController> ControllerNPC{nullptr};
 	
 	// Resources Components
 	UPROPERTY(EditAnywhere)

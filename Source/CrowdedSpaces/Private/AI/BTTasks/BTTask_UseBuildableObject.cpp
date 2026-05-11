@@ -34,12 +34,12 @@ EBTNodeResult::Type UBTTask_UseBuildableObject::ExecuteTask(UBehaviorTreeCompone
 
 void UBTTask_UseBuildableObject::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
-	AUsableObject* ActionObject = Cast<AUsableObject>(OwnerComp.GetBlackboardComponent()->GetValueAsObject("ActionObject"));
-	if (ActionObject && CurrentObject != ActionObject)
+	AUsableObject* NewObject = NPC->GetCurrentObject();
+
+	if (NewObject != CurrentObject)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Return action object != current object use"));
 		StopUsing();
-		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+		FinishLatentTask(OwnerComp, EBTNodeResult::Aborted);
 		return;
 	}
 	

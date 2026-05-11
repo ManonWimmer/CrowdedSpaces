@@ -101,6 +101,8 @@ void ANPC::BeginPlay()
 
 	CameraComponent = FreeCameraPawn->GetCameraComponent();
 	if (!CameraComponent) return;
+
+	ControllerNPC = Cast<ANPCController>(GetController());
 	
 	// Die
 	FoodComponent->OnNoMoreResource.AddDynamic(this, &ANPC::OnDead);
@@ -168,7 +170,6 @@ void ANPC::BeginPlay()
 	NPCActionWidgetPtr->Init();
 
 	// Actions
-	ANPCController* ControllerNPC = Cast<ANPCController>(GetController());
 	if (!ControllerNPC)
 	return;
 
@@ -411,8 +412,7 @@ void ANPC::CancelCurrentUse()
 {
 	if (!Blackboard)
 		return;
-
-	ANPCController* ControllerNPC = Cast<ANPCController>(GetController());
+	
 	if (!ControllerNPC)
 		return;
 	
@@ -630,10 +630,17 @@ void ANPC::SetActionObject(AUsableObject* Object)
 	
 	if (!Object)
 		return;
-	
-	USlotComponent* Slot = Object->GetNearestFreeAndWalkableSlot(this, GetActorLocation());
+
+	const TObjectPtr<USlotComponent> Slot = Object->GetNearestFreeAndWalkableSlot(this, GetActorLocation());
 	if (!Slot)
 		return;
+
+	if (HasActionObject())
+	{
+		StopAction();
+		if (UBehaviorTreeComponent* BTComp = Cast<UBehaviorTreeComponent>(ControllerNPC->GetBrainComponent()))
+			BTComp->RestartTree();
+	}
 	
 	Blackboard->SetValueAsObject("ActionObject", Object);
 	Blackboard->SetValueAsObject("ActionObjectSlot", Slot);
