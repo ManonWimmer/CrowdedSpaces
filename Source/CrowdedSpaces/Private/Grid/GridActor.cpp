@@ -17,10 +17,11 @@ AGridActor::AGridActor()
 
 	WallISM = CreateDefaultSubobject<UInstancedStaticMeshComponent>("WallISM");
 	WallISM->SetupAttachment(RootComponent);
-	WallISM->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	WallISM->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	WallISM->SetCollisionObjectType(ECC_WorldStatic);
 	WallISM->SetCollisionResponseToAllChannels(ECR_Block);
 	WallISM->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
+	WallISM->SetCanEverAffectNavigation(true);
 
 	PrimaryActorTick.bCanEverTick = false;
 }
@@ -618,6 +619,8 @@ void AGridActor::RecomputeAllRooms()
 
 	ShowPlacedRooms(true);
 	BuildSubsystem->OnRoomsRecomputed.Broadcast();
+	WallISM->MarkRenderStateDirty();
+	WallISM->UpdateNavigationBounds();
 }
 
 void AGridActor::AddCellsToRooms(TObjectPtr<UBuildRoomData> BuildData, TArray<FGridCell*> CellsToAdd)

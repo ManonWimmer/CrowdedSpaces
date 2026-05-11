@@ -192,17 +192,14 @@ void UResourceComponent::SetIsInRegen(const bool bInRegen)
 	bIsInRegen = bInRegen;
 	check(!IsTemplate());
 
-	CS_LOG("OWNER VALID CHECK: %s | IsTemplate=%d | World=%s",
-		*GetNameSafe(this),
-		IsTemplate(),
-		GetWorld() ? TEXT("VALID") : TEXT("NULL"));
-	CS_LOG("SET REGEN %s | ptr=%p | owner=%s", bIsInRegen ? TEXT("TRUE") : TEXT("FALSE"), this, *GetOwner()->GetName());
+	//CS_LOG("OWNER VALID CHECK: %s | IsTemplate=%d | World=%s", *GetNameSafe(this), IsTemplate(), GetWorld() ? TEXT("VALID") : TEXT("NULL"));
+	//CS_LOG("SET REGEN %s | ptr=%p | owner=%s", bIsInRegen ? TEXT("TRUE") : TEXT("FALSE"), this, *GetOwner()->GetName());
 	OnIsInRegenChanged.Broadcast(bIsInRegen);
 }
 
 void UResourceComponent::ResourceTick()
 {
-	CS_LOG("TICK %s | REGEN ACTUAL=%s | ptr=%p | owner=%s", *StaticEnum<EResourceType>()->GetValueAsString(ResourceType), bIsInRegen ? TEXT("TRUE") : TEXT("FALSE"), this, *GetOwner()->GetName());
+	//CS_LOG("TICK %s | REGEN ACTUAL=%s | ptr=%p | owner=%s", *StaticEnum<EResourceType>()->GetValueAsString(ResourceType), bIsInRegen ? TEXT("TRUE") : TEXT("FALSE"), this, *GetOwner()->GetName());
 	
 	if (!bIsInRegen && !CanLoseAndRegenResource)
 		return;
