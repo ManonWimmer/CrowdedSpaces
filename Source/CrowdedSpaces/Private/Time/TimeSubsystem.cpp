@@ -28,11 +28,18 @@ void UTimeSubsystem::Tick(float DeltaTime)
 	CurrentMinutes = FMath::Fmod(TotalMinutes, 1440); // Modulo pour 1440 minutes pas jours
 	OnTimeChanged.Broadcast(CurrentMinutes);
 
-	if (CurrentMinutes > TimeData->MoralEventHour * 60 && LastDayMoralEvent != CurrentDay)
+	// Check AM
+	if (CurrentMinutes > TimeData->MoralEventHourAM * 60 && LastDayMoralEventAM != CurrentDay)
 	{
-		LastDayMoralEvent = CurrentDay;
-		
-		GetRandomMoralEventForDay(CurrentDay);
+		LastDayMoralEventAM = CurrentDay;
+		GetRandomMoralEventForDay(CurrentDay, ETimeType::AM);
+	}
+
+	// Check PM
+	if (CurrentMinutes > TimeData->MoralEventHourPM * 60 && LastDayMoralEventPM != CurrentDay)
+	{
+		LastDayMoralEventPM = CurrentDay;
+		GetRandomMoralEventForDay(CurrentDay, ETimeType::PM);
 	}
 }
 
@@ -129,11 +136,11 @@ void UTimeSubsystem::SetTimeUnpaused()
 	bCanChangeTime = true;
 }
 
-void UTimeSubsystem::GetRandomMoralEventForDay(int Day) const
+void UTimeSubsystem::GetRandomMoralEventForDay(const int Day, const ETimeType TimeType) const
 {
-	for (const auto& [Day, MoralEventsDaysProbabilities] : TimeData->MoralEventDaysProbabilities)
+	for (const auto& [Title, EntryDay, EntryTimeType, MoralEventsDaysProbabilities] : TimeData->MoralEventDaysProbabilities)
 	{
-		if (Day == CurrentDay)
+		if (EntryDay == Day && EntryTimeType == TimeType)
 		{
 			const TArray<FMoralEventProbabilitiesDataStruct>& Events = MoralEventsDaysProbabilities;
 

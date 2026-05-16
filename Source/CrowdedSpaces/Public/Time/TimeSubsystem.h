@@ -69,7 +69,7 @@ public:
 	UFUNCTION()
 	void SetTimePausedWithEvent(const TSubclassOf<UMoralEvent> MoralEvent = nullptr);
 
-	void GetRandomMoralEventForDay(int Day) const;
+	void GetRandomMoralEventForDay(int Day, ETimeType TimeType) const;
 
 	UFUNCTION(BlueprintCallable, Category = "Time")
 	void SetTimeUnpaused();
@@ -88,7 +88,10 @@ private:
 	int CurrentDay = 1;
 
 	UPROPERTY()
-	int LastDayMoralEvent = 0;
+	int LastDayMoralEventAM = 0;
+
+	UPROPERTY()
+	int LastDayMoralEventPM = 0;
 
 	UPROPERTY()
 	ETimeSpeedType CurrentTimeSpeed = ETimeSpeedType::Normal;
