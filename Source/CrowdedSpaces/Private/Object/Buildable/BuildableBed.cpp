@@ -1,6 +1,7 @@
 ﻿#include "Object/Buildable/BuildableBed.h"
 
 #include "Build/BuildableRegistrySubsystem.h"
+#include "Components/CapsuleComponent.h"
 
 ABuildableBed::ABuildableBed()
 {
@@ -49,6 +50,10 @@ bool ABuildableBed::StartUsingImplementation(ANPC* NPC)
 	FoodComp->ToggleResourceTimer();
 
 	NPC->bIsInSleepAnimation = true;
+
+	// Désactive collision entre NPC et Bed
+	NPC->GetCapsuleComponent()->IgnoreActorWhenMoving(this, true);
+	this->GetComponentByClass<UPrimitiveComponent>()->IgnoreActorWhenMoving(NPC, true);
 	
 	return true;
 }
@@ -68,6 +73,10 @@ bool ABuildableBed::StopUsingImplementation(ANPC* NPC)
 	FoodComp->ToggleResourceTimer();
 
 	NPC->bIsInSleepAnimation = false;
+	
+	// Réactive collision
+	NPC->GetCapsuleComponent()->IgnoreActorWhenMoving(this, false);
+	this->GetComponentByClass<UPrimitiveComponent>()->IgnoreActorWhenMoving(NPC, false);
 	
 	return true;
 }

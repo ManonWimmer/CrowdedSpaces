@@ -242,6 +242,10 @@ public:
 	
 	void StartSmoothRotation(const FRotator& NewRotation);
 	void SmoothRotate(float DeltaTime);
+
+	// Sleep
+	UFUNCTION(BlueprintCallable)
+	void SetSleepCapsuleSize(bool bSleeping) const;
 	
 protected:
 	virtual void BeginPlay() override;
@@ -360,6 +364,13 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<APlayerController> PlayerController{nullptr};
+
+	// Capsule / Sleep
+	UPROPERTY(EditAnywhere, Category = "Capsule")
+	float DefaultCapsuleHalfHeight = 88.f;
+
+	UPROPERTY(EditAnywhere, Category = "Capsule")
+	float SleepCapsuleHalfHeight = 30.f;
 	
 	// Selectable
 public:

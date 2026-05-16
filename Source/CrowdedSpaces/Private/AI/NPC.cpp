@@ -11,6 +11,7 @@
 #include "Object/Buildable/BuildableTrainingStation.h"
 #include "Camera/FreeCameraPawn.h"
 #include "Camera/CameraComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "Components/SpotLightComponent.h"
 #include "Debug/CrowdedSpacesLogs.h"
@@ -371,6 +372,7 @@ void ANPC::SetCurrentAction(const ENPCActionType NewAction)
 	FString ActionString = StaticEnum<ENPCActionType>()->GetDisplayNameTextByValue(static_cast<int64>(CurrentAction)).ToString();
 	
 	OnCurrentActionChanged.Broadcast(CurrentAction);
+	SetSleepCapsuleSize(NewAction == ENPCActionType::Sleep);
 }
 
 void ANPC::SetCurrentObject(AUsableObject* NewObject)
@@ -761,5 +763,16 @@ void ANPC::SmoothRotate(const float DeltaTime)
 
 		GetCharacterMovement()->bOrientRotationToMovement = true;
 	}
+}
+#pragma endregion
+
+#pragma region Sleep
+void ANPC::SetSleepCapsuleSize(const bool bSleeping) const
+{
+	const TObjectPtr<UCapsuleComponent> Capsule = GetCapsuleComponent();
+	if (!Capsule)
+		return;
+
+	Capsule->SetCapsuleHalfHeight(bSleeping ? SleepCapsuleHalfHeight : DefaultCapsuleHalfHeight);
 }
 #pragma endregion
