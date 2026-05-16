@@ -11,6 +11,7 @@ UBTTask_UseBuildableObject::UBTTask_UseBuildableObject(FObjectInitializer const&
 	NodeName = "Use Buildable Object";
 
 	bNotifyTick = true;
+	bCreateNodeInstance = true;
 }
 
 EBTNodeResult::Type UBTTask_UseBuildableObject::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)

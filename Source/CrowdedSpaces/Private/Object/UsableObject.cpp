@@ -299,8 +299,8 @@ void AUsableObject::StartUsing(ANPC* NPC)
 
 void AUsableObject::StopUsing(ANPC* NPC)
 {
-	CS_LOG("StopUsing NPC: %s | Current UsingNPC: %s",
-		*GetNameSafe(NPC));
+	CS_LOG("StopUsing NPC: %s | Has Using NPCs: %s",
+		*GetNameSafe(NPC), UsingNPCs.Num() > 0 ? "true" : "false");
 
 	ReleaseSlot(NPC);
 	StopUsingImplementation(NPC);

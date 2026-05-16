@@ -1,6 +1,7 @@
 ﻿#include "Action/Actions/Action_NPC_StopAction.h"
 
 #include "AI/NPC.h"
+#include "Debug/CrowdedSpacesLogs.h"
 
 UAction_NPC_StopAction::UAction_NPC_StopAction()
 {
@@ -26,6 +27,8 @@ void UAction_NPC_StopAction::Execute_Implementation(AActor* Instigator)
 	const TObjectPtr<ANPC> NPC = Cast<ANPC>(Instigator);
 	if (!NPC)
 		return;
+
+	CS_LOG_WARNING("NPC StopAction: %s", *NPC->GetName());
 	
 	NPC->StopAction();
 }
