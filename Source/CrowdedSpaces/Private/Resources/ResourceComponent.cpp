@@ -53,7 +53,8 @@ void UResourceComponent::BeginPlay()
 		return;
 	}
 
-	Resource = MaxResource;
+	if (bSetMaxResourceAtStart)
+		Resource = MaxResource;
 	
 	GameInstance = World->GetGameInstance<UCrowdedGameInstance>();
 

@@ -43,10 +43,10 @@ public:
 
 	// Get value
 	UFUNCTION(BlueprintCallable)
-	float  GetResource() const { return Resource; }
+	float GetResource() const { return Resource; }
 
 	UFUNCTION(BlueprintCallable)
-	float  GetMaxResource() const { return MaxResource; }
+	float GetMaxResource() const { return MaxResource; }
 
 	// Check value
 	UFUNCTION(BlueprintCallable)
@@ -110,6 +110,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float MaxResource = 0;
+
+	UPROPERTY(EditAnywhere)
+	bool bSetMaxResourceAtStart = true;
 
 	UPROPERTY(EditAnywhere)
 	bool bIsInRegen = false;
