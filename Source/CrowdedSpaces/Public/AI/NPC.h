@@ -233,6 +233,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsInTrainAnimation = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsInDieAnimation = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float DeathAnimationDuration = 2;
+
 	// Rotation
 	bool bSmoothRotate = false;
 	FRotator TargetRotation;

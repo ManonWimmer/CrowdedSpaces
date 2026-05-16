@@ -318,21 +318,34 @@ float ANPC::GetCurrentLevelNeededExp(const ETrainingSkillType TrainingSkillTypeT
 #pragma region Death
 void ANPC::Die()
 {
-	// todo: animation ?
-
 	BO_LOG("Npc death, food : %f, energy : %f", FoodComponent->GetResource(), EnergyComponent->GetResource());
-	
-	ACrowdedGameMode* GameMode = GetWorld()->GetAuthGameMode<ACrowdedGameMode>();
-	if (!GameMode)
-		return;
 
-	GameMode->UnregisterNPC(this);
-
-	// Object
-	if (CurrentObject)
-		CurrentObject->Release(this);
+	bIsInEatAnimation = false;
+	bIsInExtinguishAnimation = false;
+	bIsInHealAnimation = false;
+	bIsInSleepAnimation = false;
+	bIsInTrainAnimation = false;
+	bIsInWorkAnimation = false;
 	
-	Destroy();
+	bIsInDieAnimation = true;
+	
+	FocusCameraOnNPC();
+
+	// Kill after animation delay
+	FTimerHandle DeathTimer;
+	GetWorldTimerManager().SetTimer(DeathTimer, [this]()
+	{
+		const TObjectPtr<ACrowdedGameMode> GameMode = GetWorld()->GetAuthGameMode<ACrowdedGameMode>();
+		if (!GameMode)
+			return;
+
+		GameMode->UnregisterNPC(this);
+
+		if (CurrentObject)
+			CurrentObject->Release(this);
+        
+		Destroy();
+	}, DeathAnimationDuration, false);
 }
 #pragma endregion
 
