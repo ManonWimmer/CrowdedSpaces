@@ -1,9 +1,10 @@
 ﻿#include "AI/BTTasks/BTTask_MoveToWithReleaseSecurity.h"
 
 #include "AI/NPC.h"
-#include "Build/BuildableObject.h"
+#include "Object/UsableObject.h"
 #include "AIController.h"
 #include "AI/NPCController.h"
+#include "Build/SlotComponent.h"
 
 UBTTask_MoveToWithReleaseSecurity::UBTTask_MoveToWithReleaseSecurity(FObjectInitializer const& ObjectInitializer)
 {
@@ -20,7 +21,11 @@ EBTNodeResult::Type UBTTask_MoveToWithReleaseSecurity::ExecuteTask(UBehaviorTree
     	if (!NPC)
     		return EBTNodeResult::Failed;
 
-	NPC->SetCurrentAction(NPCMoveAction);
+	const AUsableObject* CurrentObject = NPC->GetCurrentObject();
+	if (!CurrentObject)
+		return EBTNodeResult::Failed;
+	
+	NPC->SetCurrentAction(CurrentObject->GetNPCMoveAction());
     		
 	return Super::ExecuteTask(OwnerComp, NodeMemory);
 }
@@ -37,20 +42,38 @@ void UBTTask_MoveToWithReleaseSecurity::OnTaskFinished(UBehaviorTreeComponent& O
 	if (TaskResult == EBTNodeResult::Failed)
 		Cleanup(OwnerComp);
 
+	if (TaskResult == EBTNodeResult::Succeeded)
+	{
+		if (NPC)
+		{
+			const TObjectPtr<AUsableObject> CurrentObject = NPC->GetCurrentObject();
+			const TObjectPtr<USlotComponent> Slot = CurrentObject->GetNPCSlot(NPC);
+			if (Slot)
+			{
+				const FRotator TargetRotation = Slot->GetComponentRotation();
+
+				NPC->StartSmoothRotation(TargetRotation);
+			}
+		}
+	}
+
 	Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);
 }
 
-void UBTTask_MoveToWithReleaseSecurity::Cleanup(const UBehaviorTreeComponent& OwnerComp)
+void UBTTask_MoveToWithReleaseSecurity::Cleanup(const UBehaviorTreeComponent& OwnerComp) const
 {
 	if (!NPC)
 		return;
 
 	NPC->SetCurrentAction(ENPCActionType::Idle);
 
-	ABuildableObject* Object = NPC->GetCurrentObject();
-	if (!Object)
+	AUsableObject* CurrentObject = NPC->GetCurrentObject();
+	if (!CurrentObject)
 		return;
 
 	// Release on failed move to
-	Object->Release(NPC);
+	CurrentObject->Release(NPC);
+	
+	if (NPC->GetActionObject() == CurrentObject)
+		NPC->StopAction();
 }

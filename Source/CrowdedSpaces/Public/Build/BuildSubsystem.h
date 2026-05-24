@@ -5,6 +5,7 @@
 #include "RoomEditMode.h"
 #include "Game/GameModeState.h"
 #include "Grid/GridRoomType.h"
+#include "Object/ObjectType.h"
 #include "BuildSubsystem.generated.h"
 
 class UBuildableRegistrySubsystem;
@@ -14,7 +15,7 @@ class AGhostObject;
 struct FGridRoom;
 class UBuildRoomData;
 class UBuildData;
-class ABuildableObject;
+class AUsableObject;
 
 USTRUCT()
 struct FTMapArrayObjects
@@ -23,7 +24,7 @@ struct FTMapArrayObjects
 
 public:
 	UPROPERTY()
-	TArray<ABuildableObject*> Entries;
+	TArray<AUsableObject*> Entries;
 };
 
 class AGridActor;
@@ -31,8 +32,7 @@ class UResourceComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeselected);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRoomDestroyed, int, RoomId);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnRoomCreated, int, RoomId, EGridRoomType, RoomType);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnRoomUpdated, int, RoomId, EGridRoomType, RoomType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRoomsRecomputed);
 
 UCLASS()
 class CROWDEDSPACES_API UBuildSubsystem : public UTickableWorldSubsystem
@@ -65,7 +65,13 @@ public:
 	void PlaceObject();
 
 	UFUNCTION()
-	void RemoveObject(const ABuildableObject* Object) const;
+	void RemoveObject(const AUsableObject* Object) const;
+
+	UFUNCTION(BlueprintCallable)
+	float GetObjectRepairCost(const AUsableObject* Object) const;
+
+	UFUNCTION(BlueprintCallable)
+	void RepairObject(const AUsableObject* Object) const;
 	
 	UFUNCTION()
 	void LeftClicked();
@@ -77,7 +83,7 @@ public:
 	void PlaceRoom();
 
 	UFUNCTION()
-	void SetBuildData(const TArray<UBuildData*>& NewBuildData) { BuildDataObjects = NewBuildData; }
+	void SetBuildData(const TArray<UBuildData*>& NewBuildData);
 
 	UFUNCTION()
 	void SetBuildRoomData(const TArray<UBuildRoomData*>& NewBuildRoomData);
@@ -129,7 +135,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool IsRoomUnlocked(const EGridRoomType RoomType) const;
 
-	void GetObjectsToBeDestroyed(TArray<ABuildableObject*>& OutObjects) const;
+	UFUNCTION(BlueprintCallable)
+	bool IsObjectUnlocked(const EObjectType ObjectType) const;
+
+	void GetObjectsToBeDestroyed(TArray<AUsableObject*>& OutObjects) const;
 
 	UFUNCTION()
 	void OnRoomActiveStateChanged(int RoomId);
@@ -143,10 +152,7 @@ public:
 	FOnRoomDestroyed OnRoomDestroyed;
 
 	UPROPERTY(BlueprintAssignable)
-	FOnRoomCreated OnRoomCreated;
-
-	UPROPERTY(BlueprintAssignable)
-	FOnRoomUpdated OnRoomUpdated;
+	FOnRoomsRecomputed OnRoomsRecomputed;
 
 	static constexpr int InvalidRoomId = -1;
 
@@ -178,6 +184,9 @@ private:
 
 	UPROPERTY()
 	TMap<EGridRoomType, bool> UnlockedRooms;
+	
+	UPROPERTY()
+	TMap<EObjectType, bool> UnlockedObjects;
 
 	UPROPERTY()
 	TArray<TObjectPtr<UBuildRoomData>> BuildDataRooms; // Sent by game state

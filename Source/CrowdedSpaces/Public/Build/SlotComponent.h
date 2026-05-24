@@ -22,10 +22,10 @@ public:
 	bool bIsOccupied = false;
 
 	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<ANPC> OccupyingNPC;
+	TObjectPtr<ANPC> OccupyingNPC{nullptr};
 
 	UPROPERTY()
-	UMaterialInstanceDynamic* MID;
+	TObjectPtr<UMaterialInstanceDynamic> MID{nullptr};
 
 	bool bOccupied = false;
 	
@@ -35,5 +35,5 @@ public:
 	bool IsFree() const { return !bIsOccupied; }
 
 private:
-	void UpdateVisual();
+	void UpdateVisual() const;
 };

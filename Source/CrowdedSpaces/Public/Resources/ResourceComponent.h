@@ -8,6 +8,8 @@
 class UCrowdedGameInstance;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnResourceFull); 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnResourceChanged, int32, Value); 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnResourceAdded); 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnResourceRemoved); 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxResourceChanged, int32, Value); 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIsInRegenChanged, bool, Value);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNoMoreResource); 
@@ -41,10 +43,10 @@ public:
 
 	// Get value
 	UFUNCTION(BlueprintCallable)
-	float  GetResource() const { return Resource; }
+	float GetResource() const { return Resource; }
 
 	UFUNCTION(BlueprintCallable)
-	float  GetMaxResource() const { return MaxResource; }
+	float GetMaxResource() const { return MaxResource; }
 
 	// Check value
 	UFUNCTION(BlueprintCallable)
@@ -73,12 +75,24 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool GetIsInRegen() const { return bIsInRegen; }
 
+	UFUNCTION(BlueprintCallable)
+	void SetResourceRegenPerTick(const float NewRegen) { ResourceRegenPerTick = NewRegen; }
+
+	UFUNCTION(BlueprintCallable)
+	void SetResourceLossPerTick(const float NewRegen) { ResourceLossPerTick = NewRegen; }
+
 	// Delegates
 	UPROPERTY(BlueprintAssignable)
 	FOnResourceFull OnResourceFull;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnResourceChanged OnResourceChanged;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnResourceAdded OnResourceAdded;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnResourceRemoved OnResourceRemoved;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnIsInRegenChanged OnIsInRegenChanged;
@@ -96,6 +110,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float MaxResource = 0;
+
+	UPROPERTY(EditAnywhere)
+	bool bSetMaxResourceAtStart = true;
 
 	UPROPERTY(EditAnywhere)
 	bool bIsInRegen = false;

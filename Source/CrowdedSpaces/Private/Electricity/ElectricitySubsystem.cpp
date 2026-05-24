@@ -66,7 +66,7 @@ void UElectricitySubsystem::OnTimeChanged(const float NewTime)
 	}
 	
 	// Objects
-	for (TWeakObjectPtr<ABuildableObject> Object : BuildableRegistrySubsystem->BuildableObjects) 
+	for (TWeakObjectPtr<AUsableObject> Object : BuildableRegistrySubsystem->BuildableObjects) 
 	{
 		if (!Object.IsValid())
 			continue;
@@ -119,7 +119,7 @@ void UElectricitySubsystem::ChangeRoomActiveState(const int RoomId) const
 	OnRoomActiveStateChanged.Broadcast(RoomId);
 
 	// Activate / deactivate room objects
-	for (TWeakObjectPtr<ABuildableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
+	for (TWeakObjectPtr<AUsableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
 	{
 		if (!Object.IsValid())
 			continue;

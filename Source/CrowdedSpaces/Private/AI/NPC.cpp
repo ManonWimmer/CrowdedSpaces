@@ -5,22 +5,26 @@
 #include "AI/NameGeneratorSubsystem.h"
 #include "AI/NPCController.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "Build/BuildableObject.h"
+#include "Object/UsableObject.h"
 #include "Build/SlotComponent.h"
-#include "Build/Buildable/BuildableGenerator.h"
-#include "Build/Buildable/BuildableTrainingStation.h"
+#include "Object/Buildable/BuildableGenerator.h"
+#include "Object/Buildable/BuildableTrainingStation.h"
 #include "Camera/FreeCameraPawn.h"
 #include "Camera/CameraComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "Components/SpotLightComponent.h"
+#include "Debug/CrowdedSpacesLogs.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Game/CrowdedGameMode.h"
 #include "Game/CrowdedGameState.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Training/TrainingData.h"
 #include "Training/TrainingSubsystem.h"
-#include "UI/Widgets/FoodBarWidget.h"
-#include "UI/Widgets/NPCActionWidget.h"
+#include "UI/UIUtils.h"
+#include "UI/Widgets/World/FoodBarWidget.h"
+#include "UI/Widgets/World/NPCActionWidget.h"
 #include "UI/Widgets/Selection/NPCNameWidget.h"
 
 #define BO_LOG(Format, ...) UE_LOG(LogTemp, Warning, TEXT("[BuildableObject:%s] " Format), *GetNameSafe(this), ##__VA_ARGS__)
@@ -31,7 +35,6 @@ ANPC::ANPC()
 	FoodComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("FoodComponent"));
 	FoodComponent->SetType(EResourceType::Food);
 	FoodComponent->SetCanLoseAndRegenResource(true);
-	ResourceMap.Add(EResourceType::Food, FoodComponent);
 	
 	NPCNameWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("NPCNameWidget"));
 	NPCNameWidget->SetupAttachment(GetMesh());
@@ -43,7 +46,11 @@ ANPC::ANPC()
 	EnergyComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("EnergyComponent"));
 	EnergyComponent->SetType(EResourceType::Energy);
 	EnergyComponent->SetCanLoseAndRegenResource(true);
-	ResourceMap.Add(EResourceType::Energy, EnergyComponent);
+
+	// Health
+	HealthComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("HealthComponent"));
+	HealthComponent->SetType(EResourceType::Health);
+	HealthComponent->SetCanLoseAndRegenResource(false);
 
 	// Selectable
 	SelectionType = ESelectionType::NPC;
@@ -74,12 +81,20 @@ ANPC::ANPC()
 	PortraitLight->SetMobility(EComponentMobility::Movable);
 }
 
+void ANPC::OnNPCSelected_Implementation()
+{
+}
+
+void ANPC::OnNPCDeselected_Implementation()
+{
+}
+
 void ANPC::BeginPlay()
 {
 	Super::BeginPlay();
 
 	// Camera
-	const APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	PlayerController = GetWorld()->GetFirstPlayerController();
 	if (!PlayerController) return;
 
 	FreeCameraPawn = Cast<AFreeCameraPawn>(PlayerController->GetPawn());
@@ -87,10 +102,15 @@ void ANPC::BeginPlay()
 
 	CameraComponent = FreeCameraPawn->GetCameraComponent();
 	if (!CameraComponent) return;
+
+	ControllerNPC = Cast<ANPCController>(GetController());
 	
 	// Die
-	FoodComponent->OnNoMoreResource.AddDynamic(this, &ANPC::Die);
-	EnergyComponent->OnNoMoreResource.AddDynamic(this, &ANPC::Die);
+	FoodComponent->OnNoMoreResource.AddDynamic(this, &ANPC::OnDead);
+	EnergyComponent->OnNoMoreResource.AddDynamic(this, &ANPC::OnDead);
+	HealthComponent->OnNoMoreResource.AddDynamic(this, &ANPC::OnDead);
+	HealthComponent->OnResourceAdded.AddDynamic(this, &ANPC::OnHealed);
+	HealthComponent->OnResourceRemoved.AddDynamic(this, &ANPC::OnDamaged);
 
 	ACrowdedGameMode* GameMode = GetWorld()->GetAuthGameMode<ACrowdedGameMode>();
 	if (!GameMode)
@@ -123,7 +143,7 @@ void ANPC::BeginPlay()
 	BodyMaterialInstance = MeshComp->CreateAndSetMaterialInstanceDynamic(0);
 	OtherMaterialInstance = MeshComp->CreateAndSetMaterialInstanceDynamic(1);
 
-	const FLinearColor RandomColor = GetRandomColor();
+	RandomColor = GetRandomColor();
 	
 	if (BodyMaterialInstance)
 	{
@@ -151,7 +171,6 @@ void ANPC::BeginPlay()
 	NPCActionWidgetPtr->Init();
 
 	// Actions
-	ANPCController* ControllerNPC = Cast<ANPCController>(GetController());
 	if (!ControllerNPC)
 	return;
 
@@ -167,8 +186,11 @@ void ANPC::BeginPlay()
 
 void ANPC::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	FoodComponent->OnNoMoreResource.RemoveDynamic(this, &ANPC::Die);
-	EnergyComponent->OnNoMoreResource.RemoveDynamic(this, &ANPC::Die);
+	FoodComponent->OnNoMoreResource.RemoveDynamic(this, &ANPC::OnDead);
+	EnergyComponent->OnNoMoreResource.RemoveDynamic(this, &ANPC::OnDead);
+	HealthComponent->OnNoMoreResource.RemoveDynamic(this, &ANPC::OnDead);
+	HealthComponent->OnResourceAdded.RemoveDynamic(this, &ANPC::OnHealed);
+	HealthComponent->OnResourceRemoved.RemoveDynamic(this, &ANPC::OnDamaged);
 	
 	Super::EndPlay(EndPlayReason);
 }
@@ -177,25 +199,11 @@ void ANPC::Tick(const float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	// Widgets world look at camera
-	if (!NPCNameWidget || !NPCActionWidget)
-		return;
+	FUIUtils::RotateComponentToCameraYaw(PlayerController, NPCNameWidget);
+	FUIUtils::RotateComponentToCameraYaw(PlayerController, NPCActionWidget);
 
-	if (!CameraComponent)
-		return;
-
-	const FVector CameraLocation = CameraComponent->GetComponentLocation();
-	const FVector NPCNameWidgetLocation = NPCNameWidget->GetComponentLocation();
-	const FVector NPCActionWidgetLocation = NPCActionWidget->GetComponentLocation();
-
-	const FRotator LookAtNPCName = UKismetMathLibrary::FindLookAtRotation(NPCNameWidgetLocation, CameraLocation);
-	const FRotator LookAtNPCAction = UKismetMathLibrary::FindLookAtRotation(NPCActionWidgetLocation, CameraLocation);
-	
-	const FRotator YawOnlyNPCName(0.f, LookAtNPCName.Yaw, 0.f);
-	const FRotator YawOnlyNPCAction(0.f, LookAtNPCAction.Yaw, 0.f);
-
-	NPCNameWidget->SetWorldRotation(YawOnlyNPCName);
-	NPCActionWidget->SetWorldRotation(YawOnlyNPCAction);
+	if (bSmoothRotate)
+		SmoothRotate(DeltaSeconds);
 }
 
 #pragma region Training
@@ -241,11 +249,11 @@ void ANPC::AddTrainingExp(const float AddExp)
 				if (FoodProductionMultiplier == MaxMultipliersLevel) 
 					break;
 				
-				TrainingSkillsExp[ETrainingSkillType::FoodProduction] += AddExp;
+				TrainingSkillsExp[ETrainingSkillType::ElectricityProduction] += AddExp;
 
-				if (TrainingSkillsExp[ETrainingSkillType::FoodProduction] > CurrentLevelExpNeeded)
+				if (TrainingSkillsExp[ETrainingSkillType::ElectricityProduction] > CurrentLevelExpNeeded)
 				{
-					TrainingSkillsExp[ETrainingSkillType::FoodProduction] = 0;
+					TrainingSkillsExp[ETrainingSkillType::ElectricityProduction] = 0;
 					FoodProductionMultiplier += 1;
 				}
 				break;
@@ -310,30 +318,52 @@ float ANPC::GetCurrentLevelNeededExp(const ETrainingSkillType TrainingSkillTypeT
 #pragma region Death
 void ANPC::Die()
 {
-	// todo: animation ?
-
 	BO_LOG("Npc death, food : %f, energy : %f", FoodComponent->GetResource(), EnergyComponent->GetResource());
-	
-	ACrowdedGameMode* GameMode = GetWorld()->GetAuthGameMode<ACrowdedGameMode>();
-	if (!GameMode)
-		return;
 
-	GameMode->UnregisterNPC(this);
-
-	// Object
-	if (CurrentObject)
-		CurrentObject->Release(this);
+	bIsInEatAnimation = false;
+	bIsInExtinguishAnimation = false;
+	bIsInHealAnimation = false;
+	bIsInSleepAnimation = false;
+	bIsInTrainAnimation = false;
+	bIsInWorkAnimation = false;
 	
-	Destroy();
+	bIsInDieAnimation = true;
+	
+	FocusCameraOnNPC();
+
+	// Kill after animation delay
+	FTimerHandle DeathTimer;
+	GetWorldTimerManager().SetTimer(DeathTimer, [this]()
+	{
+		const TObjectPtr<ACrowdedGameMode> GameMode = GetWorld()->GetAuthGameMode<ACrowdedGameMode>();
+		if (!GameMode)
+			return;
+
+		GameMode->UnregisterNPC(this);
+
+		if (CurrentObject)
+			CurrentObject->Release(this);
+        
+		Destroy();
+	}, DeathAnimationDuration, false);
 }
 #pragma endregion
 
 #pragma region Resources
 UResourceComponent* ANPC::GetResourceComponentByType(const EResourceType Type) const
 {
-	if (const TObjectPtr<UResourceComponent>* Found = ResourceMap.Find(Type))
+	// Map qui renvoyait pas bon pour le health component...
+	
+	switch (Type)
 	{
-		return Found->Get();
+	case EResourceType::Food:
+		return FoodComponent;
+	case EResourceType::Energy:
+		return EnergyComponent;
+	case EResourceType::Health:
+		return HealthComponent;
+	default:
+		return nullptr;
 	}
 
 	return nullptr;
@@ -355,9 +385,10 @@ void ANPC::SetCurrentAction(const ENPCActionType NewAction)
 	FString ActionString = StaticEnum<ENPCActionType>()->GetDisplayNameTextByValue(static_cast<int64>(CurrentAction)).ToString();
 	
 	OnCurrentActionChanged.Broadcast(CurrentAction);
+	SetSleepCapsuleSize(NewAction == ENPCActionType::Sleep);
 }
 
-void ANPC::SetCurrentObject(ABuildableObject* NewObject)
+void ANPC::SetCurrentObject(AUsableObject* NewObject)
 {
 	CurrentObject = NewObject;
 }
@@ -396,12 +427,11 @@ void ANPC::CancelCurrentUse()
 {
 	if (!Blackboard)
 		return;
-
-	ANPCController* ControllerNPC = Cast<ANPCController>(GetController());
+	
 	if (!ControllerNPC)
 		return;
 	
-	if (const TObjectPtr<ABuildableObject> TargetObject = Cast<ABuildableObject>(Blackboard->GetValueAsObject("TargetObject")); TargetObject && TargetObject->GetObjectType() == EObjectType::Generator)
+	if (const TObjectPtr<AUsableObject> TargetObject = Cast<AUsableObject>(Blackboard->GetValueAsObject("TargetObject")); TargetObject && TargetObject->GetObjectType() == EObjectType::Generator)
 	{
 		if (UBehaviorTreeComponent* BTComp = Cast<UBehaviorTreeComponent>(ControllerNPC->GetBrainComponent()))
 			BTComp->RestartTree();
@@ -556,7 +586,7 @@ void ANPC::CapturePortrait() const
 	}
 	
 	Clone->SetRenderCustomDepth(false);
-	Clone->SetOverlayMaterial(nullptr);
+	//Clone->SetOverlayMaterial(nullptr);
 	Clone->CastShadow = false;
 	
 	PortraitCapture->ShowOnlyComponents.Empty();
@@ -593,7 +623,7 @@ void ANPC::SetupCapture()
 	Flags.SetTranslucency(true);
 	Flags.SetSeparateTranslucency(true);
 	
-	PortraitRenderTarget = NewObject<UTextureRenderTarget2D>();
+	PortraitRenderTarget = NewObject<UTextureRenderTarget2D>(this);
 
 	PortraitRenderTarget->InitAutoFormat(512, 512);
 	PortraitRenderTarget->ClearColor = FLinearColor(0,0,0,0);
@@ -607,111 +637,70 @@ void ANPC::SetupCapture()
 }
 #pragma endregion 
 
-#pragma region Generator & Training Station
-void ANPC::SetGenerator(ABuildableGenerator* Generator)
+#pragma region Action Object
+void ANPC::SetActionObject(AUsableObject* Object)
 {
 	if (!Blackboard)
 		return;
 	
-	if (Generator != nullptr)
-	{
-		USlotComponent* Slot = Generator->GetNearestFreeSlot(GetActorLocation());
-		if (!Slot)
-			return;
-		
-		Blackboard->SetValueAsObject("Generator", Generator);
-		Blackboard->SetValueAsObject("GeneratorSlot", Slot);
-		Blackboard->SetValueAsVector("GeneratorLocation", Slot->GetComponentLocation());
-
-		FocusCameraOnGenerator();
-	}
-	else
-	{
-		Blackboard->SetValueAsObject("Generator", nullptr);
-		Blackboard->SetValueAsObject("GeneratorSlot", nullptr);
-		Blackboard->SetValueAsVector("GeneratorLocation", FVector::Zero());
-	}
-
-	OnGeneratorChanged.Broadcast();
-}
-
-void ANPC::SetTrainingStation(ABuildableTrainingStation* TrainingStation)
-{
-	if (!Blackboard)
+	if (!Object)
 		return;
+
+	const TObjectPtr<USlotComponent> Slot = Object->GetNearestFreeAndWalkableSlot(this, GetActorLocation());
+	if (!Slot)
+		return;
+
+	if (HasActionObject())
+	{
+		StopAction();
+		if (UBehaviorTreeComponent* BTComp = Cast<UBehaviorTreeComponent>(ControllerNPC->GetBrainComponent()))
+			BTComp->RestartTree();
+	}
 	
-	if (TrainingStation != nullptr)
-	{
-		USlotComponent* Slot = TrainingStation->GetNearestFreeSlot(GetActorLocation());
-		if (!Slot)
-			return;
-		
-		Blackboard->SetValueAsObject("TrainingStation", TrainingStation);
-		Blackboard->SetValueAsObject("TrainingStationSlot", Slot);
-		Blackboard->SetValueAsVector("TrainingStationLocation", Slot->GetComponentLocation());
+	Blackboard->SetValueAsObject("ActionObject", Object);
+	Blackboard->SetValueAsObject("ActionObjectSlot", Slot);
+	Blackboard->SetValueAsVector("ActionObjectLocation", Slot->GetComponentLocation());
 
-		FocusCameraOnTrainingStation();
-	}
-	else
-	{
-		Blackboard->SetValueAsObject("TrainingStation", nullptr);
-		Blackboard->SetValueAsObject("TrainingStationSlot", nullptr);
-		Blackboard->SetValueAsVector("TrainingStationLocation", FVector::Zero());
-	}
-
-	OnTrainingStationChanged.Broadcast();
+	FocusCameraOnActionObject();
+	
+	OnActionObjectChanged.Broadcast();
 }
 
-void ANPC::StopAction()
+void ANPC::StopAction() const
 {
-	SetGenerator(nullptr);
-	SetTrainingStation(nullptr);
+	CS_LOG_WARNING("Stop action behavior tree reset");
+	
+	Blackboard->SetValueAsObject("ActionObject", nullptr);
+	Blackboard->SetValueAsObject("ActionObjectSlot", nullptr);
+	Blackboard->SetValueAsVector("ActionObjectLocation", FVector::Zero());
+
+	FocusCameraOnNPC();
+	
+	OnActionObjectChanged.Broadcast();
 }
 
-ABuildableGenerator* ANPC::GetGenerator() const
+AUsableObject* ANPC::GetActionObject() const
 {
 	if (!Blackboard)
 		return nullptr;
 	
-	return Cast<ABuildableGenerator>(Blackboard->GetValueAsObject("Generator"));
+	return Cast<AUsableObject>(Blackboard->GetValueAsObject("ActionObject"));
 }
 
-bool ANPC::HasGenerator() const
+bool ANPC::HasActionObject() const
 {
-	return GetGenerator() != nullptr;
-}
-
-ABuildableTrainingStation* ANPC::GetTrainingStation() const
-{
-	if (!Blackboard)
-		return nullptr;
-	
-	return Cast<ABuildableTrainingStation>(Blackboard->GetValueAsObject("TrainingStation"));
-}
-
-bool ANPC::HasTrainingStation() const
-{
-	return GetTrainingStation() != nullptr;
+	return GetActionObject() != nullptr;
 }
 #pragma endregion
 
 #pragma region Camera
-void ANPC::FocusCameraOnGenerator() const
+void ANPC::FocusCameraOnActionObject() const
 {
-	const ABuildableGenerator* Generator = GetGenerator();
-	if (!Generator)
+	const AUsableObject* ActionObject = GetActionObject();
+	if (!ActionObject)
 		return;
 
-	FreeCameraPawn->FocusOnActor(Generator);
-}
-
-void ANPC::FocusCameraOnTrainingStation() const
-{
-	const ABuildableTrainingStation* TrainingStation = GetTrainingStation();
-	if (!TrainingStation)
-		return;
-
-	FreeCameraPawn->FocusOnActor(TrainingStation);
+	FreeCameraPawn->FocusOnActor(ActionObject);
 }
 
 void ANPC::FocusCameraOnNPC() const
@@ -729,5 +718,74 @@ bool ANPC::HasAutoNeeds() const
 void ANPC::SetAutoNeeds(const bool bNewAutoNeeds)
 {
 	bAutoNeeds = bNewAutoNeeds;
+}
+#pragma endregion
+
+#pragma region Health
+void ANPC::OnDamaged()
+{
+	OnDamagedFeedback();
+
+	// Flee
+	StopAction();
+	Blackboard->SetValueAsBool("bIsFleeing", true);
+}
+
+void ANPC::OnHealed()
+{
+	OnHealedFeedback();
+}
+
+void ANPC::OnDead()
+{
+	OnDeadFeedback();
+	Die(); // mettre die dans feedback bp plus tard pour play sound, vfx etc sans null ref si il est direct destroy
+}
+
+void ANPC::OnHealedFeedback_Implementation()
+{
+}
+
+void ANPC::OnDamagedFeedback_Implementation()
+{
+}
+
+void ANPC::OnDeadFeedback_Implementation()
+{
+}
+#pragma endregion
+
+#pragma region Rotation
+void ANPC::StartSmoothRotation(const FRotator& NewRotation)
+{
+	TargetRotation = NewRotation;
+	bSmoothRotate = true;
+
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+}
+
+void ANPC::SmoothRotate(const float DeltaTime)
+{
+	const FRotator NewRotation = FMath::RInterpTo(GetActorRotation(), TargetRotation, DeltaTime, RotationSpeed);
+
+	SetActorRotation(NewRotation);
+
+	if (GetActorRotation().Equals(TargetRotation, 1.f))
+	{
+		bSmoothRotate = false;
+
+		GetCharacterMovement()->bOrientRotationToMovement = true;
+	}
+}
+#pragma endregion
+
+#pragma region Sleep
+void ANPC::SetSleepCapsuleSize(const bool bSleeping) const
+{
+	const TObjectPtr<UCapsuleComponent> Capsule = GetCapsuleComponent();
+	if (!Capsule)
+		return;
+
+	Capsule->SetCapsuleHalfHeight(bSleeping ? SleepCapsuleHalfHeight : DefaultCapsuleHalfHeight);
 }
 #pragma endregion

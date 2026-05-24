@@ -96,6 +96,9 @@ public:
 	TArray<TSubclassOf<UAction>> TrainingStationActions;
 
 	UPROPERTY(EditAnywhere, Category = "Actions", meta=(AllowPrivateAccess=true))
+	TArray<TSubclassOf<UAction>> HealingStationActions;
+	
+	UPROPERTY(EditAnywhere, Category = "Actions", meta=(AllowPrivateAccess=true))
 	TArray<TSubclassOf<UAction>> FireActions;
 
 	// Fire

@@ -43,7 +43,7 @@ private:
 	UPROPERTY()
 	TObjectPtr<UBuildSubsystem> BuildSubsystem{nullptr};
 
-	float SpawnAfterTime = 5.f;
+	float SpawnAfterTime = 10.f;
 
 	float CurrentTime = 0.f;
 };

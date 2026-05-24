@@ -1,7 +1,7 @@
 ﻿#include "AI/CustomBTTask.h"
-#include "Build/BuildableObject.h"
+#include "Object/UsableObject.h"
 
-void UCustomBTTask::StartAction(ABuildableObject* Object) // Send current action to NPC, called on execute task
+void UCustomBTTask::StartAction(AUsableObject* Object) // Send current action to NPC, called on execute task
 {
 	if (!NPC)
 		return;
@@ -9,7 +9,7 @@ void UCustomBTTask::StartAction(ABuildableObject* Object) // Send current action
 	if (!Object)
 		return;
 	
-	NPC->SetCurrentAction(Object->GetNPCAction());
+	NPC->SetCurrentAction(Object->GetNPCUseAction());
 }
 
 void UCustomBTTask::StopAction()  // Send idle action to NPC, called on task finished

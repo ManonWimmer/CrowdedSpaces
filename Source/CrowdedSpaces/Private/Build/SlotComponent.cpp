@@ -12,6 +12,12 @@ void USlotComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	#if UE_BUILD_SHIPPING
+		SetVisibility(false);
+		SetHiddenInGame(true);
+		return;
+	#endif
+	
 	MID = CreateDynamicMaterialInstance(0);
 
 	UpdateVisual();
@@ -36,7 +42,7 @@ void USlotComponent::Release(ANPC* NPC)
 	UpdateVisual();
 }
 
-void USlotComponent::UpdateVisual()
+void USlotComponent::UpdateVisual() const
 {
 	if (!MID) return;
 

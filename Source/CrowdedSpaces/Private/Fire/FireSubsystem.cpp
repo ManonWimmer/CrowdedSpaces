@@ -1,8 +1,6 @@
 #include "Fire/FireSubsystem.h"
 
-#include "IContentBrowserSingleton.h"
-#include "IPropertyTable.h"
-#include "Fire/Fire.h"
+#include "Object/Events/Fire.h"
 #include "Game/CrowdedGameState.h"
 #include "Build/BuildSubsystem.h"
 #include "Grid/GridCell.h"

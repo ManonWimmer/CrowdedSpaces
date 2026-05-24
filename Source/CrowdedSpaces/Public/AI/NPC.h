@@ -8,12 +8,14 @@
 #include "Selection/Selectable.h"
 #include "NPCActionType.h"
 #include "NPCPriorityType.h"
+#include "Damage/Damageable.h"
 #include "Engine/Texture.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Production/ProductionType.h"
 #include "Training/TrainingSkillType.h"
 #include "NPC.generated.h"
 
+class ANPCController;
 class UCameraComponent;
 class AFreeCameraPawn;
 class ABuildableTrainingStation;
@@ -24,15 +26,14 @@ class UActionComponent;
 class UTrainingSubsystem;
 enum class ENPCPriorityType : uint8;
 class UBTTask_UseBuildableObject;
-class ABuildableObject;
+class AUsableObject;
 class USlotComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentActionChanged, ENPCActionType, Value); 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSkillsTrained); 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerReadyForCapture); 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNameSet); 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGeneratorChanged); 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTrainingStationChanged); 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnActionObjectChanged); 
 
 UCLASS()
 class CROWDEDSPACES_API ANPC : public ACharacter, public ISelectable
@@ -103,12 +104,21 @@ public:
 
 	static FLinearColor GetRandomColor();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FLinearColor RandomColor;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<UMaterialInstanceDynamic> BodyMaterialInstance{nullptr};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<UMaterialInstanceDynamic> OtherMaterialInstance{nullptr};
+
 	// Object
 	UFUNCTION()
-	void SetCurrentObject(ABuildableObject* NewObject);
+	void SetCurrentObject(AUsableObject* NewObject);
 	
 	UFUNCTION()
-	ABuildableObject* GetCurrentObject() const { return CurrentObject; }
+	AUsableObject* GetCurrentObject() const { return CurrentObject; }
 
 	// Training
 	UFUNCTION(BlueprintCallable, Category="AI")
@@ -150,36 +160,23 @@ public:
 	FOnPlayerReadyForCapture OnPlayerReadyForCapture;
 
 	// Actions
-	void SetGenerator(ABuildableGenerator* Generator);
-	void SetTrainingStation(ABuildableTrainingStation* TrainingStation);
+	void SetActionObject(AUsableObject* Object);
 
 	UFUNCTION(BlueprintCallable)
-	void StopAction();
-	
-	UFUNCTION(BlueprintCallable)
-	ABuildableGenerator* GetGenerator() const;
-
-	UFUNCTION(BlueprintCallable)
-	bool HasGenerator() const;
+	void StopAction() const;
 
 	UPROPERTY(BlueprintAssignable)
-	FOnGeneratorChanged OnGeneratorChanged;
+	FOnActionObjectChanged OnActionObjectChanged;
 
 	UFUNCTION(BlueprintCallable)
-	ABuildableTrainingStation* GetTrainingStation() const;
+	AUsableObject* GetActionObject() const;
 
 	UFUNCTION(BlueprintCallable)
-	bool HasTrainingStation() const;
-
-	UPROPERTY(BlueprintAssignable)
-	FOnTrainingStationChanged OnTrainingStationChanged;
+	bool HasActionObject() const;
 
 	// Camera
 	UFUNCTION(BlueprintCallable)
-	void FocusCameraOnGenerator() const;
-
-	UFUNCTION(BlueprintCallable)
-	void FocusCameraOnTrainingStation() const;
+	void FocusCameraOnActionObject() const;
 
 	UFUNCTION(BlueprintCallable)
 	void FocusCameraOnNPC() const;
@@ -190,6 +187,71 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetAutoNeeds(bool bNewAutoNeeds);
+
+	// Health
+	UFUNCTION()
+	void OnDamaged();
+	
+	UFUNCTION()
+	void OnHealed();
+	
+	UFUNCTION()
+	void OnDead();
+
+	UFUNCTION(BlueprintNativeEvent)
+	void OnDamagedFeedback();
+
+	UFUNCTION(BlueprintNativeEvent)
+	void OnHealedFeedback();
+
+	UFUNCTION(BlueprintNativeEvent)
+	void OnDeadFeedback();
+
+	// Selected
+	UFUNCTION(BlueprintNativeEvent)
+	void OnNPCSelected();
+
+	UFUNCTION(BlueprintNativeEvent)
+	void OnNPCDeselected();
+
+	// Anim bools
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsInExtinguishAnimation = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsInEatAnimation = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsInSleepAnimation = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsInHealAnimation = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsInWorkAnimation = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsInTrainAnimation = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsInDieAnimation = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float DeathAnimationDuration = 2;
+
+	// Rotation
+	bool bSmoothRotate = false;
+	FRotator TargetRotation;
+
+	UPROPERTY(EditAnywhere, Category = "Rotation")
+	float RotationSpeed = 5.f;
+	
+	void StartSmoothRotation(const FRotator& NewRotation);
+	void SmoothRotate(float DeltaTime);
+
+	// Sleep
+	UFUNCTION(BlueprintCallable)
+	void SetSleepCapsuleSize(bool bSleeping) const;
 	
 protected:
 	virtual void BeginPlay() override;
@@ -207,9 +269,9 @@ private:
 	
 	UPROPERTY()
 	TObjectPtr<UCameraComponent> CameraComponent{nullptr};
-	
+
 	UPROPERTY()
-	TMap<EResourceType, TObjectPtr<UResourceComponent>> ResourceMap;
+	TObjectPtr<ANPCController> ControllerNPC{nullptr};
 	
 	// Resources Components
 	UPROPERTY(EditAnywhere)
@@ -217,6 +279,9 @@ private:
 	
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UResourceComponent> EnergyComponent{nullptr};
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UResourceComponent> HealthComponent{nullptr};
 
 	// Work
 	UPROPERTY(EditAnywhere)
@@ -252,17 +317,10 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	ETrainingSkillType TrainingSkillType = ETrainingSkillType::MoneyProduction;
-
-	// Color
-	UPROPERTY()
-	TObjectPtr<UMaterialInstanceDynamic> BodyMaterialInstance{nullptr};
-
-	UPROPERTY()
-	TObjectPtr<UMaterialInstanceDynamic> OtherMaterialInstance{nullptr};
-
+	
 	// Object
 	UPROPERTY()
-	TObjectPtr<ABuildableObject> CurrentObject{nullptr};
+	TObjectPtr<AUsableObject> CurrentObject{nullptr};
 
 	UPROPERTY()
 	TObjectPtr<UBTTask_UseBuildableObject> CurrentUseTask{nullptr};
@@ -309,6 +367,16 @@ private:
 	// Auto needs
 	UPROPERTY()
 	bool bAutoNeeds = true;
+
+	UPROPERTY()
+	TObjectPtr<APlayerController> PlayerController{nullptr};
+
+	// Capsule / Sleep
+	UPROPERTY(EditAnywhere, Category = "Capsule")
+	float DefaultCapsuleHalfHeight = 88.f;
+
+	UPROPERTY(EditAnywhere, Category = "Capsule")
+	float SleepCapsuleHalfHeight = 30.f;
 	
 	// Selectable
 public:

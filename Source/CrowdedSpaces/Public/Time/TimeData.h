@@ -6,6 +6,13 @@
 #include "MoralEvent/MoralEvent.h"
 #include "TimeData.generated.h"
 
+UENUM(BlueprintType)
+enum class ETimeType : uint8
+{
+	AM,
+	PM
+};
+
 USTRUCT(BlueprintType)
 struct FTimeDataStruct
 {
@@ -37,9 +44,15 @@ USTRUCT(BlueprintType)
 struct FMoralEventsDaysProbabilitiesDataStruct
 {
 	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FString Title = TEXT("Day 1 AM");
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int Day = 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	ETimeType TimeType = ETimeType::AM;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TArray<FMoralEventProbabilitiesDataStruct> MoralEventsDaysProbabilities;
@@ -55,8 +68,11 @@ public:
 	TArray<FTimeDataStruct> TimeData;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float MoralEventHour;
+	float MoralEventHourAM;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float MoralEventHourPM;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (TitleProperty = "Title"))
 	TArray<FMoralEventsDaysProbabilitiesDataStruct> MoralEventDaysProbabilities;
 };

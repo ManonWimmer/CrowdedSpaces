@@ -9,7 +9,7 @@ UAction_NPC_Select::UAction_NPC_Select()
 
 bool UAction_NPC_Select::CanExecute_Implementation(AActor* Instigator) const
 {
-	const ANPC* NPC = Cast<ANPC>(Instigator);
+	const TObjectPtr<ANPC> NPC = Cast<ANPC>(Instigator);
 	if (!NPC)
 		return false;
 	
@@ -26,7 +26,7 @@ void UAction_NPC_Select::Execute_Implementation(AActor* Instigator)
 {
 	Super::Execute_Implementation(Instigator);
 
-	ANPC* NPC = Cast<ANPC>(Instigator);
+	const TObjectPtr<ANPC> NPC = Cast<ANPC>(Instigator);
 	if (!NPC)
 		return;
 	

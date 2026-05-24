@@ -45,11 +45,8 @@ public:
 	virtual TStatId GetStatId() const override;
 
 	UFUNCTION()
-	void OnRoomCreated(const int RoomId, const EGridRoomType RoomType);
+	void RefreshStorageRooms();
 
-	UFUNCTION()
-	void OnRoomUpdated(const int RoomId, const EGridRoomType RoomType);
-	
 	UFUNCTION()
 	void AddStorageRoom(const int RoomId);
 

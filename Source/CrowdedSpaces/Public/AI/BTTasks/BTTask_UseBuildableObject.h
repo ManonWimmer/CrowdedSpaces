@@ -7,7 +7,7 @@
 #include "BTTask_UseBuildableObject.generated.h"
 
 class ANPC;
-class ABuildableObject;
+class AUsableObject;
 
 UCLASS()
 class UBTTask_UseBuildableObject : public UCustomBTTask
@@ -25,10 +25,7 @@ public:
 
 protected:
 	UPROPERTY()
-	TObjectPtr<ABuildableObject> CurrentObject = nullptr;
-
-	UPROPERTY(EditAnywhere)
-	EResourceType ResourceTypeToCheck;
+	TObjectPtr<AUsableObject> CurrentObject = nullptr;
 
 	bool bHasStartedUsing = false;
 };

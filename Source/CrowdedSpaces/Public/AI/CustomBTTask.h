@@ -5,7 +5,7 @@
 #include "BehaviorTree/Tasks/BTTask_BlackboardBase.h"
 #include "CustomBTTask.generated.h"
 
-class ABuildableObject;
+class AUsableObject;
 
 UCLASS()
 class CROWDEDSPACES_API UCustomBTTask : public UBTTask_BlackboardBase
@@ -13,7 +13,7 @@ class CROWDEDSPACES_API UCustomBTTask : public UBTTask_BlackboardBase
 	GENERATED_BODY()
 
 public:
-	virtual void StartAction(ABuildableObject* Object); // Send current action to NPC, called on execute task
+	virtual void StartAction(AUsableObject* Object); // Send current action to NPC, called on execute task
 	virtual void StopAction(); // Send idle action to NPC, called on task finished
 	
 	ANPC* GetNPC() const { return NPC; }

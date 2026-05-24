@@ -204,8 +204,8 @@ void UBuildSubsystem::StartBuilding(UBuildData* BuildData)
 	CurrentGhost->SetActorHiddenInGame(false);
 
 	// Get mesh from buildable
-	TObjectPtr<ABuildableObject> const DefaultBuildable =
-		BuildData->BuildClass->GetDefaultObject<ABuildableObject>();
+	TObjectPtr<AUsableObject> const DefaultBuildable =
+		BuildData->BuildClass->GetDefaultObject<AUsableObject>();
 
 	if (!DefaultBuildable)
 		return;
@@ -321,7 +321,7 @@ void UBuildSubsystem::PlaceObject()
 	FVector SpawnLocation = CurrentGhost->GetActorLocation();
 	SpawnLocation -= CurrentBuildRotation.RotateVector(MeshOffset);;
 
-	const TObjectPtr<ABuildableObject> Placed = GetWorld()->SpawnActor<ABuildableObject>(
+	const TObjectPtr<AUsableObject> Placed = GetWorld()->SpawnActor<AUsableObject>(
 		CurrentBuildData->BuildClass,
 		SpawnLocation,
 		CurrentBuildRotation
@@ -334,7 +334,7 @@ void UBuildSubsystem::PlaceObject()
 		return;
 
 	// Default scale
-	const TObjectPtr<ABuildableObject> DefaultBuildable = CurrentBuildData->BuildClass->GetDefaultObject<ABuildableObject>();
+	const TObjectPtr<AUsableObject> DefaultBuildable = CurrentBuildData->BuildClass->GetDefaultObject<AUsableObject>();
 	Placed->GetMeshComponent()->SetRelativeScale3D(DefaultBuildable->GetMeshComponent()->GetRelativeScale3D());
 	Placed->OccupiedCells.Empty();
 	
@@ -445,8 +445,8 @@ void UBuildSubsystem::PlaceRoom()
 }
 #pragma endregion
 
-#pragma region Object / Room Destroy
-void UBuildSubsystem::RemoveObject(const ABuildableObject* Object) const
+#pragma region Object / Room Destroy & Repair
+void UBuildSubsystem::RemoveObject(const AUsableObject* Object) const
 {
 	if (!Object || !GridActor)
 		return;
@@ -462,6 +462,26 @@ void UBuildSubsystem::RemoveObject(const ABuildableObject* Object) const
 	}
 }
 
+float UBuildSubsystem::GetObjectRepairCost(const AUsableObject* Object) const
+{
+	const TObjectPtr<UResourceComponent> Health = Object->GetHealthComponent();
+	if (!Health)
+		return 0;
+
+	const int ObjectDamage = Health->GetMaxResource() - Health->GetResource();
+
+	return ObjectDamage * Object->GetBuildData()->RepairCostPerDamage;
+}
+
+void UBuildSubsystem::RepairObject(const AUsableObject* Object) const
+{
+	const TObjectPtr<UResourceComponent> Health = Object->GetHealthComponent();
+	if (!Health)
+		return;
+
+	Health->AddResource(Health->GetMaxResource() - Health->GetResource());
+}
+
 void UBuildSubsystem::DestroyRoom(const int RoomId) const
 {
 	if (!GridActor)
@@ -473,7 +493,7 @@ void UBuildSubsystem::DestroyRoom(const int RoomId) const
 	}
 }
 
-void UBuildSubsystem::GetObjectsToBeDestroyed(TArray<ABuildableObject*>& OutObjects) const
+void UBuildSubsystem::GetObjectsToBeDestroyed(TArray<AUsableObject*>& OutObjects) const
 {
 	if (!GridActor) return;
 
@@ -487,7 +507,7 @@ void UBuildSubsystem::GetObjectsToBeDestroyed(TArray<ABuildableObject*>& OutObje
 		}
 	}
 
-	for (TWeakObjectPtr<ABuildableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
+	for (TWeakObjectPtr<AUsableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
 	{
 		if (!Object.IsValid())
 			continue;
@@ -585,6 +605,16 @@ int UBuildSubsystem::GetRoomCellsCount(const int RoomId) const
 	return GridActor->GetRoom(RoomId)->Cells.Num();
 }
 
+void UBuildSubsystem::SetBuildData(const TArray<UBuildData*>& NewBuildData)
+{
+	BuildDataObjects = NewBuildData;
+
+	for (const TObjectPtr<UBuildData> Object : BuildDataObjects)
+	{
+		UnlockedObjects.Add(Object->ObjectType, IsRoomUnlocked(Object->RoomType));
+	}
+}
+
 void UBuildSubsystem::SetBuildRoomData(const TArray<UBuildRoomData*>& NewBuildRoomData)
 {
 	BuildDataRooms = NewBuildRoomData;
@@ -608,11 +638,25 @@ void UBuildSubsystem::OnRoomActiveStateChanged(int RoomId)
 void UBuildSubsystem::UnlockRoom(const EGridRoomType RoomType)
 {
 	UnlockedRooms[RoomType] = true;
+
+	// Unlock objects too
+	for (const TObjectPtr<UBuildData> Object : BuildDataObjects)
+	{
+		if (Object->RoomType != RoomType)
+			continue;
+		
+		UnlockedObjects[Object->ObjectType] = true;
+	}
 }
 
 bool UBuildSubsystem::IsRoomUnlocked(const EGridRoomType RoomType) const 
 {
 	return UnlockedRooms[RoomType];
+}
+
+bool UBuildSubsystem::IsObjectUnlocked(const EObjectType ObjectType) const
+{
+	return UnlockedObjects[ObjectType];
 }
 #pragma endregion
 
@@ -749,7 +793,7 @@ void UBuildSubsystem::UpdateRoomSelection()
 	}
 
 	// Reset disabled material for all objects
-	for (TWeakObjectPtr<ABuildableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
+	for (TWeakObjectPtr<AUsableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
 	{
 		if (Object.IsValid())
 		{
@@ -760,10 +804,10 @@ void UBuildSubsystem::UpdateRoomSelection()
 	// Set disabled material for object if will be removed by room
 	if (CurrentRoomEditMode == ERoomEditMode::Remove)
 	{
-		TArray<ABuildableObject*> ObjectsToDestroy;
+		TArray<AUsableObject*> ObjectsToDestroy;
 		GetObjectsToBeDestroyed(ObjectsToDestroy);
 
-		for (ABuildableObject* ObjectDestroyedByRoom : ObjectsToDestroy)
+		for (AUsableObject* ObjectDestroyedByRoom : ObjectsToDestroy)
 		{
 			ObjectDestroyedByRoom->SetWillBeRemoved(true);
 		}

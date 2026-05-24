@@ -7,7 +7,7 @@
 #include "BTTask_ReserveBuildableSlot.generated.h"
 
 class ANPC;
-class ABuildableObject;
+class AUsableObject;
 
 UCLASS()
 class UBTTask_ReserveBuildableSlot : public UCustomBTTask

@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "Build/BuildableObject.h"
+#include "Object/UsableObject.h"
 #include "Grid/GridRoomType.h"
 #include "BuildData.generated.h"
 
@@ -22,7 +22,10 @@ public:
 	TObjectPtr<UTexture2D> Texture;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TSubclassOf<ABuildableObject> BuildClass;
+	TSubclassOf<AUsableObject> BuildClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	EObjectType ObjectType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	EGridRoomType RoomType = EGridRoomType::Any;
@@ -41,4 +44,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float LoseElectricityPerHour = 10;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float RepairCostPerDamage = 1;
 };

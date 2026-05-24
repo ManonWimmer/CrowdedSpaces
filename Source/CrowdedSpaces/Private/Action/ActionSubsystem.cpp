@@ -73,8 +73,12 @@ void UActionSubsystem::SelectNPC(ANPC* NPC)
 	}
 	
 	// Outline
+	/*
 	if (OutlineMaterial != nullptr)
 		NPC->GetMesh()->SetOverlayMaterial(OutlineMaterial);
+	*/
+
+	NPC->OnNPCSelected();
 
 	SelectedNPC = NPC;
 	NPC->FocusCameraOnNPC();
@@ -88,12 +92,16 @@ void UActionSubsystem::DeselectNPC()
 		return;
 
 	// Outline
+	/*
 	SelectedNPC->GetMesh()->SetOverlayMaterial(nullptr);
+	*/
+	
+	SelectedNPC->OnNPCDeselected();
 	
 	SelectedNPC = nullptr;
 }
 
-void UActionSubsystem::ShowActionsForActor(AActor* Actor)
+void UActionSubsystem::ShowActionsForActor(AActor* Actor) const
 {
 	if (!ActionWidgetManager)
 		return;
@@ -101,7 +109,7 @@ void UActionSubsystem::ShowActionsForActor(AActor* Actor)
 	ActionWidgetManager->ShowForActor(Actor);
 }
 
-void UActionSubsystem::HideActions()
+void UActionSubsystem::HideActions() const
 {
 	if (!ActionWidgetManager)
 		return;
@@ -119,7 +127,6 @@ void UActionSubsystem::OnNPCUnregistered(ANPC* UnregisteredNPC)
 
 	SelectFirstPossibleNPC();
 	
-
 	if (!ActionWidgetManager)
 		return;
 	

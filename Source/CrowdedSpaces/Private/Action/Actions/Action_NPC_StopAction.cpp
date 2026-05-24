@@ -1,6 +1,7 @@
 ﻿#include "Action/Actions/Action_NPC_StopAction.h"
 
 #include "AI/NPC.h"
+#include "Debug/CrowdedSpacesLogs.h"
 
 UAction_NPC_StopAction::UAction_NPC_StopAction()
 {
@@ -9,11 +10,11 @@ UAction_NPC_StopAction::UAction_NPC_StopAction()
 
 bool UAction_NPC_StopAction::CanExecute_Implementation(AActor* Instigator) const
 {
-	const ANPC* NPC = Cast<ANPC>(Instigator);
+	const TObjectPtr<ANPC> NPC = Cast<ANPC>(Instigator);
 	if (!NPC)
 		return false;
 	
-	if (!NPC->HasGenerator() && !NPC->HasTrainingStation())
+	if (!NPC->HasActionObject())
 		return false;
 
 	return true;
@@ -23,9 +24,11 @@ void UAction_NPC_StopAction::Execute_Implementation(AActor* Instigator)
 {
 	Super::Execute_Implementation(Instigator);
 
-	ANPC* NPC = Cast<ANPC>(Instigator);
+	const TObjectPtr<ANPC> NPC = Cast<ANPC>(Instigator);
 	if (!NPC)
 		return;
+
+	CS_LOG_WARNING("NPC StopAction: %s", *NPC->GetName());
 	
 	NPC->StopAction();
 }

@@ -1,17 +1,17 @@
 ﻿#include "AI/BTTasks/BTTask_UseBuildableObject.h"
 
 #include "AI/NPC.h"
-#include "Build/BuildableObject.h"
+#include "Object/UsableObject.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "AIController.h"
 #include "Debug/CrowdedSpacesLogs.h"
 
-UBTTask_UseBuildableObject::UBTTask_UseBuildableObject(FObjectInitializer const& ObjectInitializer):
-	ResourceTypeToCheck()
+UBTTask_UseBuildableObject::UBTTask_UseBuildableObject(FObjectInitializer const& ObjectInitializer)
 {
 	NodeName = "Use Buildable Object";
 
 	bNotifyTick = true;
+	bCreateNodeInstance = true;
 }
 
 EBTNodeResult::Type UBTTask_UseBuildableObject::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -27,7 +27,7 @@ EBTNodeResult::Type UBTTask_UseBuildableObject::ExecuteTask(UBehaviorTreeCompone
 	CurrentObject = NPC->GetCurrentObject();
 	if (!CurrentObject)
 		return EBTNodeResult::Failed;
-
+	
 	bHasStartedUsing = false;
 
 	return EBTNodeResult::InProgress;
@@ -35,6 +35,15 @@ EBTNodeResult::Type UBTTask_UseBuildableObject::ExecuteTask(UBehaviorTreeCompone
 
 void UBTTask_UseBuildableObject::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
+	AUsableObject* NewObject = NPC->GetCurrentObject();
+
+	if (NewObject != CurrentObject)
+	{
+		StopUsing();
+		FinishLatentTask(OwnerComp, EBTNodeResult::Aborted);
+		return;
+	}
+	
 	if (!NPC || !CurrentObject || !IsValid(CurrentObject) || CurrentObject->bIsBeingDestroyed)
 	{
 		StopUsing();
@@ -61,16 +70,16 @@ void UBTTask_UseBuildableObject::TickTask(UBehaviorTreeComponent& OwnerComp, uin
 		return;
 	}
 
-	if (ResourceTypeToCheck == EResourceType::None)
+	if (CurrentObject->GetUsingResourceTypeToCheck() == EResourceType::None)
 		return;
 	
-	const UResourceComponent* Resource = NPC->GetResourceComponentByType(ResourceTypeToCheck);
+	const UResourceComponent* Resource = NPC->GetResourceComponentByType(CurrentObject->GetUsingResourceTypeToCheck());
 	if (!Resource)
 		return;
 
 	if (Resource->GetResource() >= Resource->GetMaxResource())
 	{
-		CS_LOG_WARNING("Max resource, stop using");
+		CS_LOG_WARNING("Using at max resource, stop using");
 		
 		StopUsing();
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
@@ -97,9 +106,6 @@ void UBTTask_UseBuildableObject::StopUsing() const
 	CurrentObject->StopUsing(NPC);
 	CurrentObject->Release(NPC);
 
-	if (CurrentObject->GetObjectType() == EObjectType::Generator)
-		NPC->SetGenerator(nullptr);
-	
-	if (CurrentObject->GetObjectType() == EObjectType::TrainingStation)
-		NPC->SetTrainingStation(nullptr);
+	if (NPC->GetActionObject() == CurrentObject)
+		NPC->StopAction();
 }

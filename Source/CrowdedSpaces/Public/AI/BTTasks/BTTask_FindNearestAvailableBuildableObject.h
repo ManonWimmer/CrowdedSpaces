@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "AI/CustomBTTask.h"
 #include "BehaviorTree/Tasks/BTTask_BlackboardBase.h"
-#include "Build/ObjectType.h"
+#include "Object/ObjectType.h"
 #include "BTTask_FindNearestAvailableBuildableObject.generated.h"
 
 UCLASS()

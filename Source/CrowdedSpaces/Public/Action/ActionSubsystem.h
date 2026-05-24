@@ -27,8 +27,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	ANPC* GetSelectedNPC() const { return SelectedNPC; }
 
-	void ShowActionsForActor(AActor* Actor);
-	void HideActions();
+	void ShowActionsForActor(AActor* Actor) const;
+	void HideActions() const;
 
 	UFUNCTION()
 	void OnNPCUnregistered(ANPC* UnregisteredNPC);

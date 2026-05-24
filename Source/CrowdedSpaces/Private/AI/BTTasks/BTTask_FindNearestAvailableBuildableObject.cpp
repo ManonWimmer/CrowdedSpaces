@@ -3,7 +3,7 @@
 #include "AI/NPCController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Build/BuildableRegistrySubsystem.h"
-#include "Build/BuildableObject.h"
+#include "Object/UsableObject.h"
 #include "Build/SlotComponent.h"
 
 UBTTask_FindNearestAvailableBuildableObject::UBTTask_FindNearestAvailableBuildableObject(FObjectInitializer const& ObjectInitializer)
@@ -37,11 +37,11 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBe
 
 	const FVector Origin = NPC->GetActorLocation();
 
-	ABuildableObject* BestObject = nullptr;
+	AUsableObject* BestObject = nullptr;
 	USlotComponent* BestSlot = nullptr;
 	float BestDist = FLT_MAX;
 
-	for (TWeakObjectPtr<ABuildableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
+	for (TWeakObjectPtr<AUsableObject> Object : BuildableRegistrySubsystem->BuildableObjects)
 	{
 		if (!Object.IsValid())
 			continue;
@@ -65,7 +65,7 @@ EBTNodeResult::Type UBTTask_FindNearestAvailableBuildableObject::ExecuteTask(UBe
 		if (!Object->IsAvailableForReservation(NPC))
 			continue;
 
-		USlotComponent* Slot = Object->GetNearestFreeSlot(Origin);
+		USlotComponent* Slot = Object->GetNearestFreeAndWalkableSlot(NPC, Origin);
 		if (!Slot)
 			continue;
 

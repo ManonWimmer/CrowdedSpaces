@@ -1,10 +1,10 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Buildable/BuildableBed.h"
-#include "Buildable/BuildableFood.h"
-#include "Buildable/BuildableGenerator.h"
-#include "Buildable/BuildableTrainingStation.h"
+#include "Object/Buildable/BuildableBed.h"
+#include "Object/Buildable/BuildableFood.h"
+#include "Object/Buildable/BuildableGenerator.h"
+#include "Object/Buildable/BuildableTrainingStation.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "BuildableRegistrySubsystem.generated.h"
 
@@ -15,7 +15,7 @@ class CROWDEDSPACES_API UBuildableRegistrySubsystem : public UWorldSubsystem
 
 public:
 	// All
-	TArray<TWeakObjectPtr<ABuildableObject>> BuildableObjects;
+	TArray<TWeakObjectPtr<AUsableObject>> BuildableObjects;
 	
 	// Generators
 	TArray<TWeakObjectPtr<ABuildableGenerator>> Generators;
